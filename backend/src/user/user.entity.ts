@@ -7,7 +7,4 @@ export class User {
 
   @Column()
   username: string;
-
-  @Column()
-  matchStats: { win: number; loss: number };
 }
