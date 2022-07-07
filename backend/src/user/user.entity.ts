@@ -8,4 +8,11 @@ export class User {
   @Column()
   username: string;
 
+	@Column({ nullable: true })
+	public twoFactorAuthenticationSecret?: string;
+
+	@Column({ default: false })
+	public isTwoFactorAuthenticationEnabled: boolean;
 }
+
+export default User;

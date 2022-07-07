@@ -7,7 +7,8 @@ import { uuidv4 } from 'uuid'
 
 @Injectable()
 export class UserService {
-	constructor(@InjectRepository(User) private repo: Repository<User>) {}
+	constructor(@InjectRepository(User)
+		private repo: Repository<User>) {}
 
 	async getUserById(id: uuidv4) {
 		const user = await this.repo.findOne({where: {id: id}})
@@ -19,5 +20,16 @@ export class UserService {
 
 	async	createUser(newUser: CreateUserDto) {
 		return await this.repo.save(newUser);
+	}
+
+	async setTwoFactorAuthenticationSecret(secret: string, userId: string) {
+		return this.repo.update(userId, {
+			twoFactorAuthenticationSecret: secret
+		})
+	}
+	async turnOnTwoFactorAuthentication(userId: string) {
+		return this.repo.update(userId, {
+			isTwoFactorAuthenticationEnabled: true
+		});
 	}
 }
