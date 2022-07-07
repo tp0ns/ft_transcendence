@@ -12,7 +12,7 @@ export class UserController {
 		return await this.userService.getUserById(id);
 	}
 
-	@Post("/create")
+	@Post("/new")
 	@UsePipes(ValidationPipe)
 	async createUser(@Body() newUser: CreateUserDto) {
 		return await this.userService.createUser(newUser);
