@@ -12,8 +12,8 @@ import { JwtTwoFactorStrategy, TwoFAService } from './twoFA.service';
 	imports: [
 		TypeOrmModule.forFeature([User]),
 		JwtModule.register({
-			secret: process.env.TOKEN_SECRET,
-			signOptions: { expiresIn: process.env.TOKEN_EXPIRATION_TIME },
+			secret: process.env.JWT_SECRET,
+			signOptions: { expiresIn: process.env.SIGN_CD },
 		}),
 	],
 	controllers: [TwoFAController, UserController],

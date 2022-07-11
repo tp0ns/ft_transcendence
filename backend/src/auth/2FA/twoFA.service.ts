@@ -25,7 +25,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(
 					return request?.cookies?.Authentication;
 				},
 			]),
-			secretOrKey: configService.get('TOKEN_SECRET'),
+			secretOrKey: configService.get('JWT_SECRET'),
 		});
 	}
 
@@ -54,11 +54,11 @@ export class TwoFAService {
 	) {
 		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
 		const token = this.jwtService.sign(payload, {
-			secret: this.configService.get('TOKEN_SECRET'),
-			expiresIn: `${this.configService.get('TOKEN_EXPIRATION_TIME')}s`,
+			secret: this.configService.get('JWT_SECRET'),
+			expiresIn: `${this.configService.get('SIGN_CD')}s`,
 		});
 		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-			'TOKEN_EXPIRATION_TIME',
+			'SIGN_CD',
 		)}`;
 	}
 
@@ -69,7 +69,7 @@ export class TwoFAService {
 			this.configService.get('2FA_APP_NAME'),
 			secret,
 		);
-		await this.userService.setTwoFASecret(secret, user.id);
+		await this.userService.setTwoFASecret(secret, user.userId);
 		return {
 			secret,
 			otpauthUrl,

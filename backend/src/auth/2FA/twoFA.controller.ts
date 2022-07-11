@@ -31,7 +31,7 @@ export class TwoFAController {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
 		const accessTokenCookie = this.authService.getCookieWithToken(
-			request.user.id,
+			request.user.userId,
 			true,
 		);
 		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
@@ -52,7 +52,7 @@ export class TwoFAController {
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
-		await this.userService.turnOnTwoFA(request.user.id);
+		await this.userService.turnOnTwoFA(request.user.userId);
 	}
 
 	@Post('generate')
