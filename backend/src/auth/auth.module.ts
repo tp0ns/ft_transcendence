@@ -3,6 +3,6 @@ import { PassportModule } from '@nestjs/passport';
 import { schoolStrategy } from './auth.strategy';
 
 @Module({
-	imports:[PassportModule.register(schoolStrategy)]
+	imports: [PassportModule.register(schoolStrategy)],
 })
 export class AuthModule {}

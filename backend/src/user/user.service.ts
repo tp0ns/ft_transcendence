@@ -22,14 +22,14 @@ export class UserService {
 		return await this.repo.save(newUser);
 	}
 
-	async setTwoFactorAuthenticationSecret(secret: string, userId: string) {
+	async setTwoFASecret(secret: string, userId: string) {
 		return this.repo.update(userId, {
-			twoFactorAuthenticationSecret: secret
+			twoFASecret: secret,
 		})
 	}
-	async turnOnTwoFactorAuthentication(userId: string) {
+	async turnOnTwoFA(userId: string) {
 		return this.repo.update(userId, {
-			isTwoFactorAuthenticationEnabled: true
+			isTwoFAEnabled: true
 		});
 	}
 }

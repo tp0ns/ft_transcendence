@@ -9,10 +9,10 @@ export class User {
   username: string;
 
 	@Column({ nullable: true })
-	public twoFactorAuthenticationSecret?: string;
+	public twoFASecret?: string;
 
 	@Column({ default: false })
-	public isTwoFactorAuthenticationEnabled: boolean;
+	public isTwoFAEnabled: boolean;
 }
 
 export default User;
