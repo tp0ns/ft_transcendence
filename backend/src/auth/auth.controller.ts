@@ -9,8 +9,15 @@ export class AuthController {
 	constructor(
 		private authService: AuthService
 	) {}
+
 	/**
-	 * Premier call à L'API, UseGuard appelle passport
+	 * Comme pour tout module c'est au controller que tout commence.
+	 * On peut voir que cette root est protégée par un "guard".
+	 * Ces guards @param schoolAuthGuard vont, grâce à passport,
+	 * verifier que la strategy @param SchoolStrategy à laquelle
+	 * ils sont assigné est bien respectée. Si ce n'est pas le cas
+	 * ils vont exécuter cette stratégie. Cette logique est la même pour
+	 * tout les @param AuthGuard.
 	 */
 	@UseGuards(schoolAuthGuard)
 	@Get('login')
@@ -19,11 +26,13 @@ export class AuthController {
 	}
 
 	/**
-	 * Callback effectué directement par l'API
-	 * Puisque passport est passé par la fonction validate, la requete
-	 * est aggremente d'un objet User qui correspond au user qui vient
+	 * Cette route est celle renseignée par @param callbackURL dans @param SchoolStrategy.
+	 * Puisque passport est passé par la fonction validate, la requete @Req
+	 * est aggrémentée d'un objet User "req.user" qui correspond au user qui vient
 	 * de se connecter.
-	 * On renvoit l'objet user a la fonction login pour qu'elle genere un JWT
+	 *
+	 * On envoie cet objet et l'objet @res à login pour pouvoir génerer un JWT, afin d'avoir une vraie connexion
+	 * identifiée à un User (le fameux login).
 	 */
 	@UseGuards(schoolAuthGuard)
 	@Get('callback')

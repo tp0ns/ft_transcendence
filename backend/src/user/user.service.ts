@@ -18,6 +18,12 @@ export class UserService {
 		return user;
 	}
 
+	/**
+	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il
+	 * n'existe pas le crée et le renvoie.
+	 * @param profile ce que le premier call à l'API 42 a return, voir @param profileFields
+	 * @returns un User
+	 */
 	async findOrCreate(profile: Profile): Promise<User> {
 		const user: User = await this.repo.findOne({where: {schoolId: profile.id}})
 		if(!user) {
