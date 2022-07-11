@@ -25,6 +25,9 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42')
 	 * C'est à ce moment la qu'on enregistre les infos du Profile qui vient de se connecter
 	 * dans la table User.
 	 *
+	 * For each strategy, Passport will call the verify function (implemented with the validate()
+	 * method in @nestjs/passport) using an appropriate strategy-specific set of parameters.
+	 *
 	 * @param profile ce que le premier call à l'API 42 a return, voir profileFields
 	 * @returns renvoie un User qui est ajouté à la requête http de callback par passport
 	 */
