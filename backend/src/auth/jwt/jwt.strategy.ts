@@ -12,21 +12,23 @@ import { Request } from 'express';
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor( private userService: UserService ) {
-    /**
+	constructor(private userService: UserService) {
+		/**
 		 * On appelle la methode super() pour configurer les parametres de la stratégie.
 		 * 	@param jwtFromRequest Comment retrouver le JWT
 		 * 	@param ignoreExpiration Permet de tenir compte (ou pas) de la date d'expiration du cookie
 		 * 	@param secretOrKey Renseigne le secret qui permet de valider ou non le JWT
 		 */
 		super({
-      jwtFromRequest: ExtractJwt.fromExtractors([(request: Request) => {
-				return request?.cookies?.Authentication
-			}]),
-      ignoreExpiration: false,
-      secretOrKey: jwtConstants.secret,
-    });
-  }
+			jwtFromRequest: ExtractJwt.fromExtractors([
+				(request: Request) => {
+					return request?.cookies?.Authentication;
+				},
+			]),
+			ignoreExpiration: false,
+			secretOrKey: jwtConstants.secret,
+		});
+	}
 
 	/**
 	 * Si on arrive ici c'est que le JWT est valide, on va maintenant verifier que le userId contenu dans le payload
@@ -38,8 +40,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	 * @todo C'est ici qu'on va integrer le 2FA, notament grace au payload avec un booleen twofaAuthenticated.
 	 * @coucou Elias <3
 	 */
-  async validate(req: Request, payload: any) {
-		const user = this.userService.getUserById(payload.sub);
-    return user;
-  }
+	async validate(req: Request, payload: any) {
+		const user = await this.userService.getUserById(payload.sub);
+		if (!user.isTwoFAEnabled) return user;
+		else if (payload.twoFAAuthenticated == true || req.url == '/auth/42/2fa')
+			return user;
+		return;
+	}
 }

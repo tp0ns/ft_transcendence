@@ -1,5 +1,5 @@
 // eslint-disable-next-line prettier/prettier
-import { Body, ClassSerializerInterceptor, Controller, HttpCode, Post, Req, Res, UnauthorizedException, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, ClassSerializerInterceptor, Controller, HttpCode, Post, Req, Res, UnauthorizedException, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { TwoFAService } from './twoFA.service';
 import { Response } from 'express';
 import { UserService } from 'src/user/user.service';
@@ -7,7 +7,7 @@ import { TwoFACodeDto } from './twoFACodeDto';
 import JwtTwoFactorGuard from './jwt-two-factor.guard';
 import RequestWithUser from '../interfaces/requestWithUser.interface';
 
-@Controller('2fa')
+@Controller('auth/42/2fa')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TwoFAController {
 	constructor(
@@ -19,12 +19,13 @@ export class TwoFAController {
 	@Post('authenticate')
 	@HttpCode(200)
 	@UseGuards(JwtTwoFactorGuard)
+	@UsePipes(ValidationPipe)
 	async authenticate(
 		@Req() request: RequestWithUser,
-		@Body() { twoFACode }: TwoFACodeDto,
+		@Body() twoFACode: TwoFACodeDto,
 	) {
 		const isCodeValid = this.twoFAService.is2FACodeValid(
-			twoFACode,
+			twoFACode.twoFACode,
 			request.user,
 		);
 		if (!isCodeValid) {

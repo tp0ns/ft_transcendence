@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import TokenPayload from './interfaces/token.interface';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
+import { jwtConstants } from '../jwt/jwt.constants';
 
 @Injectable()
 export class JwtTwoFactorStrategy extends PassportStrategy(
@@ -54,12 +55,10 @@ export class TwoFAService {
 	) {
 		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
 		const token = this.jwtService.sign(payload, {
-			secret: this.configService.get('JWT_SECRET'),
-			expiresIn: `${this.configService.get('SIGN_CD')}s`,
+			secret: jwtConstants.secret,
+			expiresIn: jwtConstants.expire,
 		});
-		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-			'SIGN_CD',
-		)}`;
+		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
 	}
 
 	public async generateTwoFASecret(user: User) {
@@ -78,7 +77,7 @@ export class TwoFAService {
 	public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
 		return toFileStream(stream, otpauthUrl);
 	}
-	public is2FACodeValid(twoFACode: string, user: User) {
+	public is2FACodeValid(twoFACode, user: User) {
 		return authenticator.verify({
 			token: twoFACode,
 			secret: user.twoFASecret,
