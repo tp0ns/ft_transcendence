@@ -18,6 +18,7 @@ export class ChatService {
 }
 
 
+
 // const chan: Channel = new Channel();
 // 		chan.name = name;
 // 		chan.owner = user;
