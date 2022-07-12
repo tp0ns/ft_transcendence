@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Catch, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';
@@ -13,7 +13,7 @@ export class AuthController {
 	/**
 	 * Comme pour tout module c'est au controller que tout commence.
 	 * On peut voir que cette root est protégée par un "guard".
-	 * Ces guards @param schoolAuthGuard vont, grâce à passport,
+	 * Ce guard @param schoolAuthGuard va, grâce à passport,
 	 * verifier que la strategy @param SchoolStrategy à laquelle
 	 * ils sont assigné est bien respectée. Si ce n'est pas le cas
 	 * ils vont exécuter cette stratégie. Cette logique est la même pour
@@ -40,6 +40,11 @@ export class AuthController {
 		return this.authService.login(req.user, res);
 	}
 
+	/**
+	 * Supprime le contenu du cookie pour qu'il ne contienne plus de JWT.
+	 * L'urilisateur n'est donc plus identifié.
+	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
+	 */
   @UseGuards(JwtAuthGuard)
   @Get('logout')
   async logout(@Req() request: Request, @Res() res: Response) {
@@ -47,4 +52,5 @@ export class AuthController {
 		res.setHeader('Set-Cookie', new_cookie );
     return res.sendStatus(200);
   }
+
 }
