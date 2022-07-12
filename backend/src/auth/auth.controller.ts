@@ -3,11 +3,16 @@ import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';
 import { JwtAuthGuard } from './jwt/jwt.guard';
+import { UserService } from 'src/user/user.service';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 
 @Controller('auth/42')
 export class AuthController {
 	constructor(
-		private authService: AuthService
+		private userService: UserService,
+		private authService: AuthService,
+		private httpService: HttpService,
 	) {}
 
 	/**
@@ -38,6 +43,25 @@ export class AuthController {
 	@Get('callback')
 	async callback(@Req() req, @Res() res) {
 		return this.authService.login(req.user, res);
+	}
+
+	/**
+	 * Generateur de faux compte ("dummy") pour tester plus facilement
+	 * à enlever en production !
+	 */
+	@Get('dummy')
+	async	dummy(@Res() res) {
+		const { data } = await firstValueFrom(this.httpService.get("https://api.namefake.com/"));
+		const fake = JSON.parse(JSON.stringify(data));
+
+		const dummy = {
+				id: Math.floor(100000 + Math.random() * 900000),
+				username: fake.name,
+				image_url: 'https://www.myinstants.com/media/instants_images/non.gif.pagespeed.ce.C9gtkT1Vx9.gif',
+		};
+
+		const dummy_user = await this.userService.findOrCreate(dummy);
+		return await this.authService.login(dummy_user, res);
 	}
 
 	/**
