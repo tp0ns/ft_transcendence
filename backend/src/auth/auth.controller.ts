@@ -1,14 +1,22 @@
-import { Catch, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+	Catch,
+	Controller,
+	Get,
+	Post,
+	Req,
+	Res,
+	UseGuards,
+} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';
 import { JwtAuthGuard } from './jwt/jwt.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth/42')
 export class AuthController {
-	constructor(
-		private authService: AuthService
-	) {}
+	constructor(private authService: AuthService) {}
 
 	/**
 	 * Comme pour tout module c'est au controller que tout commence.
@@ -21,8 +29,8 @@ export class AuthController {
 	 */
 	@UseGuards(schoolAuthGuard)
 	@Get('login')
-	async	login() {
-		return ;
+	async login() {
+		return;
 	}
 
 	/**
@@ -45,12 +53,11 @@ export class AuthController {
 	 * L'urilisateur n'est donc plus identifié.
 	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
 	 */
-  @UseGuards(JwtAuthGuard)
-  @Get('logout')
-  async logout(@Req() request: Request, @Res() res: Response) {
-    const new_cookie = await this.authService.logout();
-		res.setHeader('Set-Cookie', new_cookie );
-    return res.sendStatus(200);
-  }
-
+	@UseGuards(JwtAuthGuard)
+	@Get('logout')
+	async logout(@Req() request: Request, @Res() res: Response) {
+		const new_cookie = await this.authService.logout();
+		res.setHeader('Set-Cookie', new_cookie);
+		return res.sendStatus(200);
+	}
 }
