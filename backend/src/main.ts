@@ -8,7 +8,7 @@ import { UnauthorizedExceptionFilter } from './unauthorized-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useStaticAssets(join(__dirname, '..', 'static'));
+  // app.useStaticAssets(join(__dirname, '..', 'static'));
   app.use(cookieParser());
 	app.useGlobalFilters(new UnauthorizedExceptionFilter());
   await app.listen(3000);
