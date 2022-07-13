@@ -11,7 +11,7 @@ import {
 
 @WebSocketGateway({
 	cors: {
-		origin: 'https://hoppscotch.io/fr/realtime/socketio/',
+		origin: 'https://hoppscotch.io',
 	},
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -41,14 +41,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
 
+	/**
+	 * 	CHANNEL EVENTS
+	 */
+
+
+
+	/**
+	 * MESSAGE EVENTS
+	 */
   /**
 	 * Handles received message behaviour
 	 *
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
   @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: string): void {
-   this.server.emit('msgToClient', payload);
+  handleMessage(client: Socket, payload: string) {
+		// return 'Coucou toi ca va ?';
+		 this.server.emit('msgToClient', payload);
   }
 
 }

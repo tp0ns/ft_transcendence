@@ -6,7 +6,5 @@ import { ChatGateway } from './chat.gateway';
 @Module({
 	imports: [TypeOrmModule.forFeature([Channel])],
 	providers: [ChatGateway],
-	exports: [ChatGateway],
-	controllers: [],
 })
 export class ChatModule {}
