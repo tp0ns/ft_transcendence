@@ -2,23 +2,28 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("uuid")
-  userId: string;
+	@PrimaryGeneratedColumn('uuid')
+	userId: string;
 
 	@Column({
 		type: 'int',
-		unique: true
+		unique: true,
 	})
 	schoolId: number;
 
-  @Column({
-		type: 'varchar'
+	@Column({
+		type: 'varchar',
 	})
-  username: string;
+	username: string;
 
 	@Column({
-		type: 'varchar'
+		type: 'varchar',
 	})
 	image_url: string;
 
+	@Column({
+		nullable: true,
+		type: 'varchar',
+	})
+	profileImage: string;
 }

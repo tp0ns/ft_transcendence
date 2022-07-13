@@ -5,9 +5,12 @@ import {
 	Param,
 	Post,
 	UploadedFile,
+	UseGuards,
 	UseInterceptors,
 	UsePipes,
 	ValidationPipe,
+	Request,
+	ConsoleLogger,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/user.dto';
 import { UserService } from './user.service';
@@ -17,6 +20,8 @@ import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from './storage/storage';
 import { Observable, of } from 'rxjs';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { User } from './user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -28,11 +33,14 @@ export class UserController {
 		return await this.userService.getUserById(id.id);
 	}
 
+	/* Uploads an image locally and stores location in db*/
+	@UseGuards(JwtAuthGuard)
 	@Post('/upload')
 	@UseInterceptors(FileInterceptor('file', storage))
-	uploadFile(@UploadedFile() file): Observable<Object> {
-		console.log(file);
-		return of({ imagePath: file.filename });
+	uploadFile(@UploadedFile() file, @Request() req) {
+		return this.userService.update(req.userId, {
+			profileImage: './uploads/profileimages/' + file.filename,
+		});
 	}
 	// @Post("/new")
 	// @UsePipes(ValidationPipe)
