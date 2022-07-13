@@ -12,7 +12,7 @@ import { ChatService } from './chat.service';
  
  @WebSocketGateway({
    cors: {
-     origin: '*',
+     origin: 'https://hoppscotch.io',
    },
  })
  export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -25,15 +25,15 @@ import { ChatService } from './chat.service';
  
 
 
-  @SubscribeMessage('msgToServer')
   /**
-  * ------------------------ HANDLE MESSAGES  ------------------------- *
-  */
-
-
+   * ------------------------ HANDLE MESSAGES  ------------------------- *
+   */
+  
+  
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
+  @SubscribeMessage('msgToServer')
   handleMessage(client: Socket, payload: string): void {
     // client.emit('msgToServer', payload);
    this.server.emit('msgToClient', payload);
