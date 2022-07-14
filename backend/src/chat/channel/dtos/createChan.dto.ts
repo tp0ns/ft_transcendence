@@ -1,11 +1,11 @@
-import { IsEmpty, IsNotEmpty, Length } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 
-export class CreateUserDto {
-	@IsEmpty()
-	id: string;
+export class CreateChanDto {
 
-	@IsNotEmpty({ message: 'User should have an username'})
-	@Length(2, 255, { message: 'The Username must be between 2 and 255 characters long'})
-	username: string;
+	@IsNotEmpty({message: 'Channel needs a title'})
+	title: string;
+
+	@IsNotEmpty({ message: 'Channel should have an owner'})
+	owner: string;
 
 }

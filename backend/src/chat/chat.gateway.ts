@@ -6,44 +6,71 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
  } from '@nestjs/websockets';
- import { Logger } from '@nestjs/common';
- import { Socket, Server } from 'socket.io';
+import { Logger, UseGuards } from '@nestjs/common';
+import { Socket, Server } from 'socket.io';
+import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
-import { CreateChanDto } from './channel/CreateChan.dto';
- 
- @WebSocketGateway({
-   cors: {
-     origin: 'https://hoppscotch.io',
-   },
- })
- export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
- 
-  @WebSocketServer() server: Server;
+import { CreateChanDto } from './channel/dtos/createChan.dto';
 
-  constructor(private ChatService: ChannelService) {}
+@WebSocketGateway({
+	cors: {
+		origin: 'https://hoppscotch.io',
+	},
+})
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  constructor( private channelService: ChannelService ) {}
 
-  private logger: Logger = new Logger('ChatGateway');
- 
+	@WebSocketServer() server: Server;
+
+	private logger: Logger = new Logger('ChatGateway');
+
+	/**
+	 * Handles server initialization behaviour
+	 */
+	afterInit(server: Server) {
+		this.logger.log(`Server is properly initialized !`);
+	}
+	/**
+	 * Handles client connection behaviour
+	 */
+	handleConnection(client: Socket) {
+		this.logger.log(`Client connected: ${client.id}`);
+	}
+
+	/**
+	 * Handles client disconnection behaviour
+	 */
+	handleDisconnect(client: Socket) {
+		this.logger.log(`Client disconnected: ${client.id}`);
+	}
+
+	/**
+	 * 	CHANNEL EVENTS
+	 */
 
 
+
+	/**
+	 * MESSAGE EVENTS
+	 */
   /**
    * ------------------------ CREATE CHANNEL  ------------------------- *
    */
 
 /**
- * 
- * @returns boolean 
- *    - true : Permet d'envoyer a createdChan pour pouvoir envoyer un msg au user 
+ *
+ * @returns boolean
+ *    - true : Permet d'envoyer a createdChan pour pouvoir envoyer un msg au user
  *            lui informant de la bonne realisation du channel.
- *    - false : Permet d'envoyer a errCreatedChan si le chan n'a pas pu etre cree 
- *            et envoyer un message d'erreur au user. 
+ *    - false : Permet d'envoyer a errCreatedChan si le chan n'a pas pu etre cree
+ *            et envoyer un message d'erreur au user.
  * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
  * @param channel Pouvoir set les donnees du chan
  */
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
     console.log('suodgfosugdofgus')
-    const channel = await this.ChatService.createNewChan(channelEntity);
+    const channel = await this.channelService.createNewChan(channelEntity);
     if (!channel) {
       this.server.emit('errCreatingChan', {
         msg: 'Coucou tu pues'
@@ -58,14 +85,17 @@ import { CreateChanDto } from './channel/CreateChan.dto';
   /**
    * ------------------------ HANDLE MESSAGES  ------------------------- *
    */
-  
-  
+
+
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
+	@UseGuards(WsGuard)
   @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: string): void {
-   this.server.emit('msgToClient', payload);
+  handleMessage(client: Socket, payload: string) {
+		console.log(client.data.user);
+		this.server.emit('msgToClient', payload);
+		return (payload);
   }
 
 }
