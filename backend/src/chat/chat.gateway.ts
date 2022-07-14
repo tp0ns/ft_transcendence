@@ -9,8 +9,8 @@ import {
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
-import { CreateChanDto } from './channel/dtos/createChan.dto';
 import { ChannelService } from './channel/channel.service';
+import { CreateChanDto } from './channel/dtos/createChan.dto';
 
 @WebSocketGateway({
 	cors: {

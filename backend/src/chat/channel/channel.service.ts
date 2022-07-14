@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateChanDto } from './dtos/CreateChan.dto';
 import { Channel } from './channel.entity';
+import { CreateChanDto } from './dtos/createChan.dto';
 
 @Injectable()
 export class ChannelService {
