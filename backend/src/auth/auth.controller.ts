@@ -1,4 +1,4 @@
-import { Catch, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Catch, Controller, Get, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';
@@ -6,8 +6,10 @@ import { JwtAuthGuard } from './jwt/jwt.guard';
 import { UserService } from 'src/user/user.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 
 @Controller('auth/42')
+@UseFilters(UnauthorizedExceptionFilter)
 export class AuthController {
 	constructor(
 		private userService: UserService,
