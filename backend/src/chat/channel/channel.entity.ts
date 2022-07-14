@@ -1,28 +1,31 @@
 import { User } from "src/user/user.entity";
 import { BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 
-@Entity('chat')
+@Entity('channel')
 
-export class Chat extends BaseEntity {
+export class Channel extends BaseEntity {
 
 	@PrimaryGeneratedColumn("uuid")
 	channelId: string;
 
-	@Column({
-		type: 'boolean',
-		default: false,
-	})
-	isPrivate: boolean;
+	// @Column({
+	// 	type: 'boolean',
+	// 	default: false,
+	// })
+	// isPrivate: boolean;
 
 	@Column("text", { 
 		default: ""
 	})
 	title: string;
 
-	@Column("text", {
-		default: ""
-	})
-	password: string;
+	@Column("text")
+	owner: string;
+
+	// @Column("text", {
+	// 	default: ""
+	// })
+	// password: string;
 
 	// @ManyToMany((type) => User, (user) => user.memberChannels, {
 	//   })
