@@ -6,8 +6,10 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
  } from '@nestjs/websockets';
- import { Logger } from '@nestjs/common';
- import { Socket, Server } from 'socket.io';
+import { Logger, UseGuards } from '@nestjs/common';
+import { Socket, Server } from 'socket.io';
+import { WsGuard } from 'src/auth/websocket/ws.guard';
+// import { WsGuard } from 'src/auth/websocket/ws.guard';
 
 @WebSocketGateway({
 	cors: {
@@ -55,10 +57,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 *
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
+	@UseGuards(WsGuard)
   @SubscribeMessage('msgToServer')
   handleMessage(client: Socket, payload: string) {
-		// return 'Coucou toi ca va ?';
-		 this.server.emit('msgToClient', payload);
+		console.log(client.data.user);
+		this.server.emit('msgToClient', payload);
+		return (payload);
   }
 
 }
