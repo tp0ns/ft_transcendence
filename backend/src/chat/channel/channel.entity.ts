@@ -1,5 +1,4 @@
-import { User } from "src/user/user.entity";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('channel')
 
@@ -14,7 +13,7 @@ export class Channel extends BaseEntity {
 	// })
 	// isPrivate: boolean;
 
-	@Column("text", { 
+	@Column("text", {
 		default: ""
 	})
 	title: string;
@@ -32,7 +31,7 @@ export class Channel extends BaseEntity {
 	//   @JoinTable()
 	//   public members: User[];
 
-	//faire la date de crea 
+	//faire la date de crea
 	//faire le time de la derniere activite sur le chan
 	//faire bannedUsers
 	//faire MuttedUsers
