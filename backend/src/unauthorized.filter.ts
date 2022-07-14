@@ -5,8 +5,8 @@ import { Request, Response } from 'express';
 /**
  * This function catches all Unauthorized Exception (401) to redirect the user to
  * @param redirect_path.
- * We want this to happen everytime so we add it globally in main.ts with this line :
- *		- app.useGlobalFilters(new UnauthorizedExceptionFilter());
+ * We want this to happen at certain time so we add it to every controller concerned with:
+ *		- @UseFilters(UnauthorizedExceptionFilter)
  */
 @Catch(UnauthorizedException)
 export class UnauthorizedExceptionFilter implements ExceptionFilter {
