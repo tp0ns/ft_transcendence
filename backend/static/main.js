@@ -1,26 +1,17 @@
 const app = new Vue({
  el: '#app',
  data: {
-  name: 'Nestjs Websockets Chat',
-  title: '',
+  title: 'Nestjs Websockets Chat',
+  chanName: '',
   owner: '',
   channels: [],
   socket: null
  },
-//  methods: {
-// 	createChannel() {
-// 		const message = {
-// 			title:"good",
-// 			user:"clara lpb"
-// 		}
-// 		this.socket.emit('createChan', message)
-// 	}
-//  },
  methods: {
-  sendMessage() {
+  createChannel() {
    if(this.validateInput()) {
     const message = {
-    title: this.title,
+    chanName: this.chanName,
     owner: this.owner
    }
    this.socket.emit('createChan', message)
@@ -29,9 +20,10 @@ const app = new Vue({
  },
  receivedMessage(message) {
   this.channels.push(message)
+
  },
  validateInput() {
-  return this.name.length > 0 && this.owner.length > 0
+  return this.chanName.length > 0 && this.owner.length > 0
  }
 },
  created() {

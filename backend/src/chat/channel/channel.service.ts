@@ -16,6 +16,11 @@ export class ChannelService {
 			owner: channel.owner
 		});
 	}
+
+
+	joinRoom(channelName : string) {
+		
+	}
 }
 
 

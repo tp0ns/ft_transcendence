@@ -10,6 +10,7 @@ import {
  import { Socket, Server } from 'socket.io';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/CreateChan.dto';
+import { channel } from 'diagnostics_channel';
  
  @WebSocketGateway({
    cors: {
@@ -20,7 +21,7 @@ import { CreateChanDto } from './channel/CreateChan.dto';
  
   @WebSocketServer() server: Server;
 
-  constructor(private ChatService: ChannelService) {}
+  constructor(private ChannelService: ChannelService) {}
 
   private logger: Logger = new Logger('ChatGateway');
  
@@ -32,21 +33,16 @@ import { CreateChanDto } from './channel/CreateChan.dto';
 
 /**
  * 
- * @returns boolean 
- *    - true : Permet d'envoyer a createdChan pour pouvoir envoyer un msg au user 
- *            lui informant de la bonne realisation du channel.
- *    - false : Permet d'envoyer a errCreatedChan si le chan n'a pas pu etre cree 
- *            et envoyer un message d'erreur au user. 
  * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
  * @param channel Pouvoir set les donnees du chan
+ * 
+ * @todo ajouter le user dans le channel
  */
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
-    console.log('suodgfosugdofgus')
-    const channel = await this.ChatService.createNewChan(channelEntity);
+    const channel = await this.ChannelService.createNewChan(channelEntity);
     if (!channel) {
       this.server.emit('errCreatingChan', {
-        msg: 'Coucou tu pues'
       })
     }
     else {
@@ -65,9 +61,8 @@ import { CreateChanDto } from './channel/CreateChan.dto';
    */
   @SubscribeMessage('msgToServer')
   handleMessage(client: Socket, payload: string): void {
-    // client.emit('msgToServer', payload);
-   this.server.emit('msgToClient', payload);
-
+    this.server.emit('msgToClient', payload);
+    // this.wss.to(message.room).emit('msgToClient', payload);
   }
  
   afterInit(server: Server) {
@@ -126,8 +121,21 @@ import { CreateChanDto } from './channel/CreateChan.dto';
   * ------------------------ CIRCULATION IN CHANNEL ------------------------- *
   */
 
-  joinChannel() {
 
+  /**
+   * 
+   * @param client va permettre d'envoyer les infos du user qui souhaite rejoindre la room
+   * @param channelName permet de trouver l'instance de channel que souhaite rejoindre le user
+   * 
+   * @todo ajouter le user pour pouvoir tester
+   * @todo besoin d'envoyer un message au user pour le prevenir qu'il a bien rejoint le chan
+   */
+  @SubscribeMessage('joinChannel')
+  joinChannel(client: Socket, channelName : string) {
+    this.ChannelService.joinRoom(channelName);
+    // this.logger.log(`JoinRoom : ${client.id}`)
+    // this.server.emit('joinedRoom', channel)
+    // client.join(room);
   }
 
   leaveChannel() {

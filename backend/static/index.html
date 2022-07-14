@@ -14,23 +14,24 @@
     <div id="app" class="container">
             <div class="row">
                 <div class="col-md-6 offset-md-3 col-sm-12">
-                    <h1 class="text-center">{{ name }}</h1>
+                    <h1 class="text-center">{{ title }}</h1>
                     <br>
                     <div id="status"></div>
                     <div id="chat">
-                        <input type="text" v-model="title" id="username" class="form-control" placeholder="Enter title...">
+                        <input type="text" v-model="chanName" id="username" class="form-control" placeholder="Enter title...">
                         <br>
                         <div class="card">
                             <div id="messages" class="card-block">
                                 <ul>
-                                    <li v-for="message of messages">{{ message.title }}: {{ message.owner }}</li>
+                                    <li v-for="message of messages">{{ message.chanName }}: {{ message.owner }}</li>
                                 </ul>
                             </div>
                         </div>
                         <br>
                         <textarea id="textarea" class="form-control" v-model="owner" placeholder="Enter owner..."></textarea>
                         <br>
-                        <button id="send" class="btn" @click.prevent="sendMessage">+</button>
+                        <button id="send" class="btn" @click.prevent="createChannel">+</button>
+                        <button id="send" class="btn" @click.prevent="joinChannel">JOIN</button>
                     </div>
                 </div>
             </div>
