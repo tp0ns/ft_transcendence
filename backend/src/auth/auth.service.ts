@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/user.entity';
@@ -23,14 +24,19 @@ export class AuthService {
 	async login(user: User, res: Response) {
 		const payload = {
 			sub: user.userId,
-			twoFAAuthenticated: !user.isTwoFAEnabled,
+			twoFAAuthenticated: false,
 		};
+		if (!user.isTwoFAEnabled)
+			payload.twoFAAuthenticated = true;
 		const access_token = this.jwtService.sign(payload);
 
 		const new_cookie = `Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
 		res.header('Set-Cookie', new_cookie);
 
-		res.redirect('/');
+		// if (user.isTwoFAEnabled)
+		// 	res.redirect('/auth/2fa/authenticate');
+		// else
+			res.redirect('/');
 	}
 
 	async logout() {

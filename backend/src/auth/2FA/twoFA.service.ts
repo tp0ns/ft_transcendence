@@ -4,46 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { User } from 'src/user/user.entity';
 import { authenticator } from 'otplib';
 import { toFileStream } from 'qrcode';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import TokenPayload from './interfaces/token.interface';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, ExtractJwt } from 'passport-jwt';
+import TokenPayload from './dto/token.interface';
 import { jwtConstants } from '../jwt/jwt.constants';
-
-@Injectable()
-export class JwtTwoFactorStrategy extends PassportStrategy(
-	Strategy,
-	'jwt-two-factor',
-) {
-	constructor(
-		private readonly configService: ConfigService,
-		private readonly userService: UserService,
-	) {
-		super({
-			jwtFromRequest: ExtractJwt.fromExtractors([
-				(request: Request) => {
-					return request?.cookies?.Authentication;
-				},
-			]),
-			secretOrKey: configService.get('JWT_SECRET'),
-		});
-	}
-
-	/**
-	 * Returns the user wether the 2FA isn't enabled or if
-	 * the user already performs the 2FA
-	 */
-	async validate(payload: TokenPayload) {
-		const user = await this.userService.getUserById(payload.userId);
-		if (!user.isTwoFAEnabled) {
-			return user;
-		}
-		if (payload.isSecondFactorAuthenticated) {
-			return user;
-		}
-	}
-}
 
 @Injectable()
 export class TwoFAService {
@@ -58,7 +22,7 @@ export class TwoFAService {
 	 */
 	public getCookieWithToken(
 		userId: string,
-		isSecondFactorAuthenticated = false,
+		isSecondFactorAuthenticated = true,
 	) {
 		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
 		const token = this.jwtService.sign(payload, {

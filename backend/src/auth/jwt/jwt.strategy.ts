@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import { jwtConstants } from './jwt.constants';
 import { UserService } from 'src/user/user.service';
 import { Request } from 'express';
@@ -43,8 +43,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	async validate(req: Request, payload: any) {
 		const user = await this.userService.getUserById(payload.sub);
 		if (!user.isTwoFAEnabled) return user;
-		else if (payload.twoFAAuthenticated == true || req.url == '/auth/42/2fa')
+		else if (
+			payload.twoFAAuthenticated == true ||
+			req.url == '/auth/2fa/authenticate'
+		)
 			return user;
+		console.log('coucou');
 		return;
 	}
 }
