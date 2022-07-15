@@ -16,12 +16,12 @@ export class ChannelService {
    */
 
 	async createNewChan(channel: CreateChanDto) {
-		return await this.channelRepository.save({
+		await this.channelRepository.save({
 			title: channel.title,
 			owner: channel.owner
 		});
+		return await this.joinChan(channel.owner, channel.title);
 	}
-
 
   /**
    * ------------------------ JOIN CHANNEL  ------------------------- *
@@ -38,10 +38,14 @@ export class ChannelService {
 		let channel : Channel;
 		try {
 			channel = this.getChanByName(channelName);
+			console.log(` check userId ${user.userId} : ${user.username}`)
 		}
 		catch {
-			// user.status = owner;
-			// return this.createNewChan(channelName);
+			const infos = {
+				title: channelName,
+				owner : user,
+			}
+			this.createNewChan(infos);
 		}
 	}
 

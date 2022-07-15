@@ -6,7 +6,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
  } from '@nestjs/websockets';
-import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
@@ -60,17 +60,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
  * 
  * @todo verifier que le user dans le channel fonctionne
  */
+  // @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
     const channel = await this.channelService.createNewChan(channelEntity);
-    if (!channel) {
-      this.server.emit('errCreatingChan')
-      throw new NotFoundException('Channel not found')
-    }
-    else {
+    // if (!channel) {
+    //   this.server.emit('errCreatingChan')
+    // }
+    // else {
       this.joinChannel(client, channelEntity.title);
       this.server.emit('createdChan', channel)
-    }
+    // }
 
   }
 
@@ -88,8 +88,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('joinChannel')
   joinChannel(client: Socket, chanName: string) {
     this.channelService.joinChan(client.data.user, chanName);
+    this.server.emit('rtn_channelMessages');
     client.join(chanName);
-    
   }
 
 
@@ -101,12 +101,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
-	@UseGuards(WsGuard)
+	// @UseGuards(WsGuard)
   @SubscribeMessage('msgToServer')
   handleMessage(client: Socket, payload: string) {
-		console.log(client.data.user);
 		this.server.emit('msgToClient', payload);
 		return (payload);
   }
+  
+  @SubscribeMessage('msgToChannel')
+  handleMessageToChan(client : Socket, payload: string, chanName: string) {
+    client.join(chanName);
+    this.server.to(chanName).emit('channelMessage', payload);
+  }
+
 
 }

@@ -21,4 +21,10 @@ export class User {
 	})
 	image_url: string;
 
+	@Column({
+		type: 'boolean',
+		default: false,
+	})
+	owner: boolean;
+
 }
