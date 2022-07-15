@@ -6,11 +6,12 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
  } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
+import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway({
 	cors: {
@@ -48,11 +49,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 * 	CHANNEL EVENTS
 	 */
 
-
-
-	/**
-	 * MESSAGE EVENTS
-	 */
   /**
    * ------------------------ CREATE CHANNEL  ------------------------- *
    */
@@ -62,20 +58,40 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
  * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
  * @param channel Pouvoir set les donnees du chan
  * 
- * @todo ajouter le user dans le channel
+ * @todo verifier que le user dans le channel fonctionne
  */
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
     const channel = await this.channelService.createNewChan(channelEntity);
     if (!channel) {
-      this.server.emit('errCreatingChan', {
-      })
+      this.server.emit('errCreatingChan')
+      throw new NotFoundException('Channel not found')
     }
     else {
+      this.joinChannel(client, channelEntity.title);
       this.server.emit('createdChan', channel)
     }
 
   }
+
+  /**
+   * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
+   */
+
+
+  /**
+   * 
+   * @param client client qui veut join le chan
+   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
+   */
+  @UseGuards(WsGuard)
+  @SubscribeMessage('joinChannel')
+  joinChannel(client: Socket, chanName: string) {
+    this.channelService.joinChan(client.data.user, chanName);
+    client.join(chanName);
+    
+  }
+
 
   /**
    * ------------------------ HANDLE MESSAGES  ------------------------- *

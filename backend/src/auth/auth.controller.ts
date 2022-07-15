@@ -66,7 +66,7 @@ export class AuthController {
 
 	/**
 	 * Supprime le contenu du cookie pour qu'il ne contienne plus de JWT.
-	 * L'urilisateur n'est donc plus identifié.
+	 * L'utilisateur n'est donc plus identifié.
 	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
 	 */
   @UseGuards(JwtAuthGuard)
