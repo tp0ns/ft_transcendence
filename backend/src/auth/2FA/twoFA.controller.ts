@@ -7,6 +7,9 @@ import { TwoFACodeDto } from './twoFACodeDto';
 import JwtTwoFactorGuard from './jwt-two-factor.guard';
 import RequestWithUser from '../interfaces/requestWithUser.interface';
 
+/**
+ * Creating 2fa route
+ */
 @Controller('auth/42/2fa')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TwoFAController {
@@ -16,6 +19,12 @@ export class TwoFAController {
 		private readonly authService: TwoFAService,
 	) {}
 
+	/**
+	 * Check if the user has been correctly authenticated with 2FA.
+	 * @param request interface containing the user.
+	 * @param twoFACode class containing the 2FA secret code.
+	 * @returns the user if everything is right or an exception.
+	 */
 	@Post('authenticate')
 	@HttpCode(200)
 	@UseGuards(JwtTwoFactorGuard)
@@ -39,6 +48,11 @@ export class TwoFAController {
 		return request.user;
 	}
 
+	/**
+	 * Check if the code given is right, if so, turn on the boolean user.isTwoFAEnabled
+	 * @param request interface containing the user.
+	 * @param twoFACode class containing the 2FA secret code.
+	 */
 	@Post('turn-on')
 	@HttpCode(200)
 	@UseGuards(JwtTwoFactorGuard)
@@ -56,6 +70,12 @@ export class TwoFAController {
 		await this.userService.turnOnTwoFA(request.user.userId);
 	}
 
+	/**
+	 * Generate a QR code to add the account on google auth
+	 * @param response the QR code
+	 * @param request current user
+	 * @returns the QR code for the user
+	 */
 	@Post('generate')
 	@UseGuards(JwtTwoFactorGuard)
 	async register(@Res() response: Response, @Req() request: RequestWithUser) {

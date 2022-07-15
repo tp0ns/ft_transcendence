@@ -30,6 +30,10 @@ export class JwtTwoFactorStrategy extends PassportStrategy(
 		});
 	}
 
+	/**
+	 * Returns the user wether the 2FA isn't enabled or if
+	 * the user already performs the 2FA
+	 */
 	async validate(payload: TokenPayload) {
 		const user = await this.userService.getUserById(payload.userId);
 		if (!user.isTwoFAEnabled) {
@@ -49,6 +53,9 @@ export class TwoFAService {
 		private readonly jwtService: JwtService,
 	) {}
 
+	/**
+	 * Get the JWT token from the cookie
+	 */
 	public getCookieWithToken(
 		userId: string,
 		isSecondFactorAuthenticated = false,
@@ -60,7 +67,9 @@ export class TwoFAService {
 		});
 		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
 	}
-
+	/**
+	 * Generate the secret key used to authenticate the user
+	 */
 	public async generateTwoFASecret(user: User) {
 		const secret = authenticator.generateSecret();
 		const otpauthUrl = authenticator.keyuri(
@@ -74,9 +83,17 @@ export class TwoFAService {
 			otpauthUrl,
 		};
 	}
+
+	/**
+	 * Display the QR code to access google auth
+	 */
 	public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
 		return toFileStream(stream, otpauthUrl);
 	}
+
+	/**
+	 * Check if the code given by the user is right or not
+	 */
 	public is2FACodeValid(twoFACode, user: User) {
 		return authenticator.verify({
 			token: twoFACode,
