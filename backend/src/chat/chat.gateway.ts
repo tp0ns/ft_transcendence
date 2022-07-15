@@ -59,18 +59,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
 	 */
+	@UseGuards(WsGuard)
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
-    const channel = await this.channelService.createNewChan(channelEntity);
-    if (!channel) {
-      this.server.emit('errCreatingChan', {
-        msg: 'Coucou tu pues'
-      })
-    }
-    else {
-      this.server.emit('createdChan', channel)
-    }
-
+		const channel = await this.channelService.createNewChan(channelEntity);
+    if (!channel)
+      this.server.emit('err_createChan', { msg: 'Coucou tu pues' });
+    else
+      this.server.emit('rtn_createChan', channel);
   }
 
   /**
