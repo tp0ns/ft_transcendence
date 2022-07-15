@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+	Column,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -26,4 +32,10 @@ export class User {
 		type: 'varchar',
 	})
 	profileImage: string;
+
+	@ManyToMany(() => User, (user) => user.friends, {
+		cascade: true,
+	})
+	@JoinTable()
+	friends: User[];
 }

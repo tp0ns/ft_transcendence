@@ -46,6 +46,9 @@ export class UserService {
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
+		while (attrs.username === user.username) {
+			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
+		}
 		Object.assign(user, attrs);
 		console.log(user);
 		return this.repo.save(user);
