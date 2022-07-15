@@ -1,5 +1,4 @@
 import {
-	Body,
 	Controller,
 	Get,
 	Param,
@@ -7,30 +6,27 @@ import {
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
-	UsePipes,
-	ValidationPipe,
 	Request,
-	ConsoleLogger,
+	UseFilters,
 } from '@nestjs/common';
-import { CreateUserDto } from './dtos/user.dto';
 import { UserService } from './user.service';
 import { ApiTags } from '@nestjs/swagger';
-import { uuidDto } from './dtos/uuidDto';
-import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from './storage/storage';
-import { Observable, of } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
-import { User } from './user.entity';
+import { uuidv4 } from 'uuid';
+import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 
 @ApiTags('users')
 @Controller('users')
+@UseFilters(UnauthorizedExceptionFilter)
 export class UserController {
 	constructor(private userService: UserService) {}
 
-	@Get(':id')
-	async getUserbyId(@Param() id: uuidDto) {
-		return await this.userService.getUserById(id.id);
+	@UseGuards(JwtAuthGuard)
+	@Get('/:id')
+	async getUserbyId(@Param('id') id: uuidv4) {
+		return await this.userService.getUserById(id);
 	}
 
 	/* Uploads an image locally and stores location in db*/
