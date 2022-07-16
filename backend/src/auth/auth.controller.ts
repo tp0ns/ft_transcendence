@@ -8,7 +8,9 @@ import { UserService } from 'src/user/user.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth/42')
 @UseFilters(UnauthorizedExceptionFilter)
 export class AuthController {

@@ -25,6 +25,12 @@ export class User {
 		type: 'varchar',
 	})
 	image_url: string;
+
+	@Column({
+		nullable: true,
+		type: 'varchar',
+	})
+	profileImage: string;
 }
 
 export default User;

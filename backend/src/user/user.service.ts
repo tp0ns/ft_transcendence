@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { uuidv4 } from 'uuid';
 import { Profile } from 'passport-42';
+import { uuidDto } from './dtos/uuidDto';
 
 @Injectable()
 export class UserService {
@@ -12,8 +13,8 @@ export class UserService {
 		private repo: Repository<User>,
 	) {}
 
-	async getUserById(id: uuidv4) {
-		const user = await this.repo.findOne({ where: { userId: id } });
+	async getUserById(uuid: string) {
+		const user = await this.repo.findOne({ where: { userId: uuid } });
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
@@ -50,6 +51,18 @@ export class UserService {
 			isTwoFAEnabled: true,
 		});
 	}
+	/* This functions takes a user_id and updates it with the attributes of its entity to be updated.
+	These are represented by the Partial<User> parameter (Partial<> permits to give as arguments parts of an entity)*/
+	async update(id: string, attrs: Partial<User>) {
+		const user = await this.repo.findOne({ where: { userId: id } });
+		if (!user) {
+			throw new NotFoundException('user not found');
+		}
+		Object.assign(user, attrs);
+		console.log(user);
+		return this.repo.save(user);
+	}
+
 	// async	createUser(newUser: CreateUserDto) {
 	// 	return await this.repo.save(newUser);
 	// }
