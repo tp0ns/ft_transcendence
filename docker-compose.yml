@@ -1,7 +1,16 @@
 version: '3'
 services:
-  # pong-front:
-
+  pong-frontend:
+    build: ./frontend
+    container_name: frontend
+    volumes:
+      - ./frontend/:/frontend/:cached
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    networks:
+      - front_back
   pong-backend:
     build: ./backend
     container_name: backend
