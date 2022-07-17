@@ -1,14 +1,13 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt'
+import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/user.entity';
 import { jwtConstants } from './jwt/jwt.constants';
 import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
-	constructor(
-		private jwtService: JwtService
-	) {}
+	constructor(private jwtService: JwtService) {}
 
 	/**
 	 * Dans cette fonction on décide de ce qui va etre store (le payload) dans le JWT(JsonWebToken).
@@ -23,14 +22,22 @@ export class AuthService {
 	 * @todo Il faut ajouter twofaAuthenticated: boolean au payload pour la 2FA
 	 */
 	async login(user: User, res: Response) {
-    const payload = { sub: user.userId };
-    const access_token= this.jwtService.sign(payload);
+		const payload = {
+			sub: user.userId,
+			twoFAAuthenticated: false,
+		};
+		if (!user.isTwoFAEnabled)
+			payload.twoFAAuthenticated = true;
+		const access_token = this.jwtService.sign(payload);
 
-		const new_cookie=`Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
+		const new_cookie = `Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
 		res.header('Set-Cookie', new_cookie);
 
-		res.redirect('/');
-  }
+		// if (user.isTwoFAEnabled)
+		// 	res.redirect('/auth/2fa/authenticate');
+		// else
+			res.redirect('/');
+	}
 
 	async logout() {
 		return await `Authentication=; HttpOnly; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`; //Max-age=0;

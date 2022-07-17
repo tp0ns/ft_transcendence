@@ -8,9 +8,8 @@ import { UserService } from 'src/user/user.service';
  * elle est simplifiée grace à passport-42 [PassportStrategy(Strategy, '42')]
  */
 @Injectable()
-export class SchoolStrategy extends PassportStrategy(Strategy, '42')
-{
-	constructor( private userService: UserService ) {
+export class SchoolStrategy extends PassportStrategy(Strategy, '42') {
+	constructor(private userService: UserService) {
 		/**
 		 * On appelle la methode super() pour configurer les parametres de la stratégie.
 		 * 	- @param clientID L'ID de l'application autorise par L'API 42, et genere sur l'intra.
@@ -22,13 +21,13 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42')
 		 */
 		super({
 			clientID: process.env.FORTYTWO_APP_ID,
-    	clientSecret: process.env.FORTYTWO_APP_SECRET,
-   		callbackURL: process.env.REDIRECT_URL,
+			clientSecret: process.env.FORTYTWO_APP_SECRET,
+			callbackURL: process.env.REDIRECT_URL,
 			profileFields: {
-				'id': 'id',
-				'username': 'login',
-				'image_url': 'image_url'
-			}
+				id: 'id',
+				username: 'login',
+				image_url: 'image_url',
+			},
 		});
 	}
 
@@ -37,7 +36,7 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42')
 	 * Cette fonction doit etre presente dans toute Strategie pour "Valider" le retour de l'API/l'Authentification.
 	 * Dans notre cas, aucune reelle verification n'est faite (@todo), on se contente d'appeler findOrCreate.
 	 *
- 	 * "For each strategy, Passport will call the verify function (implemented with the validate()
+	 * "For each strategy, Passport will call the verify function (implemented with the validate()
 	 * method in @nestjs/passport) using an appropriate strategy-specific set of parameters."
 	 *
 	 * 	La suite de l'auth se poursuit dans callback dans auth.controller.ts, merci passport !
@@ -47,7 +46,7 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42')
 	 *
 	 * @Todo Verifier que personne n'ai le meme username.
 	 */
-	async validate(accessToken, refreshToken, profile: Profile ): Promise<any> {
+	async validate(accessToken, refreshToken, profile: Profile): Promise<any> {
 		const user = this.userService.findOrCreate(profile);
 		return await user;
 	}

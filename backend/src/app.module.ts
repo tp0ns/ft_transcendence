@@ -5,10 +5,20 @@ import { AppService } from './app.service';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { TwoFAModule } from './auth/2FA/twoFA.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, TypeOrmModule.forRoot(typeOrmConfig), AuthModule],
-  controllers: [AppController],
-  providers: [AppService],
+	imports: [
+		ConfigModule.forRoot({
+			envFilePath: '.env',
+		}),
+		UserModule,
+		AuthModule,
+		TwoFAModule,
+		TypeOrmModule.forRoot(typeOrmConfig),
+	],
+	controllers: [AppController],
+	providers: [AppService],
 })
 export class AppModule {}
