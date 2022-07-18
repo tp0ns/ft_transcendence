@@ -1,13 +1,5 @@
-import {
-	Catch,
-	Controller,
-	Get,
-	Post,
-	Req,
-	Res,
-	UseFilters,
-	UseGuards,
-} from '@nestjs/common';
+// eslint-disable-next-line prettier/prettier
+import { Catch, Controller, Get, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';

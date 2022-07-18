@@ -16,6 +16,11 @@ export class User {
 	})
 	username: string;
 
+	@Column({ nullable: true })
+	public twoFASecret?: string;
+
+	@Column({ default: false })
+	public isTwoFAEnabled: boolean;
 	@Column({
 		type: 'varchar',
 	})
@@ -27,3 +32,5 @@ export class User {
 	})
 	profileImage: string;
 }
+
+export default User;

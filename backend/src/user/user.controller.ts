@@ -1,14 +1,5 @@
-import {
-	Controller,
-	Get,
-	Param,
-	Post,
-	UploadedFile,
-	UseGuards,
-	UseInterceptors,
-	Request,
-	UseFilters,
-} from '@nestjs/common';
+// eslint-disable-next-line prettier/prettier
+import { Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors, Request, UseFilters } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
