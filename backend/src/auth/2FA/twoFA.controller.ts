@@ -33,12 +33,10 @@ export class TwoFAController {
 		@Req() request: RequestWithUser,
 		@Body() twoFACode: TwoFACodeDto,
 	) {
-		console.log('before 2FACODE IN AUTHENTICATE.');
 		const isCodeValid = this.twoFAService.is2FACodeValid(
 			twoFACode.twoFACode,
 			request.user,
 		);
-		console.log('2FACODE PASSED IN AUTHENTICATE.');
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
@@ -62,12 +60,10 @@ export class TwoFAController {
 		@Req() request: RequestWithUser,
 		@Body() { twoFACode }: TwoFACodeDto,
 	) {
-		console.log('before 2FACODE IN TURN-ON.');
 		const isCodeValid = this.twoFAService.is2FACodeValid(
 			twoFACode,
 			request.user,
 		);
-		console.log('2FACODE PASSED IN TURN-ON.');
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		}

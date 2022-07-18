@@ -59,7 +59,6 @@ export class UserService {
 			throw new NotFoundException('user not found');
 		}
 		Object.assign(user, attrs);
-		console.log(user);
 		return this.repo.save(user);
 	}
 
