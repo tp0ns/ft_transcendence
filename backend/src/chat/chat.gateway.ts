@@ -11,7 +11,6 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
-import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway({
 	cors: {
@@ -60,15 +59,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
  * 
  * @todo verifier que le user dans le channel fonctionne
  */
-  // @UseGuards(WsGuard)
+  @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
-    const channel = await this.channelService.createNewChan(channelEntity);
+    const channel = await this.channelService.createNewChan(client.data.user, channelEntity);
     // if (!channel) {
     //   this.server.emit('errCreatingChan')
     // }
     // else {
-      this.joinChannel(client, channelEntity.title);
+      this.joinChannel(client.data.user, channelEntity.title);
       this.server.emit('createdChan', channel)
     // }
 
@@ -86,9 +85,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   @UseGuards(WsGuard)
   @SubscribeMessage('joinChannel')
-  joinChannel(client: Socket, chanName: string) {
+  joinChannel(client : Socket, chanName: string) {
     this.channelService.joinChan(client.data.user, chanName);
-    this.server.emit('rtn_channelMessages');
+    this.server.emit('joinedChan');
     client.join(chanName);
   }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Channel } from './channel.entity';
 import { CreateChanDto } from './dtos/createChan.dto';
 
@@ -15,12 +15,12 @@ export class ChannelService {
    * ------------------------ CREATE CHANNEL  ------------------------- *
    */
 
-	async createNewChan(channel: CreateChanDto) {
+	async createNewChan(user : User, channel: CreateChanDto) {
 		await this.channelRepository.save({
 			title: channel.title,
-			owner: channel.owner
+			owner: user,
 		});
-		return await this.joinChan(channel.owner, channel.title);
+		// return await this.joinChan(user, channel.title);
 	}
 
   /**
@@ -34,31 +34,52 @@ export class ChannelService {
    * 
    * @todo preciser que si c'est la premiere personne a rejoindre le channel = OWNER ! 
    */
-	joinChan(user : User, channelName : string) {
+
+	async joinChan(user : User, channelName : string) {
 		let channel : Channel;
 		try {
-			channel = this.getChanByName(channelName);
 			console.log(` check userId ${user.userId} : ${user.username}`)
+			console.log(`NAME OF THE CHAN ${channel.title}`);
+			console.log(`NAME OF THE USER ${user.username}`);
+			channel = await this.getChanByName(channelName);
+			channel.usersIn.push(user);
+
+			// await dataSource
+			// .createQueryBuilder()
+			// .relation(Post, "categories")
+			// .of(post)
+			// .add(category)
+
+			// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
+
 		}
 		catch {
 			const infos = {
 				title: channelName,
 				owner : user,
 			}
-			this.createNewChan(infos);
+			this.createNewChan(user, infos);
 		}
 	}
 
 
-	 getChanByName(chanName : string) {
-		 let channel;
-		// let channel : Channel = this.channelRepository.findOne({where: {name: chanName}});
-		// if (!channel)
-			// console.log("le channel il existe po");
+	/**
+	 * @brief Find the channel to join with his name
+	 * 
+	 * @param chanName 
+	 * @returns Channel object corresponding
+	 * 
+	 * @todo faire un try/catch ? 
+	 */
+	async getChanByName(chanName : string) : Promise<Channel> 
+	{
+		console.log(`name of channel is ${chanName}`)
+		const channel : Channel = await this.channelRepository.findOne({where: { title: chanName }})
+		if (!channel)
+			console.log("le channel il existe po");
 		return channel;
-
-
 	}
 }
+
 
 
