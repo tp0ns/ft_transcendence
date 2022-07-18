@@ -49,40 +49,69 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 */
 
   /**
-   * ------ createChan -------
-	 *
-	 * @returns boolean
-	 *    - true : Permet d'envoyer a createdChan pour pouvoir envoyer un msg au user
-	 *            lui informant de la bonne realisation du channel.
-	 *    - false : Permet d'envoyer a errCreatedChan si le chan n'a pas pu etre cree
-	 *            et envoyer un message d'erreur au user.
-	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
-	 * @param channel Pouvoir set les donnees du chan
-	 */
-	@UseGuards(WsGuard)
+   * ------------------------ CREATE CHANNEL  ------------------------- *
+   */
+
+/**
+ *
+ * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
+ * @param channel Pouvoir set les donnees du chan
+ *
+ * @todo verifier que le user dans le channel fonctionne
+ */
+  @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
-		const channel = await this.channelService.createNewChan(channelEntity);
-    if (!channel)
-      this.server.emit('err_createChan', { msg: 'Coucou tu pues' });
-    else
-      this.server.emit('rtn_createChan', channel);
+    const channel = await this.channelService.createNewChan(client.data.user, channelEntity);
+    // if (!channel) {
+    //   this.server.emit('errCreatingChan')
+    // }
+    // else {
+      this.joinChannel(client.data.user, channelEntity.title);
+      this.server.emit('createdChan', channel)
+    // }
+
   }
 
   /**
-	 *==========================MESSAGE EVENTS=================================
+   * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
+   */
+
+
+  /**
+   *
+   * @param client client qui veut join le chan
+   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
+   */
+  @UseGuards(WsGuard)
+  @SubscribeMessage('joinChannel')
+  joinChannel(client : Socket, chanName: string) {
+    this.channelService.joinChan(client.data.user, chanName);
+    this.server.emit('joinedChan');
+    client.join(chanName);
+  }
+
+
+  /**
+   * ------------------------ HANDLE MESSAGES  ------------------------- *
    */
 
 
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
-	@UseGuards(WsGuard)
+	// @UseGuards(WsGuard)
   @SubscribeMessage('msgToServer')
   handleMessage(client: Socket, payload: string) {
-		console.log(client.data.user);
 		this.server.emit('msgToClient', payload);
 		return (payload);
   }
+
+  @SubscribeMessage('msgToChannel')
+  handleMessageToChan(client : Socket, payload: string, chanName: string) {
+    client.join(chanName);
+    this.server.to(chanName).emit('channelMessage', payload);
+  }
+
 
 }

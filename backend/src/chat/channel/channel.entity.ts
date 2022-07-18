@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/user/user.entity";
+import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('channel')
 
@@ -18,18 +19,18 @@ export class Channel extends BaseEntity {
 	})
 	title: string;
 
-	@Column("text")
-	owner: string;
+	@ManyToOne(() => User)
+	owner: User;
+
+
+	@ManyToMany(() => User)
+	usersIn: User[];
+	// // @JoinTable()
 
 	// @Column("text", {
 	// 	default: ""
 	// })
 	// password: string;
-
-	// @ManyToMany((type) => User, (user) => user.memberChannels, {
-	//   })
-	//   @JoinTable()
-	//   public members: User[];
 
 	//faire la date de crea
 	//faire le time de la derniere activite sur le chan

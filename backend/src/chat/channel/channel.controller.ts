@@ -7,10 +7,10 @@ export class ChannelController {
 	constructor (private ChannelService: ChannelService) {}
 
 
-	@Post('/create')
+	// @Post('/create')
 	// @HttpCode(200)
-	@UsePipes(ValidationPipe)
-	async createChan(@Body() ChanData : CreateChanDto) {
-		return await this.ChannelService.createNewChan(ChanData)
-	}
+	// @UsePipes(ValidationPipe)
+	// async createChan(@Body() ChanData : CreateChanDto) {
+	// 	return await this.ChannelService.createNewChan(ChanData)
+	// }
 }
