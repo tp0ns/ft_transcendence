@@ -29,7 +29,7 @@ export class AuthService {
 		const new_cookie=`Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
 		res.header('Set-Cookie', new_cookie);
 
-		res.redirect('/');
+		res.redirect('http://localhost/');
   }
 
 	async logout() {
