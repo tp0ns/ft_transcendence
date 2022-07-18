@@ -7,8 +7,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UserModule, TypeOrmModule.forRoot(typeOrmConfig), AuthModule],
-  controllers: [AppController],
-  providers: [AppService],
+	imports: [UserModule, TypeOrmModule.forRoot(typeOrmConfig), AuthModule],
+	controllers: [AppController],
+	providers: [AppService],
 })
 export class AppModule {}

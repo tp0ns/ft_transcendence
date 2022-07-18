@@ -12,15 +12,16 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 import { UserService } from 'src/user/user.service';
 
 @Module({
-	imports:[	PassportModule.register(SchoolStrategy),
-						TypeOrmModule.forFeature([User]),
-						JwtModule.register({
-							secret: jwtConstants.secret,
-							signOptions: { expiresIn: jwtConstants.expire },
-						}),
-						HttpModule
-					],
+	imports: [
+		PassportModule.register(SchoolStrategy),
+		TypeOrmModule.forFeature([User]),
+		JwtModule.register({
+			secret: jwtConstants.secret,
+			signOptions: { expiresIn: jwtConstants.expire },
+		}),
+		HttpModule,
+	],
 	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy],
-	controllers: [AuthController]
+	controllers: [AuthController],
 })
 export class AuthModule {}

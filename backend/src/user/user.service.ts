@@ -1,18 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './user.entity';
-import { EntityPropertyNotFoundError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from './dtos/user.dto';
-import { uuidv4 } from 'uuid';
 import { Profile } from 'passport-42';
-import { uuidDto } from './dtos/uuidDto';
+import { from, Observable, of } from 'rxjs';
+import { FriendRequest } from './models/friend-request.interface';
+import { FriendRequestEntity } from './models/friend-request.entity';
 
 @Injectable()
 export class UserService {
-	constructor(@InjectRepository(User) private repo: Repository<User>) {}
+	constructor(
+		@InjectRepository(User) private userRepo: Repository<User>, // @InjectRepository(FriendRequestEntity)
+	) // private friendRequestRepo: Repository<FriendRequestEntity>,
+	{}
 
 	async getUserById(uuid: string) {
-		const user = await this.repo.findOne({ where: { userId: uuid } });
+		const user = await this.userRepo.findOne({ where: { userId: uuid } });
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
@@ -26,11 +29,11 @@ export class UserService {
 	 * @returns un User
 	 */
 	async findOrCreate(profile: Profile): Promise<User> {
-		const user: User = await this.repo.findOne({
+		const user: User = await this.userRepo.findOne({
 			where: { schoolId: profile.id },
 		});
 		if (!user) {
-			return await this.repo.save({
+			return await this.userRepo.save({
 				schoolId: profile.id,
 				username: profile.username,
 				image_url: profile.image_url,
@@ -39,10 +42,36 @@ export class UserService {
 		return await user;
 	}
 
+	async findUserById(id: string) {
+		const user = await this.userRepo.findOne({ where: { userId: id } });
+		if (!user) {
+			throw new NotFoundException('user not found');
+		}
+		return user;
+	}
+
+	// hasRequestBeenSentOrReceived(
+	// 	creator: User,
+	// 	receiver: User,
+	// ) : Observable<boolean> {
+	// 	return from(this.friendRequestRepo.findOne({
+
+	// 	}))
+	// }
+
+	// async sendFriendRequest(receiverId: string, creator: User): Observable<FriendRequest | { error: string }> {
+	// 	if (receiverId === creator.userId) {
+	// 		return of({error: "It is not possible to add yourself!"})
+	// 	}
+	// 	return this.findUserById(receiverId).pipe(switchMap((receiver: User) => {
+	// 		return
+	// 	}))
+	// }
+
 	/* This functions takes a user_id and updates it with the attributes of its entity to be updated. 
 	These are represented by the Partial<User> parameter (Partial<> permits to give as arguments parts of an entity)*/
 	async update(id: string, attrs: Partial<User>) {
-		const user = await this.repo.findOne({ where: { userId: id } });
+		const user = await this.userRepo.findOne({ where: { userId: id } });
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
@@ -51,10 +80,9 @@ export class UserService {
 		}
 		Object.assign(user, attrs);
 		console.log(user);
-		return this.repo.save(user);
+		return this.userRepo.save(user);
 	}
-
 	// async	createUser(newUser: CreateUserDto) {
-	// 	return await this.repo.save(newUser);
+	// 	return await this.userRepo.save(newUser);
 	// }
 }

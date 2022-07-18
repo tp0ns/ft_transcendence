@@ -3,8 +3,10 @@ import {
 	Entity,
 	JoinTable,
 	ManyToMany,
+	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
+import { FriendRequestEntity } from './models/friend-request.entity';
 
 @Entity()
 export class User {
@@ -33,9 +35,17 @@ export class User {
 	})
 	profileImage: string;
 
-	@ManyToMany(() => User, (user) => user.friends, {
-		cascade: true,
-	})
-	@JoinTable()
-	friends: User[];
+	// @Column()
+	// @OneToMany(
+	// 	() => FriendRequestEntity,
+	// 	(friendRequestEntity) => friendRequestEntity.creator,
+	// )
+	// sentFriendRequests: FriendRequestEntity[];
+
+	// @Column()
+	// @OneToMany(
+	// 	() => FriendRequestEntity,
+	// 	(friendRequestEntity) => friendRequestEntity.receiver,
+	// )
+	// receivedFriendRequests: FriendRequestEntity[];
 }

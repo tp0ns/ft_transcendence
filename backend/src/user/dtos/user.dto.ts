@@ -1,11 +1,25 @@
-import { IsEmpty, IsNotEmpty, Length } from "class-validator";
+import {
+	isAlphanumeric,
+	IsAlphanumeric,
+	isEmpty,
+	IsEmpty,
+	IsNotEmpty,
+	isNumber,
+	Length,
+} from 'class-validator';
+import { User } from '../user.entity';
 
-export class CreateUserDto {
-	@IsEmpty()
-	id: string;
+export class UserDto {
+	@IsAlphanumeric()
+	userId: string;
 
-	@IsNotEmpty({ message: 'User should have an username'})
-	@Length(2, 255, { message: 'The Username must be between 2 and 255 characters long'})
+	schoolId: number;
+
 	username: string;
 
+	image_url: string;
+
+	profileImage: string;
+
+	friends: User[];
 }

@@ -29,6 +29,10 @@ import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 import { uuidDto } from './dtos/uuidDto';
 import { Request } from 'express';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
+import { UserDto } from './dtos/user.dto';
+import { FriendRequest } from './models/friend-request.interface';
+import { find, Observable } from 'rxjs';
+import { User } from './user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -91,4 +95,11 @@ export class UserController {
 			username: updateUsernameDto.username,
 		});
 	}
+
+	// @ApiBody({ type: UpdateUsernameDto })
+	// @UseGuards(JwtAuthGuard)
+	// @Post('friend-request/send/:receiverId')
+	// sendFriendRequest(@Param('receiverId') receiverId: string) {
+	// 	return this.userService.findUserById(receiverId);
+	// }
 }
