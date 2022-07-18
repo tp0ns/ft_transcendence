@@ -42,7 +42,7 @@ export class ChannelService {
 			console.log(`NAME OF THE CHAN ${channel.title}`);
 			console.log(`NAME OF THE USER ${user.username}`);
 			channel = await this.getChanByName(channelName);
-			channel.usersIn.push(user);
+			// channel.usersIn.push(user);
 
 			// await dataSource
 			// .createQueryBuilder()
@@ -50,7 +50,7 @@ export class ChannelService {
 			// .of(post)
 			// .add(category)
 
-			// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
+			await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
 
 		}
 		catch {

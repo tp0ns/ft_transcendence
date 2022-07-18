@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Channel } from 'diagnostics_channel';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -26,5 +27,8 @@ export class User {
 		default: false,
 	})
 	owner: boolean;
+
+	// @ManyToMany((type) => Channel)
+	// public memberOfChannels: Channel[];
 
 }
