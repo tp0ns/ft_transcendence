@@ -1,19 +1,55 @@
 version: '3'
 services:
-  # pong-front:
+  pong-traefik:
+    image: traefik:latest
+    container_name: traefik
+    command:
+      # uncomment following commands for debugging !
+      # - "--log.level=DEBUG"
+      # - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - 80:80
+      # - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - front_back
+
+  pong-frontend:
+    build: ./frontend
+    container_name: frontend
+    volumes:
+      - ./frontend/:/frontend/:cached
+    env_file:
+      - .env
+    networks:
+      - front_back
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ft_transcendence_front_back"
+      - "traefik.http.routers.pong-frontend.rule=Host(`localhost`)"
+      - "traefik.http.routers.pong-frontend.entrypoints=web"
+      - "traefik.http.services.pong-frontend.loadbalancer.server.port=3001"
 
   pong-backend:
     build: ./backend
     container_name: backend
     volumes:
       - ./backend/:/backend/:cached
-    ports:
-      - "3000:3000"
     env_file:
       - .env
     networks:
-      - front_back
       - back_db
+      - front_back
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ft_transcendence_front_back"
+      - traefik.http.routers.pong-backend.rule=Host(`localhost`) && PathPrefix(`/backend/`)
+      - "traefik.http.routers.pong-backend.entrypoints=web"
+      - "traefik.http.services.pong-backend.loadbalancer.server.port=3000"
 
   pong-db:
     image: postgres:alpine
