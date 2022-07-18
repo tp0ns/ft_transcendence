@@ -34,9 +34,9 @@ export class AuthService {
 		res.header('Set-Cookie', new_cookie);
 
 		// if (user.isTwoFAEnabled)
-		// 	res.redirect('/auth/2fa/authenticate');
+		// 	res.redirect(''); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
 		// else
-			res.redirect('/');
+			res.redirect('http://localhost/');
 	}
 
 	async logout() {

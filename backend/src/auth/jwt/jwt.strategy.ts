@@ -42,12 +42,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	 * @coucou Elias <3
 	 */
 	async validate(req: Request, payload: any) {
-		console.log(req);
 		const user = await this.userService.getUserById(payload.sub);
 		if (!user.isTwoFAEnabled) return user;
 		else if (payload.twoFAAuthenticated || req.url == '/auth/2fa/authenticate')
 			return user;
-		console.log('coucou');
 		return;
 	}
 }
