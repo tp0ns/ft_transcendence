@@ -10,11 +10,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './jwt/jwt.constants';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { UserService } from 'src/user/user.service';
+import { FriendRequestEntity } from 'src/user/models/friend-request.entity';
 
 @Module({
 	imports: [
 		PassportModule.register(SchoolStrategy),
-		TypeOrmModule.forFeature([User]),
+		TypeOrmModule.forFeature([User, FriendRequestEntity]),
 		JwtModule.register({
 			secret: jwtConstants.secret,
 			signOptions: { expiresIn: jwtConstants.expire },

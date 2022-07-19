@@ -1,18 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'passport-42';
-import { from, Observable, of } from 'rxjs';
+import { from, map, Observable, of, switchMap } from 'rxjs';
 import { FriendRequest } from './models/friend-request.interface';
 import { FriendRequestEntity } from './models/friend-request.entity';
 
 @Injectable()
 export class UserService {
 	constructor(
-		@InjectRepository(User) private userRepo: Repository<User>, // @InjectRepository(FriendRequestEntity)
-	) // private friendRequestRepo: Repository<FriendRequestEntity>,
-	{}
+		@InjectRepository(User) private userRepo: Repository<User>,
+		@InjectRepository(FriendRequestEntity)
+		private friendRequestRepo: Repository<FriendRequestEntity>,
+	) {}
 
 	async getUserById(uuid: string) {
 		const user = await this.userRepo.findOne({ where: { userId: uuid } });
@@ -42,30 +48,49 @@ export class UserService {
 		return await user;
 	}
 
-	async findUserById(id: string) {
-		const user = await this.userRepo.findOne({ where: { userId: id } });
-		if (!user) {
-			throw new NotFoundException('user not found');
-		}
-		return user;
+	// async findUserById(id: string) {
+	// 	const user = await this.userRepo.findOne({ where: { userId: id } });
+	// 	if (!user) {
+	// 		throw new NotFoundException('user not found');
+	// 	}
+	// 	return user;
+	// }
+
+	findUserById(id: string): Observable<User> {
+		return from(this.userRepo.findOne({ where: { userId: id } })).pipe(
+			map((user: User) => {
+				if (!user) {
+					throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+				}
+				return user;
+			}),
+		);
 	}
 
 	// hasRequestBeenSentOrReceived(
 	// 	creator: User,
 	// 	receiver: User,
-	// ) : Observable<boolean> {
-	// 	return from(this.friendRequestRepo.findOne({
-
-	// 	}))
+	// ): Observable<boolean> {
+	// 	return from(this.friendRequestRepo.findOne({}));
 	// }
 
-	// async sendFriendRequest(receiverId: string, creator: User): Observable<FriendRequest | { error: string }> {
-	// 	if (receiverId === creator.userId) {
-	// 		return of({error: "It is not possible to add yourself!"})
-	// 	}
-	// 	return this.findUserById(receiverId).pipe(switchMap((receiver: User) => {
-	// 		return
-	// 	}))
+	// sendFriendRequest(
+	// 	receiverId: string,
+	// 	creator: User,
+	// ): Observable<FriendRequest | { error: string }> {
+	// 	if (receiverId === creator.userId)
+	// 		return of({ error: 'It is not possible to add yourself!' });
+
+	// 	return this.findUserById(receiverId).pipe(
+	// 		switchMap((receiver: User) => {
+	// 			return;
+	// 		}),
+	// 	);
+	// 	// return this.findUserById(receiverId).pipe(
+	// 	// 	switchMap((receiver: User) => {
+	// 	// 		return;
+	// 	// 	}),
+	// 	// );
 	// }
 
 	/* This functions takes a user_id and updates it with the attributes of its entity to be updated. 

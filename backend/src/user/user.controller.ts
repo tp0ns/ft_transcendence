@@ -96,10 +96,13 @@ export class UserController {
 		});
 	}
 
-	// @ApiBody({ type: UpdateUsernameDto })
-	// @UseGuards(JwtAuthGuard)
-	// @Post('friend-request/send/:receiverId')
-	// sendFriendRequest(@Param('receiverId') receiverId: string) {
-	// 	return this.userService.findUserById(receiverId);
-	// }
+	@ApiBody({ type: UpdateUsernameDto })
+	@UseGuards(JwtAuthGuard)
+	@Post('friend-request/send/:receiverId')
+	sendFriendRequest(
+		@Param('receiverId') receiverId: string,
+		@Req() req: Request,
+	): Observable<FriendRequest | { error: string }> {
+		return this.userService.sendFriendRequest(receiverId, req.user);
+	}
 }

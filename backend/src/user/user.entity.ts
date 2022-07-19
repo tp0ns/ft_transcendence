@@ -35,17 +35,15 @@ export class User {
 	})
 	profileImage: string;
 
-	// @Column()
-	// @OneToMany(
-	// 	() => FriendRequestEntity,
-	// 	(friendRequestEntity) => friendRequestEntity.creator,
-	// )
-	// sentFriendRequests: FriendRequestEntity[];
+	@OneToMany(
+		() => FriendRequestEntity,
+		(friendRequestEntity) => friendRequestEntity.creator,
+	)
+	sentFriendRequests: FriendRequestEntity[];
 
-	// @Column()
-	// @OneToMany(
-	// 	() => FriendRequestEntity,
-	// 	(friendRequestEntity) => friendRequestEntity.receiver,
-	// )
-	// receivedFriendRequests: FriendRequestEntity[];
+	@OneToMany(
+		() => FriendRequestEntity,
+		(friendRequestEntity) => friendRequestEntity.receiver,
+	)
+	receivedFriendRequests: FriendRequestEntity[];
 }

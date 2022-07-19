@@ -15,11 +15,11 @@ export class FriendRequestEntity {
 	@PrimaryGeneratedColumn('uuid')
 	userId: string;
 
-	// @ManyToOne(() => User, (user) => user.sentFriendRequests)
-	// creator: User;
+	@ManyToOne(() => User, (user) => user.sentFriendRequests)
+	creator: User;
 
-	// @ManyToOne(() => User, (user) => user.receivedFriendRequests)
-	// receiver: User;
+	@ManyToOne(() => User, (user) => user.receivedFriendRequests)
+	receiver: User;
 
 	@Column()
 	status: FriendRequest_Status;
