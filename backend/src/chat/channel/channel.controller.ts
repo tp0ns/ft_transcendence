@@ -1,4 +1,5 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Channel } from './channel.entity';
 import { ChannelService } from './channel.service';
 import { CreateChanDto } from './dtos/createChan.dto';
 
@@ -13,4 +14,14 @@ export class ChannelController {
 	// async createChan(@Body() ChanData : CreateChanDto) {
 	// 	return await this.ChannelService.createNewChan(ChanData)
 	// }
+
+	/**
+	 * Get all channels.
+	 */
+
+	// @Get('/')
+	// async getAllChans(): Promise<channel> {
+	//   return await this.ChannelService.getAllChannels();
+	// }
+ 
 }

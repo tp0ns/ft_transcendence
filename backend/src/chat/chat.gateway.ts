@@ -11,10 +11,11 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
+import { Channel } from './channel/channel.entity';
 
 @WebSocketGateway({
 	cors: {
-		origin: 'https://hoppscotch.io',
+		origin: 'http://localhost:3000',
 	},
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -63,12 +64,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
     const channel = await this.channelService.createNewChan(client.data.user, channelEntity);
+    // this.server.emit('createdChan', channel);
     // if (!channel) {
     //   this.server.emit('errCreatingChan')
     // }
     // else {
-      this.joinChannel(client.data.user, channelEntity.title);
-      this.server.emit('createdChan', channel)
+      this.joinChannel(client, channelEntity.title);
     // }
 
   }
@@ -82,11 +83,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * 
    * @param client client qui veut join le chan
    * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
+   * 
+   * @todo pb avec ce "client.data.user" -> WsException (cannot read properties of undefined)
    */
   @UseGuards(WsGuard)
   @SubscribeMessage('joinChannel')
-  joinChannel(client : Socket, chanName: string) {
-    this.channelService.joinChan(client.data.user, chanName);
+  async joinChannel(client : Socket, chanName: string) {
+    await this.channelService.joinChan(client.data.user, chanName);
     this.server.emit('joinedChan');
     client.join(chanName);
   }
@@ -113,5 +116,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.to(chanName).emit('channelMessage', payload);
   }
 
+
+  /**
+   * ------------------------ GET CHANNELS  ------------------------- *
+   */
+
+    @SubscribeMessage('getAllChannels')
+    async getChannels(client : Socket) {
+      this.server.emit('getChans', await this.channelService.getAllChannels())
+    }
+
+    @SubscribeMessage('getChannelByName')
+    async getChannelByName(client : Socket) {
+      this.server.emit('getChanByName', await this.channelService.getChanByName("test1"))
+    }
 
 }

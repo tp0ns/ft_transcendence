@@ -37,11 +37,9 @@ export class ChannelService {
 
 	async joinChan(user : User, channelName : string) {
 		let channel : Channel;
-		try {
-			console.log(` check userId ${user.userId} : ${user.username}`)
-			console.log(`NAME OF THE CHAN ${channel.title}`);
-			console.log(`NAME OF THE USER ${user.username}`);
+		// try {
 			channel = await this.getChanByName(channelName);
+			//ajouter le user dans les members du channel
 			// channel.usersIn.push(user);
 
 			// await dataSource
@@ -50,16 +48,16 @@ export class ChannelService {
 			// .of(post)
 			// .add(category)
 
-			await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
+			// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
 
-		}
-		catch {
-			const infos = {
-				title: channelName,
-				owner : user,
-			}
-			this.createNewChan(user, infos);
-		}
+		// }
+		// catch {
+		// 	const infos = {
+		// 		title: channelName,
+		// 		owner : user,
+		// 	}
+		// 	this.createNewChan(user, infos);
+		// }
 	}
 
 
@@ -73,13 +71,19 @@ export class ChannelService {
 	 */
 	async getChanByName(chanName : string) : Promise<Channel> 
 	{
-		console.log(`name of channel is ${chanName}`)
 		const channel : Channel = await this.channelRepository.findOne({where: { title: chanName }})
 		if (!channel)
 			console.log("le channel il existe po");
 		return channel;
 	}
+
+
+	/**
+	 * ------------------------ GETTERS  ------------------------- *
+	 */
+	
+	 async getAllChannels(): Promise<Channel[]> {
+		const channels : Channel[] = await this.channelRepository.find();
+		return channels;
+	  }
 }
-
-
-
