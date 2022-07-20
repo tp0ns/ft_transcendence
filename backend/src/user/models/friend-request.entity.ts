@@ -13,7 +13,7 @@ import { FriendRequest_Status } from './friend-request.interface';
 @Entity('request')
 export class FriendRequestEntity {
 	@PrimaryGeneratedColumn('uuid')
-	userId: string;
+	requestId: string;
 
 	@ManyToOne(() => User, (user) => user.sentFriendRequests)
 	creator: User;

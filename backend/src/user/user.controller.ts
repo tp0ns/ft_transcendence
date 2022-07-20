@@ -30,9 +30,15 @@ import { uuidDto } from './dtos/uuidDto';
 import { Request } from 'express';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
 import { UserDto } from './dtos/user.dto';
-import { FriendRequest } from './models/friend-request.interface';
+import {
+	FriendRequest,
+	FriendRequestStatus,
+	FriendRequest_Status,
+} from './models/friend-request.interface';
 import { find, Observable } from 'rxjs';
 import { User } from './user.entity';
+import { UpdateRequestStatusDto } from './dtos/UpdateRequestStatusDto';
+import { Update2FaDto } from './dtos/Update2FaDto';
 
 @ApiTags('users')
 @Controller('users')
@@ -96,13 +102,54 @@ export class UserController {
 		});
 	}
 
-	@ApiBody({ type: UpdateUsernameDto })
+	@ApiBody({ type: Update2FaDto })
+	@UseGuards(JwtAuthGuard)
+	@Put('/updateUsername')
+	async update2Fa(@Body() update2FaDto: Update2FaDto, @Req() req: Request) {
+		return this.userService.update(req.user['userId'], {
+			twoFa: update2FaDto.twoFa,
+		});
+	}
+
 	@UseGuards(JwtAuthGuard)
 	@Post('friend-request/send/:receiverId')
 	sendFriendRequest(
 		@Param('receiverId') receiverId: string,
 		@Req() req: Request,
 	): Observable<FriendRequest | { error: string }> {
+		console.log(req.user);
+		// const user: User = req.user;
 		return this.userService.sendFriendRequest(receiverId, req.user);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('friend-request/status/:receiverId')
+	getFriendRequestStatus(
+		@Param('receiverId') receiverId: string,
+		@Req() req: Request,
+	): Observable<FriendRequestStatus> {
+		return this.userService.getFriendRequestStatus(receiverId, req.user);
+	}
+
+	@ApiBody({ type: UpdateRequestStatusDto })
+	@UseGuards(JwtAuthGuard)
+	@Put('friend-request/response/:frinedRequestId')
+	respondToFriendRequest(
+		@Param('friendRequestId') friendRequestId: string,
+		@Body() statusResponse: FriendRequestStatus,
+		// @Req() req: Request,
+	): Observable<FriendRequestStatus> {
+		return this.userService.respondToFriendRequest(
+			friendRequestId,
+			statusResponse.status,
+		);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('friend-request/me/received-requests')
+	getFriendRequestsFromRecipients(
+		@Req() req: Request,
+	): Observable<FriendRequestStatus[]> {
+		return this.userService.getFriendRequestsFromRecipients(req.user);
 	}
 }

@@ -35,6 +35,11 @@ export class User {
 	})
 	profileImage: string;
 
+	@Column({
+		default: false,
+	})
+	twoFa: boolean;
+
 	@OneToMany(
 		() => FriendRequestEntity,
 		(friendRequestEntity) => friendRequestEntity.creator,
