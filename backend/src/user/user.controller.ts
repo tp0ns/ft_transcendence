@@ -123,6 +123,16 @@ export class UserController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Post('block/:receiverId')
+	blockUser(
+		@Param('receiverId') receiverId: string,
+		@Req() req: Request,
+	): Observable<FriendRequest | { error: string }> {
+		console.log(req.user);
+		return this.userService.blockUser(receiverId, req.user);
+	}
+
+	@UseGuards(JwtAuthGuard)
 	@Get('friend-request/status/:receiverId')
 	getFriendRequestStatus(
 		@Param('receiverId') receiverId: string,

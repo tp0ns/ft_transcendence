@@ -112,6 +112,52 @@ export class UserService {
 		);
 	}
 
+	blockUser(receiverId: string, creatorReq: Partial<User>) {
+		const creator: User = creatorReq as User;
+
+		if (receiverId === creator.userId)
+			return of({ error: 'It is not possible to block yourself!' });
+
+		return this.findUserById(receiverId).pipe(
+			switchMap((receiver: User) => {
+				return this.hasRequestBeenSentOrReceived(creator, receiver).pipe(
+					switchMap((hasRequestBeenSentOrReceived: boolean) => {
+						if (hasRequestBeenSentOrReceived) {
+							this.friendRequestRepo
+								.findOne({
+									where: [
+										{ creator, receiver },
+										{ creator: receiver, receiver: creator },
+									],
+								})
+								.then((request) => {
+									if (request.status === 'blocked')
+										return of({
+											error:
+												'It is not possible to block a user that has already blocked you!',
+										});
+									const attrs = {
+										creator: creator,
+										receiver: receiver,
+										status: 'blocked',
+									};
+									Object.assign(request, attrs);
+									console.log(request);
+									return from(this.friendRequestRepo.save(request));
+								});
+						}
+						let friendRequest: FriendRequest = {
+							creator,
+							receiver,
+							status: 'blocked',
+						};
+						return from(this.friendRequestRepo.save(friendRequest));
+					}),
+				);
+			}),
+		);
+	}
+
 	getFriendRequestStatus(
 		receiverId: string,
 		currentUserReq: Partial<User>,
