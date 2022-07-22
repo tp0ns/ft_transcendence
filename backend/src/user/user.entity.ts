@@ -1,24 +1,28 @@
-import { Channel } from 'diagnostics_channel';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("uuid")
-  userId: string;
+	@PrimaryGeneratedColumn('uuid')
+	userId: string;
 
 	@Column({
 		type: 'int',
-		unique: true
+		unique: true,
 	})
 	schoolId: number;
 
-  @Column({
-		type: 'varchar'
-	})
-  username: string;
-
 	@Column({
-		type: 'varchar'
+		type: 'varchar',
+	})
+	username: string;
+
+	@Column({ nullable: true })
+	public twoFASecret?: string;
+
+	@Column({ default: false })
+	public isTwoFAEnabled: boolean;
+	@Column({
+		type: 'varchar',
 	})
 	image_url: string;
 
@@ -32,3 +36,5 @@ export class User {
 	// public memberOfChannels: Channel[];
 
 }
+
+export default User;

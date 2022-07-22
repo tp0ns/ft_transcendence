@@ -1,3 +1,4 @@
+// eslint-disable-next-line prettier/prettier
 import { Catch, Controller, Get, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -7,7 +8,9 @@ import { UserService } from 'src/user/user.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth/42')
 @UseFilters(UnauthorizedExceptionFilter)
 export class AuthController {
@@ -28,8 +31,8 @@ export class AuthController {
 	 */
 	@UseGuards(schoolAuthGuard)
 	@Get('login')
-	async	login() {
-		return ;
+	async login() {
+		return;
 	}
 
 	/**
@@ -52,14 +55,17 @@ export class AuthController {
 	 * à enlever en production !
 	 */
 	@Get('dummy')
-	async	dummy(@Res() res) {
-		const { data } = await firstValueFrom(this.httpService.get("https://api.namefake.com/"));
+	async dummy(@Res() res) {
+		const { data } = await firstValueFrom(
+			this.httpService.get('https://api.namefake.com/'),
+		);
 		const fake = JSON.parse(JSON.stringify(data));
 
 		const dummy = {
-				id: Math.floor(100000 + Math.random() * 900000),
-				username: fake.name,
-				image_url: 'https://www.myinstants.com/media/instants_images/non.gif.pagespeed.ce.C9gtkT1Vx9.gif',
+			id: Math.floor(100000 + Math.random() * 900000),
+			username: fake.name,
+			image_url:
+				'https://www.myinstants.com/media/instants_images/non.gif.pagespeed.ce.C9gtkT1Vx9.gif',
 		};
 
 		const dummy_user = await this.userService.findOrCreate(dummy);
@@ -71,12 +77,11 @@ export class AuthController {
 	 * L'utilisateur n'est donc plus identifié.
 	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
 	 */
-  @UseGuards(JwtAuthGuard)
-  @Get('logout')
-  async logout(@Req() request: Request, @Res() res: Response) {
-    const new_cookie = await this.authService.logout();
-		res.setHeader('Set-Cookie', new_cookie );
-    return res.sendStatus(200);
-  }
-
+	@UseGuards(JwtAuthGuard)
+	@Get('logout')
+	async logout(@Req() request: Request, @Res() res: Response) {
+		const new_cookie = await this.authService.logout();
+		res.setHeader('Set-Cookie', new_cookie);
+		return res.sendStatus(200);
+	}
 }
