@@ -1,4 +1,5 @@
 import {
+	ForbiddenException,
 	HttpException,
 	HttpStatus,
 	Injectable,
@@ -52,167 +53,120 @@ export class UserService {
 		return user;
 	}
 
-	findUserById(id: string): Observable<User> {
-		return from(this.userRepo.findOne({ where: { userId: id } })).pipe(
-			map((user: User) => {
-				if (!user) {
-					throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-				}
-				return user;
-			}),
-		);
-	}
-
-	hasRequestBeenSentOrReceived(
+	async hasRequestBeenSentOrReceived(
 		creator: User,
 		receiver: User,
-	): Observable<boolean> {
-		return from(
-			this.friendRequestRepo.findOne({
-				where: [
-					{ creator, receiver },
-					{ creator: receiver, receiver: creator },
-				],
-			}),
-		).pipe(
-			switchMap((friendRequest: FriendRequest) => {
-				if (!friendRequest) return of(false);
-				return of(true);
-			}),
+	): Promise<boolean> {
+		const friendRequest: FriendRequest = await this.findRequestByUserId(
+			creator,
+			receiver,
 		);
+
+		if (!friendRequest) return false;
+		return true;
 	}
 
-	sendFriendRequest(
-		receiverId: string,
-		creatorReq: Partial<User>,
-	): Observable<FriendRequest | { error: string }> {
+	async findRequestByUserId(user1: User, user2: User): Promise<FriendRequest> {
+		const friendRequest: FriendRequest = await this.friendRequestRepo.findOne({
+			where: [
+				{ creator: user1, receiver: user2 },
+				{ creator: user2, receiver: user1 },
+			],
+		});
+		return friendRequest;
+	}
+
+	async sendFriendRequest(receiverId: string, creatorReq: Partial<User>) {
 		const creator: User = creatorReq as User;
 
 		if (receiverId === creator.userId)
-			return of({ error: 'It is not possible to add yourself!' });
+			throw new ForbiddenException('It is not possible to add yourself!');
 
-		return this.findUserById(receiverId).pipe(
-			switchMap((receiver: User) => {
-				return this.hasRequestBeenSentOrReceived(creator, receiver).pipe(
-					switchMap((hasRequestBeenSentOrReceived: boolean) => {
-						if (hasRequestBeenSentOrReceived)
-							return of({
-								error:
-									'A friend request has already been sent of received to your account!',
-							});
-						let friendRequest: FriendRequest = {
-							creator,
-							receiver,
-							status: 'pending',
-						};
-						return from(this.friendRequestRepo.save(friendRequest));
-					}),
+		const receiver: User = await this.getUserById(receiverId);
+		if (await this.hasRequestBeenSentOrReceived(creator, receiver))
+			throw new ForbiddenException(
+				'A friend request has already been sent of received!',
+			);
+		let friendRequest: FriendRequest = {
+			creator,
+			receiver,
+			status: 'pending',
+		};
+		return await this.friendRequestRepo.save(friendRequest);
+	}
+
+	async blockUser(
+		blockedId: string,
+		blockerReq: Partial<User>,
+	): Promise<FriendRequest> {
+		const blocker: User = blockerReq as User;
+		const blocked: User = await this.getUserById(blockedId);
+		if (blocker.userId === blockedId)
+			throw new ForbiddenException('It is not possible to add yourself!');
+
+		const request: FriendRequest = await this.findRequestByUserId(
+			blocker,
+			blocked,
+		);
+		if (request) {
+			if (request.status === 'blocked')
+				throw new ForbiddenException('Users already blocked!');
+			Object.assign(request, {
+				creator: blocker,
+				receiver: blocked,
+				status: 'blocked',
+			});
+			this.friendRequestRepo.save(request);
+			return request;
+		}
+		let blockedRequest: FriendRequest = {
+			creator: blocker,
+			receiver: blocked,
+			status: 'blocked',
+		};
+		return await this.friendRequestRepo.save(blockedRequest);
+	}
+
+	async unblockUser(
+		friendRequestId: string,
+		userReq: Partial<User>,
+	): Promise<boolean> {
+		const user: User = userReq as User;
+		const friendRequest: FriendRequest = await this.getFriendRequestById(
+			friendRequestId,
+		);
+		if (friendRequest.status === 'blocked') {
+			if (user === friendRequest.creator) {
+				await this.friendRequestRepo.delete(friendRequest);
+				return true;
+			} else
+				throw new ForbiddenException(
+					"Blocked user can't unblock relationship!",
 				);
-			}),
-		);
+		} else
+			throw new ForbiddenException("Can't unblock not blocked relationship");
 	}
 
-	blockUser(receiverId: string, creatorReq: Partial<User>) {
-		const creator: User = creatorReq as User;
-
-		if (receiverId === creator.userId)
-			return of({ error: 'It is not possible to block yourself!' });
-
-		return this.findUserById(receiverId).pipe(
-			switchMap((receiver: User) => {
-				return this.hasRequestBeenSentOrReceived(creator, receiver).pipe(
-					switchMap((hasRequestBeenSentOrReceived: boolean) => {
-						if (hasRequestBeenSentOrReceived) {
-							this.friendRequestRepo
-								.findOne({
-									where: [
-										{ creator, receiver },
-										{ creator: receiver, receiver: creator },
-									],
-								})
-								.then((request) => {
-									if (request.status === 'blocked')
-										return of({
-											error:
-												'It is not possible to block a user that has already blocked you!',
-										});
-									const attrs = {
-										creator: creator,
-										receiver: receiver,
-										status: 'blocked',
-									};
-									Object.assign(request, attrs);
-									console.log(request);
-									return from(this.friendRequestRepo.save(request));
-								});
-						}
-						let friendRequest: FriendRequest = {
-							creator,
-							receiver,
-							status: 'blocked',
-						};
-						return from(this.friendRequestRepo.save(friendRequest));
-					}),
-				);
-			}),
-		);
+	async getFriendRequestById(friendRequestid: string): Promise<FriendRequest> {
+		return await this.friendRequestRepo.findOne({
+			where: [{ requestId: friendRequestid }],
+		});
 	}
 
-	getFriendRequestStatus(
-		receiverId: string,
-		currentUserReq: Partial<User>,
-	): Observable<FriendRequestStatus> {
-		const currentUser: User = currentUserReq as User;
-		return this.findUserById(receiverId).pipe(
-			switchMap((receiver: User) => {
-				return from(
-					this.friendRequestRepo.findOne({
-						where: {
-							creator: currentUser,
-							receiver,
-						},
-					}),
-				);
-			}),
-			switchMap((friendRequest: FriendRequest) => {
-				return of({ status: friendRequest.status });
-			}),
-		);
-	}
-
-	getFriendRequestUserById(friendRequestid: string): Observable<FriendRequest> {
-		return from(
-			this.friendRequestRepo.findOne({
-				where: [{ requestId: friendRequestid }],
-			}),
-		);
-	}
-
-	respondToFriendRequest(
+	async respondToFriendRequest(
 		friendRequestId: string,
 		statusResponse: FriendRequest_Status,
-	): Observable<FriendRequestStatus> {
-		return this.getFriendRequestUserById(friendRequestId).pipe(
-			switchMap((friendRequest: FriendRequest) => {
-				return from(
-					this.friendRequestRepo.save({
-						...friendRequest,
-						status: statusResponse,
-					}),
-				);
-			}),
+	): Promise<FriendRequest> {
+		const friendRequest: FriendRequest = await this.getFriendRequestById(
+			friendRequestId,
 		);
-	}
-
-	getFriendRequestsFromRecipients(
-		currentUserReq: Partial<User>,
-	): Observable<FriendRequest[]> {
-		const currentUser = currentUserReq as User;
-		return from(
-			this.friendRequestRepo.find({
-				where: [{ receiver: currentUser }],
-			}),
-		);
+		if (!friendRequest)
+			throw new NotFoundException('Friend request entity not found!');
+		if (friendRequest.status === 'blocked')
+			throw new ForbiddenException('Status already blocked!');
+		Object.assign(friendRequest, { status: statusResponse });
+		this.friendRequestRepo.save(friendRequest);
+		return friendRequest;
 	}
 
 	/* This functions takes a user_id and updates it with the attributes of its entity to be updated. 

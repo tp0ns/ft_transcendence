@@ -116,50 +116,33 @@ export class UserController {
 	sendFriendRequest(
 		@Param('receiverId') receiverId: string,
 		@Req() req: Request,
-	): Observable<FriendRequest | { error: string }> {
+	) {
 		console.log(req.user);
 		// const user: User = req.user;
 		return this.userService.sendFriendRequest(receiverId, req.user);
 	}
 
-	@UseGuards(JwtAuthGuard)
-	@Post('block/:receiverId')
-	blockUser(
-		@Param('receiverId') receiverId: string,
-		@Req() req: Request,
-	): Observable<FriendRequest | { error: string }> {
-		console.log(req.user);
-		return this.userService.blockUser(receiverId, req.user);
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Get('friend-request/status/:receiverId')
-	getFriendRequestStatus(
-		@Param('receiverId') receiverId: string,
-		@Req() req: Request,
-	): Observable<FriendRequestStatus> {
-		return this.userService.getFriendRequestStatus(receiverId, req.user);
-	}
-
 	@ApiBody({ type: UpdateRequestStatusDto })
 	@UseGuards(JwtAuthGuard)
-	@Put('friend-request/response/:frinedRequestId')
-	respondToFriendRequest(
+	@Put('friend-request/response/:friendRequestId')
+	async respondToFriendRequest(
 		@Param('friendRequestId') friendRequestId: string,
 		@Body() statusResponse: FriendRequestStatus,
 		// @Req() req: Request,
-	): Observable<FriendRequestStatus> {
-		return this.userService.respondToFriendRequest(
+	): Promise<FriendRequest> {
+		return await this.userService.respondToFriendRequest(
 			friendRequestId,
 			statusResponse.status,
 		);
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Get('friend-request/me/received-requests')
-	getFriendRequestsFromRecipients(
+	@Post('block/:receiverId')
+	async blockUser(
+		@Param('receiverId') receiverId: string,
 		@Req() req: Request,
-	): Observable<FriendRequestStatus[]> {
-		return this.userService.getFriendRequestsFromRecipients(req.user);
+	): Promise<FriendRequest | { error: string }> {
+		console.log(req.user);
+		return await this.userService.blockUser(receiverId, req.user);
 	}
 }
