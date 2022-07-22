@@ -11,7 +11,6 @@ async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);
 	app.use(cookieParser());
 	app.useStaticAssets(join(__dirname, '..', 'static'));
-	// app.useGlobalFilters(new UnauthorizedExceptionFilter());
 	app.setGlobalPrefix('backend');
 	const config = new DocumentBuilder()
 		.setTitle('ft_transcendance')
@@ -20,7 +19,7 @@ async function bootstrap() {
 		.addTag('users')
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
-	SwaggerModule.setup('api', app, document);
+	SwaggerModule.setup('backend/api', app, document);
 	await app.listen(3000);
 }
 bootstrap();
