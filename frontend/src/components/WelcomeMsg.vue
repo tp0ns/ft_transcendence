@@ -19,7 +19,6 @@ const done = ref(false)
 
 // functions that mutate state and trigger updates
 function increment() {
-	socket.chat.emit("coucou")
 	count.value++;
 	if (count.value == 10)
 		done.value = true;
