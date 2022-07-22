@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+import { Socket } from 'engine.io-client';
 import { ref, onMounted } from 'vue'
 
 const props = defineProps({
@@ -18,6 +19,7 @@ const done = ref(false)
 
 // functions that mutate state and trigger updates
 function increment() {
+	socket.chat.emit("coucou")
 	count.value++;
 	if (count.value == 10)
 		done.value = true;

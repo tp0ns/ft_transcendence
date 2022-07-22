@@ -11,9 +11,10 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 
 @WebSocketGateway({
-	cors: {
-    origin: 'http://localhost/',
-  },
+	// cors: {
+  //   origin: 'http://localhost/',
+  // },
+	namespace: '/chat',
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
@@ -40,5 +41,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
+
+	@SubscribeMessage('caca')
+	coucouHandler(client: Socket) {
+		console.log("caca");
+	}
+
 
 }

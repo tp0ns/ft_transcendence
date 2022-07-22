@@ -8,6 +8,7 @@ import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { TwoFAModule } from './auth/2FA/twoFA.module';
 import { ConfigModule } from '@nestjs/config';
+import { GameModule } from './game/game.module';
 
 @Module({
 	imports: [
@@ -19,6 +20,7 @@ import { ConfigModule } from '@nestjs/config';
 		TwoFAModule,
 		ChatModule,
 		TypeOrmModule.forRoot(typeOrmConfig),
+		GameModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
