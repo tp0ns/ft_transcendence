@@ -58,7 +58,7 @@ const app = new Vue({
   },
 },
 created() {
- this.socket = io('http://localhost:3000')
+ this.socket = io('http://localhost/backend/')
   this.socket.on('getChans', () => {
     this.socket.emit('getAllChannels');
          })
@@ -67,7 +67,9 @@ created() {
   })
    this.socket.on('createdChan', (channel) => {
      this.receivedMessage(channel)
+   }),
+    this.socket.on('joinedChan', (channel) => {
+     this.receivedMessage(channel)
      })
-    
- },
+    }
 })

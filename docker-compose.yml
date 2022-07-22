@@ -11,6 +11,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     ports:
+    # Change this to a value above 100 for correction
       - 80:80
       # - 8080:8080
     volumes:
@@ -23,8 +24,6 @@ services:
     container_name: frontend
     volumes:
       - ./frontend/:/frontend/:cached
-    env_file:
-      - .env
     networks:
       - front_back
     labels:
@@ -47,9 +46,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=ft_transcendence_front_back"
-      - traefik.http.routers.pong-backend.rule=Host(`localhost`) && PathPrefix(`/backend/`)
       - "traefik.http.routers.pong-backend.entrypoints=web"
       - "traefik.http.services.pong-backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.pong-backend.rule=Host(`localhost`) && PathPrefix(`/backend`, `/socket.io`)"
 
   pong-db:
     image: postgres:alpine

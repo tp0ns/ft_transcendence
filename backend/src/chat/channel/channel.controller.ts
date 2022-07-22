@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Channel } from './channel.entity';
 import { ChannelService } from './channel.service';
-import { CreateChanDto } from './dtos/createChan.dto';
 
 @Controller('channel')
 export class ChannelController {

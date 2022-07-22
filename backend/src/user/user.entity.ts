@@ -1,4 +1,12 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+	Column,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	OneToMany,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
+import { FriendRequestEntity } from './models/friend-request.entity';
 
 @Entity()
 export class User {
@@ -27,14 +35,27 @@ export class User {
 	image_url: string;
 
 	@Column({
-		type: 'boolean',
+		nullable: true,
+		type: 'varchar',
+	})
+	profileImage: string;
+
+	@Column({
 		default: false,
 	})
-	owner: boolean;
+	twoFa: boolean;
 
-	// @ManyToMany((type) => Channel)
-	// public memberOfChannels: Channel[];
+	@OneToMany(
+		() => FriendRequestEntity,
+		(friendRequestEntity) => friendRequestEntity.creator,
+	)
+	sentFriendRequests: FriendRequestEntity[];
 
+	@OneToMany(
+		() => FriendRequestEntity,
+		(friendRequestEntity) => friendRequestEntity.receiver,
+	)
+	receivedFriendRequests: FriendRequestEntity[];
 }
 
 export default User;

@@ -8,9 +8,17 @@ import { UnauthorizedExceptionFilter } from './unauthorized.filter';
 
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useStaticAssets(join(__dirname, '..', 'static'));
-  app.use(cookieParser());
-  await app.listen(3000);
+	const app = await NestFactory.create<NestExpressApplication>(AppModule);
+	app.use(cookieParser());
+	app.setGlobalPrefix('backend');
+	const config = new DocumentBuilder()
+		.setTitle('ft_transcendance')
+		.setDescription('All frontend requests listed by category')
+		.setVersion('1.0')
+		.addTag('users')
+		.build();
+	const document = SwaggerModule.createDocument(app, config);
+	SwaggerModule.setup('backend/api', app, document);
+	await app.listen(3000);
 }
 bootstrap();

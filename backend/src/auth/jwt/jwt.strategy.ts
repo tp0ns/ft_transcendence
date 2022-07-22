@@ -4,6 +4,7 @@ import { Injectable, Req } from '@nestjs/common';
 import { jwtConstants } from './jwt.constants';
 import { UserService } from 'src/user/user.service';
 import { Request } from 'express';
+import { User } from 'src/user/user.entity';
 
 /**
  * Cette classe represente la configuration de la strategie spécifique à la lecture de token JWT
