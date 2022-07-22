@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 import { ApiTags } from '@nestjs/swagger';
+import { User } from 'src/user/user.entity';
 
 @ApiTags('auth')
 @Controller('auth/42')
@@ -68,7 +69,7 @@ export class AuthController {
 				'https://www.myinstants.com/media/instants_images/non.gif.pagespeed.ce.C9gtkT1Vx9.gif',
 		};
 
-		const dummy_user = await this.userService.findOrCreate(dummy);
+		const dummy_user: User = await this.userService.findOrCreate(dummy);
 		return await this.authService.login(dummy_user, res);
 	}
 
