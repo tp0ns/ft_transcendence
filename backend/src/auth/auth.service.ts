@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/user.entity';
+import { UserEntity } from 'src/user/models/user.entity';
 import { jwtConstants } from './jwt/jwt.constants';
 import { Response } from 'express';
 
@@ -21,13 +21,12 @@ export class AuthService {
 	 *
 	 * @todo Il faut ajouter twofaAuthenticated: boolean au payload pour la 2FA
 	 */
-	async login(user: User, res: Response) {
+	async login(user: UserEntity, res: Response) {
 		const payload = {
 			sub: user.userId,
 			twoFAAuthenticated: false,
 		};
-		if (!user.isTwoFAEnabled)
-			payload.twoFAAuthenticated = true;
+		if (!user.isTwoFAEnabled) payload.twoFAAuthenticated = true;
 		const access_token = this.jwtService.sign(payload);
 
 		const new_cookie = `Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
@@ -36,7 +35,7 @@ export class AuthService {
 		// if (user.isTwoFAEnabled)
 		// 	res.redirect(''); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
 		// else
-			res.redirect('http://localhost/');
+		res.redirect('http://localhost/');
 	}
 
 	async logout() {

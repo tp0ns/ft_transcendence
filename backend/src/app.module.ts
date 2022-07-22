@@ -8,6 +8,7 @@ import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { TwoFAModule } from './auth/2FA/twoFA.module';
 import { ConfigModule } from '@nestjs/config';
+import { RelationsModule } from './user/relations/relations.module';
 
 @Module({
 	imports: [
@@ -15,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
 			envFilePath: '.env',
 		}),
 		UserModule,
+		RelationsModule,
 		AuthModule,
 		TwoFAModule,
 		ChatModule,
