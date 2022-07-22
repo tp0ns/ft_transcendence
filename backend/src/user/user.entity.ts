@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+	Column,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	OneToMany,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
+import { FriendRequestEntity } from './models/friend-request.entity';
 
 @Entity()
 export class User {
@@ -31,6 +39,23 @@ export class User {
 		type: 'varchar',
 	})
 	profileImage: string;
+
+	@Column({
+		default: false,
+	})
+	twoFa: boolean;
+
+	@OneToMany(
+		() => FriendRequestEntity,
+		(friendRequestEntity) => friendRequestEntity.creator,
+	)
+	sentFriendRequests: FriendRequestEntity[];
+
+	@OneToMany(
+		() => FriendRequestEntity,
+		(friendRequestEntity) => friendRequestEntity.receiver,
+	)
+	receivedFriendRequests: FriendRequestEntity[];
 }
 
 export default User;
