@@ -85,7 +85,7 @@ export class UserService {
 		const receiver: User = await this.getUserById(receiverId);
 		if (await this.hasRequestBeenSentOrReceived(creator, receiver))
 			throw new ForbiddenException(
-				'A friend request has already been sent of received!',
+				'A friend request has already been sent or received!',
 			);
 		let friendRequest: FriendRequest = {
 			creator,
