@@ -56,10 +56,10 @@ export class UserController {
 	/* Get user by id*/
 	@ApiOkResponse({ description: 'user found' })
 	@ApiUnauthorizedResponse({ description: 'user not authorized' })
-	@ApiParam({
-		name: 'id',
-		type: 'string',
-	})
+	// @ApiParam({
+	// 	name: 'id',
+	// 	type: 'string',
+	// })
 	@UseGuards(JwtAuthGuard)
 	@Get('/:id')
 	async getUserbyId(@Param('id') id: uuidDto) {
