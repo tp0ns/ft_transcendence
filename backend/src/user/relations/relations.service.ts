@@ -122,10 +122,10 @@ export class RelationsService {
 		userReq: Partial<UserEntity>,
 	): Promise<boolean> {
 		const user: UserEntity = userReq as UserEntity;
-		const Relation: Relation = await this.getRelationById(RelationId);
-		if (Relation.status === 'blocked') {
-			if (user === Relation.creator) {
-				await this.RelationRepo.delete(Relation.id);
+		const relation: RelationEntity = await this.getRelationById(RelationId);
+		if (relation.status === 'blocked') {
+			if (user === relation.creator) {
+				await this.RelationRepo.remove(relation);
 				return true;
 			} else
 				throw new ForbiddenException(
@@ -135,7 +135,7 @@ export class RelationsService {
 			throw new ForbiddenException("Can't unblock not blocked relationship");
 	}
 
-	async getRelationById(Relationid: string): Promise<Relation> {
+	async getRelationById(Relationid: string): Promise<RelationEntity> {
 		return await this.RelationRepo.findOne({
 			where: [{ requestId: Relationid }],
 		});
