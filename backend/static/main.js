@@ -39,9 +39,6 @@ const app = new Vue({
    getAllChannels() {
     this.socket.emit('getAllChannels');
    },
-   getChannelByName() {
-     this.socket.emit('getChannelByName');
-   },
    createChannel() {
      if(this.validateInput()) {
        const channel = {
@@ -53,9 +50,6 @@ const app = new Vue({
   printChannels(AllChans) {
     this.channels.push(AllChans)
   },
-  printOneChannel(channel) {
-    this.channels.push(channel);
-  },
   receivedMessage(channel) {
     this.channels.push(channel)
   },
@@ -65,14 +59,15 @@ const app = new Vue({
 },
 created() {
  this.socket = io('http://localhost:3000')
-  this.socket.on('getChans', (AllChans) => {
-    this.printChannels(AllChans)
+  this.socket.on('getChans', () => {
+    this.socket.emit('getAllChannels');
          })
-   this.socket.on('createdChannel', (channel) => {
+  this.socket.on('sendChans', (channels) => {
+    this.printChannels(channels)
+  })
+   this.socket.on('createdChan', (channel) => {
      this.receivedMessage(channel)
      })
-    this.socket.on('getChanByName', (channel) => {
-      this.printOneChannel(channel)
-    })
+    
  },
 })

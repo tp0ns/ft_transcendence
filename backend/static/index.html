@@ -23,7 +23,7 @@
                         <div class="card">
                             <div id="channels" class="card-block">
                                 <ul>
-                                    <li v-for="channel of channels"> {{channels[0]}} </li>
+                                    <li v-for="channel of channels"> {{ channels }} </li>
                                     <!-- <li v-for="message of messages">{{ channels.title }} </li> -->
                                 </ul>
                             </div>
@@ -35,7 +35,6 @@
                         <br>
                             <button id="send" class="btn" @click.prevent="createChannel">+</button>
                             <button id="get" class="btn" @click.prevent="getAllChannels">GetChans</button>
-                            <button id="get" class="btn" @click.prevent="getChannelByName">GetFirstChan</button>
                             <div>
                             <!-- <button id="send" class="btn" @click.prevent="joinChannel">JOIN</button> -->
                         </div>

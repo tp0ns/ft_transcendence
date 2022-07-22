@@ -36,6 +36,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 */
 	handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
+    this.server.emit('getChans')
 	}
 
 	/**
@@ -70,6 +71,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     // }
     // else {
       this.joinChannel(client, channelEntity.title);
+      this.server.emit('createdChan', channel);
+
     // }
 
   }
@@ -99,7 +102,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * ------------------------ HANDLE MESSAGES  ------------------------- *
    */
 
-
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
@@ -123,12 +125,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('getAllChannels')
     async getChannels(client : Socket) {
-      this.server.emit('getChans', await this.channelService.getAllChannels())
+      this.server.emit('sendChans', await this.channelService.getAllChannels())
     }
 
-    @SubscribeMessage('getChannelByName')
-    async getChannelByName(client : Socket) {
-      this.server.emit('getChanByName', await this.channelService.getChanByName("test1"))
-    }
-
-}
+  }
