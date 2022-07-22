@@ -14,8 +14,8 @@ import { CreateChanDto } from './channel/dtos/createChan.dto';
 
 @WebSocketGateway({
 	cors: {
-		origin: 'https://hoppscotch.io',
-	},
+    origin: 'http://localhost/',
+  },
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor( private channelService: ChannelService ) {}
