@@ -20,7 +20,7 @@ export class ChannelService {
 			title: channel.title,
 			owner: user,
 		});
-		// return await this.joinChan(user, channel.title);
+		// return await this.joinChan(user, channel);
 	}
 
   /**
@@ -35,31 +35,24 @@ export class ChannelService {
    * @todo preciser que si c'est la premiere personne a rejoindre le channel = OWNER ! 
    */
 
-	async joinChan(user : User, channelName : string) {
-		let channel : Channel;
-		try {
-			console.log(` check userId ${user.userId} : ${user.username}`)
-			console.log(`NAME OF THE CHAN ${channel.title}`);
-			console.log(`NAME OF THE USER ${user.username}`);
-			channel = await this.getChanByName(channelName);
-			channel.usersIn.push(user);
+	async joinChan(user : User, channel : Channel) {
+		//ajouter le user dans les members du channel
+		// channel.members.push(user);
 
-			// await dataSource
-			// .createQueryBuilder()
-			// .relation(Post, "categories")
-			// .of(post)
-			// .add(category)
+		// await dataSource
+		// .createQueryBuilder()
+		// .relation(Post, "categories")
+		// .of(post)
+		// .add(category)
 
-			// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
+		console.log(`enter in JoinChan`);
+		// await Channel.createQueryBuilder().relation(Channel, "members").of(channel).add(user);
 
-		}
-		catch {
-			const infos = {
-				title: channelName,
-				owner : user,
-			}
-			this.createNewChan(user, infos);
-		}
+		// 	const infos = {
+		// 		title: channelName,
+		// 		owner : user,
+		// 	}
+		// 	this.createNewChan(user, infos);
 	}
 
 
@@ -73,13 +66,19 @@ export class ChannelService {
 	 */
 	async getChanByName(chanName : string) : Promise<Channel> 
 	{
-		console.log(`name of channel is ${chanName}`)
 		const channel : Channel = await this.channelRepository.findOne({where: { title: chanName }})
 		if (!channel)
 			console.log("le channel il existe po");
 		return channel;
 	}
+
+
+	/**
+	 * ------------------------ GETTERS  ------------------------- *
+	 */
+	
+	 async getAllChannels(): Promise<Channel[]> {
+		const channels : Channel[] = await this.channelRepository.find();
+		return channels;
+	  }
 }
-
-
-
