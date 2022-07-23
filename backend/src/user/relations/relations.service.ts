@@ -122,9 +122,11 @@ export class RelationsService {
 		userReq: Partial<UserEntity>,
 	): Promise<boolean> {
 		const user: UserEntity = userReq as UserEntity;
+		console.log(user);
 		const relation: RelationEntity = await this.getRelationById(RelationId);
+		console.log('relation creator: ', relation.creator);
 		if (relation.status === 'blocked') {
-			if (user === relation.creator) {
+			if (user.userId === relation.creator.userId) {
 				await this.RelationRepo.remove(relation);
 				return true;
 			} else
@@ -137,7 +139,7 @@ export class RelationsService {
 
 	async getRelationById(Relationid: string): Promise<RelationEntity> {
 		return await this.RelationRepo.findOne({
-			where: [{ requestId: Relationid }],
+			where: { requestId: Relationid },
 		});
 	}
 }

@@ -1,6 +1,7 @@
 import {
 	Column,
 	Entity,
+	JoinColumn,
 	JoinTable,
 	ManyToMany,
 	ManyToOne,
@@ -15,10 +16,14 @@ export class RelationEntity {
 	@PrimaryGeneratedColumn('uuid')
 	requestId: string;
 
-	@ManyToOne(() => UserEntity, (user) => user.sentRelations)
+	@ManyToOne(() => UserEntity, (user) => user.sentRelations, { eager: true })
+	@JoinColumn()
 	creator: UserEntity;
 
-	@ManyToOne(() => UserEntity, (user) => user.receivedRelations)
+	@ManyToOne(() => UserEntity, (user) => user.receivedRelations, {
+		eager: true,
+	})
+	@JoinColumn()
 	receiver: UserEntity;
 
 	@Column()
