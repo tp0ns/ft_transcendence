@@ -1,5 +1,5 @@
 // eslint-disable-next-line prettier/prettier
-import { Catch, Controller, Get, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { Catch, Controller, Get, Param, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';
@@ -10,10 +10,12 @@ import { HttpService } from '@nestjs/axios';
 import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from 'src/user/user.entity';
+import { uuidDto } from 'src/user/dtos/uuidDto';
+import { uuidv4 } from 'uuid'
 
 @ApiTags('auth')
-@Controller('auth/42')
-@UseFilters(UnauthorizedExceptionFilter)
+@Controller('auth')
+// @UseFilters(UnauthorizedExceptionFilter)
 export class AuthController {
 	constructor(
 		private userService: UserService,
@@ -53,7 +55,7 @@ export class AuthController {
 
 	/**
 	 * Generateur de faux compte ("dummy") pour tester plus facilement
-	 * à enlever en production !
+	 * à enlever en production / correction !
 	 */
 	@Get('dummy')
 	async dummy(@Res() res) {
@@ -74,6 +76,20 @@ export class AuthController {
 	}
 
 	/**
+	 * Connexion rapides a un compte existant pour tester plus facilement
+	 * à enlever en production / correction !
+	 */
+
+	// @UseGuards(JwtAuthGuard)
+	@Get('login/:id')
+	async dummyLogin(@Param('id') id: uuidv4, @Res() res) {
+		// console.log(id);
+		const dummy_user = await this.userService.getUserById(id);
+		// console.log(dummy_user);
+		return await this.authService.login(dummy_user, res);
+	}
+
+	/**
 	 * Supprime le contenu du cookie pour qu'il ne contienne plus de JWT.
 	 * L'utilisateur n'est donc plus identifié.
 	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
@@ -81,8 +97,9 @@ export class AuthController {
 	@UseGuards(JwtAuthGuard)
 	@Get('logout')
 	async logout(@Req() request: Request, @Res() res: Response) {
-		const new_cookie = await this.authService.logout();
-		res.setHeader('Set-Cookie', new_cookie);
+		// const new_cookie = await this.authService.logout();
+		// res.setHeader('Set-Cookie', new_cookie);
+		res.clearCookie('Authentication');
 		return res.sendStatus(200);
 	}
 }
