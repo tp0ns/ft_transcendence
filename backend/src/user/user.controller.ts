@@ -42,7 +42,7 @@ import { Update2FaDto } from './dtos/Update2FaDto';
 
 @ApiTags('users')
 @Controller('users')
-@UseFilters(UnauthorizedExceptionFilter)
+// @UseFilters(UnauthorizedExceptionFilter)
 export class UserController {
 	constructor(private userService: UserService) {}
 

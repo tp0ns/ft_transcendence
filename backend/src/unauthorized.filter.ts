@@ -14,7 +14,7 @@ export class UnauthorizedExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-		const redirect_path = '/backend/auth/42/login'
+		const redirect_path = '/login'
 
 		response.redirect(redirect_path)
 	}
