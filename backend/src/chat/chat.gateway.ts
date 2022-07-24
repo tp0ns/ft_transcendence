@@ -13,7 +13,8 @@ import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
 import { Channel } from './channel/channel.entity';
 
-@WebSocketGateway({
+@WebSocketGateway({ 
+  namespace: '/chat',
 	cors: {
 		origin: 'http://localhost:3000',
 	},
