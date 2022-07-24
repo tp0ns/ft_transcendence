@@ -2,4 +2,4 @@
 .vscode/
 .DS_Store
 secret/
-node-modules
+*node_modules/*
