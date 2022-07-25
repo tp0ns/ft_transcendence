@@ -13,10 +13,9 @@ import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
 import { Channel } from './channel/channel.entity';
 
-@WebSocketGateway({ 
-  namespace: '/chat',
+@WebSocketGateway({
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: 'http://localhost/',
 	},
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -56,10 +55,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
 
 /**
- * 
+ *
  * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
  * @param channel Pouvoir set les donnees du chan
- * 
+ *
  * @todo verifier que le user dans le channel fonctionne
  */
   @UseGuards(WsGuard)
@@ -84,10 +83,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
   /**
-   * 
+   *
    * @param client client qui veut join le chan
-   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
-   * 
+   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
+   *
    * @todo pb avec ce "client.data.user" -> WsException (cannot read properties of undefined)
    */
   @UseGuards(WsGuard)
@@ -112,7 +111,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.server.emit('msgToClient', payload);
 		return (payload);
   }
-  
+
   @SubscribeMessage('msgToChannel')
   handleMessageToChan(client : Socket, payload: string, chanName: string) {
     client.join(chanName);
