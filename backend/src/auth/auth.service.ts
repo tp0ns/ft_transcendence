@@ -37,7 +37,7 @@ export class AuthService {
 		// if (user.isTwoFAEnabled)
 		// 	res.redirect(''); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
 		// else
-			res.redirect('http://localhost/');
+			res.redirect('http://localhost/backend/users/me');
 	}
 
 	// async logout() {
