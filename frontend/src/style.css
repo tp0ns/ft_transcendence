@@ -1,3 +1,8 @@
+
+  /* ------------------------------------------------------------- */
+  /* --------------------------- HOME ---------------------------- */	
+  /* ------------------------------------------------------------- */
+
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -78,4 +83,46 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+  /* ------------------------------------------------------------- */
+  /* --------------------------- CHAT ---------------------------- */	
+  /* ------------------------------------------------------------- */
+
+.card{
+  position:relative;
+  width: 570px;
+  height: 250px;
+  display:-webkit-box;
+  display:-webkit-flex;
+  display:-ms-flexbox;
+  display:flex;
+  -webkit-box-orient:vertical;
+  -webkit-box-direction:normal;
+  -webkit-flex-direction:column;
+  -ms-flex-direction:column;
+  flex-direction:column;
+  background-color:rgb(99, 96, 96);
+  border:1px solid rgba(0,0,0,.125);
+  border-radius:.25rem
+}
+
+.form-control{
+  display:block;
+  width:610px;
+  padding:.5rem .75rem;
+  font-size:1rem;
+  line-height:1.25;
+  color:#d9e6eb;
+  background-color:rgb(99, 96, 96);
+  background-image:none;
+  -webkit-background-clip:padding-box;
+  background-clip:padding-box;
+  border:1px solid rgba(0,0,0,.15);
+  border-radius:.25rem;
+  -webkit-transition:border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+  transition:border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+  -o-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s,-webkit-box-shadow ease-in-out .15s
 }

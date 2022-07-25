@@ -1,8 +1,10 @@
 <template>
-	<h1>{{msg}}</h1>
+<div>
+	<h1>Clique 10 fois</h1>
 	<button v-if="!done" @click="increment"> You clicked me {{count}} time ! </button>
 	<button v-if="done" @click="increment">Restart</button>
 	<h1 v-if="done">Bravo !</h1>
+</div>
 </template>
 
 <script setup lang="ts">
