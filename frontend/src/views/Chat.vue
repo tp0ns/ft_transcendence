@@ -44,16 +44,16 @@
 </template>
 
 <script>
- data: {
-  name: 'Nestjs Websockets Chat';
-  title: '';
-  owner: '';
-  text: '';
-  username: '';
-  channels: [];
-  messages: [];
-  socket: null
- }
+//  data: {
+//   name: 'Nestjs Websockets Chat';
+//   title: '';
+//   owner: '';
+//   text: '';
+//   username: '';
+//   channels: [];
+//   messages: [];
+//   socket: null
+//  }
 // methods: {
 // sendMessage() {
 //     if(this.validateInput()) {
