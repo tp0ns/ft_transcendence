@@ -20,7 +20,6 @@ export class ChannelService {
 			title: channel.title,
 			owner: user,
 		});
-		// return await this.joinChan(user, channel);
 	}
 
   /**
@@ -35,26 +34,20 @@ export class ChannelService {
    * @todo preciser que si c'est la premiere personne a rejoindre le channel = OWNER ! 
    */
 
-	async joinChan(user : User, channel : Channel) {
-		//ajouter le user dans les members du channel
-		// channel.members.push(user);
-
-		// await dataSource
-		// .createQueryBuilder()
-		// .relation(Post, "categories")
-		// .of(post)
-		// .add(category)
-
-		console.log(`enter in JoinChan`);
-		// await Channel.createQueryBuilder().relation(Channel, "members").of(channel).add(user);
-
-		// 	const infos = {
-		// 		title: channelName,
-		// 		owner : user,
-		// 	}
-		// 	this.createNewChan(user, infos);
+	async joinChan(user : User, channelName : string) {
+		let channel : Channel = await this.getChanByName(channelName);
+		channel.members = [...channel.members, user]; 
+		await channel.save();
 	}
-
+	
+	/**
+	 * ------------------------ GETTERS  ------------------------- *
+	 */
+	
+	async getAllChannels(): Promise<Channel[]> {
+		const channels : Channel[] = await this.channelRepository.find();
+		return channels;
+	}
 
 	/**
 	 * @brief Find the channel to join with his name
@@ -64,21 +57,11 @@ export class ChannelService {
 	 * 
 	 * @todo faire un try/catch ? 
 	 */
-	async getChanByName(chanName : string) : Promise<Channel> 
+	public async getChanByName(chanName : string) : Promise<Channel> 
 	{
-		const channel : Channel = await this.channelRepository.findOne({where: { title: chanName }})
+		let channel : Channel = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
 		if (!channel)
 			console.log("le channel il existe po");
 		return channel;
 	}
-
-
-	/**
-	 * ------------------------ GETTERS  ------------------------- *
-	 */
-	
-	 async getAllChannels(): Promise<Channel[]> {
-		const channels : Channel[] = await this.channelRepository.find();
-		return channels;
-	  }
 }

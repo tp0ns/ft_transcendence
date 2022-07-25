@@ -22,18 +22,13 @@ export class Channel extends BaseEntity {
 	@ManyToOne(() => User)
 	owner: User;
 
-	@ManyToMany(() => User)
+	// @ManyToMany((type) => User)
+    // @JoinTable()
+    // members: User[]
+
+	@ManyToMany(() => User )
 	@JoinTable()
 	members: User[]
-
-	
-	// @ManyToMany((type) => User, {
-	// 	cascade: true,
-	// })
-    // @JoinTable()
-    // public members: User[]
-
-
 
 	// @Column("text", {
 	// 	default: ""

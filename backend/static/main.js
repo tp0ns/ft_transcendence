@@ -48,7 +48,7 @@ const app = new Vue({
         }
       },
       joinChannel(channel) {
-        this.socket.emit('joinChan', channel); 
+        this.socket.emit('joinChan', channel.title); 
       },
     printChannels(AllChans) {
       this.channels = AllChans;
