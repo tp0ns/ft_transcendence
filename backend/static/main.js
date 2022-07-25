@@ -1,6 +1,6 @@
 const app = new Vue({
-   el: '#app',
-   data: {
+  el: '#app',
+  data: {
     name: 'Nestjs Websockets Chat',
     title: '',
     owner: '',
@@ -9,7 +9,7 @@ const app = new Vue({
     channels: [],
     messages: [],
     socket: null
-   },
+  },
   // methods: {
   // sendMessage() {
   //     if(this.validateInput()) {
@@ -35,21 +35,25 @@ const app = new Vue({
   //      this.receivedMessage(message)
   //     })
   //    }, 
-   methods: {
-     getAllChannels() {
+  methods: {
+    getAllChannels() {
       this.socket.emit('getAllChannels');
-     },
-     createChannel() {
-       if(this.validateInput()) {
-         const channel = {
-           title: this.title,
-          }
-          this.socket.emit('createChan', channel)
+    },
+    createChannel() {
+      if (this.validateInput()) {
+        const channel = {
+          title: this.title,
+          password: this.password,
         }
-      },
-      joinChannel(channel) {
-        this.socket.emit('joinChan', channel.title); 
-      },
+        this.socket.emit('createChan', channel)
+      }
+    },
+    joinChannel(channel) {
+      this.socket.emit('joinChan', channel.title);
+    },
+    leaveChannel(channel) {
+      this.socket.emit('leaveChan', channel.title);
+    },
     printChannels(AllChans) {
       this.channels = AllChans;
     },
@@ -57,18 +61,16 @@ const app = new Vue({
       this.channels.push(channel)
     },
     validateInput() {
-      return this.title.length > 0 
+      return this.title.length > 0
     },
   },
   created() {
-   this.socket = io('http://localhost:3000')
+    this.socket = io('http://localhost:3000')
     this.socket.on('sendChans', (channels) => {
       this.printChannels(channels)
     })
-     this.socket.on('createdChan', (channel) => {
-       this.receivedMessage(channel)
-       })
-      
-      
-   },
-  })
+    this.socket.on('createdChan', (channel) => {
+      this.receivedMessage(channel)
+    })
+  },
+})

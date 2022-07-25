@@ -64,7 +64,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
     const channel = await this.channelService.createNewChan(client.data.user, channelEntity);
-    // this.server.emit('createdChan', channel);
     // if (!channel) {
     //   this.server.emit('errCreatingChan')
     // }
@@ -86,14 +85,22 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @param client client qui veut join le chan
    * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
    * 
-   * @todo pb avec ce "client.data.user" -> WsException (cannot read properties of undefined)
    */
   @UseGuards(WsGuard)
   @SubscribeMessage('joinChan')
   async joinChannel(client : Socket, channelName : string) {
     await this.channelService.joinChan(client.data.user, channelName);
-    this.server.emit('joinedChan');
     client.join(channelName);
+    this.server.emit('joinedChan');
+  }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('leaveChan')
+  async leaveChannel(client : Socket, channelName : string ) {
+    console.log(`ENTER IN LEAAAAAAAAAAAVEJOIN YOOOOOOOO`)
+    await this.channelService.leaveChan(client.data.user, channelName);
+    client.leave(channelName);
+    this.server.emit('leftChan')
   }
 
 
@@ -115,5 +122,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   handleMessageToChan(client : Socket, payload: string, chanName: string) {
     client.join(chanName);
     this.server.to(chanName).emit('channelMessage', payload);
+  }
+
+  /**
+   * 
+   * @param client 
+   * @param payload 
+   * 
+   * @todo est ce qu'on doit join une room ou on enverra a chaque fois les messages au client ? 
+   */
+  @SubscribeMessage('msgToUser')
+  handleMessagerToClient(client : Socket, payload: string)
+  {
+    this.server.to(client.data.user.username).emit('directMessage', payload);
   }
 }
