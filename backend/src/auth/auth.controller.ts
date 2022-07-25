@@ -78,11 +78,16 @@ export class AuthController {
 	/**
 	 * Connexion rapides a un compte existant pour tester plus facilement
 	 * à enlever en production / correction !
+	 *
+	 * Si je met id: uuidDto ca arrete de marcher completement et le id devient le premier de la table (wtf ?).
+	 * Swagger reconnait pas uuidv4 comme type donc il affiche pas de param quand il est de ce type.
+	 * Je le met en string ducoup meme si c'est pas beau et pas secur, vu qu'on va enlever
+	 * a la correction de toute facon
 	 */
 
 	// @UseGuards(JwtAuthGuard)
 	@Get('login/:id')
-	async dummyLogin(@Param('id') id: uuidv4, @Res() res) {
+	async dummyLogin(@Param('id') id: string, @Res() res) {
 		// console.log(id);
 		const dummy_user = await this.userService.getUserById(id);
 		// console.log(dummy_user);
