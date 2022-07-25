@@ -10,7 +10,7 @@ import io from 'socket.io-client'
 	<div>
 	  <router-link to="/">Home | </router-link>
 	  <router-link to="/chat">Chat | </router-link>
-	  <router-link to="/game">Game </router-link>
+	  <router-link to="/game">Game | </router-link>
   <router-view id='container'/>
   </div>
 </template>
