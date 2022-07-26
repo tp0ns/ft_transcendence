@@ -19,45 +19,57 @@ export class ChannelService {
 		await this.channelRepository.save({
 			title: channel.title,
 			owner: user,
+			password: channel.password
 		});
-		// return await this.joinChan(user, channel.title);
 	}
 
+  /**
+   * ------------------------ CIRCULATION IN CHAN  ------------------------- *
+   */
+
+  /**
+   * 
+   * @param user user who want to join the channel 
+   * @param channelName the name of the channel
+   *
+   * @todo si la personne est deja dans le channel : quel comportement ? 
+   */
+
+	async joinChan(user : UserEntity, channelName : string) {
+		let channel : Channel = await this.getChanByName(channelName);
+
+		// let channel : Channel = await this.channelRepository.findOne({where: { title: channelName }, relations: ['members']})
+		//find si le user est deja dans le channel 
+		channel.members = [...channel.members, user];
+		await channel.save();
+	}
+/**
+ * 
+ * @param user 
+ * @param channelName 
+ * 
+ * @todo si c'est l'owner qui leave le chan : quel comportement ? 
+ */
+	async leaveChan(user : UserEntity, channelName : string ) { 
+		let channel : Channel = await this.getChanByName(channelName);
+
+		console.log(`members of chans : `, JSON.stringify(channel.members));
+		console.log(`user who want to quit : `, JSON.stringify(user.username));
+		console.log(`channel to quit : `, JSON.stringify(channelName));
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(Channel, 'members')
+			.of(user)
+			.remove(user)
+	}
+	
 	/**
-	 * ------------------------ JOIN CHANNEL  ------------------------- *
+	 * ------------------------ GETTERS  ------------------------- *
 	 */
-
-	/**
-	 *
-	 * @param user user who want to join the channel
-	 * @param channelName the name of the channel
-	 *
-	 * @todo preciser que si c'est la premiere personne a rejoindre le channel = OWNER !
-	 */
-
-	async joinChan(user: UserEntity, channelName: string) {
-		let channel: Channel;
-		// try {
-		channel = await this.getChanByName(channelName);
-		//ajouter le user dans les members du channel
-		// channel.usersIn.push(user);
-
-		// await dataSource
-		// .createQueryBuilder()
-		// .relation(Post, "categories")
-		// .of(post)
-		// .add(category)
-
-		// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
-
-		// }
-		// catch {
-		// 	const infos = {
-		// 		title: channelName,
-		// 		owner : user,
-		// 	}
-		// 	this.createNewChan(user, infos);
-		// }
+	
+	async getAllChannels(): Promise<Channel[]> {
+		const channels : Channel[] = await this.channelRepository.find()
+		return channels;
 	}
 
 	/**
@@ -68,20 +80,11 @@ export class ChannelService {
 	 *
 	 * @todo faire un try/catch ?
 	 */
-	async getChanByName(chanName: string): Promise<Channel> {
-		const channel: Channel = await this.channelRepository.findOne({
-			where: { title: chanName },
-		});
-		if (!channel) console.log('le channel il existe po');
+	public async getChanByName(chanName : string) : Promise<Channel> 
+	{
+		let channel : Channel = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
+		if (!channel)
+			console.log("le channel il existe po");
 		return channel;
-	}
-
-	/**
-	 * ------------------------ GETTERS  ------------------------- *
-	 */
-
-	async getAllChannels(): Promise<Channel[]> {
-		const channels: Channel[] = await this.channelRepository.find();
-		return channels;
 	}
 }

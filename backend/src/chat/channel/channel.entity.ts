@@ -3,6 +3,7 @@ import {
 	BaseEntity,
 	Column,
 	Entity,
+	JoinColumn,
 	JoinTable,
 	ManyToMany,
 	ManyToOne,
@@ -26,18 +27,19 @@ export class Channel extends BaseEntity {
 	title: string;
 
 	@ManyToOne(() => UserEntity)
+	@JoinColumn()
 	owner: UserEntity;
 
-	// @ManyToMany((type) => UserEntity, {
-	// 	cascade: true,
-	// })
-	// @JoinTable()
-	// public members: UserEntity[]
+	@Column("text", {
+		default: "",
+	})
+	password: string;
 
-	// @Column("text", {
-	// 	default: ""
-	// })
-	// password: string;
+	@ManyToMany(() => UserEntity, (user) => user.channels, {
+		eager: true,
+	})
+	@JoinTable()
+	members: UserEntity[]
 
 	//faire la date de crea
 	//faire le time de la derniere activite sur le chan

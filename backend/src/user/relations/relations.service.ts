@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import UserEntity from '../models/user.entity';
+import { UserEntity } from '../models/user.entity';
 import { UserService } from '../user.service';
 import { RelationEntity } from './models/relations.entity';
 import { Relation, Relation_Status } from './models/relations.interface';
@@ -37,10 +37,24 @@ export class RelationsService {
 		user2: UserEntity,
 	): Promise<Relation> {
 		const Relation: Relation = await this.RelationRepo.findOne({
+			relations: ['creator', 'receiver'],
 			where: [
-				{ creator: user1, receiver: user2 },
-				{ creator: user2, receiver: user1 },
-			],
+				{
+					creator: {
+						userId: user1.userId
+					},
+					receiver: {
+						userId: user2.userId
+					}
+				},
+				{
+					creator: {
+						userId: user2.userId
+					},
+					receiver: {
+						userId: user1.userId
+					}
+				}],
 		});
 		return Relation;
 	}

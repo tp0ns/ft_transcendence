@@ -1,3 +1,4 @@
+import { Channel } from 'src/chat/channel/channel.entity';
 import {
 	Column,
 	Entity,
@@ -50,6 +51,11 @@ export class UserEntity {
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.receiver)
 	receivedRelations: RelationEntity[];
+
+	@ManyToMany(() => Channel, (channel) => channel.members, {
+		eager: false,
+	})
+	channels: Channel[];
 }
 
 export default UserEntity;

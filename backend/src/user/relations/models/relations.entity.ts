@@ -16,7 +16,9 @@ export class RelationEntity {
 	@PrimaryGeneratedColumn('uuid')
 	requestId: string;
 
-	@ManyToOne(() => UserEntity, (user) => user.sentRelations, { eager: true })
+	@ManyToOne(() => UserEntity, (user) => user.sentRelations, { 
+		eager: true,
+	})
 	@JoinColumn()
 	creator: UserEntity;
 
