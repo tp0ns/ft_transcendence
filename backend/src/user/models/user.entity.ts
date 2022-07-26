@@ -6,10 +6,10 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { FriendRequestEntity } from './models/friend-request.entity';
+import { RelationEntity } from '../relations/models/relations.entity';
 
 @Entity()
-export class User {
+export class UserEntity {
 	@PrimaryGeneratedColumn('uuid')
 	userId: string;
 
@@ -45,17 +45,11 @@ export class User {
 	})
 	twoFa: boolean;
 
-	@OneToMany(
-		() => FriendRequestEntity,
-		(friendRequestEntity) => friendRequestEntity.creator,
-	)
-	sentFriendRequests: FriendRequestEntity[];
+	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
+	sentRelations: RelationEntity[];
 
-	@OneToMany(
-		() => FriendRequestEntity,
-		(friendRequestEntity) => friendRequestEntity.receiver,
-	)
-	receivedFriendRequests: FriendRequestEntity[];
+	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.receiver)
+	receivedRelations: RelationEntity[];
 }
 
-export default User;
+export default UserEntity;

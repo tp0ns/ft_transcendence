@@ -7,7 +7,7 @@ import {
 	isNumber,
 	Length,
 } from 'class-validator';
-import { User } from '../user.entity';
+import { UserEntity } from '../models/user.entity';
 
 export class UserDto {
 	@IsAlphanumeric()
@@ -21,5 +21,5 @@ export class UserDto {
 
 	profileImage: string;
 
-	friends: User[];
+	friends: UserEntity[];
 }

@@ -10,6 +10,7 @@ import {
 	Put,
 	Req,
 	Body,
+	Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -31,12 +32,12 @@ import { Request } from 'express';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
 import { UserDto } from './dtos/user.dto';
 import {
-	FriendRequest,
-	FriendRequestStatus,
-	FriendRequest_Status,
-} from './models/friend-request.interface';
+	Relation,
+	RelationStatus,
+	Relation_Status,
+} from './relations/models/relations.interface';
 import { find, Observable } from 'rxjs';
-import { User } from './user.entity';
+import { UserEntity } from './models/user.entity';
 import { UpdateRequestStatusDto } from './dtos/UpdateRequestStatusDto';
 import { Update2FaDto } from './dtos/Update2FaDto';
 
@@ -109,40 +110,5 @@ export class UserController {
 		return this.userService.update(req.user['userId'], {
 			twoFa: update2FaDto.twoFa,
 		});
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Post('friend-request/send/:receiverId')
-	sendFriendRequest(
-		@Param('receiverId') receiverId: string,
-		@Req() req: Request,
-	) {
-		console.log(req.user);
-		// const user: User = req.user;
-		return this.userService.sendFriendRequest(receiverId, req.user);
-	}
-
-	@ApiBody({ type: UpdateRequestStatusDto })
-	@UseGuards(JwtAuthGuard)
-	@Put('friend-request/response/:friendRequestId')
-	async respondToFriendRequest(
-		@Param('friendRequestId') friendRequestId: string,
-		@Body() statusResponse: FriendRequestStatus,
-		// @Req() req: Request,
-	): Promise<FriendRequest> {
-		return await this.userService.respondToFriendRequest(
-			friendRequestId,
-			statusResponse.status,
-		);
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Post('block/:receiverId')
-	async blockUser(
-		@Param('receiverId') receiverId: string,
-		@Req() req: Request,
-	): Promise<FriendRequest | { error: string }> {
-		console.log(req.user);
-		return await this.userService.blockUser(receiverId, req.user);
 	}
 }

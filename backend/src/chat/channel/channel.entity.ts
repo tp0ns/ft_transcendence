@@ -1,11 +1,17 @@
-import { User } from "src/user/user.entity";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import UserEntity from 'src/user/models/user.entity';
+import {
+	BaseEntity,
+	Column,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	ManyToOne,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('channel')
-
 export class Channel extends BaseEntity {
-
-	@PrimaryGeneratedColumn("uuid")
+	@PrimaryGeneratedColumn('uuid')
 	channelId: string;
 
 	// @Column({
@@ -14,20 +20,19 @@ export class Channel extends BaseEntity {
 	// })
 	// isPrivate: boolean;
 
-	@Column("text", {
-		default: ""
+	@Column('text', {
+		default: '',
 	})
 	title: string;
 
-	@ManyToOne(() => User)
-	owner: User;
+	@ManyToOne(() => UserEntity)
+	owner: UserEntity;
 
-	// @ManyToMany((type) => User, {
+	// @ManyToMany((type) => UserEntity, {
 	// 	cascade: true,
 	// })
-    // @JoinTable()
-    // public members: User[]
-
+	// @JoinTable()
+	// public members: UserEntity[]
 
 	// @Column("text", {
 	// 	default: ""
@@ -40,9 +45,4 @@ export class Channel extends BaseEntity {
 	//faire MuttedUsers
 	//faire AdminUsers
 	//faire UsersIn
-
-
-
-
-
 }

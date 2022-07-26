@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, Length } from 'class-validator';
-import { FriendRequest_Status } from '../models/friend-request.interface';
+import { Relation_Status } from '../relations/models/relations.interface';
 
 export class UpdateRequestStatusDto {
 	@ApiProperty()
-	status: FriendRequest_Status;
+	status: Relation_Status;
 }

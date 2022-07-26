@@ -4,7 +4,7 @@ import { Injectable, Req } from '@nestjs/common';
 import { jwtConstants } from './jwt.constants';
 import { UserService } from 'src/user/user.service';
 import { Request } from 'express';
-import { User } from 'src/user/user.entity';
+import { UserEntity } from 'src/user/models/user.entity';
 
 /**
  * Cette classe represente la configuration de la strategie spécifique à la lecture de token JWT
@@ -37,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	 * appartient bien a un de nos utilisateur et retourner celui-ci !
 	 *
 	 * @param payload
-	 * @returns a User.
+	 * @returns a UserEntity.
 	 *
 	 * @todo C'est ici qu'on va integrer le 2FA, notament grace au payload avec un booleen twofaAuthenticated.
 	 * @coucou Elias <3

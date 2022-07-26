@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/user.entity';
+import UserEntity from 'src/user/models/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Channel } from './channel.entity';
 import { CreateChanDto } from './dtos/createChan.dto';
@@ -11,11 +11,11 @@ export class ChannelService {
 		@InjectRepository(Channel) private channelRepository: Repository<Channel>,
 	) {}
 
-  /**
-   * ------------------------ CREATE CHANNEL  ------------------------- *
-   */
+	/**
+	 * ------------------------ CREATE CHANNEL  ------------------------- *
+	 */
 
-	async createNewChan(user : User, channel: CreateChanDto) {
+	async createNewChan(user: UserEntity, channel: CreateChanDto) {
 		await this.channelRepository.save({
 			title: channel.title,
 			owner: user,
@@ -23,32 +23,32 @@ export class ChannelService {
 		// return await this.joinChan(user, channel.title);
 	}
 
-  /**
-   * ------------------------ JOIN CHANNEL  ------------------------- *
-   */
+	/**
+	 * ------------------------ JOIN CHANNEL  ------------------------- *
+	 */
 
-  /**
-   * 
-   * @param user user who want to join the channel 
-   * @param channelName the name of the channel
-   * 
-   * @todo preciser que si c'est la premiere personne a rejoindre le channel = OWNER ! 
-   */
+	/**
+	 *
+	 * @param user user who want to join the channel
+	 * @param channelName the name of the channel
+	 *
+	 * @todo preciser que si c'est la premiere personne a rejoindre le channel = OWNER !
+	 */
 
-	async joinChan(user : User, channelName : string) {
-		let channel : Channel;
+	async joinChan(user: UserEntity, channelName: string) {
+		let channel: Channel;
 		// try {
-			channel = await this.getChanByName(channelName);
-			//ajouter le user dans les members du channel
-			// channel.usersIn.push(user);
+		channel = await this.getChanByName(channelName);
+		//ajouter le user dans les members du channel
+		// channel.usersIn.push(user);
 
-			// await dataSource
-			// .createQueryBuilder()
-			// .relation(Post, "categories")
-			// .of(post)
-			// .add(category)
+		// await dataSource
+		// .createQueryBuilder()
+		// .relation(Post, "categories")
+		// .of(post)
+		// .add(category)
 
-			// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
+		// await Channel.createQueryBuilder().relation(Channel, "UsersIn").of(channel).add(user);
 
 		// }
 		// catch {
@@ -60,30 +60,28 @@ export class ChannelService {
 		// }
 	}
 
-
 	/**
 	 * @brief Find the channel to join with his name
-	 * 
-	 * @param chanName 
+	 *
+	 * @param chanName
 	 * @returns Channel object corresponding
-	 * 
-	 * @todo faire un try/catch ? 
+	 *
+	 * @todo faire un try/catch ?
 	 */
-	async getChanByName(chanName : string) : Promise<Channel> 
-	{
-		const channel : Channel = await this.channelRepository.findOne({where: { title: chanName }})
-		if (!channel)
-			console.log("le channel il existe po");
+	async getChanByName(chanName: string): Promise<Channel> {
+		const channel: Channel = await this.channelRepository.findOne({
+			where: { title: chanName },
+		});
+		if (!channel) console.log('le channel il existe po');
 		return channel;
 	}
-
 
 	/**
 	 * ------------------------ GETTERS  ------------------------- *
 	 */
-	
-	 async getAllChannels(): Promise<Channel[]> {
-		const channels : Channel[] = await this.channelRepository.find();
+
+	async getAllChannels(): Promise<Channel[]> {
+		const channels: Channel[] = await this.channelRepository.find();
 		return channels;
-	  }
+	}
 }
