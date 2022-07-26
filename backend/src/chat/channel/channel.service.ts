@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/user.entity';
+import UserEntity from 'src/user/models/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Channel } from './channel.entity';
 import { CreateChanDto } from './dtos/createChan.dto';
@@ -11,11 +11,11 @@ export class ChannelService {
 		@InjectRepository(Channel) private channelRepository: Repository<Channel>,
 	) {}
 
-  /**
-   * ------------------------ CREATE CHANNEL  ------------------------- *
-   */
+	/**
+	 * ------------------------ CREATE CHANNEL  ------------------------- *
+	 */
 
-	async createNewChan(user : User, channel: CreateChanDto) {
+	async createNewChan(user: UserEntity, channel: CreateChanDto) {
 		await this.channelRepository.save({
 			title: channel.title,
 			owner: user,
@@ -35,10 +35,10 @@ export class ChannelService {
    * @todo si la personne est deja dans le channel : quel comportement ? 
    */
 
-	async joinChan(user : User, channelName : string) {
+	async joinChan(user : UserEntity, channelName : string) {
 		let channel : Channel = await this.getChanByName(channelName);
 
-		// let channel : Channel = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
+		// let channel : Channel = await this.channelRepository.findOne({where: { title: channelName }, relations: ['members']})
 		//find si le user est deja dans le channel 
 		channel.members = [...channel.members, user];
 		await channel.save();
@@ -50,7 +50,7 @@ export class ChannelService {
  * 
  * @todo si c'est l'owner qui leave le chan : quel comportement ? 
  */
-	async leaveChan(user : User, channelName : string ) { 
+	async leaveChan(user : UserEntity, channelName : string ) { 
 		let channel : Channel = await this.getChanByName(channelName);
 
 		console.log(`members of chans : `, JSON.stringify(channel.members));
@@ -74,11 +74,11 @@ export class ChannelService {
 
 	/**
 	 * @brief Find the channel to join with his name
-	 * 
-	 * @param chanName 
+	 *
+	 * @param chanName
 	 * @returns Channel object corresponding
-	 * 
-	 * @todo faire un try/catch ? 
+	 *
+	 * @todo faire un try/catch ?
 	 */
 	public async getChanByName(chanName : string) : Promise<Channel> 
 	{

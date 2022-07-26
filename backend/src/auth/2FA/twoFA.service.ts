@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
-import { User } from 'src/user/user.entity';
+import { UserEntity } from 'src/user/models/user.entity';
 import { authenticator } from 'otplib';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
@@ -34,7 +34,7 @@ export class TwoFAService {
 	/**
 	 * Generate the secret key used to authenticate the user
 	 */
-	public async generateTwoFASecret(user: User) {
+	public async generateTwoFASecret(user: UserEntity) {
 		const secret = authenticator.generateSecret();
 		const otpauthUrl = authenticator.keyuri(
 			user.username,
@@ -58,7 +58,7 @@ export class TwoFAService {
 	/**
 	 * Check if the code given by the user is right or not
 	 */
-	public is2FACodeValid(twoFACode, user: User) {
+	public is2FACodeValid(twoFACode, user: UserEntity) {
 		return authenticator.verify({
 			token: twoFACode,
 			secret: user.twoFASecret,

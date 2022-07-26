@@ -1,5 +1,15 @@
 // eslint-disable-next-line prettier/prettier
-import { Catch, Controller, Get, Param, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
+import {
+	Catch,
+	Controller,
+	Get,
+	Param,
+	Post,
+	Req,
+	Res,
+	UseFilters,
+	UseGuards,
+} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { schoolAuthGuard } from './auth.guard';
@@ -9,9 +19,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 import { ApiTags } from '@nestjs/swagger';
-import { User } from 'src/user/user.entity';
-import { uuidDto } from 'src/user/dtos/uuidDto';
-import { uuidv4 } from 'uuid'
+import { UserEntity } from 'src/user/models/user.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -41,11 +49,11 @@ export class AuthController {
 	/**
 	 * Cette route est celle renseignée par @param callbackURL dans @param SchoolStrategy.
 	 * Puisque passport est passé par la fonction validate, la requete @Req
-	 * est aggrémentée d'un objet User "req.user" qui correspond au user qui vient
+	 * est aggrémentée d'un objet UserEntity "req.user" qui correspond au user qui vient
 	 * de se connecter.
 	 *
 	 * On envoie cet objet et l'objet @res à login pour pouvoir génerer un JWT, afin d'avoir une vraie connexion
-	 * identifiée à un User (le fameux login).
+	 * identifiée à un UserEntity (le fameux login).
 	 */
 	@UseGuards(schoolAuthGuard)
 	@Get('callback')
@@ -71,7 +79,7 @@ export class AuthController {
 				'https://www.myinstants.com/media/instants_images/non.gif.pagespeed.ce.C9gtkT1Vx9.gif',
 		};
 
-		const dummy_user: User = await this.userService.findOrCreate(dummy);
+		const dummy_user: UserEntity = await this.userService.findOrCreate(dummy);
 		return await this.authService.login(dummy_user, res);
 	}
 

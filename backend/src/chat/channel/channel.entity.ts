@@ -1,11 +1,18 @@
-import { User } from "src/user/user.entity";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import UserEntity from 'src/user/models/user.entity';
+import {
+	BaseEntity,
+	Column,
+	Entity,
+	JoinColumn,
+	JoinTable,
+	ManyToMany,
+	ManyToOne,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('channel')
-
 export class Channel extends BaseEntity {
-
-	@PrimaryGeneratedColumn("uuid")
+	@PrimaryGeneratedColumn('uuid')
 	channelId: string;
 
 	// @Column({
@@ -14,22 +21,25 @@ export class Channel extends BaseEntity {
 	// })
 	// isPrivate: boolean;
 
-	@Column("text", {
-		default: ""
+	@Column('text', {
+		default: '',
 	})
 	title: string;
 
-	@ManyToOne(() => User)
-	owner: User;
+	@ManyToOne(() => UserEntity)
+	@JoinColumn()
+	owner: UserEntity;
 
 	@Column("text", {
 		default: "",
 	})
 	password: string;
 
-	@ManyToMany(() => User )
+	@ManyToMany(() => UserEntity, (user) => user.channels, {
+		eager: true,
+	})
 	@JoinTable()
-	members: User[]
+	members: UserEntity[]
 
 	//faire la date de crea
 	//faire le time de la derniere activite sur le chan
@@ -37,9 +47,4 @@ export class Channel extends BaseEntity {
 	//faire MuttedUsers
 	//faire AdminUsers
 	//faire UsersIn
-
-
-
-
-
 }
