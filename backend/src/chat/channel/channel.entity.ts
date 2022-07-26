@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 
 @Entity('channel')
-export class Channel extends BaseEntity {
+export class ChannelEntity extends BaseEntity {
 	@PrimaryGeneratedColumn('uuid')
 	channelId: string;
 
@@ -40,6 +40,11 @@ export class Channel extends BaseEntity {
 	})
 	@JoinTable()
 	members: UserEntity[]
+
+	@Column({
+		default: false,
+	})
+	isProtected: boolean;
 
 	//faire la date de crea
 	//faire le time de la derniere activite sur le chan

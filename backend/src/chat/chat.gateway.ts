@@ -5,12 +5,16 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  MessageBody,
  } from '@nestjs/websockets';
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
+import UserEntity from 'src/user/models/user.entity';
+import { Channel } from 'diagnostics_channel';
+import { ChannelEntity } from './channel/channel.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -63,13 +67,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
  */
   @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
-  async CreateChan(client: Socket, channelEntity : CreateChanDto) {
-    const channel = await this.channelService.createNewChan(client.data.user, channelEntity);
-    // if (!channel) {
-    //   this.server.emit('errCreatingChan')
-    // }
-    // else {
-      this.server.emit('createdChan', channel);
+  async CreateChan(client: Socket, channelEntity : ChannelEntity) {
+    this.channelService.createNewChan(client.data.user, channelEntity);
+      this.server.emit('createdChan', channelEntity);
       this.joinChannel(client, channelEntity.title)
       
     // }

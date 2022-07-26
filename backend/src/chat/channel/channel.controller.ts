@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
-import { Channel } from './channel.entity';
+import { ChannelEntity } from './channel.entity';
 import { ChannelService } from './channel.service';
 
 @Controller('channel')
