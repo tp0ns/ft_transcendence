@@ -2,12 +2,15 @@
 	<div id="chat">
 		<h1>C'est le chat quoi</h1>
 		<input v-model="title" class="form-control" placeholder="Enter channel name..."/>
+		<input v-model="password" class="form-control" placeholder="Enter password if you want..."/>
+		
 		<div>
 			<ul>
 				<li v-for="channel of channels"> {{ channel.title }} </li>
 			</ul>
 		</div>
 		<button @click="createChannel">+</button>
+		<button @click="leaveChannel">leave</button>
 	</div>
 </template>
 
@@ -18,6 +21,7 @@
 
 	const socket: Socket = io('http://localhost/')
 	const title = ref('');
+	const password = ref('');
 	let channels: IChannel[] = [];
 
 	onMounted(() => {
@@ -34,9 +38,15 @@
 		if(validateInput()) {
 			const channel = {
 				title: title.value,
+				password: password.value,
 			}
 			socket.emit('createChan', channel)
 		}
+	}
+
+	function leaveChannel()
+	{
+		socket.emit('leaveChan', title)
 	}
 
 	socket.on('sendChans', (channels) => {

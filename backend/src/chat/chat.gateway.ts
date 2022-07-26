@@ -11,11 +11,10 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
-import { Channel } from './channel/channel.entity';
 
 @WebSocketGateway({
 	cors: {
-		origin: 'http://localhost/',
+		origin: 'http://localhost:3000',
 	},
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -34,9 +33,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	/**
 	 * Handles client connection behaviour
 	 */
-	handleConnection(client: Socket) {
+	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
-    this.server.emit('getChans')
+    this.server.emit('sendChans', await this.channelService.getAllChannels())
 	}
 
 	/**
@@ -55,24 +54,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
 
 /**
- *
+ * 
  * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
  * @param channel Pouvoir set les donnees du chan
- *
- * @todo verifier que le user dans le channel fonctionne
+ * 
+ * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
+ * pour tout le monde dans les channels publics si chan public
  */
   @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
     const channel = await this.channelService.createNewChan(client.data.user, channelEntity);
-    // this.server.emit('createdChan', channel);
     // if (!channel) {
     //   this.server.emit('errCreatingChan')
     // }
     // else {
-      this.joinChannel(client, channelEntity.title);
       this.server.emit('createdChan', channel);
-
+      this.joinChannel(client, channelEntity.title)
+      
     // }
 
   }
@@ -83,18 +82,26 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
   /**
-   *
+   * 
    * @param client client qui veut join le chan
-   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
-   *
-   * @todo pb avec ce "client.data.user" -> WsException (cannot read properties of undefined)
+   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
+   * 
    */
   @UseGuards(WsGuard)
-  @SubscribeMessage('joinChannel')
-  async joinChannel(client : Socket, chanName: string) {
-    await this.channelService.joinChan(client.data.user, chanName);
+  @SubscribeMessage('joinChan')
+  async joinChannel(client : Socket, channelName : string) {
+    await this.channelService.joinChan(client.data.user, channelName);
+    client.join(channelName);
     this.server.emit('joinedChan');
-    client.join(chanName);
+  }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('leaveChan')
+  async leaveChannel(client : Socket, channelName : string ) {
+    console.log(`ENTER IN LEAAAAAAAAAAAVEJOIN YOOOOOOOO`)
+    await this.channelService.leaveChan(client.data.user, channelName);
+    client.leave(channelName);
+    this.server.emit('leftChan')
   }
 
 
@@ -111,21 +118,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.server.emit('msgToClient', payload);
 		return (payload);
   }
-
+  
   @SubscribeMessage('msgToChannel')
   handleMessageToChan(client : Socket, payload: string, chanName: string) {
     client.join(chanName);
     this.server.to(chanName).emit('channelMessage', payload);
   }
 
-
   /**
-   * ------------------------ GET CHANNELS  ------------------------- *
+   * 
+   * @param client 
+   * @param payload 
+   * 
+   * @todo est ce qu'on doit join une room ou on enverra a chaque fois les messages au client ? 
    */
-
-    @SubscribeMessage('getAllChannels')
-    async getChannels(client : Socket) {
-      this.server.emit('sendChans', await this.channelService.getAllChannels())
-    }
-
+  @SubscribeMessage('msgToUser')
+  handleMessagerToClient(client : Socket, payload: string)
+  {
+    this.server.to(client.data.user.username).emit('directMessage', payload);
   }
+}

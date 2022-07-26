@@ -1,3 +1,4 @@
+import { Channel } from 'diagnostics_channel';
 import {
 	Column,
 	Entity,
@@ -56,6 +57,10 @@ export class User {
 		(friendRequestEntity) => friendRequestEntity.receiver,
 	)
 	receivedFriendRequests: FriendRequestEntity[];
+
+	// @ManyToMany(() => Channel)
+	// @JoinTable()
+	// channels: Channel[];
 }
 
 export default User;

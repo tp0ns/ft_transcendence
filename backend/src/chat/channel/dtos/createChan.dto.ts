@@ -6,5 +6,6 @@ export class CreateChanDto {
 	@IsNotEmpty({message: 'Channel needs a title'})
 	title: string;
 
+	password: string;
 
 }

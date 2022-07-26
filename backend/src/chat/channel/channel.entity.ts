@@ -22,17 +22,14 @@ export class Channel extends BaseEntity {
 	@ManyToOne(() => User)
 	owner: User;
 
-	// @ManyToMany((type) => User, {
-	// 	cascade: true,
-	// })
-    // @JoinTable()
-    // public members: User[]
+	@Column("text", {
+		default: "",
+	})
+	password: string;
 
-
-	// @Column("text", {
-	// 	default: ""
-	// })
-	// password: string;
+	@ManyToMany(() => User )
+	@JoinTable()
+	members: User[]
 
 	//faire la date de crea
 	//faire le time de la derniere activite sur le chan
