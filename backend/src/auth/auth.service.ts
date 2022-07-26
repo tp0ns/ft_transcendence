@@ -30,15 +30,16 @@ export class AuthService {
 		const access_token = this.jwtService.sign(payload);
 
 		const new_cookie = `Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
+		res.clearCookie('Authentication');
 		res.header('Set-Cookie', new_cookie);
 
 		// if (user.isTwoFAEnabled)
 		// 	res.redirect(''); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
 		// else
-		res.redirect('http://localhost/');
+		res.redirect('http://localhost/backend/users/me');
 	}
 
-	async logout() {
-		return await `Authentication=; HttpOnly; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`; //Max-age=0;
-	}
+	// async logout() {
+	// 	return await `Authentication=; HttpOnly; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`; //Max-age=0;
+	// }
 }

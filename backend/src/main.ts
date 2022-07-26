@@ -10,7 +10,6 @@ import { UnauthorizedExceptionFilter } from './unauthorized.filter';
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);
 	app.use(cookieParser());
-	app.useStaticAssets(join(__dirname, '..', 'static'));
 	app.setGlobalPrefix('backend');
 	const config = new DocumentBuilder()
 		.setTitle('ft_transcendance')

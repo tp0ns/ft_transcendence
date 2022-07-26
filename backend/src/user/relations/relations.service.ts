@@ -83,6 +83,18 @@ export class RelationsService {
 		return Relation;
 	}
 
+	async unfriend(
+		RelationId: string,
+		userReq: Partial<UserEntity>,
+	): Promise<boolean> {
+		const user: UserEntity = userReq as UserEntity;
+		const relation: RelationEntity = await this.getRelationById(RelationId);
+		if (relation.status === 'accepted') {
+			await this.RelationRepo.remove(relation);
+			return true;
+		} else throw new ForbiddenException("Can't unfriend if not a friend!");
+	}
+
 	async blockUser(
 		blockedUsername: string,
 		blockerReq: Partial<UserEntity>,
@@ -122,9 +134,7 @@ export class RelationsService {
 		userReq: Partial<UserEntity>,
 	): Promise<boolean> {
 		const user: UserEntity = userReq as UserEntity;
-		console.log(user);
 		const relation: RelationEntity = await this.getRelationById(RelationId);
-		console.log('relation creator: ', relation.creator);
 		if (relation.status === 'blocked') {
 			if (user.userId === relation.creator.userId) {
 				await this.RelationRepo.remove(relation);

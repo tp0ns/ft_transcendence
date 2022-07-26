@@ -31,10 +31,18 @@ export class UserService {
 	 * @returns un UserEntity
 	 */
 	async findOrCreate(profile: Profile): Promise<UserEntity> {
-		const user: UserEntity = await this.userRepo.findOne({
+		let user: UserEntity = await this.userRepo.findOne({
 			where: { schoolId: profile.id },
 		});
 		if (!user) {
+			console.log(profile.username);
+			while (
+				(user = await this.userRepo.findOne({
+					where: { username: profile.username },
+				}))
+			) {
+				profile.username += Math.floor(1 + Math.random() * 999).toString();
+			}
 			return await this.userRepo.save({
 				schoolId: profile.id,
 				username: profile.username,

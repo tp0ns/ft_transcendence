@@ -3,6 +3,7 @@ import {
 	Catch,
 	Controller,
 	Get,
+	Param,
 	Post,
 	Req,
 	Res,
@@ -21,8 +22,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/user/models/user.entity';
 
 @ApiTags('auth')
-@Controller('auth/42')
-@UseFilters(UnauthorizedExceptionFilter)
+@Controller('auth')
+// @UseFilters(UnauthorizedExceptionFilter)
 export class AuthController {
 	constructor(
 		private userService: UserService,
@@ -62,7 +63,7 @@ export class AuthController {
 
 	/**
 	 * Generateur de faux compte ("dummy") pour tester plus facilement
-	 * à enlever en production !
+	 * à enlever en production / correction !
 	 */
 	@Get('dummy')
 	async dummy(@Res() res) {
@@ -83,6 +84,25 @@ export class AuthController {
 	}
 
 	/**
+	 * Connexion rapides a un compte existant pour tester plus facilement
+	 * à enlever en production / correction !
+	 *
+	 * Si je met id: uuidDto ca arrete de marcher completement et le id devient le premier de la table (wtf ?).
+	 * Swagger reconnait pas uuidv4 comme type donc il affiche pas de param quand il est de ce type.
+	 * Je le met en string ducoup meme si c'est pas beau et pas secur, vu qu'on va enlever
+	 * a la correction de toute facon
+	 */
+
+	// @UseGuards(JwtAuthGuard)
+	@Get('login/:id')
+	async dummyLogin(@Param('id') id: string, @Res() res) {
+		// console.log(id);
+		const dummy_user = await this.userService.getUserById(id);
+		// console.log(dummy_user);
+		return await this.authService.login(dummy_user, res);
+	}
+
+	/**
 	 * Supprime le contenu du cookie pour qu'il ne contienne plus de JWT.
 	 * L'utilisateur n'est donc plus identifié.
 	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
@@ -90,8 +110,9 @@ export class AuthController {
 	@UseGuards(JwtAuthGuard)
 	@Get('logout')
 	async logout(@Req() request: Request, @Res() res: Response) {
-		const new_cookie = await this.authService.logout();
-		res.setHeader('Set-Cookie', new_cookie);
+		// const new_cookie = await this.authService.logout();
+		// res.setHeader('Set-Cookie', new_cookie);
+		res.clearCookie('Authentication');
 		return res.sendStatus(200);
 	}
 }

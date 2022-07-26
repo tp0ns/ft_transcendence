@@ -5,7 +5,7 @@ import { JwtAuthGuard } from './auth/jwt/jwt.guard';
 import { UnauthorizedExceptionFilter } from './unauthorized.filter';
 
 @Controller()
-@UseFilters(UnauthorizedExceptionFilter)
+// @UseFilters(UnauthorizedExceptionFilter)
 export class AppController {
 	constructor(private readonly appService: AppService) {}
 

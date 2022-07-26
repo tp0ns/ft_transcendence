@@ -33,7 +33,7 @@ export class RelationsController {
 
 	@ApiBody({ type: UpdateRequestStatusDto })
 	@UseGuards(JwtAuthGuard)
-	@Put('relations/respond-to-friend-request/:relationRequestId')
+	@Put('relations/friend-request/respond/:relationRequestId')
 	async respondToFriendRequest(
 		@Param('relationRequestId') relationRequestId: string,
 		@Body() statusResponse: RelationStatus,
@@ -43,6 +43,15 @@ export class RelationsController {
 			relationRequestId,
 			statusResponse.status,
 		);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Delete('relations/unfriend/:relationId')
+	async unfriend(
+		@Param('relationRequestId') relationRequestId: string,
+		@Req() req: Request,
+	): Promise<boolean> {
+		return await this.relationsService.unfriend(relationRequestId, req.user);
 	}
 
 	@UseGuards(JwtAuthGuard)

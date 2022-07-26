@@ -19,12 +19,11 @@
                     <div id="status"></div>
                     <div id="chat">
                         <input type="text" v-model="title" id="username" class="form-control" placeholder="Enter title...">
-                        <!-- <input type="text" v-model="username" id="username" class="form-control" placeholder="Enter username..."> -->
                         <br>
                         <div class="card">
-                            <div id="messages" class="card-block">
+                            <div id="channels" class="card-block">
                                 <ul>
-                                    <!-- <li v-for="message of messages">{{ message.username }}: {{ message.text }}</li> -->
+                                    <li v-for="channel of channels"> {{ channels }} </li>
                                     <!-- <li v-for="message of messages">{{ channels.title }} </li> -->
                                 </ul>
                             </div>
@@ -34,8 +33,11 @@
                          <!-- <textarea id="textarea" class="form-control" v-model="username" placeholder="Enter owner..."></textarea> -->
                         <!-- <textarea id="textarea" class="form-control" v-model="text" placeholder="Enter text..."></textarea> -->
                         <br>
-                        <!-- <button id="send" class="btn" @click.prevent="createChannel">+</button> -->
-                        <button id="send" class="btn" @click.prevent="joinChannel">JOIN</button>
+                            <button id="send" class="btn" @click.prevent="createChannel">+</button>
+                            <button id="get" class="btn" @click.prevent="getAllChannels">GetChans</button>
+                            <div>
+                            <!-- <button id="send" class="btn" @click.prevent="joinChannel">JOIN</button> -->
+                        </div>
                         <!-- <button id="send" class="btn" @click.prevent="sendMessage">Send</button> -->
                     </div>
                 </div>
