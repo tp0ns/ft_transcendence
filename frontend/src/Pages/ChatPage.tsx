@@ -13,6 +13,7 @@ const DUMMY_CHANNELS = [
 ];
 
 const socket: Socket = io("http://localhost");
+const channels: any = [];
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
@@ -28,7 +29,6 @@ function ChatPage() {
   }
 
   useEffect(() => {
-    const channels: any = [];
     socket.emit("getAllChannels");
     socket.on("sendChans", channels);
     setLoadedChannels(channels);
