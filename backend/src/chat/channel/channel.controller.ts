@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from './channel.entity';
 import { ChannelService } from './channel.service';
 
@@ -10,8 +11,8 @@ export class ChannelController {
 	// @Post('/create')
 	// @HttpCode(200)
 	// @UsePipes(ValidationPipe)
-	// async createChan(@Body() ChanData : CreateChanDto) {
-	// 	return await this.ChannelService.createNewChan(ChanData)
+	// async createChan(@Body() user: UserEntity, channel: ChannelEntity) {
+	// 	return await this.ChannelService.createNewChan(user, channel)
 	// }
 
 	/**
@@ -22,5 +23,6 @@ export class ChannelController {
 	// async getAllChans(): Promise<channel> {
 	//   return await this.ChannelService.getAllChannels();
 	// }
+
  
 }

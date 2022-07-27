@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserEntity from 'src/user/models/user.entity';
 import { DataSource, Repository } from 'typeorm';
+import { MembersEntity } from '../channelMembers/members.entity';
+import { membersService } from '../channelMembers/members.service';
 import { ChannelEntity } from './channel.entity';
-import { CreateChanDto } from './dtos/createChan.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
+		@Inject(forwardRef(() => membersService))
+		private membersService: membersService,
 	) {}
 
 	/**
@@ -16,6 +20,7 @@ export class ChannelService {
 	 */
 
 	async createNewChan(user: UserEntity, channel: ChannelEntity) {
+		// let newPassword = await bcrypt.hash(channel.password, 10);
 		try {
 		await this.channelRepository.save({
 			title: channel.title,
@@ -27,6 +32,10 @@ export class ChannelService {
 		catch {
 			//error
 		}
+	}
+
+	createMember(user : UserEntity, channel : ChannelEntity) {
+		this.membersService.createNewMember(user, channel);
 	}
 
   /**
@@ -43,10 +52,12 @@ export class ChannelService {
 
 	async joinChan(user : UserEntity, channelName : string) {
 		let channel : ChannelEntity = await this.getChanByName(channelName);
-
-		// let channel : Channel = await this.channelRepository.findOne({where: { title: channelName }, relations: ['members']})
+		let member : MembersEntity = await this.membersService.createNewMember(user, channel);
 		//find si le user est deja dans le channel 
-		channel.members = [...channel.members, user];
+		//check si le user n'est pas ban 
+		//check si le channel existe
+
+		channel.members = [...channel.members , member];
 		await channel.save();
 	}
 /**
@@ -93,4 +104,6 @@ export class ChannelService {
 			console.log("le channel il existe po");
 		return channel;
 	}
+
 }
+
