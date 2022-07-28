@@ -1,26 +1,30 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { ChannelsContext } from "../store/channels-context";
 
 import Card from "../ui/Card";
 import classes from "./NewChannelForm.module.css";
 
-function NewChannelForm(props: any) {
-  const titleInputRef: any = useRef();
-  const imageInputRef: any = useRef();
+const NewChannelForm: React.FC = () => {
+  const channelsCtx = useContext(ChannelsContext);
+
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
   const [privateChan, setPrivateChan] = useState(false);
 
-  function submitHandler(event: any) {
+  function submitHandler(event: React.FormEvent) {
     event.preventDefault();
 
-    const enteredTitle = titleInputRef.current.value;
-    const enteredImage = imageInputRef.current.value;
+    const enteredTitle: string = titleInputRef.current!.value;
+    const enteredImage: string = passwordInputRef.current!.value;
 
     const channelData = {
+      id: "",
       title: enteredTitle,
       password: enteredImage,
       private: privateChan,
     };
-
-    props.onAddChannel(channelData);
+    channelsCtx.addChannel(channelData);
+    console.log(channelData);
   }
 
   function handlePrivate(event: any) {
@@ -37,7 +41,7 @@ function NewChannelForm(props: any) {
         </div>
         <div className={classes.control}>
           <label htmlFor="image">Channel Password</label>
-          <input type="text" required id="image" ref={imageInputRef} />
+          <input type="text" required id="image" ref={passwordInputRef} />
         </div>
         <div className={classes.control}>
           <button onClick={handlePrivate}>Make private</button>
@@ -48,6 +52,6 @@ function NewChannelForm(props: any) {
       </form>
     </Card>
   );
-}
+};
 
 export default NewChannelForm;

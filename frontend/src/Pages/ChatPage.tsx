@@ -1,7 +1,8 @@
 import { io, Socket } from "socket.io-client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChannelsList from "../components/ChannelsLists";
 import NewChannelForm from "../components/NewChannel";
+import { ChannelsContext } from "../store/channels-context";
 
 const DUMMY_CHANNELS = [
   {
@@ -13,34 +14,30 @@ const DUMMY_CHANNELS = [
 ];
 
 const socket: Socket = io("http://localhost");
-const channels: any = [];
+// const channels: any = [];
 
 function ChatPage() {
+  const channelsCtx = useContext(ChannelsContext);
+
   const [newChannel, setNewChannel] = useState(false);
-  const [loadedChannels, setLoadedChannels] = useState([]);
+  // const [loadedChannels, setLoadedChannels] = useState([]);
 
-  function addChannel(newChannel: any) {
-    setNewChannel(false);
-    socket.emit("createChan", newChannel);
-  }
-
-  function handleNewChannel() {
+  const handleNewChannel = () => {
     setNewChannel(true);
-  }
+  };
 
   useEffect(() => {
-    socket.emit("getAllChannels");
-    socket.on("sendChans", channels);
-    setLoadedChannels(channels);
-  });
+    setNewChannel(false);
+  }, [channelsCtx]);
 
-  async function getChannels() {}
-
+  console.log(newChannel);
   return (
     <section>
-      <button onClick={handleNewChannel}>Add Channel</button>
-      <ChannelsList channels={loadedChannels} />
-      {newChannel ? <NewChannelForm onAddChannel={addChannel} /> : null}
+      {!newChannel ? (
+        <button onClick={handleNewChannel}>Add Channel</button>
+      ) : null}
+      <ChannelsList channels={channelsCtx.items} />
+      {newChannel ? <NewChannelForm /> : null}
     </section>
   );
 }

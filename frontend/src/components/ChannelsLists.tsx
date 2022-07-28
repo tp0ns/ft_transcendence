@@ -5,7 +5,11 @@ function ChannelsList(props: any) {
     <section>
       <ul>
         {props.channels.map((channel: any) => (
-          <ChannelItem name={channel.name} />
+          <ChannelItem
+            key={channel.id}
+            name={channel.title}
+            displayChannel={props.displayChannelHandler}
+          />
         ))}
       </ul>
     </section>

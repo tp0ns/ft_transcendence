@@ -11,6 +11,7 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from './channel/channel.service';
 import { CreateChanDto } from './channel/dtos/createChan.dto';
+import { Channel } from './channel/channel.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -138,5 +139,15 @@ export class ChatGateway
 	@SubscribeMessage('msgToUser')
 	handleMessagerToClient(client: Socket, payload: string) {
 		this.server.to(client.data.user.username).emit('directMessage', payload);
+	}
+
+	/**
+	 * ------------------------ GET CHANNELS  ------------------------- *
+	 */
+
+	@SubscribeMessage('getAllChannels')
+	async getChannels(client: Socket) {
+		const channels: Channel[] = await this.channelService.getAllChannels();
+		this.server.emit('sendChans', channels);
 	}
 }
