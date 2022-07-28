@@ -99,7 +99,8 @@ export class ChannelService {
 	 */
 	public async getChanByName(chanName : string) : Promise<ChannelEntity> 
 	{
-		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
+		// let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
+		let channel : ChannelEntity = await this.channelRepository.findOne({ where: {title: chanName }});
 		if (!channel)
 			console.log("le channel il existe po");
 		return channel;

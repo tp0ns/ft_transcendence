@@ -1,7 +1,7 @@
 npm install
 npm audit fix
 
-exec npm run dev
+exec npm run start
 # correction
 # change to npm run build
 # or

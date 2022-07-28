@@ -1,11 +1,11 @@
 import {
-  SubscribeMessage,
-  WebSocketGateway,
-  OnGatewayInit,
-  WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
- } from '@nestjs/websockets';
+	SubscribeMessage,
+	WebSocketGateway,
+	OnGatewayInit,
+	WebSocketServer,
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+} from '@nestjs/websockets';
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
@@ -19,8 +19,10 @@ import { ChannelEntity } from './channel/channel.entity';
 		origin: 'http://localhost:3000',
 	},
 })
-export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor( private channelService: ChannelService ) {}
+export class ChatGateway
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+	constructor(private channelService: ChannelService) {}
 
 	@WebSocketServer() server: Server;
 
@@ -37,7 +39,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	 */
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
-    this.server.emit('sendChans', await this.channelService.getAllChannels())
+		this.server.emit('sendChans', await this.channelService.getAllChannels());
 	}
 
 	/**
@@ -62,6 +64,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
   async CreateChan(client: Socket, channelEntity : ChannelEntity) {
+	console.log(`check enter in createChan : `, JSON.stringify(channelEntity));
     this.channelService.createNewChan(client.data.user, channelEntity);
       this.server.emit('createdChan', channelEntity);
       this.joinChannel(client, channelEntity.title)
@@ -103,28 +106,27 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
 	// @UseGuards(WsGuard)
-  @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: string) {
+	@SubscribeMessage('msgToServer')
+	handleMessage(client: Socket, payload: string) {
 		this.server.emit('msgToClient', payload);
-		return (payload);
-  }
-  
-  @SubscribeMessage('msgToChannel')
-  handleMessageToChan(client : Socket, payload: string, chanName: string) {
-    client.join(chanName);
-    this.server.to(chanName).emit('channelMessage', payload);
-  }
+		return payload;
+	}
 
-  /**
-   * 
-   * @param client 
-   * @param payload 
-   * 
-   * @todo est ce qu'on doit join une room ou on enverra a chaque fois les messages au client ? 
-   */
-  @SubscribeMessage('msgToUser')
-  handleMessagerToClient(client : Socket, payload: string)
-  {
-    this.server.to(client.data.user.username).emit('directMessage', payload);
-  }
+	@SubscribeMessage('msgToChannel')
+	handleMessageToChan(client: Socket, payload: string, chanName: string) {
+		client.join(chanName);
+		this.server.to(chanName).emit('channelMessage', payload);
+	}
+
+	/**
+	 *
+	 * @param client
+	 * @param payload
+	 *
+	 * @todo est ce qu'on doit join une room ou on enverra a chaque fois les messages au client ?
+	 */
+	@SubscribeMessage('msgToUser')
+	handleMessagerToClient(client: Socket, payload: string) {
+		this.server.to(client.data.user.username).emit('directMessage', payload);
+	}
 }
