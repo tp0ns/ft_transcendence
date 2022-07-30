@@ -1,17 +1,20 @@
 import { useContext, useRef, useState } from "react";
+import ChannelProp from "../interfaces/Channel.interface";
 import { ChannelsContext } from "../store/channels-context";
 
 import Card from "../ui/Card";
 import classes from "./NewChannelForm.module.css";
 
-const NewChannelForm: React.FC = () => {
+const NewChannelForm: React.FC<{
+  sendChan: (channelData: ChannelProp) => void;
+}> = (props: any) => {
   const channelsCtx = useContext(ChannelsContext);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const [privateChan, setPrivateChan] = useState(false);
 
-  function submitHandler(event: React.FormEvent) {
+  function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const enteredTitle: string = titleInputRef.current!.value;
@@ -23,8 +26,9 @@ const NewChannelForm: React.FC = () => {
       password: enteredImage,
       private: privateChan,
     };
-    channelsCtx.addChannel(channelData);
+    // channelsCtx.addChannel(channelData);
     console.log(channelData);
+    props.sendChan(channelData);
   }
 
   function handlePrivate(event: any) {
