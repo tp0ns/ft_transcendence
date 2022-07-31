@@ -16,7 +16,7 @@ import { ChannelEntity } from './channel/channel.entity';
 
 @WebSocketGateway({
 	cors: {
-		origin: 'http://localhost:3000',
+		origin: 'http://localhost/',
 	},
 })
 export class ChatGateway
@@ -61,13 +61,31 @@ export class ChatGateway
  * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
  * pour tout le monde dans les channels publics si chan public
  */
+//   @UseGuards(WsGuard)
+//   @SubscribeMessage('createChan')
+//   async CreateChan(client: Socket, channelEntity : CreateChanDto) {
+// 	console.log(`check enter in createChan : `, JSON.stringify(channelEntity));
+//     this.channelService.createNewChan(client.data.user, channelEntity);
+//       this.server.emit('createdChan', channelEntity);
+//       this.joinChannel(client, channelEntity.title)
+//   }
+
   @UseGuards(WsGuard)
   @SubscribeMessage('createChan')
-  async CreateChan(client: Socket, channelEntity : ChannelEntity) {
-	console.log(`check enter in createChan : `, JSON.stringify(channelEntity));
-    this.channelService.createNewChan(client.data.user, channelEntity);
-      this.server.emit('createdChan', channelEntity);
-      this.joinChannel(client, channelEntity.title)
+  async CreateChan(client: Socket, channelEntity: CreateChanDto) {
+	  const channel = await this.channelService.createNewChan(
+		  client.data.user,
+		  channelEntity,
+	  );
+	  // if (!channel) {
+	  //   this.server.emit('errCreatingChan')
+	  // }
+	  // else {
+	  this.server.emit('createdChan', channel);
+	  this.joinChannel(client, channelEntity.title);
+	  console.log(JSON.stringify(channel));
+
+	  // }
   }
 
   /**

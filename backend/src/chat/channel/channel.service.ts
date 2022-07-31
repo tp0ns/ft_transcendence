@@ -5,37 +5,33 @@ import { DataSource, Repository } from 'typeorm';
 import { MembersEntity } from '../channelMembers/members.entity';
 import { membersService } from '../channelMembers/members.service';
 import { ChannelEntity } from './channel.entity';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
+import { CreateChanDto } from './dtos/createChan.dto';
 
 @Injectable()
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
-		@Inject(forwardRef(() => membersService))
-		private membersService: membersService,
 	) {}
 
 	/**
 	 * ------------------------ CREATE CHANNEL  ------------------------- *
 	 */
 
-	async createNewChan(user: UserEntity, channel: ChannelEntity) {
+	async createNewChan(user: UserEntity, channel: CreateChanDto) {
 		// let newPassword = await bcrypt.hash(channel.password, 10);
-		try {
+		// try {
 		await this.channelRepository.save({
 			title: channel.title,
 			owner: user,
 			password: channel.password,
-			isProtected : channel.isProtected,
-		});
-		}
-		catch {
+			// isProtected : channel.isProtected,
+		// });
+		// }
+		// catch {
 			//error
-		}
-	}
-
-	createMember(user : UserEntity, channel : ChannelEntity) {
-		this.membersService.createNewMember(user, channel);
+		});
+		// 	this.membersService.createNewMember(user, channel);
 	}
 
   /**
@@ -52,12 +48,14 @@ export class ChannelService {
 
 	async joinChan(user : UserEntity, channelName : string) {
 		let channel : ChannelEntity = await this.getChanByName(channelName);
-		let member : MembersEntity = await this.membersService.createNewMember(user, channel);
+		// let member : MembersEntity = await this.membersService.createNewMember(user, channel);
 		//find si le user est deja dans le channel 
 		//check si le user n'est pas ban 
 		//check si le channel existe
 
-		channel.members = [...channel.members , member];
+		// channel.members = [...channel.members , member];
+		// await channel.save();
+		channel.members = [...channel.members, user];
 		await channel.save();
 	}
 /**
@@ -99,8 +97,9 @@ export class ChannelService {
 	 */
 	public async getChanByName(chanName : string) : Promise<ChannelEntity> 
 	{
-		// let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
-		let channel : ChannelEntity = await this.channelRepository.findOne({ where: {title: chanName }});
+		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
+
+		// let channel : ChannelEntity = await this.channelRepository.findOne({ where: {title: chanName }});
 		if (!channel)
 			console.log("le channel il existe po");
 		return channel;

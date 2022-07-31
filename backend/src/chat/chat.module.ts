@@ -13,8 +13,8 @@ import { MembersEntity } from './channelMembers/members.entity';
 import { membersService } from './channelMembers/members.service';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([ChannelEntity, UserEntity, RelationEntity, MembersEntity])],
-	providers: [ChatGateway, JwtService, UserService, ChannelService, membersService],
+	imports: [TypeOrmModule.forFeature([ChannelEntity, UserEntity, RelationEntity])],
+	providers: [ChatGateway, JwtService, UserService, ChannelService],
 	controllers: [ChannelController],
 })
 export class ChatModule {}
