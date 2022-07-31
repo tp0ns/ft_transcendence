@@ -28,13 +28,13 @@ export class ChannelController {
 	 * @returns
 	 */
 
-	 @Post('new')
-	 @UseGuards(JwtAuthGuard)
-	 public async newChannel(@Req() req : Request, @Body() channel : CreateChanDto)
-	 {
-		 const user: UserEntity = await this.UserService.getUserByRequest(req);
-		 return await this.ChannelService.createNewChan(user, channel);
-	 }
+	//  @Post('new')
+	//  @UseGuards(JwtAuthGuard)
+	//  public async newChannel(@Req() req : Request, @Body() channel : CreateChanDto)
+	//  {
+	// 	 const user: UserEntity = await this.UserService.getUserByRequest(req);
+	// 	 return await this.ChannelService.createNewChan(user, channel);
+	//  }
 	/**
 	 * Get all channels.
 	 */

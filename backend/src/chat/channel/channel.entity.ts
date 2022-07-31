@@ -40,7 +40,7 @@ export class ChannelEntity extends BaseEntity {
 	})
 	password: string;
 
-	@OneToMany(() => UserEntity, (user) => user.channels, {
+	@ManyToMany(() => UserEntity, (user) => user.channels, {
 	})
 	@JoinTable()
 	members: UserEntity[]

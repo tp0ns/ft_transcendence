@@ -12,26 +12,30 @@ import { CreateChanDto } from './dtos/createChan.dto';
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
+		@Inject(forwardRef(() => membersService))
+    	private membersService: membersService,
 	) {}
 
 	/**
 	 * ------------------------ CREATE CHANNEL  ------------------------- *
 	 */
 
-	async createNewChan(user: UserEntity, channel: CreateChanDto) {
+	async createNewChan(user: UserEntity, chan: CreateChanDto) {
 		// let newPassword = await bcrypt.hash(channel.password, 10);
 		// try {
-		await this.channelRepository.save({
-			title: channel.title,
+		let channel : ChannelEntity = await this.channelRepository.save({
+			title: chan.title,
 			owner: user,
-			password: channel.password,
+			password: chan.password,
 			// isProtected : channel.isProtected,
 		// });
 		// }
 		// catch {
 			//error
 		});
-		// 	this.membersService.createNewMember(user, channel);
+		console.log(`check user in channel service : `, JSON.stringify(user));
+		console.log(`check channel in channel service : `, JSON.stringify(channel));
+		this.membersService.createNewMember(user, channel);
 	}
 
 	/**
@@ -58,6 +62,7 @@ export class ChannelService {
 		channel.members = [...channel.members, user];
 		await channel.save();
 	}
+	
 /**
  * 
  * @param user 
@@ -96,13 +101,13 @@ export class ChannelService {
 	 *
 	 * @todo faire un try/catch ?
 	 */
-	public async getChanByName(chanName : string) : Promise<ChannelEntity> 
+	async getChanByName(chanName : string) : Promise<ChannelEntity> 
 	{
-		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
-
+		// const channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
 		// let channel : ChannelEntity = await this.channelRepository.findOne({ where: {title: chanName }});
-		if (!channel)
-			console.log("le channel il existe po");
+		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']});
+		// if (!channel)
+			// console.log("le channel il existe po");
 		return channel;
 	}
 
