@@ -1,7 +1,8 @@
 import { io, Socket } from "socket.io-client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChannelsList from "../components/ChannelsLists";
 import NewChannelForm from "../components/NewChannel";
+import ChannelProp from "../interfaces/Channel.interface";
 
 const DUMMY_CHANNELS = [
   {
@@ -12,39 +13,40 @@ const DUMMY_CHANNELS = [
   },
 ];
 
-let socket : any;
-let CONNEXION_PORT = 'localhost/backend'
-const channels: any = [];
+let channels: any = [];
+
+const socket: Socket = io("http://localhost");
+socket.on("getAllChannels", channels);
+
+// const channels: any = [];
 
 function ChatPage() {
+  // const channelsCtx = useContext(ChannelsContext);
+
   const [newChannel, setNewChannel] = useState(false);
-  const [loadedChannels, setLoadedChannels] = useState([]);
+  // const [loadedChannels, setLoadedChannels] = useState([]);
+
+  const handleNewChannel = () => {
+    setNewChannel(true);
+  };
 
   useEffect(() => {
-    socket = io(CONNEXION_PORT);
-    socket.emit("getAllChannels");
-    socket.on("sendChans", channels);
-    setLoadedChannels(channels);
-  });
+    socket.on("getAllChannels", channels);
+    console.log(channels);
+  }, [socket]);
 
-  function addChannel(newChannel: any) {
-    console.log(`enter in add channel `);
+  const sendChannel = (channelData: ChannelProp) => {
     setNewChannel(false);
-    socket.emit("createChan", newChannel);
-  }
-
-  function handleNewChannel() {
-    setNewChannel(true);
-  }
-
-
-  async function getChannels() {}
+    socket.emit("createChan", channelData);
+  };
 
   return (
     <section>
-      <button onClick={handleNewChannel}>Add Channel</button>
-      <ChannelsList channels={loadedChannels} />
-      {newChannel ? <NewChannelForm onAddChannel={addChannel} /> : null}
+      {!newChannel ? (
+        <button onClick={handleNewChannel}>Add Channel</button>
+      ) : null}
+      <ChannelsList channels={channels} />
+      {newChannel ? <NewChannelForm sendChan={sendChannel} /> : null}
     </section>
   );
 }

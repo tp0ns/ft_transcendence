@@ -147,4 +147,14 @@ export class ChatGateway
 	handleMessagerToClient(client: Socket, payload: string) {
 		this.server.to(client.data.user.username).emit('directMessage', payload);
 	}
+
+	/**
+	 * ------------------------ GET CHANNELS  ------------------------- *
+	 */
+
+	@SubscribeMessage('getAllChannels')
+	async getChannels(client: Socket) {
+		const channels: ChannelEntity[] = await this.channelService.getAllChannels();
+		this.server.emit('sendChans', channels);
+	}
 }

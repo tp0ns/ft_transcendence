@@ -34,17 +34,17 @@ export class ChannelService {
 		// 	this.membersService.createNewMember(user, channel);
 	}
 
-  /**
-   * ------------------------ CIRCULATION IN CHAN  ------------------------- *
-   */
+	/**
+	 * ------------------------ CIRCULATION IN CHAN  ------------------------- *
+	 */
 
-  /**
-   * 
-   * @param user user who want to join the channel 
-   * @param channelName the name of the channel
-   *
-   * @todo si la personne est deja dans le channel : quel comportement ? 
-   */
+	/**
+	 *
+	 * @param user user who want to join the channel
+	 * @param channelName the name of the channel
+	 *
+	 * @todo si la personne est deja dans le channel : quel comportement ?
+	 */
 
 	async joinChan(user : UserEntity, channelName : string) {
 		let channel : ChannelEntity = await this.getChanByName(channelName);
@@ -75,15 +75,16 @@ export class ChannelService {
 			.createQueryBuilder()
 			.relation(ChannelEntity, 'members')
 			.of(user)
-			.remove(user)
+			.remove(user);
 	}
-	
+
 	/**
 	 * ------------------------ GETTERS  ------------------------- *
 	 */
 	
 	async getAllChannels(): Promise<ChannelEntity[]> {
 		const channels : ChannelEntity[] = await this.channelRepository.find()
+		console.log('Channels in backend: ', channels);
 		return channels;
 	}
 
