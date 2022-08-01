@@ -50,66 +50,130 @@ export class ChatGateway
 	}
 
   /**
-   * ------------------------ CREATE CHANNEL  ------------------------- *
+   * ------------------------ CREATE/MODIFY CHANNEL  ------------------------- *
    */
 
-/**
- * 
- * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
- * @param channel Pouvoir set les donnees du chan
- * 
- * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
- * pour tout le monde dans les channels publics si chan public
- */
-  @UseGuards(WsGuard)
-  @SubscribeMessage('createChan')
-  async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-	  const channel = await this.channelService.createNewChan(
-		  client.data.user,
-		  channelEntity,
-	  );
-	  // if (!channel) {
-	  //   this.server.emit('errCreatingChan')
-	  // }
-	  // else {
-	  this.server.emit('createdChan', channel);
-	  this.joinChannel(client, channelEntity.title);
-	  console.log(JSON.stringify(channel));
+	/**
+	 * 
+	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
+	 * @param channel Pouvoir set les donnees du chan
+	 * 
+	 * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
+	 * pour tout le monde dans les channels publics si chan public
+	 * @todo verifier qu'un autre channel ne porte pas deja le meme nom
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('createChan')
+	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
+		const channel = await this.channelService.createNewChan(
+			client.data.user,
+			channelEntity,
+		);
+		// if (!channel) {
+		//   this.server.emit('errCreatingChan')
+		// }
+		// else {
+		this.server.emit('createdChan', channel);
+		this.joinChannel(client, channelEntity.title);
+		console.log(JSON.stringify(channel));
 
-	  // }
-  }
+		// }
+	}
 
-  /**
-   * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
-   */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('modifyPassword')
+	async modifyPassword(client: Socket, chanName: string, newPassword : string)
+	{
+		await this.channelService.modifyPassword(client.data.user, chanName, newPassword);
+	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('modifyAdmins')
+	async modifyAdmins(client : Socket, chanName: string, newAdmins: UserEntity[])
+	{
+		await this.channelService.modifyAdmins(client.data.user, chanName, newAdmins);
+	}
 
-  /**
-   * 
-   * @param client client qui veut join le chan
-   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
-   * 
-   */
-  @UseGuards(WsGuard)
-  @SubscribeMessage('joinChan')
-  async joinChannel(client : Socket, channelName : string) {
-    await this.channelService.joinChan(client.data.user, channelName);
-    client.join(channelName);
-    this.server.emit('joinedChan');
-  }
-
-  @UseGuards(WsGuard)
-  @SubscribeMessage('leaveChan')
-  async leaveChannel(client : Socket, channelName : string ) {
-    await this.channelService.leaveChan(client.data.user, channelName);
-    client.leave(channelName);
-    this.server.emit('leftChan')
-  }
+	/**
+	 * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
+	 */
 
 
-  /**
-   * ------------------------ HANDLE MESSAGES  ------------------------- *
-   */
+	/**
+	 * 
+	 * @param client client qui veut join le chan
+	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
+	 * 
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('joinChan')
+	async joinChannel(client : Socket, channelName : string) {
+	await this.channelService.joinChan(client.data.user, channelName);
+	client.join(channelName);
+	this.server.emit('joinedChan');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('leaveChan')
+	async leaveChannel(client : Socket, channelName : string ) {
+	await this.channelService.leaveChan(client.data.user, channelName);
+	client.leave(channelName);
+	this.server.emit('leftChan')
+	}
+
+	/**
+	 * 
+	 * @param client 
+	 * @param userToInvite 
+	 * @param chanName 
+	 * 
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('invitInChan')
+	async invitInChan(client: Socket, userToInvite: UserEntity, chanName: string)
+	{
+		const isPrivate : boolean = await this.channelService.invitInChan(client.data.user, userToInvite, chanName);
+		if (isPrivate == true)
+			client.join(chanName);
+	}
+
+  
+	/**
+	 * ------------------------ BAN / MUTE  ------------------------- *
+	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('BanUser')
+	async BanUser(client: Socket, userToBan: UserEntity, chanName: string)
+	{
+		await this.channelService.banUser(client.data.user, userToBan, chanName);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('MuteUser')
+	async MuteUser(client: Socket, userToMute: UserEntity, chanName: string)
+	{
+		await this.channelService.muteUser(client.data.user, userToMute, chanName);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('UnbanUser')
+	async UnbanUser(client: Socket, userToUnban: UserEntity, chanName: string)
+	{
+		await this.channelService.unbanUser(client.data.user, userToUnban, chanName);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('UnmuteUser')
+	async UnmuteUser(client: Socket, userToUnmute: UserEntity, chanName: string)
+	{
+		await this.channelService.unmuteUser(client.data.user, userToUnmute, chanName);
+	}
+
+	
+	/**
+	 * ------------------------ HANDLE MESSAGES  ------------------------- *
+	 */
 
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
@@ -150,4 +214,21 @@ export class ChatGateway
 		const channels: ChannelEntity[] = await this.channelService.getAllChannels();
 		this.server.emit('sendChans', channels);
 	}
+
+	@SubscribeMessage('getAllPublicChannels')
+	async GetAllPublicChannels(client: Socket)
+	{
+		const publicChannels: ChannelEntity[] = await this.channelService.getAllPublicChannels();
+		this.server.emit('sendPublicsChannels', publicChannels);
+	}
+
+
+	@SubscribeMessage('getAllPrivateChannels')
+	async getAllPrivateChannels(client: Socket)
+	{
+		const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels();
+		this.server.emit('sendPrivateChannels', privateChannels);
+	}
+
+	
 }

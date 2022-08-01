@@ -28,7 +28,7 @@ const OpenedChannel: React.FC<{ channel: ChannelProp; socket: Socket }> = (
     props.socket.on("channelMessage", (message) => {
       // console.log("message from server: ", message);
       setNewMessage((prevState) => {
-        return [message, ...prevState];
+        return [message[0], ...prevState];
       });
     });
   }, [messages]);
