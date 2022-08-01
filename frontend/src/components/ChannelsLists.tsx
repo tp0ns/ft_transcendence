@@ -2,7 +2,6 @@ import ChannelProp from "../interfaces/Channel.interface";
 import ChannelItem from "./ChannelItem";
 
 const ChannelsList: React.FC<{ channels: any }> = (props) => {
-  console.log("ChannlesList: ", props.channels);
   return (
     <section>
       <ul>

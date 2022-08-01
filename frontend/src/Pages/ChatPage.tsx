@@ -13,10 +13,7 @@ const DUMMY_CHANNELS = [
   },
 ];
 
-let channels: any = [];
-
 const socket: Socket = io("http://localhost");
-socket.on("getAllChannels", channels);
 
 // const channels: any = [];
 
@@ -24,16 +21,29 @@ function ChatPage() {
   // const channelsCtx = useContext(ChannelsContext);
 
   const [newChannel, setNewChannel] = useState(false);
+  const [channelsReceived, setChannelsReceived] = useState<ChannelProp[]>([]);
   // const [loadedChannels, setLoadedChannels] = useState([]);
 
   const handleNewChannel = () => {
     setNewChannel(true);
   };
 
-  useEffect(() => {
-    socket.on("getAllChannels", channels);
-    console.log(channels);
-  }, [socket]);
+  socket.on("sendChans", (channels) => {
+    setChannelsReceived(channels);
+  });
+
+  socket.on("createdChan", (channel) => {
+    console.log("createdChan channels frontend:", channel);
+    setChannelsReceived((prevState: any[]) => {
+      return [channel, ...prevState];
+    });
+  });
+
+  // useEffect(() => {
+  //   socket.emit("getAllChannels");
+
+  //   console.log("useEffect() channel", channelsReceived);
+  // }, []);
 
   const sendChannel = (channelData: ChannelProp) => {
     setNewChannel(false);
@@ -45,7 +55,7 @@ function ChatPage() {
       {!newChannel ? (
         <button onClick={handleNewChannel}>Add Channel</button>
       ) : null}
-      <ChannelsList channels={channels} />
+      <ChannelsList channels={channelsReceived} />
       {newChannel ? <NewChannelForm sendChan={sendChannel} /> : null}
     </section>
   );

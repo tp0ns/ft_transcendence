@@ -75,9 +75,9 @@ export class ChatGateway
 		//   this.server.emit('errCreatingChan')
 		// }
 		// else {
+		console.log('backend: ', JSON.stringify(channel));
 		this.server.emit('createdChan', channel);
 		this.joinChannel(client, channelEntity.title);
-		console.log(JSON.stringify(channel));
 
 		// }
 	}
@@ -103,7 +103,6 @@ export class ChatGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveChan')
 	async leaveChannel(client: Socket, channelName: string) {
-		console.log(`ENTER IN LEAAAAAAAAAAAVEJOIN YOOOOOOOO`);
 		await this.channelService.leaveChan(client.data.user, channelName);
 		client.leave(channelName);
 		this.server.emit('leftChan');

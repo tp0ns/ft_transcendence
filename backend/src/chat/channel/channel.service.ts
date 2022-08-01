@@ -69,7 +69,6 @@ export class ChannelService {
 
 	async getAllChannels(): Promise<Channel[]> {
 		const channels: Channel[] = await this.channelRepository.find();
-		console.log('Channels in backend: ', channels);
 		return channels;
 	}
 
