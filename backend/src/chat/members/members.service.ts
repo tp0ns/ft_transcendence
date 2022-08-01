@@ -12,12 +12,9 @@ export class membersService {
 	) {}
 
 	async createNewMember(newUser: UserEntity, chan: ChannelEntity) : Promise<void> {
-		console.log(`check user in member service : `, JSON.stringify(newUser));
-		console.log(`check channel in meber service : `, JSON.stringify(chan));
 		await this.MembersRepository.save({
 			user: newUser, 
 			channel: chan
 	});
-
 	}
 }

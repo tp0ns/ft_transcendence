@@ -2,8 +2,8 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserEntity from 'src/user/models/user.entity';
 import { DataSource, Repository } from 'typeorm';
-import { MembersEntity } from '../channelMembers/members.entity';
-import { membersService } from '../channelMembers/members.service';
+import { MembersEntity } from '../members/members.entity';
+import { membersService } from '../members/members.service';
 import { ChannelEntity } from './channel.entity';
 // import * as bcrypt from 'bcrypt';
 import { CreateChanDto } from './dtos/createChan.dto';
@@ -12,8 +12,7 @@ import { CreateChanDto } from './dtos/createChan.dto';
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
-		@Inject(forwardRef(() => membersService))
-    	private membersService: membersService,
+		@Inject(forwardRef(() => membersService)) private membersService: membersService,
 	) {}
 
 	/**
@@ -21,27 +20,27 @@ export class ChannelService {
 	 */
 
 	async createNewChan(user: UserEntity, chan: CreateChanDto) {
-		// let newPassword = await bcrypt.hash(channel.password, 10);
+		// let newPassword = await bcrypt.hash(chan.password, 10);
 		// try {
+		const date = new Date();
 		let channel : ChannelEntity = await this.channelRepository.save({
 			title: chan.title,
 			owner: user,
 			password: chan.password,
+			creation: date, 
+			update: date
 			// isProtected : channel.isProtected,
 		// });
 		// }
 		// catch {
 			//error
 		});
-		console.log(`check user in channel service : `, JSON.stringify(user));
-		console.log(`check channel in channel service : `, JSON.stringify(channel));
-		this.membersService.createNewMember(user, channel);
 	}
-
+	
 	/**
 	 * ------------------------ CIRCULATION IN CHAN  ------------------------- *
 	 */
-
+	
 	/**
 	 *
 	 * @param user user who want to join the channel
@@ -49,18 +48,13 @@ export class ChannelService {
 	 *
 	 * @todo si la personne est deja dans le channel : quel comportement ?
 	 */
-
+	
 	async joinChan(user : UserEntity, channelName : string) {
 		let channel : ChannelEntity = await this.getChanByName(channelName);
-		// let member : MembersEntity = await this.membersService.createNewMember(user, channel);
+		await this.membersService.createNewMember(user, channel);
 		//find si le user est deja dans le channel 
 		//check si le user n'est pas ban 
 		//check si le channel existe
-
-		// channel.members = [...channel.members , member];
-		// await channel.save();
-		channel.members = [...channel.members, user];
-		await channel.save();
 	}
 	
 /**
@@ -72,8 +66,6 @@ export class ChannelService {
  */
 	async leaveChan(user : UserEntity, channelName : string ) { 
 		let channel : ChannelEntity = await this.getChanByName(channelName);
-
-		console.log(`members of chans : `, JSON.stringify(channel.members));
 		console.log(`user who want to quit : `, JSON.stringify(user.username));
 		console.log(`channel to quit : `, JSON.stringify(channelName));
 		await this.channelRepository
@@ -89,7 +81,7 @@ export class ChannelService {
 	
 	async getAllChannels(): Promise<ChannelEntity[]> {
 		const channels : ChannelEntity[] = await this.channelRepository.find()
-		console.log('Channels in backend: ', channels);
+		// console.log('Channels in backend: ', channels);
 		return channels;
 	}
 
@@ -103,9 +95,7 @@ export class ChannelService {
 	 */
 	async getChanByName(chanName : string) : Promise<ChannelEntity> 
 	{
-		// const channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']})
-		// let channel : ChannelEntity = await this.channelRepository.findOne({ where: {title: chanName }});
-		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']});
+		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }});
 		// if (!channel)
 			// console.log("le channel il existe po");
 		return channel;

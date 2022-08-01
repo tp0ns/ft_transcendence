@@ -10,7 +10,7 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-// import { MembersEntity } from '../channelMembers/members.entity';
+import { MembersEntity } from '../members/members.entity';
 
 @Entity('channel')
 export class ChannelEntity extends BaseEntity {
@@ -40,16 +40,21 @@ export class ChannelEntity extends BaseEntity {
 	})
 	password: string;
 
-	@ManyToMany(() => UserEntity, (user) => user.channels, {
-	})
-	@JoinTable()
-	members: UserEntity[]
+	@OneToMany(() => MembersEntity, (members) => members.channel)
+	channels: ChannelEntity[]
 
 	@Column({
 		default: false,
 	})
 	isProtected: boolean;
 
-	//faire la date de crea
-	//faire le time de la derniere activite sur le chan
+	@Column({
+		nullable: false,
+	})
+	creation: Date;
+	
+	  @Column({
+		nullable: false,
+	})
+	update: Date;
 }

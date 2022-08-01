@@ -5,7 +5,7 @@ import { ChannelEntity } from "../channel/channel.entity";
 
 @Entity('members') 
 export class MembersEntity extends BaseEntity {
-	@PrimaryGeneratedColumn('uuid') 
+	@PrimaryGeneratedColumn('uuid')
 	memberId : string
 
 	@Column({
@@ -23,17 +23,11 @@ export class MembersEntity extends BaseEntity {
 	})
 	admin: boolean
 
-	/**
-	 * Un membre peut avoir plusieurs channels
-	 */
 	@ManyToOne(() => ChannelEntity, (channel) => channel.channelId, {
 		eager: true,
 	})
 	channel : ChannelEntity
 
-	/**
-	 * Un type de membre peut avoir plusieurs users
-	 */
 	@ManyToOne(() => UserEntity, (user) => user.userId, {
 	})
 	user: UserEntity

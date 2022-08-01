@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Post, Req, UseGuards, UsePipes, Valida
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import UserEntity from 'src/user/models/user.entity';
-import { membersService } from '../channelMembers/members.service';
+import { membersService } from '../members/members.service';
 import { ChannelEntity } from './channel.entity';
 import { ChannelService } from './channel.service';
 import { CreateChanDto } from './dtos/createChan.dto';
