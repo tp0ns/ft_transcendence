@@ -23,7 +23,7 @@ function ChatPage() {
 
   const [newChannel, setNewChannel] = useState(false);
   const [channelsReceived, setChannelsReceived] = useState([]);
-  const [openedChannel, setOpenedChannel] = useState<ChannelProp>();
+  const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
 
   const handleNewChannel = () => {
     setNewChannel(true);
@@ -48,6 +48,10 @@ function ChatPage() {
     setOpenedChannel(channel);
   };
 
+  const leaveChannelHandler = () => {
+    setOpenedChannel(null);
+  };
+
   return (
     <section>
       {!newChannel ? (
@@ -61,7 +65,11 @@ function ChatPage() {
         <NewChannelForm sendChan={sendChannel} />
       ) : null}
       {!newChannel && openedChannel ? (
-        <OpenedChannel channel={openedChannel} socket={socket} />
+        <OpenedChannel
+          channel={openedChannel}
+          socket={socket}
+          leaveChannel={leaveChannelHandler}
+        />
       ) : null}
     </section>
   );
