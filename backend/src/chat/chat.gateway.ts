@@ -49,71 +49,69 @@ export class ChatGateway
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
 
-  /**
-   * ------------------------ CREATE CHANNEL  ------------------------- *
-   */
+	/**
+	 * ------------------------ CREATE CHANNEL  ------------------------- *
+	 */
 
-/**
- * 
- * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
- * @param channel Pouvoir set les donnees du chan
- * 
- * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
- * pour tout le monde dans les channels publics si chan public
- */
-  @UseGuards(WsGuard)
-  @SubscribeMessage('createChan')
-  async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-	  const channel = await this.channelService.createNewChan(
-		  client.data.user,
-		  channelEntity,
-	  );
-	  // if (!channel) {
-	  //   this.server.emit('errCreatingChan')
-	  // }
-	  // else {
-	  this.server.emit('createdChan', channel);
-	  this.joinChannel(client, channelEntity.title);
-	  console.log(JSON.stringify(channel));
+	/**
+	 *
+	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
+	 * @param channel Pouvoir set les donnees du chan
+	 *
+	 * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
+	 * pour tout le monde dans les channels publics si chan public
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('createChan')
+	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
+		const channel = await this.channelService.createNewChan(
+			client.data.user,
+			channelEntity,
+		);
+		// if (!channel) {
+		//   this.server.emit('errCreatingChan')
+		// }
+		// else {
+		this.server.emit('createdChan', channel);
+		this.joinChannel(client, channelEntity.title);
+		console.log(JSON.stringify(channel));
 
-	  // }
-  }
+		// }
+	}
 
-  /**
-   * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
-   */
+	/**
+	 * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
+	 */
 
+	/**
+	 *
+	 * @param client client qui veut join le chan
+	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
+	 *
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('joinChan')
+	async joinChannel(client: Socket, channelName: string) {
+		await this.channelService.joinChan(client.data.user, channelName);
+		client.join(channelName);
+		this.server.emit('joinedChan');
+	}
 
-  /**
-   * 
-   * @param client client qui veut join le chan
-   * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
-   * 
-   */
-  @UseGuards(WsGuard)
-  @SubscribeMessage('joinChan')
-  async joinChannel(client : Socket, channelName : string) {
-    await this.channelService.joinChan(client.data.user, channelName);
-    client.join(channelName);
-    this.server.emit('joinedChan');
-  }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('leaveChan')
+	async leaveChannel(client: Socket, channelName: string) {
+		await this.channelService.leaveChan(client.data.user, channelName);
+		client.leave(channelName);
+		this.server.emit('leftChan');
+	}
 
-  @UseGuards(WsGuard)
-  @SubscribeMessage('leaveChan')
-  async leaveChannel(client : Socket, channelName : string ) {
-    await this.channelService.leaveChan(client.data.user, channelName);
-    client.leave(channelName);
-    this.server.emit('leftChan')
-  }
+	/**
+	 * ------------------------ HANDLE MESSAGES  ------------------------- *
+	 */
 
-
-  /**
-   * ------------------------ HANDLE MESSAGES  ------------------------- *
-   */
-
-  /**
-   * @todo en plus d'envoyer le msg, stocker dans l'entite messages
-   */
+	/**
+	 * @todo en plus d'envoyer le msg, stocker dans l'entite messages
+	 */
 	// @UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
 	handleMessage(client: Socket, payload: string) {
@@ -147,7 +145,8 @@ export class ChatGateway
 
 	@SubscribeMessage('getAllChannels')
 	async getChannels(client: Socket) {
-		const channels: ChannelEntity[] = await this.channelService.getAllChannels();
+		const channels: ChannelEntity[] =
+			await this.channelService.getAllChannels();
 		this.server.emit('sendChans', channels);
 	}
 }
