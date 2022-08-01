@@ -4,8 +4,6 @@ import ChannelProp from "../interfaces/Channel.interface";
 import Card from "../ui/Card";
 import MessagesList from "./MessagesLists";
 
-const DUMMY_MSSG = ["hello world", "GROSSE TEUB"];
-
 const OpenedChannel: React.FC<{
   channel: ChannelProp;
   socket: Socket;
@@ -36,7 +34,7 @@ const OpenedChannel: React.FC<{
       console.log("message from server: ", payload);
       setNewMessage([...messages, payload[0]]);
     });
-  }, [messages]);
+  }, [messages, props.socket]);
 
   return (
     <Card>

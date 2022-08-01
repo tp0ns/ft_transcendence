@@ -3,6 +3,7 @@ interface ChannelProp {
 	title: string;
 	password: string;
 	private: boolean;
+	protected: boolean;
 }
 
 export default ChannelProp;
