@@ -24,6 +24,4 @@ export class MessageService {
 		})
 		return message;
 	}
-
-
 }

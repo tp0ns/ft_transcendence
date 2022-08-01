@@ -1,13 +1,21 @@
 import ChannelProp from "../interfaces/Channel.interface";
 import ChannelItem from "./ChannelItem";
 
-const ChannelsList: React.FC<{ channels: any }> = (props) => {
-  console.log("ChannlesList: ", props.channels);
+const ChannelsList: React.FC<{
+  displayChannel: (channel: any) => void;
+  channels: any;
+}> = (props) => {
   return (
     <section>
       <ul>
         {props.channels.map((channel: any) => (
-          <ChannelItem key={channel.id} name={channel.title} />
+          <ChannelItem
+            displayChannel={() => {
+              props.displayChannel(channel);
+            }}
+            key={channel.id}
+            name={channel.title}
+          />
         ))}
       </ul>
     </section>

@@ -121,10 +121,12 @@ export class ChatGateway
 		return payload;
 	}
 
+	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	handleMessageToChan(client: Socket, payload: string, chanName: string) {
 		client.join(chanName);
-		this.server.to(chanName).emit('channelMessage', payload);
+		this.channelService.sendMessage(client.data.user, payload, chanName);
+		this.server.emit('channelMessage', payload);
 	}
 
 	/**

@@ -4,6 +4,7 @@ import UserEntity from 'src/user/models/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { MembersEntity } from '../members/members.entity';
 import { membersService } from '../members/members.service';
+import { MessageService } from '../messages/messages.service';
 import { ChannelEntity } from './channel.entity';
 // import * as bcrypt from 'bcrypt';
 import { CreateChanDto } from './dtos/createChan.dto';
@@ -13,6 +14,7 @@ export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
 		@Inject(forwardRef(() => membersService)) private membersService: membersService,
+		@Inject(forwardRef(() => MessageService)) private messageService: MessageService,
 	) {}
 
 	/**
@@ -78,10 +80,9 @@ export class ChannelService {
 	/**
 	 * ------------------------ GETTERS  ------------------------- *
 	 */
-	
+
 	async getAllChannels(): Promise<ChannelEntity[]> {
-		const channels : ChannelEntity[] = await this.channelRepository.find()
-		// console.log('Channels in backend: ', channels);
+		const channels: ChannelEntity[] = await this.channelRepository.find();
 		return channels;
 	}
 
@@ -100,6 +101,17 @@ export class ChannelService {
 			// console.log("le channel il existe po");
 		return channel;
 	}
+
+	/**
+	 * ------------------------ MESSAGES  ------------------------- *
+	 */
+
+	async sendMessage(user: UserEntity, message: string, chanName: string)
+	{
+		let channel : ChannelEntity = await this.getChanByName(chanName);
+		this.messageService.addNewMessage(user, channel, message);
+	}
+
 
 }
 

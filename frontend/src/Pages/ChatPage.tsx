@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import ChannelsList from "../components/ChannelsLists";
 import NewChannelForm from "../components/NewChannel";
 import ChannelProp from "../interfaces/Channel.interface";
+import OpenedChannel from "../components/OpenedChannel";
 
 const DUMMY_CHANNELS = [
   {
@@ -13,10 +14,7 @@ const DUMMY_CHANNELS = [
   },
 ];
 
-let channels: any = [];
-
 const socket: Socket = io("http://localhost");
-socket.on("getAllChannels", channels);
 
 // const channels: any = [];
 
@@ -24,20 +22,30 @@ function ChatPage() {
   // const channelsCtx = useContext(ChannelsContext);
 
   const [newChannel, setNewChannel] = useState(false);
-  // const [loadedChannels, setLoadedChannels] = useState([]);
+  const [channelsReceived, setChannelsReceived] = useState([]);
+  const [openedChannel, setOpenedChannel] = useState<ChannelProp>();
 
   const handleNewChannel = () => {
     setNewChannel(true);
   };
 
   useEffect(() => {
-    socket.on("getAllChannels", channels);
-    console.log(channels);
-  }, [socket]);
+    console.log("Before getAllChannels emit!");
+    socket.emit("getAllChannels");
+    console.log("After getAllChannels emit!");
+    socket.on("sendChans", (channels) => {
+      setChannelsReceived(channels);
+    });
+    console.log("After sendChans emit!");
+  }, [newChannel]);
 
   const sendChannel = (channelData: ChannelProp) => {
     setNewChannel(false);
     socket.emit("createChan", channelData);
+  };
+
+  const handleOpenedChannel = (channel: any) => {
+    setOpenedChannel(channel);
   };
 
   return (
@@ -45,8 +53,16 @@ function ChatPage() {
       {!newChannel ? (
         <button onClick={handleNewChannel}>Add Channel</button>
       ) : null}
-      <ChannelsList channels={channels} />
-      {newChannel ? <NewChannelForm sendChan={sendChannel} /> : null}
+      <ChannelsList
+        displayChannel={handleOpenedChannel}
+        channels={channelsReceived}
+      />
+      {newChannel && !openedChannel ? (
+        <NewChannelForm sendChan={sendChannel} />
+      ) : null}
+      {!newChannel && openedChannel ? (
+        <OpenedChannel channel={openedChannel} socket={socket} />
+      ) : null}
     </section>
   );
 }

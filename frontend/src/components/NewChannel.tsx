@@ -27,7 +27,6 @@ const NewChannelForm: React.FC<{
       private: privateChan,
     };
     // channelsCtx.addChannel(channelData);
-    console.log(channelData);
     props.sendChan(channelData);
   }
 
