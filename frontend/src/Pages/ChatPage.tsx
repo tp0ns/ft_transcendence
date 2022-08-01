@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import ChannelsList from "../components/ChannelsLists";
 import NewChannelForm from "../components/NewChannel";
 import ChannelProp from "../interfaces/Channel.interface";
+import OpenedChannel from "../components/OpenedChannel";
 
 const DUMMY_CHANNELS = [
   {
@@ -22,23 +23,29 @@ function ChatPage() {
 
   const [newChannel, setNewChannel] = useState(false);
   const [channelsReceived, setChannelsReceived] = useState([]);
-  // const [loadedChannels, setLoadedChannels] = useState([]);
+  const [openedChannel, setOpenedChannel] = useState<ChannelProp>();
 
   const handleNewChannel = () => {
     setNewChannel(true);
   };
 
-  console.log("Before getAllChannels emit!");
-  socket.emit("getAllChannels");
-  console.log("After getAllChannels emit!");
-  socket.on("sendChans", (channels) => {
-    setChannelsReceived(channels);
-  });
-  console.log("After sendChans emit!");
+  useEffect(() => {
+    console.log("Before getAllChannels emit!");
+    socket.emit("getAllChannels");
+    console.log("After getAllChannels emit!");
+    socket.on("sendChans", (channels) => {
+      setChannelsReceived(channels);
+    });
+    console.log("After sendChans emit!");
+  }, [newChannel]);
 
   const sendChannel = (channelData: ChannelProp) => {
     setNewChannel(false);
     socket.emit("createChan", channelData);
+  };
+
+  const handleOpenedChannel = (channel: any) => {
+    setOpenedChannel(channel);
   };
 
   return (
@@ -46,8 +53,16 @@ function ChatPage() {
       {!newChannel ? (
         <button onClick={handleNewChannel}>Add Channel</button>
       ) : null}
-      <ChannelsList channels={channelsReceived} />
-      {newChannel ? <NewChannelForm sendChan={sendChannel} /> : null}
+      <ChannelsList
+        displayChannel={handleOpenedChannel}
+        channels={channelsReceived}
+      />
+      {newChannel && !openedChannel ? (
+        <NewChannelForm sendChan={sendChannel} />
+      ) : null}
+      {!newChannel && openedChannel ? (
+        <OpenedChannel channel={openedChannel} socket={socket} />
+      ) : null}
     </section>
   );
 }

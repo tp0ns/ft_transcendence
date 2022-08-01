@@ -125,7 +125,7 @@ export class ChatGateway
 	@SubscribeMessage('msgToChannel')
 	handleMessageToChan(client: Socket, payload: string, chanName: string) {
 		client.join(chanName);
-		this.server.to(chanName).emit('channelMessage', payload);
+		this.server.emit('channelMessage', payload);
 	}
 
 	/**
