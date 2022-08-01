@@ -11,6 +11,7 @@ import {
 	PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MembersEntity } from '../members/members.entity';
+import { MessagesEntity } from '../messages/messages.entity';
 
 @Entity('channel')
 export class ChannelEntity extends BaseEntity {
@@ -42,6 +43,9 @@ export class ChannelEntity extends BaseEntity {
 
 	@OneToMany(() => MembersEntity, (members) => members.channel)
 	channels: ChannelEntity[]
+
+	@OneToMany(() => MessagesEntity, (message) => message.channel)
+	messages: MessagesEntity[];
 
 	@Column({
 		default: false,

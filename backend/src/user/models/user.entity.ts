@@ -1,5 +1,6 @@
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MembersEntity } from 'src/chat/members/members.entity';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import {
 	Column,
 	Entity,
@@ -56,6 +57,9 @@ export class UserEntity {
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.receiver)
 	receivedRelations: RelationEntity[];
+
+	@OneToMany(() => MessagesEntity, (message) => message.channel)
+	messages: MessagesEntity[];
 }
 
 export default UserEntity;
