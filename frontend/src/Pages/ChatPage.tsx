@@ -21,29 +21,20 @@ function ChatPage() {
   // const channelsCtx = useContext(ChannelsContext);
 
   const [newChannel, setNewChannel] = useState(false);
-  const [channelsReceived, setChannelsReceived] = useState<ChannelProp[]>([]);
+  const [channelsReceived, setChannelsReceived] = useState([]);
   // const [loadedChannels, setLoadedChannels] = useState([]);
 
   const handleNewChannel = () => {
     setNewChannel(true);
   };
 
+  console.log("Before getAllChannels emit!");
+  socket.emit("getAllChannels");
+  console.log("After getAllChannels emit!");
   socket.on("sendChans", (channels) => {
     setChannelsReceived(channels);
   });
-
-  socket.on("createdChan", (channel) => {
-    console.log("createdChan channels frontend:", channel);
-    setChannelsReceived((prevState: any[]) => {
-      return [channel, ...prevState];
-    });
-  });
-
-  // useEffect(() => {
-  //   socket.emit("getAllChannels");
-
-  //   console.log("useEffect() channel", channelsReceived);
-  // }, []);
+  console.log("After sendChans emit!");
 
   const sendChannel = (channelData: ChannelProp) => {
     setNewChannel(false);
