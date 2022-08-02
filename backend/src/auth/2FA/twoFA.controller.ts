@@ -1,5 +1,19 @@
 // eslint-disable-next-line prettier/prettier
-import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, Post, Req, Res, UnauthorizedException, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
+import {
+	Body,
+	ClassSerializerInterceptor,
+	Controller,
+	Get,
+	HttpCode,
+	Post,
+	Req,
+	Res,
+	UnauthorizedException,
+	UseGuards,
+	UseInterceptors,
+	UsePipes,
+	ValidationPipe,
+} from '@nestjs/common';
 import { TwoFAService } from './twoFA.service';
 import { Response } from 'express';
 import { UserService } from 'src/user/user.service';
@@ -45,7 +59,7 @@ export class TwoFAController {
 			true,
 		);
 		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
-		return request.user;
+		// return request.user;
 	}
 
 	/**
