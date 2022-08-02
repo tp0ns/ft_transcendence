@@ -8,15 +8,13 @@ import { UserService } from 'src/user/user.service';
 import { ChannelController } from './channel/channel.controller';
 import { ChannelEntity } from './channel/channel.entity';
 import { ChannelService } from './channel/channel.service';
-import { ChatGateway } from './chat.gateway';
-import { MembersEntity } from './members/members.entity';
-import { membersService } from './members/members.service';
+import { GeneralGateway } from 'src/general.gateway';
 import { MessagesEntity } from './messages/messages.entity';
 import { MessageService } from './messages/messages.service';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([ChannelEntity, UserEntity, RelationEntity, MembersEntity, MessagesEntity])],
-	providers: [ChatGateway, JwtService, UserService, ChannelService, membersService, MessageService],
+	imports: [TypeOrmModule.forFeature([ChannelEntity, UserEntity, RelationEntity, MessagesEntity])],
+	providers: [GeneralGateway, JwtService, UserService, ChannelService, MessageService],
 	controllers: [ChannelController],
 })
 export class ChatModule {}

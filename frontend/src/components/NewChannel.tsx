@@ -16,7 +16,7 @@ const NewChannelForm: React.FC<{
     event.preventDefault();
 
     const enteredTitle: string = titleInputRef.current!.value;
-    let enteredPassword: string = "123";
+    let enteredPassword: string = "";
     if (passwordInputRef.current) {
       enteredPassword = passwordInputRef.current!.value;
     }
@@ -28,6 +28,7 @@ const NewChannelForm: React.FC<{
       private: privateChan,
       protected: protectedChan,
     };
+    console.log("ChannelData in new item form: ", channelData);
     // channelsCtx.addChannel(channelData);
     props.sendChan(channelData);
   }

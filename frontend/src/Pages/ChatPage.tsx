@@ -17,6 +17,7 @@ function ChatPage() {
   };
 
   useEffect(() => {
+    console.log("entered useEffect");
     socket.emit("getAllChannels");
     socket.on("sendChans", (channels) => {
       setChannelsReceived(channels);
@@ -24,15 +25,19 @@ function ChatPage() {
   }, [newChannel]);
 
   const sendChannel = (channelData: ChannelProp) => {
-    setNewChannel(false);
+    console.log("entered sendChan");
+    console.log("Channel Data in chat page: ", channelData);
     socket.emit("createChan", channelData);
+    setNewChannel(false);
   };
 
   const handleOpenedChannel = (channel: any) => {
+    socket.emit("joinRoom", channel);
     setOpenedChannel(channel);
   };
 
   const leaveChannelHandler = () => {
+    socket.emit("leaveRoom");
     setOpenedChannel(null);
   };
 
@@ -42,7 +47,7 @@ function ChatPage() {
         <button onClick={handleNewChannel}>Add Channel</button>
       ) : null}
       <ChannelsList
-        displayChannel={handleOpenedChannel}
+        selectedChannel={handleOpenedChannel}
         channels={channelsReceived}
       />
       {newChannel && !openedChannel ? (

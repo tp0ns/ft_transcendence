@@ -10,8 +10,6 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { MembersEntity } from '../members/members.entity';
-import { MessagesEntity } from '../messages/messages.entity';
 
 @Entity('channel')
 export class ChannelEntity extends BaseEntity {
@@ -21,7 +19,7 @@ export class ChannelEntity extends BaseEntity {
 	@Column({
 		default: false,
 	})
-	isPrivate: boolean;
+	private: boolean;
 
 	@Column('text', {
 		default: '',
@@ -29,35 +27,46 @@ export class ChannelEntity extends BaseEntity {
 	title: string;
 
 	/**
-	 * Un Channel ne peut avoir qu'un seul owner mais un user 
+	 * Un Channel ne peut avoir qu'un seul owner mais un user
 	 * peut etre owner de plusieurs channels
 	 */
 	@ManyToOne(() => UserEntity)
 	@JoinColumn()
 	owner: UserEntity;
 
-	@Column("text", {
-		default: "",
+	@Column('text', {
+		default: null,
+		nullable: true,
 	})
 	password: string;
 
-	@OneToMany(() => MembersEntity, (members) => members.channel)
-	channels: ChannelEntity[]
+	@ManyToMany(() => UserEntity)
+	@JoinTable()
+	admins: UserEntity[]
 
-	@OneToMany(() => MessagesEntity, (message) => message.channel)
-	messages: MessagesEntity[];
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	members: UserEntity[]
+
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	bannedMembers: UserEntity[]
+
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	mutedMembers: UserEntity[]
 
 	@Column({
 		default: false,
 	})
-	isProtected: boolean;
+	protected: boolean;
 
 	@Column({
 		nullable: false,
 	})
 	creation: Date;
-	
-	  @Column({
+
+	@Column({
 		nullable: false,
 	})
 	update: Date;
