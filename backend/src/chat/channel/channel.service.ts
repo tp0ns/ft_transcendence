@@ -18,11 +18,16 @@ export class ChannelService {
 	) {}
 
 	/**
-	 * ------------------------ CREATE/ MODIFY CHANNEL  ------------------------- *
+	 * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
 	 */
 
+	/**
+	 * 
+	 * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
+	 * pour tout le monde dans les channels publics si chan public
+	 * @todo verifier qu'un autre channel ne porte pas deja le meme nom
+	 */
 	async createNewChan(user: UserEntity, chan: CreateChanDto) {
-		console.log(`password of protected chan is : `, JSON.stringify(chan.password));
 		let newPassword : string = null;
 		const date = new Date();
 		if (chan.password != null)
@@ -34,12 +39,16 @@ export class ChannelService {
 			password: newPassword,
 			creation: date, 
 			update: date,
-			// isProtected : chan.,
+			isProtected: chan.isProtected,
+			isPrivate: chan.isPrivate,
 				});
 			}
 		catch {
 			// error
-			}	
+			}
+		//if channel == isPublic
+		//tant qu'on a pas parcouru toute la liste des users connectes
+		//faire un joinChannel
 		}
 
 	/**
@@ -73,6 +82,22 @@ export class ChannelService {
 		}
 	}
 
+	async deleteChan(user: UserEntity, chanName: string)
+	{
+		const channel : ChannelEntity = await this.getChanByName(chanName);
+		if (channel.owner != user)
+			console.log(`You can't delete this channel`);
+		else 
+		{
+			await this.channelRepository
+				.createQueryBuilder()
+				.delete()
+				.from(ChannelEntity)
+				.where("title = :chanName", { chanName: channel.title })
+				.execute()
+		}
+	}
+
 	/**
 	 * ------------------------ CIRCULATION IN CHAN  ------------------------- *
 	 */
@@ -91,6 +116,7 @@ export class ChannelService {
 		//find si le user est deja dans le channel 
 		//check si le user n'est pas ban 
 		//check si le channel existe
+		//verifier que le 
 	}
 	
 	/**

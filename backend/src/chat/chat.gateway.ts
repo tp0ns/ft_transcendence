@@ -53,7 +53,7 @@ export class ChatGateway
 	}
 
   /**
-   * ------------------------ CREATE/MODIFY CHANNEL  ------------------------- *
+   * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
    */
 
 	/**
@@ -61,9 +61,6 @@ export class ChatGateway
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
 	 * 
-	 * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
-	 * pour tout le monde dans les channels publics si chan public
-	 * @todo verifier qu'un autre channel ne porte pas deja le meme nom
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
@@ -77,9 +74,7 @@ export class ChatGateway
 		// }
 		// else {
 		this.server.emit('createdChan', channel);
-		this.joinChannel(client, channelEntity.title);
-		console.log(JSON.stringify(channel));
-
+		// this.joinChannel(client, channelEntity.title);
 		// }
 	}
 
@@ -97,6 +92,13 @@ export class ChatGateway
 		await this.channelService.modifyAdmins(client.data.user, chanName, newAdmins);
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('deleteChan')
+	async deleteChan(client: Socket, chanName: string)
+	{
+		await this.channelService.deleteChan(client.data.user, chanName);
+	}
+
 	/**
 	 * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
 	 */
@@ -105,23 +107,26 @@ export class ChatGateway
 	 *
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
+	 * 
+	 * @todo si le channel est private, verifier que le user est bien membre du channel avant de rejoindre la room
 	 *
 	 */
 	@UseGuards(WsGuard)
-	@SubscribeMessage('joinChan')
-	async joinChannel(client: Socket, channelName: string) {
-		console.log(`enter in joinChannel`);
-		await this.channelService.joinChan(client.data.user, channelName);
+	@SubscribeMessage('joinRoom')
+	async joinRoom(client: Socket, channelName: string) {
+		console.log(`enter in joinRoom`);
+		// await this.channelService.joinChan(client.data.user, channelName);
 		client.join(channelName);
-		this.server.emit('joinedChan');
+		this.server.emit('joinedRoom');
 	}
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('leaveChan')
-	async leaveChannel(client : Socket, channelName : string ) {
-	await this.channelService.leaveChan(client.data.user, channelName);
-	client.leave(channelName);
-	this.server.emit('leftChan')
+	@SubscribeMessage('leaveRoom')
+	async leaveRoom(client : Socket, channelName : string ) {
+		console.log(`enter in leaveRoom`);
+		// await this.channelService.leaveChan(client.data.user, channelName);
+		client.leave(channelName);
+		this.server.emit('leftRoom')
 	}
 
 	/**
