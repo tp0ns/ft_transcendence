@@ -67,6 +67,7 @@ export class ChatGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
+		console.log(`check channel send by the front : `, JSON.stringify(channelEntity));
 		const channel = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
@@ -118,8 +119,6 @@ export class ChatGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
 	async joinRoom(client: Socket, channelName: string) {
-		console.log(`enter in joinRoom`);
-		// await this.channelService.joinChan(client.data.user, channelName);
 		client.join(channelName);
 		this.server.emit('joinedRoom');
 	}
@@ -127,8 +126,6 @@ export class ChatGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
 	async leaveRoom(client : Socket, channelName : string ) {
-		console.log(`enter in leaveRoom`);
-		// await this.channelService.leaveChan(client.data.user, channelName);
 		client.leave(channelName);
 		this.server.emit('leftRoom')
 	}
@@ -208,6 +205,7 @@ export class ChatGateway
 	handleMessageToChan(client: Socket, payload: string, chanName: string) {
 		client.join(chanName);
 		this.channelService.sendMessage(client.data.user, payload, chanName);
+		// this.server.to(chanName).emit('channelMessage', payload);
 		this.server.emit('channelMessage', payload);
 	}
 
