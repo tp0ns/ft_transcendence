@@ -24,7 +24,6 @@ const TwoFAPAge = () => {
 			if (!response.ok) {
 				throw new Error("Request failed!");
 			} else {
-				console.log("coucou");
 				navigate("/");
 			}
 		} catch (err) {
