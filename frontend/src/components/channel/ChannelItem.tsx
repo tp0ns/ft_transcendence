@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Socket } from "socket.io-client";
-import Card from "../ui/Card";
+import Card from "../../ui/Card";
 
 const ChannelItem: React.FC<{
   displayChannel: () => void;
