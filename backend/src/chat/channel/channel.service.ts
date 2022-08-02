@@ -87,7 +87,7 @@ export class ChannelService {
 		}
 	}
 
-	async deleteChan(user: UserEntity, chanName: string)
+	async deleteChan(user: UserEntity, chanName: string) 
 	{
 		const channel : ChannelEntity = await this.getChanByName(chanName);
 		if (channel.owner != user)
@@ -189,19 +189,25 @@ export class ChannelService {
 		return channels;
 	}
 
-	async getAllPublicChannels() : Promise<ChannelEntity[]> 
-	{
-		const publicChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: false}})
-		return publicChannels;
-	}
+	// async getMemberChannels(user: UserEntity): Promise<ChannelEntity[]>
+	// {
+	// 	const member: MembersEntity = await this.membersService.getMember(user);
 
-	async getAllPrivateChannels(user: UserEntity) : Promise<ChannelEntity[]> 
-	{
-		// const member: MembersEntity = await this.membersService.getMember(user);
-		const privateChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: true}})
+	// }
 
-		return privateChannels;
-	}
+	// async getAllPublicChannels() : Promise<ChannelEntity[]> 
+	// {
+	// 	const publicChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: false}})
+	// 	return publicChannels;
+	// }
+
+	// async getAllPrivateChannels(user: UserEntity) : Promise<ChannelEntity[]> 
+	// {
+	// 	// const member: MembersEntity = await this.membersService.getMember(user);
+	// 	const privateChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: true}})
+
+	// 	return privateChannels;
+	// }
 
 	/**
 	 * @brief Find the channel to join with his name

@@ -71,7 +71,7 @@ export class ChatGateway
 			client.data.user,
 			channelEntity,
 		);
-		this.server.emit('createdChan', channel);
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)
@@ -79,6 +79,7 @@ export class ChatGateway
 	async modifyPassword(client: Socket, chanName: string, newPassword : string)
 	{
 		await this.channelService.modifyPassword(client.data.user, chanName, newPassword);
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)
@@ -86,6 +87,7 @@ export class ChatGateway
 	async modifyAdmins(client : Socket, chanName: string, newAdmins: UserEntity[])
 	{
 		await this.channelService.modifyAdmins(client.data.user, chanName, newAdmins);
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)
@@ -94,6 +96,9 @@ export class ChatGateway
 	{
 		//tant qu'on a pas ajouter tous les users : 
 		// await this.channelService.invitInChan(client.data.user, userEntity, chanName);
+		await this.channelService.getChanByName(chanName);
+		this.server.emit('updatedChannels');
+
 	}
 
 	@UseGuards(WsGuard)
@@ -101,6 +106,8 @@ export class ChatGateway
 	async deleteChan(client: Socket, chanName: string)
 	{
 		await this.channelService.deleteChan(client.data.user, chanName);
+		this.server.emit('updatedChannels');
+
 	}
 
 	/**
@@ -225,7 +232,7 @@ export class ChatGateway
 	 * ------------------------ GET CHANNELS  ------------------------- *
 	 */
 
-	 @UseGuards(WsGuard)
+	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
 	async getChannels(client: Socket) {
 		const channels: ChannelEntity[] =
@@ -233,21 +240,28 @@ export class ChatGateway
 		this.server.emit('sendChans', channels);
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getAllPublicChannels')
-	async GetAllPublicChannels(client: Socket)
-	{
-		const publicChannels: ChannelEntity[] = await this.channelService.getAllPublicChannels();
-		this.server.emit('sendPublicsChannels', publicChannels);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('getMemberChannels')
+	// async getMemberChannels(client: Socket)
+	// {
+	// 	const channels: ChannelEntity[] = await this.channelService.getMemberChannels(client.data.user);
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getAllPrivateChannels')
-	async getAllPrivateChannels(client: Socket)
-	{
-		const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
-		this.server.emit('sendPrivateChannels', privateChannels);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('getAllPublicChannels')
+	// async GetAllPublicChannels(client: Socket)
+	// {
+	// 	const publicChannels: ChannelEntity[] = await this.channelService.getAllPublicChannels();
+	// 	this.server.emit('sendPublicsChannels', publicChannels);
+	// }
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('getAllPrivateChannels')
+	// async getAllPrivateChannels(client: Socket)
+	// {
+	// 	const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
+	// 	this.server.emit('sendPrivateChannels', privateChannels);
+	// }
 
 	
 }

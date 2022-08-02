@@ -1,7 +1,6 @@
 import UserEntity from "src/user/models/user.entity";
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { ChannelEntity } from "../channel/channel.entity";
-// import { Channel } from "../channel/channel.entity";
 
 @Entity('members') 
 export class MembersEntity extends BaseEntity {

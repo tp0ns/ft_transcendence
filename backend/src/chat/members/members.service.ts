@@ -18,10 +18,11 @@ export class membersService {
 	});
 	}
 
-	async getMember(userToFind: UserEntity) //: Promise<MembersEntity> 
+	async getMember(userToFind: UserEntity) : Promise<MembersEntity[]> 
 	{
-		// let member : MembersEntity = await this.MembersRepository.findOne({where: {user: userToFind}})
-
-		// return member;
+		let members : MembersEntity[] = await this.MembersRepository.find({
+			relations: ['user', 'channel'],
+			where: [{user: { userId: userToFind.userId }}]});
+		return members;
 	}
 }
