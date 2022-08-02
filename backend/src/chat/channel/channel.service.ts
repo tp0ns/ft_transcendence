@@ -84,6 +84,13 @@ export class ChannelService {
 		}
 	}
 
+	async modifyMembers(invitingUser: UserEntity, chanName: string,usersToAdd: UserEntity[])
+	{
+		let channel : ChannelEntity = await this.getChanByName(chanName);
+		// if (channel.private == true)
+			// await this.joinChan(userToInvite, chanName);
+	}
+
 	async deleteChan(user: UserEntity, chanName: string) 
 	{
 		const channel : ChannelEntity = await this.getChanByName(chanName);
@@ -140,13 +147,6 @@ export class ChannelService {
 			.remove(user);
 	}
 
-	async invitInChan(invitingUser: UserEntity, userToInvite: UserEntity, chanName: string)
-	{
-		let channel : ChannelEntity = await this.getChanByName(chanName);
-		if (channel.private == true)
-			await this.joinChan(userToInvite, chanName);
-  }
-
 	/**
 	 * ------------------------ BAN / MUTE  ------------------------- *
 	 */
@@ -154,14 +154,14 @@ export class ChannelService {
 	async banUser(banningUser: UserEntity, userToBan: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-		channel.members = [...channel.banMembers, banningUser];
+		channel.members = [...channel.bannedMembers, banningUser];
 		await channel.save();
 	}
 
 	async muteUser(muttingUser: UserEntity, userToMute: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-		channel.members = [...channel.muteMembers, muttingUser];
+		channel.members = [...channel.mutedMembers, muttingUser];
 		await channel.save();
 	}
 
@@ -171,7 +171,7 @@ export class ChannelService {
 
 		await this.channelRepository
 			.createQueryBuilder()
-			.relation(ChannelEntity, 'banMembers')
+			.relation(ChannelEntity, 'bannedMembers')
 			.of(UserEntity)
 			.remove(userToUnban)
 	}
@@ -182,7 +182,7 @@ export class ChannelService {
 
 		await this.channelRepository
 			.createQueryBuilder()
-			.relation(ChannelEntity, 'muteMembers')
+			.relation(ChannelEntity, 'mutedMembers')
 			.of(UserEntity)
 			.remove(userToUnmute)
 	}

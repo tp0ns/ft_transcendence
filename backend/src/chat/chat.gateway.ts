@@ -94,9 +94,7 @@ export class ChatGateway
 	@SubscribeMessage('modifyMembers')
 	async modifyMembers(client : Socket, chanName: string, newMembers: UserEntity[])
 	{
-		//tant qu'on a pas ajouter tous les users : 
-		// await this.channelService.invitInChan(client.data.user, userEntity, chanName);
-		await this.channelService.getChanByName(chanName);
+		await this.channelService.modifyMembers(client.data.user, chanName, newMembers)
 		this.server.emit('updatedChannels');
 
 	}
@@ -135,21 +133,6 @@ export class ChatGateway
 		client.leave(channelName);
 		this.server.emit('leftRoom')
 	}
-
-	/**
-	 * 
-	 * @param client 
-	 * @param userToInvite 
-	 * @param chanName 
-	 * 
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('invitInChan')
-	async invitInChan(client: Socket, userToInvite: UserEntity, chanName: string)
-	{
-		await this.channelService.invitInChan(client.data.user, userToInvite, chanName);
-	}
-
   
 	/**
 	 * ------------------------ BAN / MUTE  ------------------------- *

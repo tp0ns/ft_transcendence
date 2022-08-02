@@ -40,17 +40,21 @@ export class ChannelEntity extends BaseEntity {
 	})
 	password: string;
 
+	@ManyToMany(() => UserEntity)
+	@JoinTable()
+	admins: UserEntity[]
+
 	@ManyToMany(() => UserEntity )
 	@JoinTable()
 	members: UserEntity[]
 
 	@ManyToMany(() => UserEntity )
 	@JoinTable()
-	banMembers: UserEntity[]
+	bannedMembers: UserEntity[]
 
 	@ManyToMany(() => UserEntity )
 	@JoinTable()
-	muteMembers: UserEntity[]
+	mutedMembers: UserEntity[]
 
 	@Column({
 		default: false,
