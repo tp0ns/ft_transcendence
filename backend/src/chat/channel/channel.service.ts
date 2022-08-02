@@ -22,22 +22,25 @@ export class ChannelService {
 	 */
 
 	async createNewChan(user: UserEntity, chan: CreateChanDto) {
-		let newPassword = await bcrypt.hash(chan.password, 10);
-		// try {
+		console.log(`password of protected chan is : `, JSON.stringify(chan.password));
+		let newPassword : string = null;
 		const date = new Date();
+		if (chan.password != null)
+			newPassword = await bcrypt.hash(chan.password, 10);
+		try {
 		let channel : ChannelEntity = await this.channelRepository.save({
 			title: chan.title,
 			owner: user,
-			password: chan.password,
+			password: newPassword,
 			creation: date, 
-			update: date
-			// isProtected : channel.isProtected,
-		// });
-		// }
-		// catch {
-			//error
-		});
-	}
+			update: date,
+			// isProtected : chan.,
+				});
+			}
+		catch {
+			// error
+			}	
+		}
 
 	/**
 	 * 

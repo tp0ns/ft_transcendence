@@ -31,12 +31,14 @@ export class ChatGateway
 	/**
 	 * Handles server initialization behaviour
 	 */
+	 @UseGuards(WsGuard)
 	afterInit(server: Server) {
 		this.logger.log(`Server is properly initialized !`);
 	}
 	/**
 	 * Handles client connection behaviour
 	 */
+	 @UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('sendChans', await this.channelService.getAllChannels());
@@ -45,6 +47,7 @@ export class ChatGateway
 	/**
 	 * Handles client disconnection behaviour
 	 */
+	 @UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
@@ -98,19 +101,19 @@ export class ChatGateway
 	 * ------------------------ CIRCULATION IN CHANNELS  ------------------------- *
 	 */
 
-
 	/**
-	 * 
+	 *
 	 * @param client client qui veut join le chan
-	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree 
-	 * 
+	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
+	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinChan')
-	async joinChannel(client : Socket, channelName : string) {
-	await this.channelService.joinChan(client.data.user, channelName);
-	client.join(channelName);
-	this.server.emit('joinedChan');
+	async joinChannel(client: Socket, channelName: string) {
+		console.log(`enter in joinChannel`);
+		await this.channelService.joinChan(client.data.user, channelName);
+		client.join(channelName);
+		this.server.emit('joinedChan');
 	}
 
 	@UseGuards(WsGuard)
@@ -178,7 +181,7 @@ export class ChatGateway
   /**
    * @todo en plus d'envoyer le msg, stocker dans l'entite messages
    */
-	// @UseGuards(WsGuard)
+	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
 	handleMessage(client: Socket, payload: string) {
 		this.server.emit('msgToClient', payload);
@@ -200,6 +203,7 @@ export class ChatGateway
 	 *
 	 * @todo est ce qu'on doit join une room ou on enverra a chaque fois les messages au client ?
 	 */
+	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToUser')
 	handleMessagerToClient(client: Socket, payload: string) {
 		this.server.to(client.data.user.username).emit('directMessage', payload);
@@ -209,12 +213,15 @@ export class ChatGateway
 	 * ------------------------ GET CHANNELS  ------------------------- *
 	 */
 
+	 @UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
 	async getChannels(client: Socket) {
-		const channels: ChannelEntity[] = await this.channelService.getAllChannels();
+		const channels: ChannelEntity[] =
+			await this.channelService.getAllChannels();
 		this.server.emit('sendChans', channels);
 	}
 
+	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllPublicChannels')
 	async GetAllPublicChannels(client: Socket)
 	{
@@ -222,7 +229,7 @@ export class ChatGateway
 		this.server.emit('sendPublicsChannels', publicChannels);
 	}
 
-
+	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllPrivateChannels')
 	async getAllPrivateChannels(client: Socket)
 	{

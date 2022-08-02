@@ -1,4 +1,3 @@
-import ChannelProp from "../interfaces/Channel.interface";
 import ChannelItem from "./ChannelItem";
 
 const ChannelsList: React.FC<{
@@ -8,15 +7,19 @@ const ChannelsList: React.FC<{
   return (
     <section>
       <ul>
-        {props.channels.map((channel: any) => (
-          <ChannelItem
-            displayChannel={() => {
-              props.displayChannel(channel);
-            }}
-            key={channel.id}
-            name={channel.title}
-          />
-        ))}
+        {props.channels.map((channel: any) => {
+          console.log("channel in channelList", channel);
+          return (
+            <ChannelItem
+              displayChannel={() => {
+                props.displayChannel(channel);
+              }}
+              key={channel.id}
+              name={channel.title}
+              private={channel.private}
+            />
+          );
+        })}
       </ul>
     </section>
   );
