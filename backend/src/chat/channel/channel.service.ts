@@ -6,7 +6,7 @@ import { MembersEntity } from '../members/members.entity';
 import { membersService } from '../members/members.service';
 import { MessageService } from '../messages/messages.service';
 import { ChannelEntity } from './channel.entity';
-// import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { CreateChanDto } from './dtos/createChan.dto';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class ChannelService {
 	 */
 
 	async createNewChan(user: UserEntity, chan: CreateChanDto) {
-		// let newPassword = await bcrypt.hash(chan.password, 10);
+		let newPassword = await bcrypt.hash(chan.password, 10);
 		// try {
 		const date = new Date();
 		let channel : ChannelEntity = await this.channelRepository.save({
