@@ -29,14 +29,13 @@ export class AuthService {
 		if (!user.isTwoFAEnabled) payload.twoFAAuthenticated = true;
 		const access_token = this.jwtService.sign(payload);
 
-		const new_cookie = `Authentication=${access_token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
+		const new_cookie = `Authentication=${access_token}; Path=/; Max-Age=${jwtConstants.expire}`;
 		res.clearCookie('Authentication');
 		res.header('Set-Cookie', new_cookie);
 
-		// if (user.isTwoFAEnabled)
-		// 	res.redirect(''); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
+		if (user.isTwoFAEnabled) res.redirect('http://localhost/2fa'); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
 		// else
-		res.redirect('http://localhost/backend/users/me');
+		res.redirect('http://localhost/');
 	}
 
 	// async logout() {
