@@ -1,6 +1,6 @@
-FROM node:alpine
+FROM node
 
 WORKDIR /backend/
 COPY ./launch_script.sh .
 
-CMD [ "ash", "launch_script.sh" ] 
+CMD [ "bash", "launch_script.sh" ] 

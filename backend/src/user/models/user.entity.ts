@@ -1,4 +1,4 @@
-import { Channel } from 'src/chat/channel/channel.entity';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import {
 	Column,
 	Entity,
@@ -46,16 +46,15 @@ export class UserEntity {
 	})
 	twoFa: boolean;
 
+
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.receiver)
 	receivedRelations: RelationEntity[];
 
-	@ManyToMany(() => Channel, (channel) => channel.members, {
-		eager: false,
-	})
-	channels: Channel[];
+	@OneToMany(() => MessagesEntity, (message) => message.channel)
+	messages: MessagesEntity[];
 }
 
 export default UserEntity;

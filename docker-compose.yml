@@ -28,7 +28,7 @@ services:
       - front_back
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=ft_transcendance_front_back"
+      - "traefik.docker.network=ft_transcendence_front_back"
       - "traefik.http.routers.pong-frontend.rule=Host(`localhost`)"
       - "traefik.http.routers.pong-frontend.entrypoints=web"
       - "traefik.http.services.pong-frontend.loadbalancer.server.port=3001"
@@ -45,7 +45,7 @@ services:
       - front_back
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=ft_transcendance_front_back"
+      - "traefik.docker.network=ft_transcendence_front_back"
       - "traefik.http.routers.pong-backend.entrypoints=web"
       - "traefik.http.services.pong-backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.pong-backend.rule=Host(`localhost`) && PathPrefix(`/backend`, `/socket.io`)"
