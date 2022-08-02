@@ -67,7 +67,6 @@ export class ChatGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-		console.log(`check channel send by the front : `, JSON.stringify(channelEntity));
 		const channel = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,

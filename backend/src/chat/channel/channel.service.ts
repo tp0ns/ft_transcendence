@@ -31,24 +31,24 @@ export class ChannelService {
 		let newPassword : string = null;
 		const date = new Date();
 		let channel : ChannelEntity;
-		if (chan.password != null)
+		if (chan.password != '')
 			newPassword = await bcrypt.hash(chan.password, 10);
 		try {
 			channel = await this.channelRepository.save({
 				title: chan.title,
 				owner: user,
 				password: newPassword,
+				private: chan.private,
+				protected: chan.protected,
 				creation: date, 
 				update: date,
-				isProtected: chan.isProtected,
-				isPrivate: chan.isPrivate,
 					});
 				}
 		catch {
 			// error
 			}
 		this.joinChan(user, channel.title)
-		if (channel.isPrivate == false)
+		if (channel.private == false)
 		{
 			//tant qu'on a pas parcouru toute la liste des users connectes
 			//faire un joinChannel
@@ -66,7 +66,7 @@ export class ChannelService {
 	async modifyPassword(user: UserEntity, chanName: string, newPassword : string)
 	{
 		const channel : ChannelEntity = await this.getChanByName(chanName);
-		if (channel.owner != user || channel.isProtected == false)
+		if (channel.owner != user || channel.protected == false)
 			console.log(`You can't modify the channel`);
 		else 
 		{
@@ -145,7 +145,7 @@ export class ChannelService {
 	async invitInChan(invitingUser: UserEntity, userToInvite: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-		if (channel.isPrivate == true)
+		if (channel.private == true)
 			await this.joinChan(userToInvite, chanName);
   }
 
@@ -191,14 +191,14 @@ export class ChannelService {
 
 	async getAllPublicChannels() : Promise<ChannelEntity[]> 
 	{
-		const publicChannels : ChannelEntity[] = await this.channelRepository.find({where: {isPrivate: false}})
+		const publicChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: false}})
 		return publicChannels;
 	}
 
 	async getAllPrivateChannels(user: UserEntity) : Promise<ChannelEntity[]> 
 	{
 		// const member: MembersEntity = await this.membersService.getMember(user);
-		const privateChannels : ChannelEntity[] = await this.channelRepository.find({where: {isPrivate: true}})
+		const privateChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: true}})
 
 		return privateChannels;
 	}

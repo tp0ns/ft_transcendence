@@ -21,7 +21,7 @@ export class ChannelEntity extends BaseEntity {
 	@Column({
 		default: false,
 	})
-	isPrivate: boolean;
+	private: boolean;
 
 	@Column('text', {
 		default: '',
@@ -51,7 +51,7 @@ export class ChannelEntity extends BaseEntity {
 	@Column({
 		default: false,
 	})
-	isProtected: boolean;
+	protected: boolean;
 
 	@Column({
 		nullable: false,
