@@ -41,7 +41,7 @@ export class ChatGateway
 	 @UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
-		this.server.emit('sendChans', await this.channelService.getAllChannels());
+		this.server.emit('updatedChannels');
 	}
 
 	/**

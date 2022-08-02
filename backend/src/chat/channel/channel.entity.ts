@@ -10,8 +10,6 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { MembersEntity } from '../members/members.entity';
-import { MessagesEntity } from '../messages/messages.entity';
 
 @Entity('channel')
 export class ChannelEntity extends BaseEntity {
@@ -42,11 +40,17 @@ export class ChannelEntity extends BaseEntity {
 	})
 	password: string;
 
-	@OneToMany(() => MembersEntity, (members) => members.channel)
-	channels: ChannelEntity[];
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	members: UserEntity[]
 
-	@OneToMany(() => MessagesEntity, (message) => message.channel)
-	messages: MessagesEntity[];
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	banMembers: UserEntity[]
+
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	muteMembers: UserEntity[]
 
 	@Column({
 		default: false,

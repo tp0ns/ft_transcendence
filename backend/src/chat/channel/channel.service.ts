@@ -2,8 +2,6 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserEntity from 'src/user/models/user.entity';
 import { DataSource, Repository } from 'typeorm';
-import { MembersEntity } from '../members/members.entity';
-import { membersService } from '../members/members.service';
 import { MessageService } from '../messages/messages.service';
 import { ChannelEntity } from './channel.entity';
 import * as bcrypt from 'bcrypt';
@@ -13,7 +11,6 @@ import { CreateChanDto } from './dtos/createChan.dto';
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
-		@Inject(forwardRef(() => membersService)) private membersService: membersService,
 		@Inject(forwardRef(() => MessageService)) private messageService: MessageService,
 	) {}
 
@@ -117,7 +114,8 @@ export class ChannelService {
 	
 	async joinChan(user : UserEntity, channelName : string) {
 		let channel : ChannelEntity = await this.getChanByName(channelName);
-		await this.membersService.createNewMember(user, channel);
+		channel.members = [...channel.members, user];
+		await channel.save();
 		//find si le user est deja dans le channel 
 		//check si le user n'est pas ban 
 		//check si le channel existe
@@ -155,26 +153,38 @@ export class ChannelService {
 
 	async banUser(banningUser: UserEntity, userToBan: UserEntity, chanName: string)
 	{
-				
-		
+		let channel : ChannelEntity = await this.getChanByName(chanName);
+		channel.members = [...channel.banMembers, banningUser];
+		await channel.save();
 	}
 
 	async muteUser(muttingUser: UserEntity, userToMute: UserEntity, chanName: string)
 	{
-				
-		
+		let channel : ChannelEntity = await this.getChanByName(chanName);
+		channel.members = [...channel.muteMembers, muttingUser];
+		await channel.save();
 	}
 
 	async unbanUser(unbanningUser: UserEntity, userToUnban: UserEntity, chanName: string)
 	{
-				
-		
+		let channel : ChannelEntity = await this.getChanByName(chanName);
+
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, 'banMembers')
+			.of(UserEntity)
+			.remove(userToUnban)
 	}
 
 	async unmuteUser(unmuttingUser: UserEntity, userToUnmute: UserEntity, chanName: string)
 	{
-				
-		
+		let channel : ChannelEntity = await this.getChanByName(chanName);
+
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, 'muteMembers')
+			.of(UserEntity)
+			.remove(userToUnmute)
 	}
 
 
@@ -219,7 +229,7 @@ export class ChannelService {
 	 */
 	async getChanByName(chanName : string) : Promise<ChannelEntity> 
 	{
-		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }});
+		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']});
 		// if (!channel)
 			// console.log("le channel il existe po");
 		return channel;
