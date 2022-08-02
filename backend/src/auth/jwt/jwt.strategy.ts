@@ -45,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	async validate(req: Request, payload: any) {
 		const user = await this.userService.getUserById(payload.sub);
 		if (!user.isTwoFAEnabled) return user;
-		else if (payload.twoFAAuthenticated || req.url == '/auth/2fa/authenticate')
+		else if (payload.twoFAAuthenticated || req.url == '/backend/auth/2fa/authenticate')
 			return user;
 		return;
 	}

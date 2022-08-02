@@ -33,12 +33,8 @@ export class AuthService {
 		res.clearCookie('Authentication');
 		res.header('Set-Cookie', new_cookie);
 
-		if (user.isTwoFAEnabled) res.redirect('http://localhost/2fa'); // rediriger vers la page de front ou on peut rentrer le code de la 2fa
-		// else
-		res.redirect('http://localhost/');
+		// rediriger soit vers la page front de la 2fa soit vers l'acceuil
+		if (user.isTwoFAEnabled) res.redirect('http://localhost/2fa');
+		else res.redirect('http://localhost/');
 	}
-
-	// async logout() {
-	// 	return await `Authentication=; HttpOnly; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`; //Max-age=0;
-	// }
 }

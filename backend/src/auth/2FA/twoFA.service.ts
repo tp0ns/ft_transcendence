@@ -29,7 +29,7 @@ export class TwoFAService {
 			secret: jwtConstants.secret,
 			expiresIn: jwtConstants.expire,
 		});
-		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.expire}`;
+		return `Authentication=${token}; Path=/; Max-Age=${jwtConstants.expire}`;
 	}
 	/**
 	 * Generate the secret key used to authenticate the user

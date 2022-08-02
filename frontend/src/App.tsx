@@ -4,6 +4,7 @@ import "./App.css";
 import RequireAuth from "./components/RequireAuth";
 import ChatPage from "./Pages/ChatPage";
 import LoginPage from "./Pages/LoginPage";
+import TwoFAPAge from "./Pages/TwoFAPage";
 import ChannelsContextProvider from "./store/channels-context";
 
 function App() {
@@ -16,6 +17,14 @@ function App() {
 					element={
 						<RequireAuth>
 							<div>Acceuil</div>
+						</RequireAuth>
+					}
+				/>
+				<Route
+					path="/2fa"
+					element={
+						<RequireAuth>
+							<TwoFAPAge />
 						</RequireAuth>
 					}
 				/>
