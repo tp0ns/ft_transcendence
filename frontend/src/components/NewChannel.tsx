@@ -16,7 +16,10 @@ const NewChannelForm: React.FC<{
     event.preventDefault();
 
     const enteredTitle: string = titleInputRef.current!.value;
-    const enteredPassword: string = passwordInputRef.current!.value;
+    let enteredPassword: string = "";
+    if (passwordInputRef.current) {
+      enteredPassword = passwordInputRef.current!.value;
+    }
 
     const channelData = {
       id: "",
