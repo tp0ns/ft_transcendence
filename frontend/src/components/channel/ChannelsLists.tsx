@@ -1,5 +1,5 @@
 import { Socket } from "socket.io-client";
-import ChannelProp from "../interfaces/Channel.interface";
+import ChannelProp from "../../interfaces/Channel.interface";
 import ChannelItem from "./ChannelItem";
 
 const ChannelsList: React.FC<{

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
-import ChannelProp from "../interfaces/Channel.interface";
-import Card from "../ui/Card";
+import ChannelProp from "../../interfaces/Channel.interface";
+import Card from "../../ui/Card";
 import MessagesList from "./MessagesLists";
 
 const OpenedChannel: React.FC<{

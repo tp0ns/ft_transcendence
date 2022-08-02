@@ -1,4 +1,4 @@
-import ChannelProp from "../interfaces/Channel.interface";
+import ChannelProp from "../../interfaces/Channel.interface";
 import classes from "./NewChannelForm.module.css";
 
 // Change password if Owner
