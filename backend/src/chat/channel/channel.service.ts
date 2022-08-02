@@ -75,12 +75,12 @@ export class ChannelService {
 	async modifyAdmins(user: UserEntity, chanName: string, newAdmins: UserEntity[])
 	{
 		const channel: ChannelEntity = await this.getChanByName(chanName);
-		//verifier owner & admins
 		if (channel.owner != user)
 			console.log(`You can't set new admins`);
 		else 
 		{
-			//ajouter tableau d'admins dans channelEntity
+			channel.admins = [...channel.admins, user];
+			await channel.save();
 		}
 	}
 
@@ -151,40 +151,89 @@ export class ChannelService {
 	 * ------------------------ BAN / MUTE  ------------------------- *
 	 */
 
+	/**
+	 * 
+	 * @param banningUser 
+	 * @param userToBan 
+	 * @param chanName 
+	 * 
+	 * @todo verifier que le user est bien dans le channel (vrmt ?, on peut pas bannir en avance?)
+	 * @todo verifier que le user n'est pas deja ban 
+	 * 
+	 */
 	async banUser(banningUser: UserEntity, userToBan: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-		channel.members = [...channel.bannedMembers, banningUser];
-		await channel.save();
+		if (channel.admins.includes(banningUser) || channel.owner == banningUser)
+		{
+			channel.members = [...channel.bannedMembers, userToBan];
+			await channel.save();
+		}
+		else 
+		{
+			console.log(`You need to be an admin to ban someone`);
+		}
 	}
 
+	/**
+	 * 
+	 * @param muttingUser 
+	 * @param userToMute 
+	 * @param chanName 
+	 * 
+	 * @todo verifier que le user est bien dans le channel
+	 * @todo verifier que le user n'est pas deja mute 
+	 */
 	async muteUser(muttingUser: UserEntity, userToMute: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-		channel.members = [...channel.mutedMembers, muttingUser];
-		await channel.save();
+		if (channel.admins.includes(muttingUser) || channel.owner == muttingUser)
+		{
+			channel.members = [...channel.mutedMembers, userToMute];
+			await channel.save();
+		}
 	}
 
+	/**
+	 * 
+	 * @param unbanningUser 
+	 * @param userToUnban 
+	 * @param chanName 
+	 * 
+	 * @todo verifier que le user est bien banni
+	 */
 	async unbanUser(unbanningUser: UserEntity, userToUnban: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-
-		await this.channelRepository
-			.createQueryBuilder()
-			.relation(ChannelEntity, 'bannedMembers')
-			.of(UserEntity)
-			.remove(userToUnban)
+		if (channel.admins.includes(unbanningUser) || channel.owner == unbanningUser)
+		{
+			await this.channelRepository
+				.createQueryBuilder()
+				.relation(ChannelEntity, 'bannedMembers')
+				.of(UserEntity)
+				.remove(userToUnban)
+		}
 	}
 
+	/**
+	 * 
+	 * @param unmuttingUser 
+	 * @param userToUnmute 
+	 * @param chanName 
+	 * 
+	 * @todo verifier que le user est deja mute
+	 */
 	async unmuteUser(unmuttingUser: UserEntity, userToUnmute: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
-
+		if (channel.admins.includes(unmuttingUser) || channel.owner == unmuttingUser)
+		{
 		await this.channelRepository
 			.createQueryBuilder()
 			.relation(ChannelEntity, 'mutedMembers')
 			.of(UserEntity)
 			.remove(userToUnmute)
+		}
 	}
 
 
