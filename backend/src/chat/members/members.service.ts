@@ -17,4 +17,11 @@ export class membersService {
 			channel: chan
 	});
 	}
+
+	async getMember(userToFind: UserEntity) //: Promise<MembersEntity> 
+	{
+		// let member : MembersEntity = await this.MembersRepository.findOne({where: {user: userToFind}})
+
+		// return member;
+	}
 }

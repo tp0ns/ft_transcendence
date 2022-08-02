@@ -47,11 +47,13 @@ export class ChannelService {
 		catch {
 			// error
 			}
-		// this.joinChan(user, channel.title)
-		//if channel == isPublic
-		//tant qu'on a pas parcouru toute la liste des users connectes
-		//faire un joinChannel
+		this.joinChan(user, channel.title)
+		if (channel.isPrivate == false)
+		{
+			//tant qu'on a pas parcouru toute la liste des users connectes
+			//faire un joinChannel
 		}
+	}
 
 	/**
 	 * 
@@ -76,6 +78,7 @@ export class ChannelService {
 	async modifyAdmins(user: UserEntity, chanName: string, newAdmins: UserEntity[])
 	{
 		const channel: ChannelEntity = await this.getChanByName(chanName);
+		//verifier owner & admins
 		if (channel.owner != user)
 			console.log(`You can't set new admins`);
 		else 
@@ -139,16 +142,11 @@ export class ChannelService {
 			.remove(user);
 	}
 
-	async invitInChan(invitingUser: UserEntity, userToInvite: UserEntity, chanName: string) : Promise<boolean>
+	async invitInChan(invitingUser: UserEntity, userToInvite: UserEntity, chanName: string)
 	{
 		let channel : ChannelEntity = await this.getChanByName(chanName);
 		if (channel.isPrivate == true)
-		{
 			await this.joinChan(userToInvite, chanName);
-			return true;
-		}
-		console.log(`this channel is public, you can't send an invitation`)
-		return false;
   }
 
 	/**
@@ -197,9 +195,11 @@ export class ChannelService {
 		return publicChannels;
 	}
 
-	async getAllPrivateChannels() : Promise<ChannelEntity[]> 
+	async getAllPrivateChannels(user: UserEntity) : Promise<ChannelEntity[]> 
 	{
+		// const member: MembersEntity = await this.membersService.getMember(user);
 		const privateChannels : ChannelEntity[] = await this.channelRepository.find({where: {isPrivate: true}})
+
 		return privateChannels;
 	}
 
@@ -228,7 +228,5 @@ export class ChannelService {
 		let channel : ChannelEntity = await this.getChanByName(chanName);
 		this.messageService.addNewMessage(user, channel, message);
 	}
-
-
 }
 

@@ -89,6 +89,14 @@ export class ChatGateway
 	}
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('modifyMembers')
+	async modifyMembers(client : Socket, chanName: string, newMembers: UserEntity[])
+	{
+		//tant qu'on a pas ajouter tous les users : 
+		// await this.channelService.invitInChan(client.data.user, userEntity, chanName);
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
 	async deleteChan(client: Socket, chanName: string)
 	{
@@ -136,9 +144,7 @@ export class ChatGateway
 	@SubscribeMessage('invitInChan')
 	async invitInChan(client: Socket, userToInvite: UserEntity, chanName: string)
 	{
-		const isPrivate : boolean = await this.channelService.invitInChan(client.data.user, userToInvite, chanName);
-		if (isPrivate == true)
-			client.join(chanName);
+		await this.channelService.invitInChan(client.data.user, userToInvite, chanName);
 	}
 
   
@@ -189,6 +195,14 @@ export class ChatGateway
 		return payload;
 	}
 
+	/**
+	 * 
+	 * @param client 
+	 * @param payload 
+	 * @param chanName 
+	 * 
+	 * @todo faire un emit.to
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	handleMessageToChan(client: Socket, payload: string, chanName: string) {
@@ -234,7 +248,7 @@ export class ChatGateway
 	@SubscribeMessage('getAllPrivateChannels')
 	async getAllPrivateChannels(client: Socket)
 	{
-		const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels();
+		const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
 		this.server.emit('sendPrivateChannels', privateChannels);
 	}
 
