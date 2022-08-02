@@ -61,6 +61,8 @@ export class ChatGateway
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
 	 * 
+	 * @todo verifier que channelEntity existe : est-ce que securite dans le front ? 
+	 * 
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
@@ -69,13 +71,7 @@ export class ChatGateway
 			client.data.user,
 			channelEntity,
 		);
-		// if (!channel) {
-		//   this.server.emit('errCreatingChan')
-		// }
-		// else {
 		this.server.emit('createdChan', channel);
-		// this.joinChannel(client, channelEntity.title);
-		// }
 	}
 
 	@UseGuards(WsGuard)

@@ -30,22 +30,24 @@ export class ChannelService {
 	async createNewChan(user: UserEntity, chan: CreateChanDto) {
 		let newPassword : string = null;
 		const date = new Date();
+		let channel : ChannelEntity;
 		if (chan.password != null)
 			newPassword = await bcrypt.hash(chan.password, 10);
 		try {
-		let channel : ChannelEntity = await this.channelRepository.save({
-			title: chan.title,
-			owner: user,
-			password: newPassword,
-			creation: date, 
-			update: date,
-			isProtected: chan.isProtected,
-			isPrivate: chan.isPrivate,
-				});
-			}
+			channel = await this.channelRepository.save({
+				title: chan.title,
+				owner: user,
+				password: newPassword,
+				creation: date, 
+				update: date,
+				isProtected: chan.isProtected,
+				isPrivate: chan.isPrivate,
+					});
+				}
 		catch {
 			// error
 			}
+		// this.joinChan(user, channel.title)
 		//if channel == isPublic
 		//tant qu'on a pas parcouru toute la liste des users connectes
 		//faire un joinChannel
