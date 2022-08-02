@@ -21,7 +21,10 @@ export class TwoFAService {
 	 * Get the JWT token from the cookie
 	 */
 	public getCookieWithToken(userId: string, twoFAAuthenticated = true) {
-		const payload: TokenPayload = { userId, twoFAAuthenticated };
+		const payload: TokenPayload = {
+			sub: userId,
+			twoFAAuthenticated: twoFAAuthenticated,
+		};
 		const token = this.jwtService.sign(payload, {
 			secret: jwtConstants.secret,
 			expiresIn: jwtConstants.expire,
