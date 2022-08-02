@@ -29,20 +29,21 @@ export class ChannelEntity extends BaseEntity {
 	title: string;
 
 	/**
-	 * Un Channel ne peut avoir qu'un seul owner mais un user 
+	 * Un Channel ne peut avoir qu'un seul owner mais un user
 	 * peut etre owner de plusieurs channels
 	 */
 	@ManyToOne(() => UserEntity)
 	@JoinColumn()
 	owner: UserEntity;
 
-	@Column("text", {
-		default: "",
+	@Column('text', {
+		default: null,
+		nullable: true,
 	})
 	password: string;
 
 	@OneToMany(() => MembersEntity, (members) => members.channel)
-	channels: ChannelEntity[]
+	channels: ChannelEntity[];
 
 	@OneToMany(() => MessagesEntity, (message) => message.channel)
 	messages: MessagesEntity[];
@@ -56,8 +57,8 @@ export class ChannelEntity extends BaseEntity {
 		nullable: false,
 	})
 	creation: Date;
-	
-	  @Column({
+
+	@Column({
 		nullable: false,
 	})
 	update: Date;

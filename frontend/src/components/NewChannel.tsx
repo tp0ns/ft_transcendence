@@ -12,14 +12,15 @@ const NewChannelForm: React.FC<{
   const [privateChan, setPrivateChan] = useState(false);
   const [protectedChan, setProtectedChan] = useState(false);
 
+  let enteredPassword: string;
+  if (passwordInputRef.current) {
+    enteredPassword = passwordInputRef.current!.value;
+  }
+
   function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const enteredTitle: string = titleInputRef.current!.value;
-    let enteredPassword: string = "123";
-    if (passwordInputRef.current) {
-      enteredPassword = passwordInputRef.current!.value;
-    }
 
     const channelData = {
       id: "",
