@@ -28,6 +28,7 @@ const NewChannelForm: React.FC<{
       private: privateChan,
       protected: protectedChan,
     };
+    console.log("ChannelData in new item form: ", channelData);
     // channelsCtx.addChannel(channelData);
     props.sendChan(channelData);
   }

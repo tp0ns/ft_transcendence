@@ -6,7 +6,6 @@ const ChannelItem: React.FC<{
   name: string;
   private: boolean;
 }> = (props) => {
-  console.log(props.private);
   return (
     <Card>
       <h1>{props.name}</h1>

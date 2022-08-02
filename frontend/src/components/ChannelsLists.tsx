@@ -1,7 +1,8 @@
+import ChannelProp from "../interfaces/Channel.interface";
 import ChannelItem from "./ChannelItem";
 
 const ChannelsList: React.FC<{
-  displayChannel: (channel: any) => void;
+  selectedChannel: (channel: ChannelProp) => void;
   channels: any;
 }> = (props) => {
   return (
@@ -12,7 +13,7 @@ const ChannelsList: React.FC<{
           return (
             <ChannelItem
               displayChannel={() => {
-                props.displayChannel(channel);
+                props.selectedChannel(channel);
               }}
               key={channel.id}
               name={channel.title}
