@@ -9,24 +9,24 @@ import {
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
-import { ChannelService } from './channel/channel.service';
-import { CreateChanDto } from './channel/dtos/createChan.dto';
+import { ChannelService } from './chat/channel/channel.service';
+import { CreateChanDto } from './chat/channel/dtos/createChan.dto';
 import UserEntity from 'src/user/models/user.entity';
-import { ChannelEntity } from './channel/channel.entity';
+import { ChannelEntity } from './chat/channel/channel.entity';
 
 @WebSocketGateway({
 	cors: {
 		origin: 'http://localhost/',
 	},
 })
-export class ChatGateway
+export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
 	constructor(private channelService: ChannelService) {}
 
 	@WebSocketServer() server: Server;
 
-	private logger: Logger = new Logger('ChatGateway');
+	private logger: Logger = new Logger('GeneralGateway');
 
 	/**
 	 * Handles server initialization behaviour
@@ -51,6 +51,16 @@ export class ChatGateway
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
+
+	/**
+	 *   _____ _    _       _______
+	 *  / ____| |  | |   /\|__   __|
+	 * | |    | |__| |  /  \  | |
+	 * | |    |  __  | / /\ \ | |
+	 * | |____| |  | |/ ____ \| |
+	 *  \_____|_|  |_/_/    \_|_|
+	 *
+	 */
 
 	/**
 	 * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
@@ -240,12 +250,12 @@ export class ChatGateway
 		this.server.emit('sendChans', channels);
 	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getMemberChannels')
-	// async getMemberChannels(client: Socket)
-	// {
-	// 	const channels: ChannelEntity[] = await this.channelService.getMemberChannels(client.data.user);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMemberChannels')
+	async getMemberChannels(client: Socket) {
+		const channels: ChannelEntity[] =
+			await this.channelService.getMemberChannels(client.data.user);
+	}
 
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('getAllPublicChannels')
@@ -262,4 +272,14 @@ export class ChatGateway
 	// 	const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
 	// 	this.server.emit('sendPrivateChannels', privateChannels);
 	// }
+
+	/**
+	 *   _____          __  __ ______
+	 *  / ____|   /\   |  \/  |  ____|
+	 * | |  __   /  \  | \  / | |__
+	 * | | |_ | / /\ \ | |\/| |  __|
+	 * | |__| |/ ____ \| |  | | |____
+	 *  \_____/_/    \_|_|  |_|______|
+	 *
+	 */
 }

@@ -210,11 +210,12 @@ export class ChannelService {
 		return channels;
 	}
 
-	// async getMemberChannels(user: UserEntity): Promise<ChannelEntity[]>
-	// {
-	// 	const member: MembersEntity = await this.membersService.getMember(user);
-
-	// }
+	async getMemberChannels(user: UserEntity): Promise<ChannelEntity[]>
+	{
+		let channels : ChannelEntity[];
+		// const member: MembersEntity = await this.membersService.getMember(user);
+		return channels;
+	}
 
 	// async getAllPublicChannels() : Promise<ChannelEntity[]>
 	// {
