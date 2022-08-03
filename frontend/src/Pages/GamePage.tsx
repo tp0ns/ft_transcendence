@@ -3,7 +3,7 @@ import GameScreen from "../components/game/GameScreen";
 const GamePage = () => {
   return (
     <div>
-      <h1>caca</h1>
+      <h1>Pong</h1>
       <GameScreen />
     </div>
   );

@@ -4,7 +4,7 @@ const Http = require('http').Server(Express);
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const SocketIo = require('socket.io')(Http, {
 	cors: {
-		origin: 'http://localhost:8080',
+		origin: 'http://localhost',
 		methods: ['GET', 'POST'],
 	},
 });

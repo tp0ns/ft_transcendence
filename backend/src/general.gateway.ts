@@ -13,6 +13,8 @@ import { ChannelService } from './chat/channel/channel.service';
 import { CreateChanDto } from './chat/channel/dtos/createChan.dto';
 import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from './chat/channel/channel.entity';
+import Match from './game/interfaces/game.interface';
+import { GameService } from './game/game.service';
 
 @WebSocketGateway({
 	cors: {
@@ -22,7 +24,10 @@ import { ChannelEntity } from './chat/channel/channel.entity';
 export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-	constructor(private channelService: ChannelService) {}
+	constructor(
+		private channelService: ChannelService,
+		private gameService: GameService,
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -282,4 +287,16 @@ export class GeneralGateway
 	 *  \_____/_/    \_|_|  |_|______|
 	 *
 	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('connection')
+	async sendDefaultPos({ socket, match }: { socket: Socket; match: Match }) {
+		console.log(socket);
+		const beginMatch: Match = await this.gameService.setDefaultPos(match);
+		this.server.emit(
+			'setPosition',
+			beginMatch.leftPad,
+			beginMatch.rightPad,
+			beginMatch.ball,
+		);
+	}
 }

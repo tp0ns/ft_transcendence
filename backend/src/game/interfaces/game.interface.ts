@@ -1,4 +1,6 @@
-interface pad {
+import UserEntity from "src/user/models/user.entity";
+
+interface Pad {
 	x: number;
 	y: number;
 	w: number;
@@ -6,7 +8,7 @@ interface pad {
 	speed: number;
 }
 
-interface ball {
+interface Ball {
 	x: number;
 	y: number;
 	radius: number;
@@ -16,4 +18,16 @@ interface ball {
 	goRight: boolean;
 }
 
-export default pad;
+interface Player extends UserEntity{
+
+}
+
+interface Match {
+	rightPad:	Pad;
+	leftPad:	Pad;
+	ball:			Ball;
+	player1:	Player;
+	player2:	Player;
+}
+
+export default Match;
