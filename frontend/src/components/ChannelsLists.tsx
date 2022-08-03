@@ -12,7 +12,6 @@ const ChannelsList: React.FC<{
     <section>
       <ul>
         {props.channels.map((channel: any) => {
-          console.log("channel in channelList", channel);
           return (
             <ChannelItem
               displayChannel={() => {

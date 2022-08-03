@@ -1,4 +1,8 @@
+import { channel } from "diagnostics_channel";
+import { useEffect, useState } from "react";
+import { socket } from "../App";
 import ChannelProp from "../interfaces/Channel.interface";
+import InputAndButton from "../ui/InputAndButton";
 import classes from "./NewChannelForm.module.css";
 
 // Change password if Owner
@@ -6,24 +10,35 @@ import classes from "./NewChannelForm.module.css";
 // Add members if private Chan and everyone
 
 const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
+  const [myId, setMyId] = useState<string>();
+
+  useEffect(() => {
+    fetch("http://localhost/backend/users/me")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("data.userId: ", data.userId);
+        setMyId(data.userId);
+      });
+  }, []);
+
+  const isOwner = () => {
+    return myId === props.channel.owner.id;
+  };
+
+  const handlePasswordChange = (inputPassword: string) => {
+    props.channel.password = inputPassword;
+    socket.emit("modifyChannel", props.channel);
+  };
+
   return (
-    <div>
-      <h1>CACA!!!!!</h1>
-      <p>
-        Soyez patients putain, trop de pression dans ce groupe j'en peux plus.
-        C'est etoufant.
-      </p>
+    <div className={classes.control}>
+      {isOwner() ? (
+        <InputAndButton
+          buttonName="Change Password"
+          capturedInfo={handlePasswordChange}
+        />
+      ) : null}
     </div>
-    // <div className={classes.control}>
-    //       <button onClick={handlePassword}>
-    //         {!protectedChan ? "Protect" : "Unprotect"}
-    //       </button>
-    //     </div>
-    //     {protectedChan ? (
-    //       <div className={classes.control}>
-    //         <label htmlFor="image">Channel Password</label>
-    //         <input type="text" required id="image" ref={passwordInputRef} />
-    //       </div>
   );
 };
 

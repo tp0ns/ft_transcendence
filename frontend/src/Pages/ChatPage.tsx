@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ChannelsList from "../components/ChannelsLists";
 import NewChannelForm from "../components/NewChannel";
 import ChannelProp from "../interfaces/Channel.interface";
