@@ -9,24 +9,25 @@ import {
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
-import { ChannelService } from './channel/channel.service';
-import { CreateChanDto } from './channel/dtos/createChan.dto';
+import { ChannelService } from './chat/channel/channel.service';
+import { CreateChanDto } from './chat/channel/dtos/createChan.dto';
 import UserEntity from 'src/user/models/user.entity';
-import { ChannelEntity } from './channel/channel.entity';
+import { ChannelEntity } from './chat/channel/channel.entity';
+import { ModifyChanDto } from './chat/channel/dtos/modifyChan.dto';
 
 @WebSocketGateway({
 	cors: {
 		origin: 'http://localhost/',
 	},
 })
-export class ChatGateway
+export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
 	constructor(private channelService: ChannelService) {}
 
 	@WebSocketServer() server: Server;
 
-	private logger: Logger = new Logger('ChatGateway');
+	private logger: Logger = new Logger('GeneralGateway');
 
 	/**
 	 * Handles server initialization behaviour
@@ -52,6 +53,16 @@ export class ChatGateway
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
 
+/**
+*   _____ _    _       _______
+*  / ____| |  | |   /\|__   __|  
+* | |    | |__| |  /  \  | |    
+* | |    |  __  | / /\ \ | |   
+* | |____| |  | |/ ____ \| |   
+*  \_____|_|  |_/_/    \_|_|    
+* 
+*/
+
   /**
    * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
    */
@@ -75,29 +86,37 @@ export class ChatGateway
 	}
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyPassword')
-	async modifyPassword(client: Socket, chanName: string, newPassword : string)
+	@SubscribeMessage('modifyChannel')
+	async modifyChannel(client: Socket, modifications: ModifyChanDto)
 	{
-		await this.channelService.modifyPassword(client.data.user, chanName, newPassword);
+		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyAdmins')
-	async modifyAdmins(client : Socket, chanName: string, newAdmins: UserEntity[])
-	{
-		await this.channelService.modifyAdmins(client.data.user, chanName, newAdmins);
-		this.server.emit('updatedChannels');
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('modifyPassword')
+	// async modifyPassword(client: Socket, modifications: ModifyChanDto)
+	// {
+	// 	await this.channelService.modifyPassword(client.data.user, modifications);
+	// 	this.server.emit('updatedChannels');
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyMembers')
-	async modifyMembers(client : Socket, chanName: string, newMembers: UserEntity[])
-	{
-		await this.channelService.modifyMembers(client.data.user, chanName, newMembers)
-		this.server.emit('updatedChannels');
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('modifyAdmins')
+	// async modifyAdmins(client : Socket, modifications: ModifyChanDto)
+	// {
+	// 	await this.channelService.modifyAdmins(client.data.user, modifications);
+	// 	this.server.emit('updatedChannels');
+	// }
 
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('modifyMembers')
+	// async modifyMembers(client : Socket, modifications: ModifyChanDto)
+	// {
+	// 	await this.channelService.modifyMembers(client.data.user, modifications)
+	// 	this.server.emit('updatedChannels');
+
+	// }
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
@@ -223,28 +242,25 @@ export class ChatGateway
 		this.server.emit('sendChans', channels);
 	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getMemberChannels')
-	// async getMemberChannels(client: Socket)
-	// {
-	// 	const channels: ChannelEntity[] = await this.channelService.getMemberChannels(client.data.user);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMemberChannels')
+	async getMemberChannels(client: Socket)
+	{
+		const channels: ChannelEntity[] = 
+			await this.channelService.getMemberChannels(client.data.user);
+		this.server.emit('sendMemberChannels', channels);
+	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getAllPublicChannels')
-	// async GetAllPublicChannels(client: Socket)
-	// {
-	// 	const publicChannels: ChannelEntity[] = await this.channelService.getAllPublicChannels();
-	// 	this.server.emit('sendPublicsChannels', publicChannels);
-	// }
+/**
+*   _____          __  __ ______ 
+*  / ____|   /\   |  \/  |  ____|
+* | |  __   /  \  | \  / | |__   
+* | | |_ | / /\ \ | |\/| |  __|  
+* | |__| |/ ____ \| |  | | |____ 
+*  \_____/_/    \_|_|  |_|______|																				   
+* 
+*/
+																				
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getAllPrivateChannels')
-	// async getAllPrivateChannels(client: Socket)
-	// {
-	// 	const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
-	// 	this.server.emit('sendPrivateChannels', privateChannels);
-	// }
-
-	
+ 
 }
