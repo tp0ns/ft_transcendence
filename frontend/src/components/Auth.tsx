@@ -4,7 +4,7 @@ import jwtDecode from "jwt-decode";
 
 const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 	const [cookies] = useCookies();
-	let location = useLocation();
+	const location = useLocation();
 
 	if (!cookies.Authentication) {
 		return <Navigate to="/login" state={{ from: location }} replace />;
