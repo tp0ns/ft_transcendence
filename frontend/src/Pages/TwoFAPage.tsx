@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router";
 
 const TwoFAPAge = () => {
@@ -33,11 +33,14 @@ const TwoFAPAge = () => {
 	}
 
 	return (
-		<form onSubmit={submitHandler}>
-			<label htmlFor="text">Enter your 2FA code</label>
-			<input ref={userInput} type="text" id="text"></input>
-			<button>Connect</button>
-		</form>
+		<React.Fragment>
+			
+			<form onSubmit={submitHandler}>
+				<label htmlFor="text">Enter your 2FA code</label>
+				<input ref={userInput} type="text" id="text"></input>
+				<button>Connect</button>
+			</form>
+		</React.Fragment>
 	);
 };
 

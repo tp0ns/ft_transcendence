@@ -1,0 +1,34 @@
+.layout {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 4rem;
+	background-color: #3a3636;
+	color: #f4edde;
+	align-content: center;
+}
+
+.layout a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.links {
+	padding-left: 2rem;
+	padding-right: 2rem;
+	width: auto;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pages {
+	list-style-type: none;
+	width: 20%;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+}
