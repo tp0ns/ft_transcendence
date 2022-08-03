@@ -4,11 +4,17 @@ export class ModifyChanDto {
 	@IsNotEmpty({ message: 'Channel needs a title' })
 	title: string;
 
-	member?: string;
+	newMember?: string;
 
-	password?: string;
+	newPassword?: string;
 
-	private?: string;
+	newAdmin?: string;
 
-	admin?: string;
+	newBan?: string;
+
+	newMute?: string;
+
+	deleteBan?: string;
+
+	deleteMute?: string;
 }
