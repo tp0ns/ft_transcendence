@@ -49,21 +49,45 @@ export class ChannelService {
 		}
 		this.joinChan(user, channel.title);
 		if (channel.private == false) {
+			// for (const user of )
 			//tant qu'on a pas parcouru toute la liste des users connectes
 			//faire un joinChannel
 		}
 	}
 
+	/**
+	 * 
+	 * @param user le user qui souhaite effectuer la modification 
+	 * - la plupart du temps : necessaire que ce soit un admin ou le owner
+	 * - sauf dans le cas de l'ajout d'un membre dans un channel privee 
+	 * @param modifications l'interface qui permettra de savoir quel 
+	 * est l'element du channel a modifier
+	 * 
+	 * @todo peut etre a modifier pour nu switch : checker comment ca marche
+	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
-		if (modifications.password) this.modifyPassword(user, modifications);
-		if (modifications.admin) this.modifyAdmins;
+		if (modifications.newPassword) 
+			await this.modifyPassword(user, modifications);
+		if (modifications.newAdmin) 
+			await this.modifyAdmins(user, modifications);
+		if (modifications.newMember)
+			await this.modifyMembers(user, modifications);
+		if (modifications.newBan)
+			await this.addBanMembers(user, modifications);
+		if (modifications.newMute)
+			await this.addMuteMembers(user, modifications);
+		if (modifications.deleteBan)
+			await this.deleteBanMembers(user, modifications);
+		if (modifications.deleteMute)
+			await this.deleteMuteMembers(user, modifications);
 	}
 
 	/**
 	 *
-	 * @param user
-	 * @param chanName
-	 * @param newPassword
+	 * @param user le user qui souhaite effectuer la modification
+	 * -> doit etre owner
+	 * @param modifications l'interface dans laquelle le password 
+	 * sera rempli pour modifier le password du channel.
 	 *
 	 * @todo hash le nouveau password avant de le save dans le channel
 	 */
@@ -71,23 +95,31 @@ export class ChannelService {
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
-		if (channel.owner.userId != user.userId || channel.protected == false)
+		if (!channel || channel.owner.userId != user.userId)
 			console.log(`You can't modify the channel`);
 		else {
-			channel.password = modifications.password;
+			channel.protected = true;
+			channel.password = modifications.newPassword;
 			await this.channelRepository.save(channel);
 		}
 	}
 
+	/**
+	 * 
+	 * @param user le user qui souhaite effectuer la modification
+	 * -> doit etre admin ou owner
+	 * @param modifications l'interface dans laquelle un username dans admin 
+	 * sera rempli pour ajouter un admin au channel.
+	 */
 	async modifyAdmins(user: UserEntity, modifications: ModifyChanDto) {
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
-		if (channel.owner.userId != user.userId)
+		if (!channel || channel.owner.userId != user.userId || !channel.admins.includes(user))
 			console.log(`You can't set new admins`);
 		else {
 			let user: UserEntity = await this.userService.getUserByUsername(
-				modifications.admin,
+				modifications.newAdmin,
 			);
 			if (!channel.admins.includes(user)) {
 				channel.admins = [...channel.admins, user];
@@ -95,33 +127,41 @@ export class ChannelService {
 			}
 		}
 	}
-
+	
 	/**
-	 *
-	 * - verifier si le channel est bien privee, sinon, tous membres connectes
-	 * est deja membre automatiquement du channel
-	 * - pas besoin de verifier si la personne qui souhaite ajouter des membres
-	 * est owner ou admins car tout le monde peut le faire
-	 * - verifier que le user n'est pas deja dans le channel
-	 * ❓ - verifier que le user n'est pas ban ?
+	 * 
+	 * @param invitingUser le user qui souhaite effectuer la modification
+	 * -> peut etre un simple membre
+	 * @param modifications l'interface dans laquelle : 
+	 * - un username dans member sera rempli pour ajouter un member au channel
+	 * s'il n'est pas deja dans le channel, s'il n'est pas ban
+	 * - le titre d'un channel sera rempli pour verifier qu'il s'agit d'un 
+	 * channel privee 
+	 * 
+	 * 
 	 * ❓ - est ce que si y'a une invitation mais un password il faut rentrer
 	 * le password pour pouvoir rejoindre le channel ? c chiant a fair
-	 *
-	 * @param invitingUser
-	 * @param chanName
-	 * @param usersToAdd
 	 */
 	async modifyMembers(invitingUser: UserEntity, modifications: ModifyChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(modifications.title);
-		if (channel && channel.private == true) {
+		if (channel && channel.private == true && channel.members.includes(invitingUser)) {
 			let user: UserEntity = await this.userService.getUserByUsername(
-				modifications.member,
+				modifications.newMember,
 			);
 			if (!channel.members.includes(user))
+			{
 				await this.joinChan(user, modifications.title);
+				//rejoindre la room aussi 
+			}
 		}
 	}
 
+	/**
+	 * 
+	 * @param user le user qui souhaite supprimer le channel : 
+	 * -> seulement le owner
+	 * @param chanName le channel a supprimer
+	 */
 	async deleteChan(user: UserEntity, chanName: string) {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
 		if (channel.owner != user) console.log(`You can't delete this channel`);
@@ -176,6 +216,19 @@ export class ChannelService {
 	}
 
 	/**
+	 * 
+	 * @param user verifier que ce user est dans :
+	 * @param channelName ce channel
+	 */
+	async checkIfUserInChannel(user: UserEntity, channelName: string) : Promise<boolean>
+	{
+		let channel : ChannelEntity = await this.getChanByName(channelName);
+		if (channel.members.includes(user))
+			return true;
+		return false;
+	}
+
+	/**
 	 * ------------------------ BAN / MUTE  ------------------------- *
 	 */
 
@@ -189,14 +242,11 @@ export class ChannelService {
 	 * @todo verifier que le user n'est pas deja ban
 	 *
 	 */
-	async banUser(
-		banningUser: UserEntity,
-		userToBan: UserEntity,
-		chanName: string,
-	) {
-		let channel: ChannelEntity = await this.getChanByName(chanName);
+	async addBanMembers(banningUser: UserEntity, modifications: ModifyChanDto) {
+		let channel: ChannelEntity = await this.getChanByName(modifications.title);
+		let newBan: UserEntity = await this.userService.getUserByUsername(modifications.newBan)
 		if (channel.admins.includes(banningUser) || channel.owner == banningUser) {
-			channel.members = [...channel.bannedMembers, userToBan];
+			channel.members = [...channel.bannedMembers, newBan];
 			await channel.save();
 		} else {
 			console.log(`You need to be an admin to ban someone`);
@@ -212,14 +262,11 @@ export class ChannelService {
 	 * @todo verifier que le user est bien dans le channel
 	 * @todo verifier que le user n'est pas deja mute
 	 */
-	async muteUser(
-		muttingUser: UserEntity,
-		userToMute: UserEntity,
-		chanName: string,
-	) {
-		let channel: ChannelEntity = await this.getChanByName(chanName);
+	async addMuteMembers(muttingUser: UserEntity, modifications: ModifyChanDto) {
+		let channel: ChannelEntity = await this.getChanByName(modifications.title);
+		let newMute: UserEntity = await this.userService.getUserByUsername(modifications.newMute)
 		if (channel.admins.includes(muttingUser) || channel.owner == muttingUser) {
-			channel.members = [...channel.mutedMembers, userToMute];
+			channel.members = [...channel.mutedMembers, newMute];
 			await channel.save();
 		}
 	}
@@ -232,12 +279,9 @@ export class ChannelService {
 	 *
 	 * @todo verifier que le user est bien banni
 	 */
-	async unbanUser(
-		unbanningUser: UserEntity,
-		userToUnban: UserEntity,
-		chanName: string,
-	) {
-		let channel: ChannelEntity = await this.getChanByName(chanName);
+	async deleteBanMembers(unbanningUser: UserEntity, modifications: ModifyChanDto) {
+		let channel: ChannelEntity = await this.getChanByName(modifications.title);
+		let deleteBan: UserEntity = await this.userService.getUserByUsername(modifications.deleteBan)
 		if (
 			channel.admins.includes(unbanningUser) ||
 			channel.owner == unbanningUser
@@ -246,7 +290,7 @@ export class ChannelService {
 				.createQueryBuilder()
 				.relation(ChannelEntity, 'bannedMembers')
 				.of(UserEntity)
-				.remove(userToUnban);
+				.remove(deleteBan);
 		}
 	}
 
@@ -258,12 +302,9 @@ export class ChannelService {
 	 *
 	 * @todo verifier que le user est deja mute
 	 */
-	async unmuteUser(
-		unmuttingUser: UserEntity,
-		userToUnmute: UserEntity,
-		chanName: string,
-	) {
-		let channel: ChannelEntity = await this.getChanByName(chanName);
+	 async deleteMuteMembers(unmuttingUser: UserEntity, modifications: ModifyChanDto) {
+		let channel: ChannelEntity = await this.getChanByName(modifications.title);
+		let deleteMute: UserEntity = await this.userService.getUserByUsername(modifications.deleteMute);
 		if (
 			channel.admins.includes(unmuttingUser) ||
 			channel.owner == unmuttingUser
@@ -272,7 +313,7 @@ export class ChannelService {
 				.createQueryBuilder()
 				.relation(ChannelEntity, 'mutedMembers')
 				.of(UserEntity)
-				.remove(userToUnmute);
+				.remove(deleteMute);
 		}
 	}
 
