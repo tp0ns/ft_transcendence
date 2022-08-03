@@ -13,6 +13,7 @@ import { ChannelService } from './chat/channel/channel.service';
 import { CreateChanDto } from './chat/channel/dtos/createChan.dto';
 import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from './chat/channel/channel.entity';
+import { ModifyChanDto } from './chat/channel/dtos/modifyChan.dto';
 
 @WebSocketGateway({
 	cors: {
@@ -85,29 +86,37 @@ export class GeneralGateway
 	}
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyPassword')
-	async modifyPassword(client: Socket, chanName: string, newPassword : string)
+	@SubscribeMessage('modifyChannel')
+	async modifyChannel(client: Socket, modifications: ModifyChanDto)
 	{
-		await this.channelService.modifyPassword(client.data.user, chanName, newPassword);
+		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyAdmins')
-	async modifyAdmins(client : Socket, chanName: string, newAdmins: UserEntity[])
-	{
-		await this.channelService.modifyAdmins(client.data.user, chanName, newAdmins);
-		this.server.emit('updatedChannels');
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('modifyPassword')
+	// async modifyPassword(client: Socket, modifications: ModifyChanDto)
+	// {
+	// 	await this.channelService.modifyPassword(client.data.user, modifications);
+	// 	this.server.emit('updatedChannels');
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyMembers')
-	async modifyMembers(client : Socket, chanName: string, newMembers: UserEntity[])
-	{
-		await this.channelService.modifyMembers(client.data.user, chanName, newMembers)
-		this.server.emit('updatedChannels');
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('modifyAdmins')
+	// async modifyAdmins(client : Socket, modifications: ModifyChanDto)
+	// {
+	// 	await this.channelService.modifyAdmins(client.data.user, modifications);
+	// 	this.server.emit('updatedChannels');
+	// }
 
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('modifyMembers')
+	// async modifyMembers(client : Socket, modifications: ModifyChanDto)
+	// {
+	// 	await this.channelService.modifyMembers(client.data.user, modifications)
+	// 	this.server.emit('updatedChannels');
+
+	// }
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
@@ -237,24 +246,10 @@ export class GeneralGateway
 	@SubscribeMessage('getMemberChannels')
 	async getMemberChannels(client: Socket)
 	{
-		const channels: ChannelEntity[] = await this.channelService.getMemberChannels(client.data.user);
+		const channels: ChannelEntity[] = 
+			await this.channelService.getMemberChannels(client.data.user);
+		this.server.emit('sendMemberChannels', channels);
 	}
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getAllPublicChannels')
-	// async GetAllPublicChannels(client: Socket)
-	// {
-	// 	const publicChannels: ChannelEntity[] = await this.channelService.getAllPublicChannels();
-	// 	this.server.emit('sendPublicsChannels', publicChannels);
-	// }
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getAllPrivateChannels')
-	// async getAllPrivateChannels(client: Socket)
-	// {
-	// 	const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
-	// 	this.server.emit('sendPrivateChannels', privateChannels);
-	// }
 
 /**
 *   _____          __  __ ______ 

@@ -6,12 +6,15 @@ import { MessageService } from '../messages/messages.service';
 import { ChannelEntity } from './channel.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateChanDto } from './dtos/createChan.dto';
+import { UserService } from 'src/user/user.service';
+import { ModifyChanDto } from './dtos/modifyChan.dto';
 
 @Injectable()
 export class ChannelService {
 	constructor(
 		@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
 		@Inject(forwardRef(() => MessageService)) private messageService: MessageService,
+		@Inject(forwardRef(() => UserService)) private userService: UserService,
 	) {}
 
 	/**
@@ -52,6 +55,14 @@ export class ChannelService {
 		}
 	}
 
+	async modifyChannel(user: UserEntity, modifications: ModifyChanDto)
+	{
+		if (modifications.password)
+			this.modifyPassword(user, modifications);
+		if (modifications.admin)
+			this.modifyAdmins
+	}
+
 	/**
 	 * 
 	 * @param user 
@@ -60,35 +71,58 @@ export class ChannelService {
 	 * 
 	 * @todo hash le nouveau password avant de le save dans le channel
 	 */
-	async modifyPassword(user: UserEntity, chanName: string, newPassword : string)
+	async modifyPassword(user: UserEntity, modifications: ModifyChanDto)
 	{
-		const channel : ChannelEntity = await this.getChanByName(chanName);
-		if (channel.owner != user || channel.protected == false)
+		const channel : ChannelEntity = await this.getChanByName(modifications.title);
+		if (channel.owner.userId != user.userId || channel.protected == false)
 			console.log(`You can't modify the channel`);
 		else 
 		{
-			channel.password = newPassword;
+			channel.password = modifications.password;
 			await this.channelRepository.save(channel);
 		}
 	}
 
-	async modifyAdmins(user: UserEntity, chanName: string, newAdmins: UserEntity[])
+	async modifyAdmins(user: UserEntity, modifications: ModifyChanDto)
 	{
-		const channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.owner != user)
+		const channel: ChannelEntity = await this.getChanByName(modifications.title);
+		if (channel.owner.userId != user.userId)
 			console.log(`You can't set new admins`);
 		else 
 		{
-			channel.admins = [...channel.admins, user];
-			await channel.save();
+			let user: UserEntity = await this.userService.getUserByUsername(modifications.admin)
+			if (!channel.admins.includes(user))
+			{
+				channel.admins = [...channel.admins, user];
+				await channel.save();
+			}
 		}
 	}
 
-	async modifyMembers(invitingUser: UserEntity, chanName: string,usersToAdd: UserEntity[])
+	/**
+	 * 
+	 * - verifier si le channel est bien privee, sinon, tous membres connectes 
+	 * est deja membre automatiquement du channel
+	 * - pas besoin de verifier si la personne qui souhaite ajouter des membres
+	 * est owner ou admins car tout le monde peut le faire 
+	 * - verifier que le user n'est pas deja dans le channel 
+	 * ❓ - verifier que le user n'est pas ban ? 
+	 * ❓ - est ce que si y'a une invitation mais un password il faut rentrer 
+	 * le password pour pouvoir rejoindre le channel ? c chiant a fair
+	 * 
+	 * @param invitingUser 
+	 * @param chanName 
+	 * @param usersToAdd 
+	 */
+	async modifyMembers(invitingUser: UserEntity, modifications: ModifyChanDto)
 	{
-		let channel : ChannelEntity = await this.getChanByName(chanName);
-		// if (channel.private == true)
-			// await this.joinChan(userToInvite, chanName);
+		let channel : ChannelEntity = await this.getChanByName(modifications.title);
+		if (channel && channel.private == true)
+		{
+			let user: UserEntity = await this.userService.getUserByUsername(modifications.member)
+			if (!channel.members.includes(user))
+				await this.joinChan(user, modifications.title);
+		}
 	}
 
 	async deleteChan(user: UserEntity, chanName: string) 
@@ -248,26 +282,23 @@ export class ChannelService {
 		return channels;
 	}
 
-	async getMemberChannels(user: UserEntity): Promise<ChannelEntity[]>
+	/**
+	 * 
+	 * @param member 
+	 * @returns all member's channels 
+	 * 
+	 * @todo est-ce que j'envoie aussi si le user est mute ou ban ?
+	 */
+	async getMemberChannels(member: UserEntity): Promise<ChannelEntity[]>
 	{
-		let channels : ChannelEntity[];
-		// const member: MembersEntity = await this.membersService.getMember(user);
+		let channels : ChannelEntity[] = await this.channelRepository
+				.createQueryBuilder('channel')
+				.leftJoinAndSelect("channel.members", "members")
+				.where('channel.private = false')
+				.andWhere("members.userId = :id", {id: member.userId})
+				.getMany()
 		return channels;
 	}
-
-	// async getAllPublicChannels() : Promise<ChannelEntity[]> 
-	// {
-	// 	const publicChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: false}})
-	// 	return publicChannels;
-	// }
-
-	// async getAllPrivateChannels(user: UserEntity) : Promise<ChannelEntity[]> 
-	// {
-	// 	// const member: MembersEntity = await this.membersService.getMember(user);
-	// 	const privateChannels : ChannelEntity[] = await this.channelRepository.find({where: {private: true}})
-
-	// 	return privateChannels;
-	// }
 
 	/**
 	 * @brief Find the channel to join with his name
@@ -279,7 +310,7 @@ export class ChannelService {
 	 */
 	async getChanByName(chanName : string) : Promise<ChannelEntity> 
 	{
-		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members']});
+		let channel : ChannelEntity = await this.channelRepository.findOne({where: { title: chanName }, relations: ['members', 'owner', 'admins']});
 		// if (!channel)
 			// console.log("le channel il existe po");
 		return channel;

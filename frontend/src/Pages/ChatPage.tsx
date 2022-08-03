@@ -31,6 +31,15 @@ function ChatPage() {
     setNewChannel(false);
   };
 
+  const modifyChannel = (channelData: ChannelProp) => {
+    console.log("entered sendChan");
+    console.log("Channel Data in chat page: ", channelData);
+    socket.emit("createChan", channelData);
+    setNewChannel(false);
+  };
+
+
+
   const handleOpenedChannel = (channel: any) => {
     socket.emit("joinRoom", channel);
     setOpenedChannel(channel);
