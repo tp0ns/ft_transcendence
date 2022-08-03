@@ -1,6 +1,6 @@
 import classes from "./GameScreen.module.css";
 import { socket } from "../../App";
-import { LegacyRef, RefObject, useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 let ballPosition = {
   x: 0,
@@ -27,27 +27,16 @@ let rightPadPosition = {
   speed: 20,
 };
 
-let context = null;
-
 const GameScreen = () => {
-
-  const [canvasClicked, setCanvasClicked] = useState(false)
-
   const canvas = useRef<HTMLCanvasElement>(null);
 
-
   useEffect(() => {
-    const context = canvas.current!.getContext('2d')
+    const context = canvas.current!.getContext("2d");
 
     socket.on("setPosition", (leftPos, rightPos, ballPos) => {
       leftPadPosition = leftPos;
       rightPadPosition = rightPos;
-      context!.clearRect(
-        0,
-        0,
-        canvas.current!.width,
-        canvas.current!.height
-      );
+      context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
 
       //  draw the ball
       ballPosition = ballPos;
@@ -82,7 +71,7 @@ const GameScreen = () => {
     });
 
     // do something here with the canvas
-  }, [])
+  }, []);
 
   const move = (direction: any) => {
     socket.emit("move", direction);
@@ -97,7 +86,7 @@ const GameScreen = () => {
   };
 
   const moveBall = () => {
-    if (ballPosition.goRight == 0) {
+    if (ballPosition.goRight === 0) {
       if (
         ballPosition.y + ballPosition.speedy <= 10 ||
         ballPosition.y + ballPosition.speedy >= 470
@@ -165,7 +154,7 @@ const GameScreen = () => {
         ballPosition.goRight = 0;
       }
     }
-    if (ballPosition.x != 10 && ballPosition.x != 630) {
+    if (ballPosition.x !== 10 && ballPosition.x !== 630) {
       // animation until the ball touches the wall
       requestAnimationFrame(moveBall);
     }
@@ -180,25 +169,21 @@ const GameScreen = () => {
       gameFunctions("resetBall");
     }
     if (event.key === "w") {
-      move('up');
+      move("up");
     }
 
     if (event.key === "s") {
-      move('down');
-    
+      move("down");
+    }
   };
 
   const handleStart = () => {
     moveBall();
-  }
+  };
 
   const handleReset = () => {
-    gameFunctions('resetBall');
-  }
-
-  const handleCanvasClick = () => {
-    setCanvasClicked(true);
-  }
+    gameFunctions("resetBall");
+  };
 
   return (
     <div>
@@ -210,7 +195,6 @@ const GameScreen = () => {
         height="480"
         ref={canvas}
         className={classes.canvas}
-        onClick={handleCanvasClick}
       />
       <p>
         <button onClick={handleStart}>Start</button>
