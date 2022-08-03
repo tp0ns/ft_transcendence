@@ -50,8 +50,13 @@ function ChatPage() {
   };
 
   const settingsHandler = (channel: ChannelProp) => {
+    console.log("channel in settingHandler: ", channel);
     setSettings(channel);
   };
+
+  useEffect(() => {
+    console.log("channelSettings in useEffect: ", channelSettings);
+  }, [channelSettings]);
 
   return (
     <section>
