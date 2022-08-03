@@ -1,6 +1,6 @@
 import classes from "./GameScreen.module.css";
 import { socket } from "../../App";
-import { useEffect, useRef } from "react";
+import { LegacyRef, RefObject, useContext, useEffect, useRef, useState } from "react";
 
 let ballPosition = {
   x: 0,
@@ -27,36 +27,62 @@ let rightPadPosition = {
   speed: 20,
 };
 
+let context = null;
+
 const GameScreen = () => {
 
-  const canvasRef = useRef(null);
+  const [canvasClicked, setCanvasClicked] = useState(false)
+
+  const canvas = useRef<HTMLCanvasElement>(null);
+
 
   useEffect(() => {
-    const canvas = document.getElementById('game') as HTMLCanvasElement;
-    const context = canvas.getContext('2d');
-    callback([canvas, context]);
-  }, []);
-  
-  socket.on("setPosition", (leftPos, rightPos, ballPos) => {
-    leftPadPosition = leftPos;
-    rightPadPosition = rightPos;
-    context.clearRect(0, 0, $refs.game.width, $refs.game.height)
+    const context = canvas.current!.getContext('2d')
 
-    //  draw the ball
-    ballPosition = ballPos;
-    context.arc(5, 5, 5, 0, 2 * Math.PI);
-    context.beginPath();
-    context.arc(ballPosition.x, ballPosition.y, ballPosition.radius, ballPosition.startAngle, 2 * Math.PI);
-    context.lineWidth = 1;
-    context.fillStyle = "#FF67E7";
-    context.fill();
-    
-    //draw left pad
-    context.fillStyle = "#9254C8";
-    context.fillRect(leftPadPosition.x, leftPadPosition.y - 50, leftPadPosition.w, leftPadPosition.h);
-    //draw right pad
-    context.fillRect(rightPadPosition.x, rightPadPosition.y - 50, rightPadPosition.w, rightPadPosition.h);
-});
+    socket.on("setPosition", (leftPos, rightPos, ballPos) => {
+      leftPadPosition = leftPos;
+      rightPadPosition = rightPos;
+      context!.clearRect(
+        0,
+        0,
+        canvas.current!.width,
+        canvas.current!.height
+      );
+
+      //  draw the ball
+      ballPosition = ballPos;
+      context!.arc(5, 5, 5, 0, 2 * Math.PI);
+      context!.beginPath();
+      context!.arc(
+        ballPosition.x,
+        ballPosition.y,
+        ballPosition.radius,
+        ballPosition.startAngle,
+        2 * Math.PI
+      );
+      context!.lineWidth = 1;
+      context!.fillStyle = "#FF67E7";
+      context!.fill();
+
+      //draw left pad
+      context!.fillStyle = "#9254C8";
+      context!.fillRect(
+        leftPadPosition.x,
+        leftPadPosition.y - 50,
+        leftPadPosition.w,
+        leftPadPosition.h
+      );
+      //draw right pad
+      context!.fillRect(
+        rightPadPosition.x,
+        rightPadPosition.y - 50,
+        rightPadPosition.w,
+        rightPadPosition.h
+      );
+    });
+
+    // do something here with the canvas
+  }, [])
 
   const move = (direction: any) => {
     socket.emit("move", direction);
@@ -170,7 +196,9 @@ const GameScreen = () => {
     gameFunctions('resetBall');
   }
 
-  
+  const handleCanvasClick = () => {
+    setCanvasClicked(true);
+  }
 
   return (
     <div>
@@ -180,8 +208,9 @@ const GameScreen = () => {
         onKeyDown={handleKeyDown}
         width="640"
         height="480"
-        id="game"
+        ref={canvas}
         className={classes.canvas}
+        onClick={handleCanvasClick}
       />
       <p>
         <button onClick={handleStart}>Start</button>
@@ -192,7 +221,3 @@ const GameScreen = () => {
 };
 
 export default GameScreen;
-  function callback(arg0: (HTMLCanvasElement | CanvasRenderingContext2D | null)[]) {
-    throw new Error("Function not implemented.");
-  }
-
