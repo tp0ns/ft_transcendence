@@ -1,8 +1,8 @@
 import { channel } from "diagnostics_channel";
 import { useEffect, useState } from "react";
-import { socket } from "../App";
-import ChannelProp from "../interfaces/Channel.interface";
-import InputAndButton from "../ui/InputAndButton";
+import { socket } from "../../App";
+import ChannelProp from "../../interfaces/Channel.interface";
+import InputAndButton from "../../ui/InputAndButton";
 import classes from "./NewChannelForm.module.css";
 
 // Change password if Owner

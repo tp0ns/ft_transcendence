@@ -32,14 +32,14 @@ export class GeneralGateway
 	/**
 	 * Handles server initialization behaviour
 	 */
-	 @UseGuards(WsGuard)
+	@UseGuards(WsGuard)
 	afterInit(server: Server) {
 		this.logger.log(`Server is properly initialized !`);
 	}
 	/**
 	 * Handles client connection behaviour
 	 */
-	 @UseGuards(WsGuard)
+	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
@@ -48,32 +48,32 @@ export class GeneralGateway
 	/**
 	 * Handles client disconnection behaviour
 	 */
-	 @UseGuards(WsGuard)
+	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 	}
 
-/**
-*   _____ _    _       _______
-*  / ____| |  | |   /\|__   __|  
-* | |    | |__| |  /  \  | |    
-* | |    |  __  | / /\ \ | |   
-* | |____| |  | |/ ____ \| |   
-*  \_____|_|  |_/_/    \_|_|    
-* 
-*/
-
-  /**
-   * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
-   */
+	/**
+	 *   _____ _    _       _______
+	 *  / ____| |  | |   /\|__   __|
+	 * | |    | |__| |  /  \  | |
+	 * | |    |  __  | / /\ \ | |
+	 * | |____| |  | |/ ____ \| |
+	 *  \_____|_|  |_/_/    \_|_|
+	 *
+	 */
 
 	/**
-	 * 
+	 * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
+	 */
+
+	/**
+	 *
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
-	 * 
-	 * @todo verifier que channelEntity existe : est-ce que securite dans le front ? 
-	 * 
+	 *
+	 * @todo verifier que channelEntity existe : est-ce que securite dans le front ?
+	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
@@ -87,8 +87,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('modifyChannel')
-	async modifyChannel(client: Socket, modifications: ModifyChanDto)
-	{
+	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
@@ -120,11 +119,9 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
-	async deleteChan(client: Socket, chanName: string)
-	{
+	async deleteChan(client: Socket, chanName: string) {
 		await this.channelService.deleteChan(client.data.user, chanName);
 		this.server.emit('updatedChannels');
-
 	}
 
 	/**
@@ -135,7 +132,7 @@ export class GeneralGateway
 	 *
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
-	 * 
+	 *
 	 * @todo si le channel est private, verifier que le user est bien membre du channel avant de rejoindre la room
 	 *
 	 */
@@ -148,51 +145,54 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
-	async leaveRoom(client : Socket, channelName : string ) {
+	async leaveRoom(client: Socket, channelName: string) {
 		client.leave(channelName);
-		this.server.emit('leftRoom')
+		this.server.emit('leftRoom');
 	}
-  
+
 	/**
 	 * ------------------------ BAN / MUTE  ------------------------- *
 	 */
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('BanUser')
-	async BanUser(client: Socket, userToBan: UserEntity, chanName: string)
-	{
+	async BanUser(client: Socket, userToBan: UserEntity, chanName: string) {
 		await this.channelService.banUser(client.data.user, userToBan, chanName);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('MuteUser')
-	async MuteUser(client: Socket, userToMute: UserEntity, chanName: string)
-	{
+	async MuteUser(client: Socket, userToMute: UserEntity, chanName: string) {
 		await this.channelService.muteUser(client.data.user, userToMute, chanName);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('UnbanUser')
-	async UnbanUser(client: Socket, userToUnban: UserEntity, chanName: string)
-	{
-		await this.channelService.unbanUser(client.data.user, userToUnban, chanName);
+	async UnbanUser(client: Socket, userToUnban: UserEntity, chanName: string) {
+		await this.channelService.unbanUser(
+			client.data.user,
+			userToUnban,
+			chanName,
+		);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('UnmuteUser')
-	async UnmuteUser(client: Socket, userToUnmute: UserEntity, chanName: string)
-	{
-		await this.channelService.unmuteUser(client.data.user, userToUnmute, chanName);
+	async UnmuteUser(client: Socket, userToUnmute: UserEntity, chanName: string) {
+		await this.channelService.unmuteUser(
+			client.data.user,
+			userToUnmute,
+			chanName,
+		);
 	}
 
-	
 	/**
 	 * ------------------------ HANDLE MESSAGES  ------------------------- *
 	 */
 
-  /**
-   * @todo en plus d'envoyer le msg, stocker dans l'entite messages
-   */
+	/**
+	 * @todo en plus d'envoyer le msg, stocker dans l'entite messages
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
 	handleMessage(client: Socket, payload: string) {
@@ -201,11 +201,11 @@ export class GeneralGateway
 	}
 
 	/**
-	 * 
-	 * @param client 
-	 * @param payload 
-	 * @param chanName 
-	 * 
+	 *
+	 * @param client
+	 * @param payload
+	 * @param chanName
+	 *
 	 * @todo faire un emit.to
 	 */
 	@UseGuards(WsGuard)
@@ -244,23 +244,19 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
-	async getMemberChannels(client: Socket)
-	{
-		const channels: ChannelEntity[] = 
+	async getMemberChannels(client: Socket) {
+		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
 		this.server.emit('sendMemberChannels', channels);
 	}
 
-/**
-*   _____          __  __ ______ 
-*  / ____|   /\   |  \/  |  ____|
-* | |  __   /  \  | \  / | |__   
-* | | |_ | / /\ \ | |\/| |  __|  
-* | |__| |/ ____ \| |  | | |____ 
-*  \_____/_/    \_|_|  |_|______|																				   
-* 
-*/
-																				
-
- 
+	/**
+	 *   _____          __  __ ______
+	 *  / ____|   /\   |  \/  |  ____|
+	 * | |  __   /  \  | \  / | |__
+	 * | | |_ | / /\ \ | |\/| |  __|
+	 * | |__| |/ ____ \| |  | | |____
+	 *  \_____/_/    \_|_|  |_|______|
+	 *
+	 */
 }

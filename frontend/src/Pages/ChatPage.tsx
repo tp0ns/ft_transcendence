@@ -1,12 +1,11 @@
 import { io, Socket } from "socket.io-client";
-import { useState } from "react";
-import ChannelsList from "../components/ChannelsLists";
-import NewChannelForm from "../components/NewChannel";
+import { useEffect, useState } from "react";
+import ChannelsList from "../components/channel/ChannelsLists";
+import NewChannelForm from "../components/channel/NewChannel";
 import ChannelProp from "../interfaces/Channel.interface";
-import OpenedChannel from "../components/OpenedChannel";
-import Settings from "../components/Settings";
-
-const socket: Socket = io("http://localhost");
+import OpenedChannel from "../components/channel/OpenedChannel";
+import Settings from "../components/channel/Settings";
+import { socket } from "../App";
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
