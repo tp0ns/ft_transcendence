@@ -1,19 +1,21 @@
 @font-face {
 	font-family: "blippoblack";
-	src: url("../public/blippo_black_font/blippo_black_regular-webfont.woff2")
+	src: url("../public/fonts/blippo_black_font/blippo_black_regular-webfont.woff2")
 			format("woff2"),
-		url("../public/blippo_black_font/blippo_black_regular-webfont.woff")
+		url("../public/fonts/blippo_black_font/blippo_black_regular-webfont.woff")
 			format("woff");
 	font-weight: normal;
 	font-style: normal;
 }
 
 body {
-	margin: 0;
+	padding-top: 4rem;
 	font-family: "blippoblack", "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
 		"Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	color: #3a3636;
+	background-color: #fdd05d;
 }
 
 code {
