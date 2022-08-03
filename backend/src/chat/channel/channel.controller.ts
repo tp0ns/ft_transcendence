@@ -1,19 +1,39 @@
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
-import { Channel } from './channel.entity';
+import { Body, Controller, Get, HttpCode, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { WsGuard } from 'src/auth/websocket/ws.guard';
+import UserEntity from 'src/user/models/user.entity';
+import { ChannelEntity } from './channel.entity';
 import { ChannelService } from './channel.service';
+import { CreateChanDto } from './dtos/createChan.dto';
 
 @Controller('channel')
 export class ChannelController {
 	constructor (private ChannelService: ChannelService) {}
 
 
-	// @Post('/create')
-	// @HttpCode(200)
-	// @UsePipes(ValidationPipe)
-	// async createChan(@Body() ChanData : CreateChanDto) {
-	// 	return await this.ChannelService.createNewChan(ChanData)
-	// }
+	@Post('/create')
+	@HttpCode(200)
+	@UsePipes(ValidationPipe)
+	@UseGuards(WsGuard)
+	async createChan(user: UserEntity, @Body() channel: ChannelEntity) {
+		return await this.ChannelService.createNewChan(user, channel)
+	}
 
+	/**
+	 * Create a new channel
+	 * The requesting user will own the channel.
+	 *
+	 * @param req containing id user that will be
+	 * @returns
+	 */
+
+	//  @Post('new')
+	//  @UseGuards(JwtAuthGuard)
+	//  public async newChannel(@Req() req : Request, @Body() channel : CreateChanDto)
+	//  {
+	// 	 const user: UserEntity = await this.UserService.getUserByRequest(req);
+	// 	 return await this.ChannelService.createNewChan(user, channel);
+	//  }
 	/**
 	 * Get all channels.
 	 */
@@ -22,5 +42,6 @@ export class ChannelController {
 	// async getAllChans(): Promise<channel> {
 	//   return await this.ChannelService.getAllChannels();
 	// }
+
  
 }

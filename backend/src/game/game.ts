@@ -34,6 +34,8 @@ const rectPosition = {
 		speed: 20,
 	},
 };
+// les valeurs 620 et 460 ne doivent pas etre constantes. il faut trouver un moyen de recuperer la taille du canvas
+//	et de composer avec. ou alors utiliser vh/vw ou bien em au lieu de px
 
 let ballPosition = {
 	x: 250,
@@ -44,9 +46,6 @@ let ballPosition = {
 	speedy: 0,
 	goRight: 0,
 };
-
-// les valeurs 620 et 460 ne doivent pas etre constantes. il faut trouver un moyen de recuperer la taille du canvas
-//	et de composer avec. ou alors utiliser vh/vw ou bien em au lieu de px
 
 SocketIo.on('connection', (socket) => {
 	SocketIo.emit(

@@ -6,4 +6,8 @@ export class CreateChanDto {
 
 	password: string;
 
+	protected: boolean;
+
+	private: boolean;
+
 }

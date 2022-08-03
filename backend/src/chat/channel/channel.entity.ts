@@ -7,44 +7,67 @@ import {
 	JoinTable,
 	ManyToMany,
 	ManyToOne,
+	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity('channel')
-export class Channel extends BaseEntity {
+export class ChannelEntity extends BaseEntity {
 	@PrimaryGeneratedColumn('uuid')
 	channelId: string;
 
-	// @Column({
-	// 	type: 'boolean',
-	// 	default: false,
-	// })
-	// isPrivate: boolean;
+	@Column({
+		default: false,
+	})
+	private: boolean;
 
 	@Column('text', {
 		default: '',
 	})
 	title: string;
 
+	/**
+	 * Un Channel ne peut avoir qu'un seul owner mais un user
+	 * peut etre owner de plusieurs channels
+	 */
 	@ManyToOne(() => UserEntity)
 	@JoinColumn()
 	owner: UserEntity;
 
-	@Column("text", {
-		default: "",
+	@Column('text', {
+		default: null,
+		nullable: true,
 	})
 	password: string;
 
-	@ManyToMany(() => UserEntity, (user) => user.channels, {
-		eager: true,
-	})
+	@ManyToMany(() => UserEntity)
+	@JoinTable()
+	admins: UserEntity[]
+
+	@ManyToMany(() => UserEntity )
 	@JoinTable()
 	members: UserEntity[]
 
-	//faire la date de crea
-	//faire le time de la derniere activite sur le chan
-	//faire bannedUsers
-	//faire MuttedUsers
-	//faire AdminUsers
-	//faire UsersIn
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	bannedMembers: UserEntity[]
+
+	@ManyToMany(() => UserEntity )
+	@JoinTable()
+	mutedMembers: UserEntity[]
+
+	@Column({
+		default: false,
+	})
+	protected: boolean;
+
+	@Column({
+		nullable: false,
+	})
+	creation: Date;
+
+	@Column({
+		nullable: false,
+	})
+	update: Date;
 }
