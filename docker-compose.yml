@@ -58,7 +58,7 @@ services:
     networks:
       - back_db
     volumes:
-      - ${PRIVATE_PATH_DB}:/var/lib/postgresql/data/:cached
+      - ${PRIVATE_PATH_DB}:/var/lib/postgresql/:cached
 
   pong-dev:
     image: dpage/pgadmin4
