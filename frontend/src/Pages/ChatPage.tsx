@@ -45,10 +45,7 @@ function ChatPage() {
 
 	return (
 		<React.Fragment>
-			{ReactDOM.createPortal(
-				<NavBar />,
-				document.getElementById("navbar-root") as Element
-			)}
+			<NavBar />
 			<section>
 				{!newChannel ? (
 					<button onClick={handleNewChannel}>Add Channel</button>

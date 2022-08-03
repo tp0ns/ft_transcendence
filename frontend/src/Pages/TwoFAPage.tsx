@@ -34,7 +34,6 @@ const TwoFAPAge = () => {
 
 	return (
 		<React.Fragment>
-			
 			<form onSubmit={submitHandler}>
 				<label htmlFor="text">Enter your 2FA code</label>
 				<input ref={userInput} type="text" id="text"></input>
