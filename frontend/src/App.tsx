@@ -1,16 +1,18 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { io, Socket } from "socket.io-client";
 import "./App.css";
 import ChatPage from "./Pages/ChatPage";
-import ChannelsContextProvider from "./store/channels-context";
+import GamePage from "./Pages/GamePage";
+
+export const socket: Socket = io("http://localhost");
 
 function App() {
   return (
-    <ChannelsContextProvider>
-      <Routes>
-        <Route path="/chat" element={<ChatPage />} />
-      </Routes>
-    </ChannelsContextProvider>
+    <Routes>
+      <Route path="/chat" element={<ChatPage />} />
+      <Route path="/game" element={<GamePage />} />
+    </Routes>
   );
 }
 

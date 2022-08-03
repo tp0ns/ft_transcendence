@@ -1,28 +1,36 @@
 import { io, Socket } from "socket.io-client";
 import { useEffect, useState } from "react";
-import ChannelsList from "../components/ChannelsLists";
-import NewChannelForm from "../components/NewChannel";
+import ChannelsList from "../components/channel/ChannelsLists";
+import NewChannelForm from "../components/channel/NewChannel";
 import ChannelProp from "../interfaces/Channel.interface";
-import OpenedChannel from "../components/OpenedChannel";
-
-const socket: Socket = io("http://localhost");
+import OpenedChannel from "../components/channel/OpenedChannel";
+import Settings from "../components/channel/Settings";
+import { socket } from "../App";
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
   const [channelsReceived, setChannelsReceived] = useState([]);
+  const [channelSettings, setSettings] = useState<ChannelProp | null>(null);
   const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
 
   const handleNewChannel = () => {
     setNewChannel(true);
   };
 
-  useEffect(() => {
-    console.log("entered useEffect");
+  // useEffect(() => {
+  //   console.log("entered useEffect");
+  //   socket.emit("getAllChannels");
+  //   socket.on("sendChans", (channels) => {
+  //     setChannelsReceived(channels);
+  //   });
+  // }, [newChannel]);
+
+  socket.on("updatedChannels", () => {
     socket.emit("getAllChannels");
     socket.on("sendChans", (channels) => {
       setChannelsReceived(channels);
     });
-  }, [newChannel]);
+  });
 
   const sendChannel = (channelData: ChannelProp) => {
     console.log("entered sendChan");
@@ -31,7 +39,7 @@ function ChatPage() {
     setNewChannel(false);
   };
 
-  const handleOpenedChannel = (channel: any) => {
+  const handleOpenedChannel = (channel: ChannelProp) => {
     socket.emit("joinRoom", channel);
     setOpenedChannel(channel);
   };
@@ -41,6 +49,10 @@ function ChatPage() {
     setOpenedChannel(null);
   };
 
+  const settingsHandler = (channel: ChannelProp) => {
+    setSettings(channel);
+  };
+
   return (
     <section>
       {!newChannel ? (
@@ -48,7 +60,9 @@ function ChatPage() {
       ) : null}
       <ChannelsList
         selectedChannel={handleOpenedChannel}
+        displaySettings={settingsHandler}
         channels={channelsReceived}
+        socket={socket}
       />
       {newChannel && !openedChannel ? (
         <NewChannelForm sendChan={sendChannel} />
@@ -60,6 +74,7 @@ function ChatPage() {
           leaveChannel={leaveChannelHandler}
         />
       ) : null}
+      {channelSettings ? <Settings channel={channelSettings} /> : null}
     </section>
   );
 }

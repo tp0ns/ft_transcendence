@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import ChannelProp from "../interfaces/Channel.interface";
+import ChannelProp from "../../interfaces/Channel.interface";
 
-import Card from "../ui/Card";
+import Card from "../../ui/Card";
 import classes from "./NewChannelForm.module.css";
 
 const NewChannelForm: React.FC<{

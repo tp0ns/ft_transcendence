@@ -1,8 +1,11 @@
-import ChannelProp from "../interfaces/Channel.interface";
+import { Socket } from "socket.io-client";
+import ChannelProp from "../../interfaces/Channel.interface";
 import ChannelItem from "./ChannelItem";
 
 const ChannelsList: React.FC<{
   selectedChannel: (channel: ChannelProp) => void;
+  displaySettings: (channel: ChannelProp) => void;
+  socket: Socket;
   channels: any;
 }> = (props) => {
   return (
@@ -15,9 +18,13 @@ const ChannelsList: React.FC<{
               displayChannel={() => {
                 props.selectedChannel(channel);
               }}
+              displaySettings={() => {
+                props.displaySettings(channel);
+              }}
               key={channel.id}
               name={channel.title}
               private={channel.private}
+              socket={props.socket}
             />
           );
         })}
