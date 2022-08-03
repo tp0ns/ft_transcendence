@@ -13,6 +13,10 @@
 	text-decoration: none;
 }
 
+.logo {
+	font-size: xx-large;
+}
+
 .links {
 	padding-left: 2rem;
 	padding-right: 2rem;
