@@ -6,7 +6,6 @@
 	height: 4rem;
 	background-color: #3a3636;
 	color: #f4edde;
-	align-content: center;
 }
 
 .layout a {
@@ -18,6 +17,7 @@
 	padding-left: 2rem;
 	padding-right: 2rem;
 	width: auto;
+	height: 100%;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
@@ -26,7 +26,8 @@
 
 .pages {
 	list-style-type: none;
-	width: 20%;
+	padding-inline-start: 0px;
+	width: 30%;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
