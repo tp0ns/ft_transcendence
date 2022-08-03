@@ -1,3 +1,4 @@
+import ReactDOM from "react-dom";
 import { io, Socket } from "socket.io-client";
 import React, { useEffect, useState } from "react";
 import ChannelsList from "../components/ChannelsLists";
@@ -44,7 +45,10 @@ function ChatPage() {
 
 	return (
 		<React.Fragment>
-			<NavBar />
+			{ReactDOM.createPortal(
+				<NavBar />,
+				document.getElementById("navbar-root") as Element
+			)}
 			<section>
 				{!newChannel ? (
 					<button onClick={handleNewChannel}>Add Channel</button>
