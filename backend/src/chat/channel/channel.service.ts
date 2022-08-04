@@ -23,11 +23,12 @@ export class ChannelService {
 	/**
 	 * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
 	 */
-
+	
 	/**
-	 *
-	 * @todo faire en sorte que lors de la creation d'un nouveau chan, il s'affiche
-	 * pour tout le monde dans les channels publics si chan public
+	 * 
+	 * @param user 
+	 * @param chan 
+	 * 
 	 * @todo verifier qu'un autre channel ne porte pas deja le meme nom
 	 */
 	async createNewChan(user: UserEntity, chan: CreateChanDto) {
@@ -65,10 +66,10 @@ export class ChannelService {
 	 * @param modifications l'interface qui permettra de savoir quel
 	 * est l'element du channel a modifier
 	 *
-	 * @todo peut etre a modifier pour nu switch : checker comment ca marche
+	 * @todo peut etre a modifier pour un switch : checker comment ca marche
 	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
-		console.log(`check if new admin :`, JSON.stringify(modifications.newAdmin));
+		console.log(`check modifications :`, JSON.stringify(modifications));
 		if (modifications.newPassword || modifications.protected)
 			await this.modifyPassword(user, modifications);
 		if (modifications.newAdmin) 
@@ -92,7 +93,6 @@ export class ChannelService {
 	 * @param modifications l'interface dans laquelle le password
 	 * sera rempli pour modifier le password du channel.
 	 *
-	 * @todo hash le nouveau password avant de le save dans le channel
 	 */
 	async modifyPassword(user: UserEntity, modifications: ModifyChanDto) {
 		const channel: ChannelEntity = await this.getChanByName(
@@ -108,7 +108,7 @@ export class ChannelService {
 		else 
 		{
 			channel.protected = true;
-			channel.password = modifications.newPassword;
+			channel.password = await bcrypt.hash(modifications.newPassword, 10);
 		}
 		await this.channelRepository.save(channel);
 
@@ -157,15 +157,11 @@ export class ChannelService {
 	 */
 	async modifyMembers(invitingUser: UserEntity, modifications: ModifyChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(modifications.title);
-		if (
-			channel &&
-			channel.private == true &&
-			channel.members.includes(invitingUser)
-		) {
-			let user: UserEntity = await this.userService.getUserByUsername(
-				modifications.newMember,
-			);
-			if (!channel.members.includes(user)) {
+		let user: UserEntity = await this.userService.getUserByUsername(modifications.newMember);
+		if (channel && channel.private == true && (this.getIfUserInChan(invitingUser, channel)))
+		{
+			if (!channel.members.includes(user)) 
+			{
 				await this.joinChan(user, modifications.title);
 				//rejoindre la room aussi
 			}
@@ -398,6 +394,15 @@ export class ChannelService {
 		return channel;
 	}
 
+	async getIfUserInChan(userToFind: UserEntity, channel: ChannelEntity) : Promise<boolean>
+	{
+		for (const member of channel.members)
+		{
+			if (member == userToFind)
+				return true;
+		}
+		return false;
+	}
 	/**
 	 * ------------------------ MESSAGES  ------------------------- *
 	 */
