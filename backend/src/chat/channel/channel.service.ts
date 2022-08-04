@@ -133,9 +133,9 @@ export class ChannelService {
 				!channel.admins.includes(user))
 			console.log(`You can't set new admins`);
 		else {
-			let user: UserEntity = await this.userService.getUserByUsername(
+			let userToAdd: UserEntity = await this.userService.getUserByUsername(
 				modifications.newAdmin);
-			if (!channel.admins.includes(user)) {
+			if (!channel.admins.includes(userToAdd)) {
 				await this.joinAdmin(user, modifications.title);
 			}
 		}
