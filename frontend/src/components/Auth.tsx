@@ -2,9 +2,9 @@ import { useLocation, Navigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import jwtDecode from "jwt-decode";
 
-const RequireAuth: React.FC<{ children: JSX.Element }> = (props) => {
+const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 	const [cookies] = useCookies();
-	let location = useLocation();
+	const location = useLocation();
 
 	if (!cookies.Authentication) {
 		return <Navigate to="/login" state={{ from: location }} replace />;
@@ -29,4 +29,4 @@ const RequireAuth: React.FC<{ children: JSX.Element }> = (props) => {
 	return <div>{props.children}</div>;
 };
 
-export default RequireAuth;
+export default Auth;

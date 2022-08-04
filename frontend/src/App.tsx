@@ -1,10 +1,13 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
-import RequireAuth from "./components/RequireAuth";
+import Auth from "./components/Auth";
 import ChatPage from "./Pages/ChatPage";
+import GamePage from "./Pages/GamePage";
 import LoginPage from "./Pages/LoginPage";
+import SocialPage from "./Pages/SocialPage";
 import TwoFAPAge from "./Pages/TwoFAPage";
+import UserPage from "./Pages/UserPage";
 import ChannelsContextProvider from "./store/channels-context";
 
 function App() {
@@ -13,27 +16,43 @@ function App() {
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
 				<Route
-					path="/"
+					path="/2fa"
 					element={
-						<RequireAuth>
-							<div>Acceuil</div>
-						</RequireAuth>
+						<Auth>
+							<TwoFAPAge />
+						</Auth>
 					}
 				/>
 				<Route
-					path="/2fa"
+					path="/"
 					element={
-						<RequireAuth>
-							<TwoFAPAge />
-						</RequireAuth>
+						<Auth>
+							<GamePage />
+						</Auth>
+					}
+				/>
+				<Route
+					path="/user"
+					element={
+						<Auth>
+							<UserPage />
+						</Auth>
+					}
+				/>
+				<Route
+					path="/social"
+					element={
+						<Auth>
+							<SocialPage />
+						</Auth>
 					}
 				/>
 				<Route
 					path="/chat"
 					element={
-						<RequireAuth>
+						<Auth>
 							<ChatPage />
-						</RequireAuth>
+						</Auth>
 					}
 				/>
 			</Routes>
