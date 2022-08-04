@@ -101,6 +101,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('modifyChannel')
 	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
+		console.log(`check if enter in modifyChannel`);
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
@@ -172,7 +173,6 @@ export class GeneralGateway
 
 	/**
 	 * MESSAGE POUR LE SERVEUR
-	 * @todo en plus d'envoyer le msg, stocker dans l'entite messages
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
@@ -217,7 +217,7 @@ export class GeneralGateway
 	 */
 
 	/**
-	 * 
+	 * Pour recuperer tous les channels existant 
 	 * @param client 
 	 */
 	@UseGuards(WsGuard)
@@ -228,6 +228,11 @@ export class GeneralGateway
 		this.server.emit('sendChans', channels);
 	}
 
+	/**
+	 * Pour ne recuperer que les channels dont le user fait partie
+	 * -> autant publiques que privees 
+	 * @param client 
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
 	async getMemberChannels(client: Socket) {
