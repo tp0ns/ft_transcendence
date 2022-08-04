@@ -1,4 +1,3 @@
-import { io, Socket } from "socket.io-client";
 import { useEffect, useState } from "react";
 import ChannelsList from "../components/channel/ChannelsLists";
 import NewChannelForm from "../components/channel/NewChannel";
@@ -6,6 +5,7 @@ import ChannelProp from "../interfaces/Channel.interface";
 import OpenedChannel from "../components/channel/OpenedChannel";
 import Settings from "../components/channel/Settings";
 import { socket } from "../App";
+import classes from "./ChatPage.module.css";
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
@@ -59,16 +59,19 @@ function ChatPage() {
   }, [channelSettings]);
 
   return (
-    <section>
-      {!newChannel ? (
-        <button onClick={handleNewChannel}>Add Channel</button>
-      ) : null}
-      <ChannelsList
-        selectedChannel={handleOpenedChannel}
-        displaySettings={settingsHandler}
-        channels={channelsReceived}
-        socket={socket}
-      />
+    <section className={classes.section}>
+      <div id={classes["channels_list"]}>
+        {!newChannel ? (
+          <button onClick={handleNewChannel}>Add Channel</button>
+        ) : null}
+        <ChannelsList
+          className={classes.ChannlesList}
+          selectedChannel={handleOpenedChannel}
+          displaySettings={settingsHandler}
+          channels={channelsReceived}
+          socket={socket}
+        />
+      </div>
       {newChannel && !openedChannel ? (
         <NewChannelForm sendChan={sendChannel} />
       ) : null}
