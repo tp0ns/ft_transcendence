@@ -292,16 +292,10 @@ export class ChannelService {
 		let deleteBan: UserEntity = await this.userService.getUserByUsername(
 			modifications.deleteBan,
 		);
-		if (
-			channel.admins.includes(unbanningUser) ||
-			channel.owner == unbanningUser
-		) {
-			await this.channelRepository
-				.createQueryBuilder()
-				.relation(ChannelEntity, 'bannedMembers')
-				.of(UserEntity)
-				.remove(deleteBan);
-		}
+			channel.bannedMembers = channel.bannedMembers.filter((banned) => {
+				return banned.userId !== deleteBan.userId
+			})
+			await channel.save();
 	}
 
 	/**
@@ -320,16 +314,10 @@ export class ChannelService {
 		let deleteMute: UserEntity = await this.userService.getUserByUsername(
 			modifications.deleteMute,
 		);
-		if (
-			channel.admins.includes(unmuttingUser) ||
-			channel.owner == unmuttingUser
-		) {
-			await this.channelRepository
-				.createQueryBuilder()
-				.relation(ChannelEntity, 'mutedMembers')
-				.of(UserEntity)
-				.remove(deleteMute);
-		}
+		channel.mutedMembers = channel.mutedMembers.filter((mutted) => {
+			return mutted.userId !== deleteMute.userId
+		})
+		await channel.save();
 	}
 
 	/**
