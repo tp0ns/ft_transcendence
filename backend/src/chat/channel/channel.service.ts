@@ -69,7 +69,7 @@ export class ChannelService {
 	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
 		console.log(`check if new admin :`, JSON.stringify(modifications.newAdmin));
-		if (modifications.newPassword || modifications.removePassword)
+		if (modifications.newPassword || modifications.protected)
 			await this.modifyPassword(user, modifications);
 		if (modifications.newAdmin) 
 			await this.modifyAdmins(user, modifications);
@@ -100,7 +100,7 @@ export class ChannelService {
 		);
 		if (!channel || channel.owner.userId != user.userId)
 			console.log(`You can't modify the channel`);
-		else if (modifications.removePassword) 
+		else if (modifications.protected) 
 		{
 			channel.protected = false;
 			channel.password = null;
