@@ -359,7 +359,8 @@ export class ChannelService {
 	 */
 
 	async getAllChannels(): Promise<ChannelEntity[]> {
-		const channels: ChannelEntity[] = await this.channelRepository.find();
+		const channels: ChannelEntity[] = await this.channelRepository.find({ relations: 
+				['members', 'admins', 'owner', 'bannedMembers', 'mutedMembers']});
 		return channels;
 	}
 
