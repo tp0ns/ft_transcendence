@@ -46,7 +46,7 @@ export class ChannelService {
 				update: date,
 			});
 		} catch {
-			// error
+			console.log(`problem with channelDto`);
 		}
 		this.joinChan(user, channel.title);
 		this.joinAdmin(user, channel.title);
@@ -136,8 +136,7 @@ export class ChannelService {
 			let user: UserEntity = await this.userService.getUserByUsername(
 				modifications.newAdmin);
 			if (!channel.admins.includes(user)) {
-				channel.admins = [...channel.admins, user];
-				await channel.save();
+				await this.joinAdmin(user, modifications.title);
 			}
 		}
 	}
