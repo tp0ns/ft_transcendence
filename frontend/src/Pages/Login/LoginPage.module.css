@@ -6,28 +6,33 @@
 }
 
 .login_logo {
-	font-size: 300%;
-}
-
-.login_list {
-	height: 150px;
-	width: 200px;
-	display: flex;
-	flex-direction: column;
-	border: solid 2px;
-	border-radius: 20px;
+	font-size: 1000%;
 }
 
 .login_school {
 	text-decoration: none;
 	color: inherit;
+	width: 10rem;
 	border: solid 2px;
+	border-radius: 20px;
+	background-color: #3a3636;
 	display: flex;
 	align-items: center;
+	justify-content: center;
+	margin-inline: 1rem;
+}
+
+.login_school p {
+	display: inline;
+	align-items: center;
+	color: #f4edde;
 }
 
 .login_school img {
 	height: 20px;
 	width: 20px;
-	display: inline-block;
+	margin-left: 5px;
+	align-items: center;
+	filter: invert(91%) sepia(7%) saturate(572%) hue-rotate(341deg)
+		brightness(106%) contrast(91%);
 }
