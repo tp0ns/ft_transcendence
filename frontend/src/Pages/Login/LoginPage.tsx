@@ -1,22 +1,13 @@
 import classes from "./LoginPage.module.css";
 
 const LoginPage = () => {
-	// async function connectSchool() {
-	// 	try {
-	// 		const response = await fetch("http://localhost/backend/auth/login", {
-	// 			method: "GET",
-	// 			headers: {},
-	// 			body: null,
-	// 		});
-	// 		if (!response.ok) {
-	// 			throw new Error("Request failed!");
-	// 		}
-	// 	} catch (err) {}
-	// }
-
 	return (
 		<div className={classes.login}>
-			<div className={classes.login_logo}>PONG</div>
+			<div className={classes.login_logo}>
+				<div>P</div>
+				<div className={classes.o}>O</div>
+				<div>NG</div>
+			</div>
 			<a
 				href="http://localhost/backend/auth/login"
 				className={classes.login_school}

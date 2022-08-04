@@ -8,6 +8,7 @@ const TwoFAPAge = () => {
 
 	async function submitHandler(event: React.FormEvent) {
 		event.preventDefault();
+		console.log(event.target);
 		if (userInput.current?.value === "") return;
 		try {
 			const response = await fetch(
@@ -36,11 +37,11 @@ const TwoFAPAge = () => {
 	return (
 		<React.Fragment>
 			<form onSubmit={submitHandler} className={classes.form}>
-				<div className={classes.form_content}>
-					<label htmlFor="text">Enter your verification code</label>
-					<input ref={userInput} type="text" id="text" maxLength={6}></input>
-					<button>Connect</button>
-				</div>
+				{/* <div className={classes.form_content}> */}
+				<label htmlFor="text">Enter your verification code</label>
+				<input ref={userInput} type="text" id="text" maxLength={6}></input>
+				<button>Connect</button>
+				{/* </div> */}
 			</form>
 		</React.Fragment>
 	);
