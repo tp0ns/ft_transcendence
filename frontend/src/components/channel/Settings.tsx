@@ -63,12 +63,15 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
   };
 
   const handleNewAdmin = (inputUser: string) => {
+    console.log("input user: ", inputUser);
+    console.log("Channel members: ", props.channel.members);
     props.channel.members!.map((member) => {
-      if (member.username === inputUser && !isAdmin(member.userId)) {
+      if (member.username === inputUser) {
         const modifiedInfo: ModifiedChannelInfoProp = {
           title: props.channel.title,
           newAdmin: inputUser,
         };
+        console.log("Modified info: ", modifiedInfo);
         socket.emit("modifyChannel", modifiedInfo);
       }
     });

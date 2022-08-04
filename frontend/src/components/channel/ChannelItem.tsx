@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Socket } from "socket.io-client";
 import Card from "../../ui/Card";
+import { socket } from "../../App";
 
 const ChannelItem: React.FC<{
   displayChannel: () => void;
@@ -13,8 +14,7 @@ const ChannelItem: React.FC<{
 
   const deleteChannel = () => {
     setDeleteChannel(true);
-    // props.socket.emit("deleteChan", props.name);
-    return <h1>Delete in progress...</h1>;
+    socket.emit("deleteChan", props.name);
   };
 
   return (
@@ -24,7 +24,6 @@ const ChannelItem: React.FC<{
       <button onClick={props.displayChannel}>Join channel</button>
       <button onClick={props.displaySettings}>Settings</button>
       <button onClick={deleteChannel}>Delete</button>
-      {deletedChannel ? <h1>Delete in progress...</h1> : null}
     </Card>
   );
 };
