@@ -36,7 +36,6 @@ export class ChannelService {
 		const date = new Date();
 		let channel: ChannelEntity;
 		if (chan.password != '') newPassword = await bcrypt.hash(chan.password, 10);
-		try {
 			channel = await this.channelRepository.save({
 				title: chan.title,
 				owner: user,
@@ -46,9 +45,6 @@ export class ChannelService {
 				creation: date,
 				update: date,
 			});
-		} catch {
-			console.log(`problem with channelDto`);
-		}
 		this.joinChan(user, channel.title);
 		this.joinAdmin(user, channel.title);
 		if (channel.private == false) {
@@ -120,24 +116,18 @@ export class ChannelService {
 	 * -> doit etre admin ou owner
 	 * @param modifications l'interface dans laquelle un username dans admin
 	 * sera rempli pour ajouter un admin au channel.
+	 * 
+	 * @todo verifier que le user qui veut ajouter un autre user en admin 
+	 * est lui meme un admin (includes marche pas j'ai l'impression)
 	 */
 	async modifyAdmins(user: UserEntity, modifications: ModifyChanDto) {
-		console.log(`check channel : `, JSON.stringify(modifications.title));
-		console.log(`check user :`, JSON.stringify(user.username));
-		console.log(`check new admin :`, JSON.stringify(modifications.newAdmin));
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
-		console.log(`check owner of channel : `, JSON.stringify(channel.owner.username));
-		if ( !channel || channel.owner.userId != user.userId ||
-				!channel.admins.includes(user))
-			console.log(`You can't set new admins`);
-		else {
-			let userToAdd: UserEntity = await this.userService.getUserByUsername(
-				modifications.newAdmin);
-			if (!channel.admins.includes(userToAdd)) {
-				await this.joinAdmin(user, modifications.title);
-			}
+		let userToAdd: UserEntity = await this.userService.getUserByUsername(
+			modifications.newAdmin);
+		if (!channel.admins.includes(userToAdd)) {
+			await this.joinAdmin(userToAdd, modifications.title);
 		}
 	}
 
@@ -173,19 +163,17 @@ export class ChannelService {
 	 * @param user le user qui souhaite supprimer le channel :
 	 * -> seulement le owner ??
 	 * @param chanName le channel a supprimer
+	 * 
+	 * @todo est ce que seul le owner a le droit de supprimer un channel ? 
 	 */
 	async deleteChan(user: UserEntity, chanName: string) {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.owner.userId != user.userId) 
-			console.log(`You can't delete this channel`);
-		else {
 			await this.channelRepository
 				.createQueryBuilder()
 				.delete()
 				.from(ChannelEntity)
 				.where('title = :chanName', { chanName: channel.title })
 				.execute();
-		}
 	}
 
 	/**
@@ -258,9 +246,11 @@ export class ChannelService {
 	 *
 	 * @todo verifier que le user est bien dans le channel (vrmt ?, on peut pas bannir en avance?)
 	 * @todo verifier que le user n'est pas deja ban
+	 * @todo mettre le user dans bannedMembers EEEEEEET le supprimer de toutes les autres listes (admins, members, etc... )
 	 *
 	 */
 	async addBanMembers(banningUser: UserEntity, modifications: ModifyChanDto) {
+		console.log(`ADD BAN MEMBEEEEEEERS`);
 		let channel: ChannelEntity = await this.getChanByName(modifications.title);
 		let newBan: UserEntity = await this.userService.getUserByUsername(
 			modifications.newBan,
