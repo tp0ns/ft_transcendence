@@ -94,6 +94,7 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
       newBan: isBanned ? inputUser : undefined,
       deleteBan: !isBanned ? inputUser : undefined,
     };
+    socket.emit("modifyChannel", modifiedInfo);
   };
 
   const handleMute = (inputUser: string) => {
@@ -103,6 +104,7 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
       newMute: isMuted ? inputUser : undefined,
       deleteMute: !isMuted ? inputUser : undefined,
     };
+    socket.emit("modifyChannel", modifiedInfo);
   };
 
   const handleProtected = () => {

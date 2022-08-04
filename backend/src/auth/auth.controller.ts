@@ -58,7 +58,8 @@ export class AuthController {
 	@UseGuards(schoolAuthGuard)
 	@Get('callback')
 	async callback(@Req() req, @Res() res) {
-		return this.authService.login(req.user, res);
+		if (req.user) return this.authService.login(req.user, res);
+		res.redirect('/login');
 	}
 
 	/**

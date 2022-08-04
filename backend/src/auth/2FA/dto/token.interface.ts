@@ -1,6 +1,6 @@
 interface TokenPayload {
-	userId: string;
-	isSecondFactorAuthenticated: boolean;
+	sub: string;
+	twoFAAuthenticated: boolean;
 }
 
 export default TokenPayload;
