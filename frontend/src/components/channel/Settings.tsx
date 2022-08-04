@@ -1,3 +1,4 @@
+import { time } from "console";
 import { useEffect, useState } from "react";
 import { socket } from "../../App";
 import ChannelProp from "../../interfaces/Channel.interface";
@@ -17,20 +18,18 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
   const [isProtected, setProtected] = useState<boolean>(
     props.channel.protected
   );
+  const [isPrivate, setPrivate] = useState<boolean>(props.channel.private);
 
   useEffect(() => {
     fetch("http://localhost/backend/users/me")
       .then((response) => response.json())
       .then((data) => {
-        console.log("data.userId: ", data.userId);
         setMyId(data.userId);
       });
-    console.log("Channel in settings: ", props.channel);
+    setPrivate(props.channel.private);
   }, []);
 
   const isOwner = () => {
-    console.log("my userId: ", myId);
-    console.log("owner Id: ", props.channel.owner.userId);
     return myId === props.channel.owner.userId;
   };
 
@@ -47,12 +46,12 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
   };
 
   const isMember = (inputId: string) => {
-    if (props.channel.members) {
-      props.channel.members!.map((member) => {
-        if (member.userId === inputId) return true;
-      });
-    }
-    return false;
+    props.channel.members!.map((member) => {
+      if (member.userId === inputId) {
+        return true;
+      }
+    });
+    return true;
   };
 
   const handlePasswordChange = (inputPassword: string) => {
@@ -145,7 +144,7 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
           />
         </div>
       ) : null}
-      {isMember(myId) ? (
+      {isMember(myId) && isPrivate ? (
         <InputAndButton
           buttonName="Add member"
           capturedInfo={handleNewMember}
