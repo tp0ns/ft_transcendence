@@ -14,6 +14,9 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
   const [myId, setMyId] = useState<string>("");
   const [isBanned, setBanned] = useState<boolean>(false);
   const [isMuted, setMuted] = useState<boolean>(false);
+  const [isProtected, setProtected] = useState<boolean>(
+    props.channel.protected
+  );
 
   useEffect(() => {
     fetch("http://localhost/backend/users/me")
@@ -22,6 +25,7 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
         console.log("data.userId: ", data.userId);
         setMyId(data.userId);
       });
+    console.log("Channel in settings: ", props.channel);
   }, []);
 
   const isOwner = () => {
@@ -99,15 +103,31 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
     };
   };
 
+  const handleProtected = () => {
+    setProtected((prevState) => !prevState);
+    const modifiedInfo: ModifiedChannelInfoProp = {
+      title: props.channel.title,
+      protected: isProtected,
+    };
+    socket.emit("modifyChannel", modifiedInfo);
+  };
+
   return (
     <div className={classes.control}>
-      <h1>BITEEE</h1>
+      <h1>{props.channel.title}</h1>
       <p>{isOwner()}</p>
+      {isOwner() && isProtected ? (
+        <div>
+          <InputAndButton
+            buttonName="Change Password"
+            capturedInfo={handlePasswordChange}
+          />
+        </div>
+      ) : null}
       {isOwner() ? (
-        <InputAndButton
-          buttonName="Change Password"
-          capturedInfo={handlePasswordChange}
-        />
+        <button onClick={handleProtected}>
+          {isProtected ? "Unprotect" : "Protect"}
+        </button>
       ) : null}
       {isAdmin(myId) ? (
         <div>
