@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { useNavigate } from "react-router";
+import classes from "./TwoFAPage.module.css";
 
 const TwoFAPAge = () => {
 	const userInput = useRef<HTMLInputElement>(null);
@@ -34,10 +35,12 @@ const TwoFAPAge = () => {
 
 	return (
 		<React.Fragment>
-			<form onSubmit={submitHandler}>
-				<label htmlFor="text">Enter your 2FA code</label>
-				<input ref={userInput} type="text" id="text"></input>
-				<button>Connect</button>
+			<form onSubmit={submitHandler} className={classes.form}>
+				<div className={classes.form_content}>
+					<label htmlFor="text">Enter your verification code</label>
+					<input ref={userInput} type="text" id="text" maxLength={6}></input>
+					<button>Connect</button>
+				</div>
 			</form>
 		</React.Fragment>
 	);
