@@ -18,6 +18,8 @@ interface ModifiedChannelInfoProp {
   deleteBan?: string;
 
   deleteMute?: string;
+
+  protected?: boolean;
 }
 
 export default ModifiedChannelInfoProp;
