@@ -175,12 +175,13 @@ export class ChannelService {
 	/**
 	 *
 	 * @param user le user qui souhaite supprimer le channel :
-	 * -> seulement le owner
+	 * -> seulement le owner ??
 	 * @param chanName le channel a supprimer
 	 */
 	async deleteChan(user: UserEntity, chanName: string) {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.owner != user) console.log(`You can't delete this channel`);
+		if (channel.owner.userId != user.userId) 
+			console.log(`You can't delete this channel`);
 		else {
 			await this.channelRepository
 				.createQueryBuilder()
@@ -242,12 +243,10 @@ export class ChannelService {
 	 * @param user verifier que ce user est dans :
 	 * @param channelName ce channel
 	 */
-	async checkIfUserInChannel(
-		user: UserEntity,
-		channelName: string,
-	): Promise<boolean> {
+	async checkIfUserInChannel( user: UserEntity, channelName: string): Promise<boolean> {
 		let channel: ChannelEntity = await this.getChanByName(channelName);
-		if (channel.members.includes(user)) return true;
+		if (channel.members.includes(user)) 
+			return true;
 		return false;
 	}
 
@@ -403,8 +402,8 @@ export class ChannelService {
 	 * ------------------------ MESSAGES  ------------------------- *
 	 */
 
-	async sendMessage(user: UserEntity, message: string, chanName: string) {
-		let channel: ChannelEntity = await this.getChanByName(chanName);
-		this.messageService.addNewMessage(user, channel, message);
+	async sendMessage(user: UserEntity, payload: string) {
+		let channel: ChannelEntity = await this.getChanByName(payload[0]);
+		this.messageService.addNewMessage(user, channel, payload[1]);
 	}
 }

@@ -130,6 +130,7 @@ export class GeneralGateway
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
+	 * @todo mettre l'erreur dans le service
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -142,7 +143,9 @@ export class GeneralGateway
 		if (check == true) {
 			client.join(channelName);
 			this.server.emit('joinedRoom');
-		} else console.log(`You need to be a member of the channel`);
+		} 
+		else 
+		console.log(`You need to be a member of the channel`);
 	}
 
 	/**
@@ -168,17 +171,19 @@ export class GeneralGateway
 	 */
 
 	/**
+	 * MESSAGE POUR LE SERVEUR
 	 * @todo en plus d'envoyer le msg, stocker dans l'entite messages
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
 	handleMessage(client: Socket, payload: string) {
+		this.channelService.sendMessage(client.data.user, payload);
 		this.server.emit('msgToClient', payload);
 		return payload;
 	}
 
 	/**
-	 *
+	 * MESSAGE DANS UN CHANNEL
 	 * @param client
 	 * @param payload
 	 * @param chanName
@@ -187,15 +192,15 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	handleMessageToChan(client: Socket, payload: string, chanName: string) {
-		client.join(chanName);
-		this.channelService.sendMessage(client.data.user, payload, chanName);
+	handleMessageToChan(client: Socket, payload: string) {
+		client.join(payload[0]);
+		this.channelService.sendMessage(client.data.user, payload);
 		// this.server.to(chanName).emit('channelMessage', payload);
 		this.server.emit('channelMessage', payload);
 	}
 
 	/**
-	 *
+	 * DIRECT MESSAGE
 	 * @param client
 	 * @param payload
 	 *
@@ -211,13 +216,15 @@ export class GeneralGateway
 	 * ------------------------ GET CHANNELS  ------------------------- *
 	 */
 
+	/**
+	 * 
+	 * @param client 
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
 	async getChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getAllChannels();
-			for(const channel of channels)
-				console.log(`channels members: `, JSON.stringify(channel.members));
 		this.server.emit('sendChans', channels);
 	}
 
