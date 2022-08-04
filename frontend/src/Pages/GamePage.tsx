@@ -1,15 +1,12 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import NavBar from "../components/NavBar/NavBar";
-// import classes from "./GamePage.module.css";
+import GameScreen from "../components/game/GameScreen";
 
 const GamePage = () => {
-	return (
-		<React.Fragment>
-			<NavBar />
-			<div>Game Page</div>
-		</React.Fragment>
-	);
+  return (
+    <div>
+      <h1>caca</h1>
+      <GameScreen />
+    </div>
+  );
 };
 
 export default GamePage;
