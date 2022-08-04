@@ -250,17 +250,12 @@ export class ChannelService {
 	 *
 	 */
 	async addBanMembers(banningUser: UserEntity, modifications: ModifyChanDto) {
-		console.log(`ADD BAN MEMBEEEEEEERS`);
 		let channel: ChannelEntity = await this.getChanByName(modifications.title);
 		let newBan: UserEntity = await this.userService.getUserByUsername(
 			modifications.newBan,
 		);
-		if (channel.admins.includes(banningUser) || channel.owner == banningUser) {
-			channel.members = [...channel.bannedMembers, newBan];
-			await channel.save();
-		} else {
-			console.log(`You need to be an admin to ban someone`);
-		}
+		channel.bannedMembers = [...channel.bannedMembers, newBan];
+		await channel.save();
 	}
 
 	/**
@@ -277,10 +272,8 @@ export class ChannelService {
 		let newMute: UserEntity = await this.userService.getUserByUsername(
 			modifications.newMute,
 		);
-		if (channel.admins.includes(muttingUser) || channel.owner == muttingUser) {
-			channel.members = [...channel.mutedMembers, newMute];
-			await channel.save();
-		}
+		channel.mutedMembers = [...channel.mutedMembers, newMute];
+		await channel.save();
 	}
 
 	/**
@@ -377,7 +370,7 @@ export class ChannelService {
 	async getChanByName(chanName: string): Promise<ChannelEntity> {
 		let channel: ChannelEntity = await this.channelRepository.findOne({
 			where: { title: chanName },
-			relations: ['members', 'owner', 'admins'],
+			relations: ['members', 'admins', 'owner', 'bannedMembers', 'mutedMembers'],
 		});
 		// if (!channel)
 		// console.log("le channel il existe po");
