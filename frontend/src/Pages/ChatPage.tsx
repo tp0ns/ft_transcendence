@@ -65,7 +65,7 @@ function ChatPage() {
           <button onClick={handleNewChannel}>Add Channel</button>
         ) : null}
         <ChannelsList
-          className={classes.ChannlesList}
+          // className={classes.ChannlesList}
           selectedChannel={handleOpenedChannel}
           displaySettings={settingsHandler}
           channels={channelsReceived}
