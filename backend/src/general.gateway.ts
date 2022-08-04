@@ -104,13 +104,6 @@ export class GeneralGateway
 		this.server.emit('updatedChannels');
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyPassword')
-	async modifyPassword(client: Socket, modifications: ModifyChanDto) {
-		await this.channelService.modifyPassword(client.data.user, modifications);
-		this.server.emit('updatedChannels');
-	}
-
 	/**
 	 *
 	 * @param client pour checker si le user qui souhaite modifier le channel a

@@ -7,6 +7,8 @@ interface ModifiedChannelInfoProp {
 
   newPassword?: string;
 
+  removePassword?: boolean;
+
   newAdmin?: string;
 
   newBan?: string;

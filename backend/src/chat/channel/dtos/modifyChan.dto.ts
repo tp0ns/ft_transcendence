@@ -17,4 +17,6 @@ export class ModifyChanDto {
 	deleteBan?: string;
 
 	deleteMute?: string;
+
+	removePassword?: boolean;
 }

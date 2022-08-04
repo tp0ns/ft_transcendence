@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateChanDto } from './dtos/createChan.dto';
 import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {
@@ -48,6 +49,7 @@ export class ChannelService {
 			// error
 		}
 		this.joinChan(user, channel.title);
+		this.joinAdmin(user, channel.title);
 		if (channel.private == false) {
 			// for (const user of )
 			//tant qu'on a pas parcouru toute la liste des users connectes
@@ -66,12 +68,17 @@ export class ChannelService {
 	 * @todo peut etre a modifier pour nu switch : checker comment ca marche
 	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
-		if (modifications.newPassword)
+		console.log(`check if new admin :`, JSON.stringify(modifications.newAdmin));
+		if (modifications.newPassword || modifications.removePassword)
 			await this.modifyPassword(user, modifications);
-		if (modifications.newAdmin) await this.modifyAdmins(user, modifications);
-		if (modifications.newMember) await this.modifyMembers(user, modifications);
-		if (modifications.newBan) await this.addBanMembers(user, modifications);
-		if (modifications.newMute) await this.addMuteMembers(user, modifications);
+		if (modifications.newAdmin) 
+			await this.modifyAdmins(user, modifications);
+		if (modifications.newMember) 
+			await this.modifyMembers(user, modifications);
+		if (modifications.newBan) 
+			await this.addBanMembers(user, modifications);
+		if (modifications.newMute) 
+			await this.addMuteMembers(user, modifications);
 		if (modifications.deleteBan)
 			await this.deleteBanMembers(user, modifications);
 		if (modifications.deleteMute)
@@ -93,11 +100,18 @@ export class ChannelService {
 		);
 		if (!channel || channel.owner.userId != user.userId)
 			console.log(`You can't modify the channel`);
-		else {
+		else if (modifications.removePassword) 
+		{
+			channel.protected = false;
+			channel.password = null;
+		}
+		else 
+		{
 			channel.protected = true;
 			channel.password = modifications.newPassword;
-			await this.channelRepository.save(channel);
 		}
+		await this.channelRepository.save(channel);
+
 	}
 
 	/**
@@ -108,19 +122,19 @@ export class ChannelService {
 	 * sera rempli pour ajouter un admin au channel.
 	 */
 	async modifyAdmins(user: UserEntity, modifications: ModifyChanDto) {
+		console.log(`check channel : `, JSON.stringify(modifications.title));
+		console.log(`check user :`, JSON.stringify(user.username));
+		console.log(`check new admin :`, JSON.stringify(modifications.newAdmin));
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
-		if (
-			!channel ||
-			channel.owner.userId != user.userId ||
-			!channel.admins.includes(user)
-		)
+		console.log(`check owner of channel : `, JSON.stringify(channel.owner.username));
+		if ( !channel || channel.owner.userId != user.userId ||
+				!channel.admins.includes(user))
 			console.log(`You can't set new admins`);
 		else {
 			let user: UserEntity = await this.userService.getUserByUsername(
-				modifications.newAdmin,
-			);
+				modifications.newAdmin);
 			if (!channel.admins.includes(user)) {
 				channel.admins = [...channel.admins, user];
 				await channel.save();
@@ -198,6 +212,12 @@ export class ChannelService {
 		//check si le user n'est pas ban
 		//check si le channel existe
 		//verifier que le
+	}
+
+	async joinAdmin(user: UserEntity, channelName: string) {
+		let channel: ChannelEntity = await this.getChanByName(channelName);
+		channel.admins = [...channel.admins, user];
+		await channel.save();
 	}
 
 	/**
