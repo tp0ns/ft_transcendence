@@ -1,14 +1,14 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import "./App.css";
 import Auth from "./components/Auth";
 import ChatPage from "./Pages/ChatPage";
 import Debug from "./Pages/Debug";
 import GamePage from "./Pages/GamePage";
-import LoginPage from "./Pages/LoginPage";
+import LoginPage from "./Pages/Login/LoginPage";
 import SocialPage from "./Pages/SocialPage";
-import TwoFAPAge from "./Pages/TwoFAPage";
+import TwoFAPAge from "./Pages/Login/TwoFAPage";
 import UserPage from "./Pages/UserPage";
 
 export const socket = io("http://localhost/");

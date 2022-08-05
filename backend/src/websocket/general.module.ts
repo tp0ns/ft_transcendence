@@ -8,13 +8,28 @@ import { UserService } from 'src/user/user.service';
 import { ChannelController } from '../chat/channel/channel.controller';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ChannelService } from '../chat/channel/channel.service';
-import { GeneralGateway } from 'src/websocket/general.gateway';
+import { GeneralGateway } from './general.gateway';
 import { MessagesEntity } from '../chat/messages/messages.entity';
 import { MessageService } from '../chat/messages/messages.service';
+import { GameService } from 'src/game/game.service';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([ChannelEntity, UserEntity, RelationEntity, MessagesEntity])],
-	providers: [GeneralGateway, JwtService, UserService, ChannelService, MessageService],
+	imports: [
+		TypeOrmModule.forFeature([
+			ChannelEntity,
+			UserEntity,
+			RelationEntity,
+			MessagesEntity,
+		]),
+	],
+	providers: [
+		GeneralGateway,
+		JwtService,
+		UserService,
+		ChannelService,
+		MessageService,
+		GameService,
+	],
 	controllers: [ChannelController],
 })
 export class ChatModule {}

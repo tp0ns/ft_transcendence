@@ -61,7 +61,7 @@ function ChatPage() {
 
   return (
     <section className={classes.section}>
-      <NavBar />
+		<NavBar />
       <div id={classes["channels_list"]}>
         {!newChannel ? (
           <button onClick={handleNewChannel}>Add Channel</button>

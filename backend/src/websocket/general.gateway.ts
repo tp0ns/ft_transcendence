@@ -15,6 +15,8 @@ import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { UserService } from '../user/user.service';
+import { GameService } from '../game/game.service';
+import { Match } from '../game/interfaces/game.interface';
 
 @WebSocketGateway({
 	cors: {
@@ -25,14 +27,14 @@ export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
 	constructor(
-		private channelService: ChannelService, 
-		private userService: UserService,
-		) {}
+		private channelService: ChannelService,
+		private gameService: GameService,
+	) {}
 
 	@WebSocketServer() server: Server;
 
 	private logger: Logger = new Logger('GeneralGateway');
-
+	private beginMatch: Match = this.gameService.setDefaultPos();
 	/**
 	 * Handles server initialization behaviour
 	 */
@@ -221,8 +223,8 @@ export class GeneralGateway
 	 */
 
 	/**
-	 * Pour recuperer tous les channels existant 
-	 * @param client 
+	 * Pour recuperer tous les channels existant
+	 * @param client
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
@@ -234,8 +236,8 @@ export class GeneralGateway
 
 	/**
 	 * Pour ne recuperer que les channels dont le user fait partie
-	 * -> autant publiques que privees 
-	 * @param client 
+	 * -> autant publiques que privees
+	 * @param client
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
@@ -254,4 +256,17 @@ export class GeneralGateway
 	 *  \_____/_/    \_|_|  |_|______|
 	 *
 	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('joinMatch')
+	async sendDefaultPos(socket: Socket) {
+		console.log('sendDefaultPos entry');
+		console.log('beginMatch', this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
 }

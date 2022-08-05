@@ -8,7 +8,6 @@ import * as bcrypt from 'bcrypt';
 import { CreateChanDto } from './dtos/createChan.dto';
 import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {

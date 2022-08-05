@@ -14,16 +14,10 @@ const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 	if (token.exp * 1000 < dateNow.getTime()) {
 		return <Navigate to="/login" state={{ from: location }} replace />;
 	}
-	if (
-		location.pathname !== "/2fa" &&
-		token.isSecondFactorAuthenticated === false
-	) {
+	if (location.pathname !== "/2fa" && token.twoFAAuthenticated === false) {
 		return <Navigate to="/2fa" state={{ from: location }} replace />;
 	}
-	if (
-		location.pathname === "/2fa" &&
-		token.isSecondFactorAuthenticated === true
-	) {
+	if (location.pathname === "/2fa" && token.twoFAAuthenticated === true) {
 		return <Navigate to="/" state={{ from: location }} replace />;
 	}
 	return <div>{props.children}</div>;
