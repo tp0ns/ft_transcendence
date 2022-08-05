@@ -46,4 +46,26 @@ export class GameService {
 		};
 		return match;
 	}
+
+	async movePad(direction: string, match: Match) {
+		// console.log('movePad entry with :', direction);
+		switch (direction) {
+			case 'up':
+				if (match.rightPad.y - match.rightPad.speed < 50) {
+					match.rightPad.y = 50;
+					// eslint-disable-next-line prettier/prettier
+				}
+				else
+					match.rightPad.y -= match.rightPad.speed;
+				break;
+			case 'down':
+				if (match.rightPad.y + match.rightPad.speed >= 433) {
+					match.rightPad.y = 433;
+					// eslint-disable-next-line prettier/prettier
+				}
+				else
+					match.rightPad.y += match.rightPad.speed;
+				break;
+		}
+	}
 }

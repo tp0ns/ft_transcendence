@@ -255,11 +255,23 @@ export class GeneralGateway
 	 *
 	 */
 
+	//Join Match event, draw the game for the user
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
 	async sendDefaultPos(socket: Socket) {
-		console.log('sendDefaultPos entry');
-		console.log('beginMatch', this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	// Move event, allow the user to move its pad
+	@UseGuards(WsGuard)
+	@SubscribeMessage('move')
+	async move(client: Socket, direction: string) {
+		await this.gameService.movePad(direction, this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
