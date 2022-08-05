@@ -5,9 +5,9 @@ import "./App.css";
 import Auth from "./components/Auth";
 import ChatPage from "./Pages/ChatPage";
 import GamePage from "./Pages/GamePage";
-import LoginPage from "./Pages/LoginPage";
+import LoginPage from "./Pages/Login/LoginPage";
 import SocialPage from "./Pages/SocialPage";
-import TwoFAPAge from "./Pages/TwoFAPage";
+import TwoFAPAge from "./Pages/Login/TwoFAPage";
 import UserPage from "./Pages/UserPage";
 
 export const socket = io("http://localhost/");
