@@ -27,8 +27,8 @@ function ChatPage() {
   // }, [newChannel]);
 
   socket.on("updatedChannels", () => {
-    socket.emit("getAllChannels");
-    socket.on("sendChans", (channels) => {
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChannels", (channels) => {
       setChannelsReceived(channels);
     });
   });

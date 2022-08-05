@@ -7,6 +7,7 @@ import {
 	isNumber,
 	Length,
 } from 'class-validator';
+import { Socket } from 'dgram';
 import { UserEntity } from '../models/user.entity';
 
 export class UserDto {
@@ -22,4 +23,5 @@ export class UserDto {
 	profileImage: string;
 
 	friends: UserEntity[];
+
 }

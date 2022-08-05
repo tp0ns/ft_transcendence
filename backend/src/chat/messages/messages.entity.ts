@@ -12,8 +12,10 @@ export class MessagesEntity extends BaseEntity {
 	})
 	message: string
 
-	@ManyToOne(() => ChannelEntity, (channel) => channel.channelId, {
+	@ManyToOne(() => ChannelEntity, (channel) => channel.messages, {
 		eager: true,
+		cascade: true,
+		onDelete: 'CASCADE',
 	})
 	channel : ChannelEntity
 
