@@ -32,7 +32,7 @@ export class GeneralGateway
 	@WebSocketServer() server: Server;
 
 	private logger: Logger = new Logger('GeneralGateway');
-	private beginMatch: Match;
+	private beginMatch: Match = this.gameService.setDefaultPos();
 	/**
 	 * Handles server initialization behaviour
 	 */
@@ -289,11 +289,10 @@ export class GeneralGateway
 	 */
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('connection')
+	@SubscribeMessage('joinMatch')
 	async sendDefaultPos(socket: Socket) {
 		console.log('sendDefaultPos entry');
 		console.log('beginMatch', this.beginMatch);
-		this.beginMatch = await this.gameService.setDefaultPos();
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,

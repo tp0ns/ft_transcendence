@@ -32,7 +32,7 @@ const GameScreen = () => {
 
   useEffect(() => {
     const context = canvas.current!.getContext("2d");
-	socket.emit("connection");
+	socket.emit("joinMatch");
     socket.on("setPosition", (leftPos, rightPos, ballPos) => {
 		console.log(leftPos, rightPos, ballPos)
       leftPadPosition = leftPos;
