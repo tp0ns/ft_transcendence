@@ -14,10 +14,11 @@ export class WsGuard implements CanActivate {
 	async canActivate( context: ExecutionContext ): Promise<boolean> {
 		try {
 			let client: Socket = context.switchToWs().getClient();
-			const sessionCookie = client.handshake.headers.cookie
-				.split(';')
-				.find((cookie: string) => cookie.startsWith(' Authentication'))
-				.split('=')[1];
+			console.log(client.handshake.headers.cookie);
+			let sessionCookie: string | string[] = client.handshake.headers.cookie
+			.split(';')
+			.find((cookie: string) => (cookie.startsWith(' Authentication') || cookie.startsWith('Authentication')))
+			.split('=')[1];
 
 			const payload = await this.jwtService.verify(sessionCookie, { secret: jwtConstants.secret });
 			const user = await this.userService.getUserById(payload.sub);
