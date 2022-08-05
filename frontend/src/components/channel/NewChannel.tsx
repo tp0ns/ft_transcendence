@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import ChannelProp from "../interfaces/Channel.interface";
+import ChannelProp from "../../interfaces/Channel.interface";
 
-import Card from "../ui/Card";
+import Card from "../../ui/Card";
 import classes from "./NewChannelForm.module.css";
 
 const NewChannelForm: React.FC<{
@@ -11,7 +11,7 @@ const NewChannelForm: React.FC<{
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const [privateChan, setPrivateChan] = useState(false);
   const [protectedChan, setProtectedChan] = useState(false);
-
+  
   function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 

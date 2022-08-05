@@ -12,7 +12,7 @@ async function bootstrap() {
 	app.use(cookieParser());
 	app.setGlobalPrefix('backend');
 	const config = new DocumentBuilder()
-		.setTitle('ft_transcendance')
+		.setTitle('ft_transcendence')
 		.setDescription('All frontend requests listed by category')
 		.setVersion('1.0')
 		.addTag('users')

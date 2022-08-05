@@ -1,72 +1,92 @@
-import ReactDOM from "react-dom";
-import { io, Socket } from "socket.io-client";
-import React, { useEffect, useState } from "react";
-import ChannelsList from "../components/ChannelsLists";
-import NewChannelForm from "../components/NewChannel";
+import { useEffect, useState } from "react";
+import ChannelsList from "../components/channel/ChannelsLists";
+import NewChannelForm from "../components/channel/NewChannel";
 import ChannelProp from "../interfaces/Channel.interface";
-import OpenedChannel from "../components/OpenedChannel";
+import OpenedChannel from "../components/channel/OpenedChannel";
+import Settings from "../components/channel/Settings";
+import { socket } from "../App";
+import classes from "./ChatPage.module.css";
 import NavBar from "../components/NavBar/NavBar";
 
-const socket: Socket = io("http://localhost");
-
 function ChatPage() {
-	const [newChannel, setNewChannel] = useState(false);
-	const [channelsReceived, setChannelsReceived] = useState([]);
-	const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
+  const [newChannel, setNewChannel] = useState(false);
+  const [channelsReceived, setChannelsReceived] = useState([]);
+  const [channelSettings, setSettings] = useState<ChannelProp | null>(null);
+  const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
 
-	const handleNewChannel = () => {
-		setNewChannel(true);
-	};
+  const handleNewChannel = () => {
+    setNewChannel(true);
+  };
 
-	useEffect(() => {
-		console.log("entered useEffect");
-		socket.emit("getAllChannels");
-		socket.on("sendChans", (channels) => {
-			setChannelsReceived(channels);
-		});
-	}, [newChannel]);
+  // useEffect(() => {
+  //   console.log("entered useEffect");
+  //   socket.emit("getAllChannels");
+  //   socket.on("sendChans", (channels) => {
+  //     setChannelsReceived(channels);
+  //   });
+  // }, [newChannel]);
 
-	const sendChannel = (channelData: ChannelProp) => {
-		console.log("entered sendChan");
-		console.log("Channel Data in chat page: ", channelData);
-		socket.emit("createChan", channelData);
-		setNewChannel(false);
-	};
+  socket.on("updatedChannels", () => {
+    socket.emit("getAllChannels");
+    socket.on("sendChans", (channels) => {
+      setChannelsReceived(channels);
+    });
+  });
 
-	const handleOpenedChannel = (channel: any) => {
-		socket.emit("joinRoom", channel);
-		setOpenedChannel(channel);
-	};
+  const sendChannel = (channelData: ChannelProp) => {
+    console.log("entered sendChan");
+    console.log("Channel Data in chat page: ", channelData);
+    socket.emit("createChan", channelData);
+    setNewChannel(false);
+  };
 
-	const leaveChannelHandler = () => {
-		socket.emit("leaveRoom");
-		setOpenedChannel(null);
-	};
+  const handleOpenedChannel = (channel: ChannelProp) => {
+    socket.emit("joinRoom", channel);
+    setOpenedChannel(channel);
+  };
 
-	return (
-		<React.Fragment>
-			<NavBar />
-			<section>
-				{!newChannel ? (
-					<button onClick={handleNewChannel}>Add Channel</button>
-				) : null}
-				<ChannelsList
-					selectedChannel={handleOpenedChannel}
-					channels={channelsReceived}
-				/>
-				{newChannel && !openedChannel ? (
-					<NewChannelForm sendChan={sendChannel} />
-				) : null}
-				{!newChannel && openedChannel ? (
-					<OpenedChannel
-						channel={openedChannel}
-						socket={socket}
-						leaveChannel={leaveChannelHandler}
-					/>
-				) : null}
-			</section>
-		</React.Fragment>
-	);
+  const leaveChannelHandler = () => {
+    socket.emit("leaveRoom");
+    setOpenedChannel(null);
+  };
+
+  const settingsHandler = (channel: ChannelProp) => {
+    console.log("channel in settingHandler: ", channel);
+    setSettings(channel);
+  };
+
+  useEffect(() => {
+    console.log("channelSettings in useEffect: ", channelSettings);
+  }, [channelSettings]);
+
+  return (
+    <section className={classes.section}>
+		<NavBar />
+      <div id={classes["channels_list"]}>
+        {!newChannel ? (
+          <button onClick={handleNewChannel}>Add Channel</button>
+        ) : null}
+        <ChannelsList
+          // className={classes.ChannlesList}
+          selectedChannel={handleOpenedChannel}
+          displaySettings={settingsHandler}
+          channels={channelsReceived}
+          socket={socket}
+        />
+      </div>
+      {newChannel && !openedChannel ? (
+        <NewChannelForm sendChan={sendChannel} />
+      ) : null}
+      {!newChannel && openedChannel ? (
+        <OpenedChannel
+          channel={openedChannel}
+          socket={socket}
+          leaveChannel={leaveChannelHandler}
+        />
+      ) : null}
+      {channelSettings ? <Settings channel={channelSettings} /> : null}
+    </section>
+  );
 }
 
 export default ChatPage;
