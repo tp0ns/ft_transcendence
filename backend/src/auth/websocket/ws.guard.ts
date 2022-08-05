@@ -7,29 +7,34 @@ import { jwtConstants } from '../jwt/jwt.constants';
 
 @Injectable()
 export class WsGuard implements CanActivate {
-	constructor (
+	constructor(
 		private readonly jwtService: JwtService,
 		private readonly userService: UserService,
 	) {}
-	async canActivate( context: ExecutionContext ): Promise<boolean> {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
 		try {
 			let client: Socket = context.switchToWs().getClient();
-			const sessionCookie = client.handshake.headers.cookie
+			let sessionCookie: string | string[] = client.handshake.headers.cookie
 				.split(';')
-				.find((cookie: string) => cookie.startsWith(' Authentication'))
+				.find(
+					(cookie: string) =>
+						cookie.startsWith(' Authentication') ||
+						cookie.startsWith('Authentication'),
+				)
 				.split('=')[1];
 
-			const payload = await this.jwtService.verify(sessionCookie, { secret: jwtConstants.secret });
+			const payload = await this.jwtService.verify(sessionCookie, {
+				secret: jwtConstants.secret,
+			});
 			const user = await this.userService.getUserById(payload.sub);
 
 			client.data.user = user;
-			if (user)
-				return await true;
+			if (user) return await true;
 			return await false;
-		} catch( err ) {
-			console.log("Error occured in ws guard : ");
+		} catch (err) {
+			console.log('Error occured in ws guard : ');
 			console.log(err.message);
 			throw new WsException(err.message);
-		};
-  }
+		}
+	}
 }

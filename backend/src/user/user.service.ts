@@ -79,6 +79,12 @@ export class UserService {
 		return user;
 	}
 
+	async getAllUsers()
+	{
+		const users: UserEntity[] = await this.userRepo.find();
+		return users;
+	}
+
 	/* This functions takes a user_id and updates it with the attributes of its entity to be updated.
 	These are represented by the Partial<UserEntity> parameter (Partial<> permits to give as arguments parts of an entity)*/
 	async update(id: string, attrs: Partial<UserEntity>) {

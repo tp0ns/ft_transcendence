@@ -6,9 +6,13 @@ import OpenedChannel from "../components/channel/OpenedChannel";
 import Settings from "../components/channel/Settings";
 import { socket } from "../App";
 import classes from "./ChatPage.module.css";
+<<<<<<< HEAD
 import React from "react";
 import NavBar from "../components/NavBar/NavBar";
 import ChannelMembersList from "../components/channel/ChannelMembersList";
+=======
+import NavBar from "../components/NavBar/NavBar";
+>>>>>>> 9aa10a07f541641c036350c169eb685da0b5ea50
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
@@ -37,8 +41,8 @@ function ChatPage() {
   }, []);
 
   socket.on("updatedChannels", () => {
-    socket.emit("getAllChannels");
-    socket.on("sendChans", (channels) => {
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChannels", (channels) => {
       setChannelsReceived(channels);
     });
   });

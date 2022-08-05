@@ -9,12 +9,14 @@ import {
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
-import { ChannelService } from './chat/channel/channel.service';
-import { CreateChanDto } from './chat/channel/dtos/createChan.dto';
+import { ChannelService } from '../chat/channel/channel.service';
+import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
 import UserEntity from 'src/user/models/user.entity';
-import { ChannelEntity } from './chat/channel/channel.entity';
-import { ModifyChanDto } from './chat/channel/dtos/modifyChan.dto';
-import { channel } from 'diagnostics_channel';
+import { ChannelEntity } from '../chat/channel/channel.entity';
+import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
+import { UserService } from '../user/user.service';
+import { GameService } from '../game/game.service';
+import { Match } from '../game/interfaces/game.interface';
 
 @WebSocketGateway({
 	cors: {
@@ -24,12 +26,15 @@ import { channel } from 'diagnostics_channel';
 export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-	constructor(private channelService: ChannelService) {}
+	constructor(
+		private channelService: ChannelService,
+		private gameService: GameService,
+	) {}
 
 	@WebSocketServer() server: Server;
 
 	private logger: Logger = new Logger('GeneralGateway');
-
+	private beginMatch: Match = this.gameService.setDefaultPos();
 	/**
 	 * Handles server initialization behaviour
 	 */
@@ -81,7 +86,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-		const channel = await this.channelService.createNewChan(
+		const channel : ChannelEntity = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
 		);
@@ -101,7 +106,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('modifyChannel')
 	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
-		console.log(`check if enter in modifyChannel`);
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
@@ -132,21 +136,23 @@ export class GeneralGateway
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
 	 * @todo mettre l'erreur dans le service
+	 * @todo faire en sorte de recuperer tous les messages du channel 
 	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
-	async joinRoom(client: Socket, channelName: string) {
-		let check: boolean = await this.channelService.checkIfUserInChannel(
-			client.data.user,
-			channelName,
-		);
-		if (check == true) {
-			client.join(channelName);
+	async joinRoom(client: Socket, channel: ChannelEntity) {
+		// let check: boolean = await this.channelService.getIfUserInChan(
+		// 	client.data.user,
+		// 	channel,
+		// );
+		// if (check == true) 
+		// {
+			client.join(channel.title);
 			this.server.emit('joinedRoom');
-		} 
-		else 
-		console.log(`You need to be a member of the channel`);
+		// } 
+		// else 
+			// console.log(`You need to be a member of the channel`);
 	}
 
 	/**
@@ -156,13 +162,13 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
-	async leaveRoom(client: Socket, channelName: string) {
-		let check: boolean = await this.channelService.checkIfUserInChannel(
+	async leaveRoom(client: Socket, channel : ChannelEntity) {
+		let check: boolean = await this.channelService.getIfUserInChan(
 			client.data.user,
-			channelName,
+			channel,
 		);
 		if (check == true) {
-			client.leave(channelName);
+			client.leave(channel.title);
 			this.server.emit('leftRoom');
 		}
 	}
@@ -217,8 +223,8 @@ export class GeneralGateway
 	 */
 
 	/**
-	 * Pour recuperer tous les channels existant 
-	 * @param client 
+	 * Pour recuperer tous les channels existant
+	 * @param client
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
@@ -230,8 +236,8 @@ export class GeneralGateway
 
 	/**
 	 * Pour ne recuperer que les channels dont le user fait partie
-	 * -> autant publiques que privees 
-	 * @param client 
+	 * -> autant publiques que privees
+	 * @param client
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
@@ -250,4 +256,17 @@ export class GeneralGateway
 	 *  \_____/_/    \_|_|  |_|______|
 	 *
 	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('joinMatch')
+	async sendDefaultPos(socket: Socket) {
+		console.log('sendDefaultPos entry');
+		console.log('beginMatch', this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
 }
