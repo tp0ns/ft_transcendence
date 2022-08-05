@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import UserEntity from 'src/user/models/user.entity';
 import { Match, Pad, Ball, Player } from './interfaces/game.interface';
@@ -47,13 +48,12 @@ export class GameService {
 		return match;
 	}
 
+	// set new position according to keyboard
 	async movePad(direction: string, match: Match) {
-		// console.log('movePad entry with :', direction);
 		switch (direction) {
 			case 'up':
 				if (match.rightPad.y - match.rightPad.speed < 50) {
 					match.rightPad.y = 50;
-					// eslint-disable-next-line prettier/prettier
 				}
 				else
 					match.rightPad.y -= match.rightPad.speed;
@@ -61,11 +61,22 @@ export class GameService {
 			case 'down':
 				if (match.rightPad.y + match.rightPad.speed >= 433) {
 					match.rightPad.y = 433;
-					// eslint-disable-next-line prettier/prettier
 				}
 				else
 					match.rightPad.y += match.rightPad.speed;
 				break;
 		}
+	}
+
+	// set new position according to mouse
+	async moveMouse(mousePosy: number, match: Match) {
+		if (mousePosy <= 0 + 50) {
+			match.leftPad.y = 0 + 50;
+		}
+		else if (mousePosy >= 383 + 50) {
+			match.leftPad.y = 383 + 50;
+		}
+		else
+			match.leftPad.y = mousePosy;
 	}
 }

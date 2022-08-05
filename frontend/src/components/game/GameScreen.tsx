@@ -82,7 +82,7 @@ const GameScreen = () => {
 	};
 
 	const mouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-		socket.emit("mouseMove", event.clientY, ballPosition);
+		socket.emit("mouseMove", event.clientY);
 	};
 
 	const moveBall = () => {

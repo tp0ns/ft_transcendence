@@ -279,4 +279,17 @@ export class GeneralGateway
 			this.beginMatch.ball,
 		);
 	}
+
+	// Move event, allow the user to move its pad with mouse
+	@UseGuards(WsGuard)
+	@SubscribeMessage('mouseMove')
+	async mouseMove(client: Socket, mousePosy: number) {
+		await this.gameService.moveMouse(mousePosy, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
 }
