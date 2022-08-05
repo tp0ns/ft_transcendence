@@ -4,6 +4,7 @@ import { io, Socket } from "socket.io-client";
 import "./App.css";
 import Auth from "./components/Auth";
 import ChatPage from "./Pages/ChatPage";
+import Debug from "./Pages/Debug";
 import GamePage from "./Pages/GamePage";
 import LoginPage from "./Pages/LoginPage";
 import SocialPage from "./Pages/SocialPage";
@@ -16,6 +17,14 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="*"
+        element={
+          <Auth>
+            <GamePage />
+          </Auth>
+        }
+      />
       <Route
         path="/2fa"
         element={
@@ -56,6 +65,12 @@ function App() {
           </Auth>
         }
       />
+      <Route 
+        path="/debug"
+        element={
+          <Debug />
+        }
+        />
     </Routes>
   );
 }
