@@ -30,7 +30,10 @@ export class ChannelEntity extends BaseEntity {
 	 * Un Channel ne peut avoir qu'un seul owner mais un user
 	 * peut etre owner de plusieurs channels
 	 */
-	@ManyToOne(() => UserEntity)
+	@ManyToOne(() => UserEntity, { 
+		eager: true,
+		cascade: true, 
+	})
 	@JoinColumn()
 	owner: UserEntity;
 
@@ -40,21 +43,29 @@ export class ChannelEntity extends BaseEntity {
 	})
 	password: string;
 
-	@ManyToMany(() => UserEntity)
+	@ManyToMany(() => UserEntity, {
+		cascade: true,
+	})
 	@JoinTable()
-	admins: UserEntity[]
+	admins: UserEntity[];
 
-	@ManyToMany(() => UserEntity )
+	@ManyToMany(() => UserEntity, {
+		cascade: true,
+	})
 	@JoinTable()
-	members: UserEntity[]
+	members: UserEntity[];
 
-	@ManyToMany(() => UserEntity )
+	@ManyToMany(() => UserEntity, {
+		cascade: true,
+	})
 	@JoinTable()
-	bannedMembers: UserEntity[]
+	bannedMembers: UserEntity[];
 
-	@ManyToMany(() => UserEntity )
+	@ManyToMany(() => UserEntity, {
+		cascade: true,
+	})
 	@JoinTable()
-	mutedMembers: UserEntity[]
+	mutedMembers: UserEntity[];
 
 	@Column({
 		default: false,

@@ -15,6 +15,8 @@ import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from './chat/channel/channel.entity';
 import { GameService } from './game/game.service';
 import { Match } from './game/interfaces/game.interface';
+import { ModifyChanDto } from './chat/channel/dtos/modifyChan.dto';
+import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway({
 	cors: {
@@ -73,10 +75,12 @@ export class GeneralGateway
 
 	/**
 	 *
-	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le set en tant que owner
+	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le
+	 * set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
+	 * @emits updatedChannels permet au front de savoir qu'il est temps de
+	 * recuperer les channels
 	 *
-	 * @todo verifier que channelEntity existe : est-ce que securite dans le front ?
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -89,47 +93,32 @@ export class GeneralGateway
 		this.server.emit('updatedChannels');
 	}
 
+	/**
+	 *
+	 * @param client besoin d'envoyer le user qui souhaite modifier le channel pour
+	 * verifier qu'il a les droits (owner / admins )
+	 * @param modifications interface envoye avec le titre du channel et les
+	 * modifications possibles (password / protected / private / admins / members )
+	 * @emits updatedChannels permet au front de savoir qu'il est temps de
+	 * recuperer les channels
+	 *
+	 */
 	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyPassword')
-	async modifyPassword(client: Socket, chanName: string, newPassword: string) {
-		await this.channelService.modifyPassword(
-			client.data.user,
-			chanName,
-			newPassword,
-		);
+	@SubscribeMessage('modifyChannel')
+	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
+		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyAdmins')
-	async modifyAdmins(
-		client: Socket,
-		chanName: string,
-		newAdmins: UserEntity[],
-	) {
-		await this.channelService.modifyAdmins(
-			client.data.user,
-			chanName,
-			newAdmins,
-		);
-		this.server.emit('updatedChannels');
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('modifyMembers')
-	async modifyMembers(
-		client: Socket,
-		chanName: string,
-		newMembers: UserEntity[],
-	) {
-		await this.channelService.modifyMembers(
-			client.data.user,
-			chanName,
-			newMembers,
-		);
-		this.server.emit('updatedChannels');
-	}
-
+	/**
+	 *
+	 * @param client pour checker si le user qui souhaite modifier le channel a
+	 * les droits
+	 * @param chanName nom du channel a supprimer
+	 * @emits updatedChannels permet au front de savoir qu'il est temps de
+	 * recuperer les channels
+	 *
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
 	async deleteChan(client: Socket, chanName: string) {
@@ -146,57 +135,40 @@ export class GeneralGateway
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
-	 * @todo si le channel est private, verifier que le user est bien membre du channel avant de rejoindre la room
+	 * @todo mettre l'erreur dans le service
 	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
 	async joinRoom(client: Socket, channelName: string) {
-		client.join(channelName);
-		this.server.emit('joinedRoom');
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('leaveRoom')
-	async leaveRoom(client: Socket, channelName: string) {
-		client.leave(channelName);
-		this.server.emit('leftRoom');
+		let check: boolean = await this.channelService.checkIfUserInChannel(
+			client.data.user,
+			channelName,
+		);
+		if (check == true) {
+			client.join(channelName);
+			this.server.emit('joinedRoom');
+		}
+		else
+		console.log(`You need to be a member of the channel`);
 	}
 
 	/**
-	 * ------------------------ BAN / MUTE  ------------------------- *
+	 *
+	 * @param client client qui veut leave le chan
+	 * @param channelName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 */
-
 	@UseGuards(WsGuard)
-	@SubscribeMessage('BanUser')
-	async BanUser(client: Socket, userToBan: UserEntity, chanName: string) {
-		await this.channelService.banUser(client.data.user, userToBan, chanName);
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('MuteUser')
-	async MuteUser(client: Socket, userToMute: UserEntity, chanName: string) {
-		await this.channelService.muteUser(client.data.user, userToMute, chanName);
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('UnbanUser')
-	async UnbanUser(client: Socket, userToUnban: UserEntity, chanName: string) {
-		await this.channelService.unbanUser(
+	@SubscribeMessage('leaveRoom')
+	async leaveRoom(client: Socket, channelName: string) {
+		let check: boolean = await this.channelService.checkIfUserInChannel(
 			client.data.user,
-			userToUnban,
-			chanName,
+			channelName,
 		);
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('UnmuteUser')
-	async UnmuteUser(client: Socket, userToUnmute: UserEntity, chanName: string) {
-		await this.channelService.unmuteUser(
-			client.data.user,
-			userToUnmute,
-			chanName,
-		);
+		if (check == true) {
+			client.leave(channelName);
+			this.server.emit('leftRoom');
+		}
 	}
 
 	/**
@@ -204,17 +176,18 @@ export class GeneralGateway
 	 */
 
 	/**
-	 * @todo en plus d'envoyer le msg, stocker dans l'entite messages
+	 * MESSAGE POUR LE SERVEUR
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
 	handleMessage(client: Socket, payload: string) {
+		this.channelService.sendMessage(client.data.user, payload);
 		this.server.emit('msgToClient', payload);
 		return payload;
 	}
 
 	/**
-	 *
+	 * MESSAGE DANS UN CHANNEL
 	 * @param client
 	 * @param payload
 	 * @param chanName
@@ -223,15 +196,15 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	handleMessageToChan(client: Socket, payload: string, chanName: string) {
-		client.join(chanName);
-		this.channelService.sendMessage(client.data.user, payload, chanName);
+	handleMessageToChan(client: Socket, payload: string) {
+		client.join(payload[0]);
+		this.channelService.sendMessage(client.data.user, payload);
 		// this.server.to(chanName).emit('channelMessage', payload);
 		this.server.emit('channelMessage', payload);
 	}
 
 	/**
-	 *
+	 * DIRECT MESSAGE
 	 * @param client
 	 * @param payload
 	 *
@@ -247,6 +220,10 @@ export class GeneralGateway
 	 * ------------------------ GET CHANNELS  ------------------------- *
 	 */
 
+	/**
+	 * Pour recuperer tous les channels existant
+	 * @param client
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
 	async getChannels(client: Socket) {
@@ -255,28 +232,18 @@ export class GeneralGateway
 		this.server.emit('sendChans', channels);
 	}
 
+	/**
+	 * Pour ne recuperer que les channels dont le user fait partie
+	 * -> autant publiques que privees
+	 * @param client
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
 	async getMemberChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
+		this.server.emit('sendMemberChannels', channels);
 	}
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getAllPublicChannels')
-	// async GetAllPublicChannels(client: Socket)
-	// {
-	// 	const publicChannels: ChannelEntity[] = await this.channelService.getAllPublicChannels();
-	// 	this.server.emit('sendPublicsChannels', publicChannels);
-	// }
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getAllPrivateChannels')
-	// async getAllPrivateChannels(client: Socket)
-	// {
-	// 	const privateChannels: ChannelEntity[] = await this.channelService.getAllPrivateChannels(client.data.user);
-	// 	this.server.emit('sendPrivateChannels', privateChannels);
-	// }
 
 	/**
 	 *   _____          __  __ ______

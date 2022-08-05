@@ -11,7 +11,7 @@ const NewChannelForm: React.FC<{
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const [privateChan, setPrivateChan] = useState(false);
   const [protectedChan, setProtectedChan] = useState(false);
-
+  
   function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 

@@ -1,5 +1,5 @@
 interface UserProp {
-  id: string;
+  userId: string;
   schoolId: number;
   username: string;
   twoFASecret: string;

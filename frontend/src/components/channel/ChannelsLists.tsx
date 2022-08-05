@@ -9,27 +9,24 @@ const ChannelsList: React.FC<{
   channels: any;
 }> = (props) => {
   return (
-    <section>
-      <ul>
-        {props.channels.map((channel: any) => {
-          console.log("channel in channelList", channel);
-          return (
-            <ChannelItem
-              displayChannel={() => {
-                props.selectedChannel(channel);
-              }}
-              displaySettings={() => {
-                props.displaySettings(channel);
-              }}
-              key={channel.id}
-              name={channel.title}
-              private={channel.private}
-              socket={props.socket}
-            />
-          );
-        })}
-      </ul>
-    </section>
+    <div>
+      {props.channels.map((channel: any) => {
+        return (
+          <ChannelItem
+            displayChannel={() => {
+              props.selectedChannel(channel);
+            }}
+            displaySettings={() => {
+              props.displaySettings(channel);
+            }}
+            key={channel.id}
+            name={channel.title}
+            private={channel.private}
+            socket={props.socket}
+          />
+        );
+      })}
+    </div>
   );
 };
 
