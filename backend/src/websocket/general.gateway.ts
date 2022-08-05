@@ -244,7 +244,7 @@ export class GeneralGateway
 	async getMemberChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
-		this.server.emit('sendMemberChannels', channels);
+		this.server.emit('sendMemberChans', channels);
 	}
 
 	/**

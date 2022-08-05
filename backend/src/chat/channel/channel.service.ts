@@ -133,10 +133,13 @@ export class ChannelService {
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
-		let userToAdd: UserEntity = await this.userService.getUserByUsername(
-			modifications.newAdmin);
-		if (!channel.admins.includes(userToAdd)) {
-			await this.joinAdmin(userToAdd, modifications.title);
+		if (channel.admins.find((admin: UserEntity) => admin.username === user.username))
+		{
+			let userToAdd: UserEntity = await this.userService.getUserByUsername(
+				modifications.newAdmin);
+			if (!channel.admins.includes(userToAdd)) {
+				await this.joinAdmin(userToAdd, modifications.title);
+				}
 		}
 	}
 
@@ -338,6 +341,10 @@ export class ChannelService {
 		let channels: ChannelEntity[] = await this.channelRepository
 			.createQueryBuilder('channel')
 			.leftJoinAndSelect('channel.members', 'members')
+			.leftJoinAndSelect('channel.owner', 'owner')
+			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+			.leftJoinAndSelect('channel.admins', 'admins')
 			.where('channel.private = false')
 			.orWhere('members.userId = :id', { id: member.userId })
 			.getMany();
