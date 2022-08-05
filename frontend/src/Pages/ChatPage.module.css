@@ -1,13 +1,71 @@
 .section {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   flex-direction: row;
 }
 
 #channels_list {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#channel_group {
+  width: 70%;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.img {
+  height: 50px;
+  width: 50px;
+}
+
+.memberItem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+
+.profilePicture_username {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+}
+
+.addChannel {
+  width: 100%;
+  height: 20%;
+  box-sizing: border-box;
+
+  /* Jet */
+
+  background: #3a3636;
+  /* Jet */
+
+  border: 1px solid #3a3636;
+  border-radius: 15px;
+}
+
+.addChannel h1 {
+  box-sizing: border-box;
+
+  background: white;
+}
+
+.channelItem {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+}
+
+.openedChannel {
+  width: 70%;
 }

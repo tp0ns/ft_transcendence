@@ -6,7 +6,9 @@ import OpenedChannel from "../components/channel/OpenedChannel";
 import Settings from "../components/channel/Settings";
 import { socket } from "../App";
 import classes from "./ChatPage.module.css";
+import React from "react";
 import NavBar from "../components/NavBar/NavBar";
+import ChannelMembersList from "../components/channel/ChannelMembersList";
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
@@ -18,13 +20,23 @@ function ChatPage() {
     setNewChannel(true);
   };
 
-  // useEffect(() => {
-  //   console.log("entered useEffect");
-  //   socket.emit("getAllChannels");
-  //   socket.on("sendChans", (channels) => {
-  //     setChannelsReceived(channels);
-  //   });
-  // }, [newChannel]);
+  useEffect(() => {
+    console.log("entered useEffect");
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChannels", (channels) => {
+      setChannelsReceived(channels);
+    });
+    console.log("NewChannel", channelsReceived);
+  }, [newChannel]);
+
+  useEffect(() => {
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChannels", (channels) => {
+      setChannelsReceived(channels);
+      setOpenedChannel(channels[0]);
+    });
+    console.log("First render", channelsReceived);
+  }, []);
 
   socket.on("updatedChannels", () => {
     socket.emit("getAllChannels");
@@ -51,7 +63,7 @@ function ChatPage() {
   };
 
   const settingsHandler = (channel: ChannelProp) => {
-    console.log("channel in settingHandler: ", channel);
+    console.log("channel in settings handler: ", channel);
     setSettings(channel);
   };
 
@@ -60,32 +72,36 @@ function ChatPage() {
   }, [channelSettings]);
 
   return (
-    <section className={classes.section}>
-		<NavBar />
-      <div id={classes["channels_list"]}>
-        {!newChannel ? (
-          <button onClick={handleNewChannel}>Add Channel</button>
+    <React.Fragment>
+      <NavBar />
+      <section className={classes.section}>
+        <div id={classes["channels_list"]}>
+          {!newChannel ? (
+            <button className={classes.addChannel} onClick={handleNewChannel}>
+              Add Channel
+            </button>
+          ) : null}
+          <ChannelsList
+            selectedChannel={handleOpenedChannel}
+            displaySettings={settingsHandler}
+            channels={channelsReceived}
+            socket={socket}
+          />
+        </div>
+        {newChannel ? <NewChannelForm sendChan={sendChannel} /> : null}
+        {openedChannel ? (
+          <div id={classes["channel_group"]}>
+            <OpenedChannel
+              channel={openedChannel}
+              socket={socket}
+              leaveChannel={leaveChannelHandler}
+            />
+            <ChannelMembersList channel={openedChannel} socket={socket} />
+          </div>
         ) : null}
-        <ChannelsList
-          // className={classes.ChannlesList}
-          selectedChannel={handleOpenedChannel}
-          displaySettings={settingsHandler}
-          channels={channelsReceived}
-          socket={socket}
-        />
-      </div>
-      {newChannel && !openedChannel ? (
-        <NewChannelForm sendChan={sendChannel} />
-      ) : null}
-      {!newChannel && openedChannel ? (
-        <OpenedChannel
-          channel={openedChannel}
-          socket={socket}
-          leaveChannel={leaveChannelHandler}
-        />
-      ) : null}
-      {channelSettings ? <Settings channel={channelSettings} /> : null}
-    </section>
+        {channelSettings ? <Settings channel={channelSettings} /> : null}
+      </section>
+    </React.Fragment>
   );
 }
 

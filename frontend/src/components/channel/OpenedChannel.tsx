@@ -3,6 +3,7 @@ import { Socket } from "socket.io-client";
 import ChannelProp from "../../interfaces/Channel.interface";
 import Card from "../../ui/Card";
 import MessagesList from "./MessagesLists";
+import classes from "././../../Pages/ChatPage.module.css";
 
 const OpenedChannel: React.FC<{
   channel: ChannelProp;
@@ -31,19 +32,19 @@ const OpenedChannel: React.FC<{
 
   useEffect(() => {
     props.socket.on("channelMessage", (payload) => {
-      console.log("message from server: ", payload);
+      // console.log("message from server: ", payload);
       setNewMessage([...messages, payload[0]]);
     });
   }, [messages, props.socket]);
 
   return (
-    <Card>
+    <div className={classes.openedChannel}>
       <h1>{props.channel.title}</h1>
       <MessagesList messages={messages} />
       <input type="text" required id="image" ref={messageInputRef} />
       <button onClick={messageHandler}>Send message</button>
       <button onClick={leaveHandler}>Leave Channel</button>
-    </Card>
+    </div>
   );
 };
 
