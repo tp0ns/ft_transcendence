@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import "./App.css";
 import Auth from "./components/Auth";
 import ChatPage from "./Pages/ChatPage";

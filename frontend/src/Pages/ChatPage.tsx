@@ -6,6 +6,7 @@ import OpenedChannel from "../components/channel/OpenedChannel";
 import Settings from "../components/channel/Settings";
 import { socket } from "../App";
 import classes from "./ChatPage.module.css";
+import NavBar from "../components/NavBar/NavBar";
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
@@ -60,6 +61,7 @@ function ChatPage() {
 
   return (
     <section className={classes.section}>
+		<NavBar />
       <div id={classes["channels_list"]}>
         {!newChannel ? (
           <button onClick={handleNewChannel}>Add Channel</button>
