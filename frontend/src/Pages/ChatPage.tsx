@@ -6,13 +6,9 @@ import OpenedChannel from "../components/channel/OpenedChannel";
 import Settings from "../components/channel/Settings";
 import { socket } from "../App";
 import classes from "./ChatPage.module.css";
-<<<<<<< HEAD
 import React from "react";
 import NavBar from "../components/NavBar/NavBar";
 import ChannelMembersList from "../components/channel/ChannelMembersList";
-=======
-import NavBar from "../components/NavBar/NavBar";
->>>>>>> 9aa10a07f541641c036350c169eb685da0b5ea50
 
 function ChatPage() {
   const [newChannel, setNewChannel] = useState(false);
@@ -24,20 +20,22 @@ function ChatPage() {
     setNewChannel(true);
   };
 
-  // useEffect(() => {
-  //   console.log("entered useEffect");
-  //   socket.emit("getAllChannels");
-  //   socket.on("sendChans", (channels) => {
-  //     setChannelsReceived(channels);
-  //   });
-  // }, [newChannel]);
+  useEffect(() => {
+    console.log("entered useEffect");
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChannels", (channels) => {
+      setChannelsReceived(channels);
+    });
+    console.log("NewChannel", channelsReceived);
+  }, [newChannel]);
 
   useEffect(() => {
-    socket.emit("getAllChannels");
-    socket.on("sendChans", (channels) => {
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChannels", (channels) => {
       setChannelsReceived(channels);
       setOpenedChannel(channels[0]);
     });
+    console.log("First render", channelsReceived);
   }, []);
 
   socket.on("updatedChannels", () => {
@@ -65,7 +63,7 @@ function ChatPage() {
   };
 
   const settingsHandler = (channel: ChannelProp) => {
-    console.log("channel in settingHandler: ", channel);
+    console.log("channel in settings handler: ", channel);
     setSettings(channel);
   };
 

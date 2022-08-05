@@ -32,7 +32,7 @@ const OpenedChannel: React.FC<{
 
   useEffect(() => {
     props.socket.on("channelMessage", (payload) => {
-      console.log("message from server: ", payload);
+      // console.log("message from server: ", payload);
       setNewMessage([...messages, payload[0]]);
     });
   }, [messages, props.socket]);

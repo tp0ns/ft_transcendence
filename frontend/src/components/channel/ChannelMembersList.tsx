@@ -9,7 +9,7 @@ const ChannelMembersList: React.FC<{ channel: ChannelProp; socket: Socket }> = (
   return (
     <React.Fragment>
       {props.channel.members?.map((member) => {
-        console.log("members: ", member);
+        // console.log("members: ", member);
         return (
           <MemberItem member={member} channelTitle={props.channel.title} />
         );
