@@ -76,11 +76,11 @@ function ChatPage() {
       <NavBar />
       <section className={classes.section}>
         <div id={classes["channels_list"]}>
-          {!newChannel ? (
+          {(
             <button className={classes.addChannel} onClick={handleNewChannel}>
-              Add Channel
+              +
             </button>
-          ) : null}
+          )}
           <ChannelsList
             selectedChannel={handleOpenedChannel}
             displaySettings={settingsHandler}
