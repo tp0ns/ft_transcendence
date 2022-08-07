@@ -57,14 +57,14 @@ const GameScreen = () => {
 			context!.fillStyle = "#3a3636";
 			context!.fillRect(
 				leftPadPosition.x,
-				leftPadPosition.y - 50,
+				leftPadPosition.y - leftPadPosition.h, // in order to be at the middle of the pad
 				leftPadPosition.w,
 				leftPadPosition.h
 			);
 			//draw right pad
 			context!.fillRect(
 				rightPadPosition.x,
-				rightPadPosition.y - 50,
+				rightPadPosition.y - rightPadPosition.h / 2,
 				rightPadPosition.w,
 				rightPadPosition.h
 			);

@@ -68,13 +68,13 @@ export class GameService {
 		}
 	}
 
-	// set new position according to mouse
+	// set new position according to mouse (for left pad only)
 	async moveMouse(mousePosy: number, match: Match) {
-		if (mousePosy <= 0 + 50) {
-			match.leftPad.y = 0 + 50;
+		if (mousePosy <= 0 + 100) {
+			match.leftPad.y = 0 + 100;
 		}
-		else if (mousePosy >= 383 + 50) {
-			match.leftPad.y = 383 + 50;
+		else if (mousePosy >= 480) {
+			match.leftPad.y = 480;
 		}
 		else
 			match.leftPad.y = mousePosy;
