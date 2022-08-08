@@ -1,3 +1,5 @@
+
+
 .section {
   display: flex;
   justify-content: space-between;
@@ -6,17 +8,29 @@
 }
 
 #channels_list {
-  width: 50%;
+  width: 20%;
   display: flex;
   justify-content: center;
+  overflow: hidden;
   flex-direction: column;
 }
 
 #channel_group {
-  width: 70%;
+  width: 60%;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
+}
+
+#channel_settings_group {
+  display: flex;
+  width: 20%;
+  flex-direction: column;
+}
+
+#channel_members {
+  display: flex;
+  flex-direction: column;
 }
 
 .img {
@@ -41,7 +55,7 @@
 .addChannel {
   font-family: blippoblack;
   height:50px;
-  width:400px;
+  width:100%;
   font-size: 35px;
   box-sizing: border-box;
   color: white;
@@ -55,16 +69,6 @@
   border-radius: 15px;
 }
 
-/* .addChannel button {
-  font: inherit;
-  cursor: pointer;
-  background-color: #77002e;
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border: 1px solid #77002e;
-  border-radius: 4px;
-  font-weight: bold;
-} */
 
 /* .actions button:hover,
 .actions button:active {
@@ -84,7 +88,7 @@
   align-items: center;
   flex-direction: row;
   height: 90px;
-  width:400px;
+  width: 100%;
   display: block;
   text-align: center;
   
@@ -107,7 +111,7 @@
   background-color: rgb(124, 111, 111);
   border-color: rgb(124, 111, 111);
   height: 53px;
-  width:400px;
+  width:100%;
   border-radius: 8px;
 }
 

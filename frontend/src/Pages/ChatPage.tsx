@@ -96,10 +96,19 @@ function ChatPage() {
               socket={socket}
               leaveChannel={leaveChannelHandler}
             />
-            <ChannelMembersList channel={openedChannel} socket={socket} />
           </div>
         ) : null}
-        {channelSettings ? <Settings channel={channelSettings} /> : null}
+        <div id={classes["channel_settings_groups"]}>
+          <div id={classes["channel_settings"]}>
+            {channelSettings ? <Settings channel={channelSettings} /> : null}
+            channel settings
+          </div>
+          <div id={classes["channel_members"]}>
+            {openedChannel ? (
+              <ChannelMembersList channel={openedChannel} socket={socket} />
+            ) : null}
+          </div>
+        </div>
       </section>
     </React.Fragment>
   );

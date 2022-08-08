@@ -1,35 +1,85 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { classicNameResolver } from "typescript";
 import { socket } from "../../App";
+import ChannelProp from "../../interfaces/Channel.interface";
 import ModifiedChannelInfoProp from "../../interfaces/modifyChannelInterface";
 import UserProp from "../../interfaces/User.interface";
 import classes from "../../Pages/ChatPage.module.css";
 
-const MemberItem: React.FC<{ member: UserProp; channelTitle: string }> = (
+const MemberItem: React.FC<{ member: UserProp; channel: ChannelProp }> = (
   props
 ) => {
   // const [imageToDisplay, setImageToDisplay] = useState<string>(null);
+  const [myId, setMyId] = useState<string>("");
   const [isBanned, setBanned] = useState<boolean>(false);
   const [isMuted, setMuted] = useState<boolean>(false);
+  const [isAdmin, setAdmin] = useState<boolean> (false);
+  const [isPrivate, setPrivate] = useState<boolean>(props.channel.private);
+
+  useEffect(() => {
+    fetch("http://localhost/backend/users/me")
+      .then((response) => response.json())
+      .then((data) => {
+        setMyId(data.userId);
+      });
+    setPrivate(props.channel.private);
+    // console.log("channel: ", props.channel);
+  }, []);
 
   const handleBan = () => {
     setBanned((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
-      title: props.channelTitle,
+      title: props.channel.title,
       newBan: isBanned ? props.member.username : undefined,
-      deleteBan: !isBanned ? props.member.username : undefined,
     };
     socket.emit("modifyChannel", modifiedInfo);
   };
 
+  const handleUnban = () => {
+    setBanned((prevState) => !prevState);
+    const modifiedInfo: ModifiedChannelInfoProp = {
+      title: props.channel.title,
+      deleteBan: !isBanned ? props.member.username : undefined,
+    }
+    socket.emit("modifyChannel", modifiedInfo);
+  }
+
   const handleMute = () => {
     setMuted((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
-      title: props.channelTitle,
+      title: props.channel.title,
       newMute: isMuted ? props.member.username : undefined,
-      deleteMute: !isMuted ? props.member.username : undefined,
     };
     socket.emit("modifyChannel", modifiedInfo);
+  };
+
+  const handleUnmute = () => {
+    setMuted((prevState) => !prevState);
+    const modifiedInfo: ModifiedChannelInfoProp = {
+      title: props.channel.title,
+      deleteMute: isMuted ? props.member.username : undefined,
+    };
+    socket.emit("modifyChannel", modifiedInfo);
+  }
+
+  const handleAdmin = () => {
+    setAdmin((prevState) => !prevState);
+    const modifiedInfo: ModifiedChannelInfoProp = {
+      title: props.channel.title,
+      newAdmin: isAdmin ? props.member.username : undefined,
+    }
+    socket.emit("modifyChannel", modifiedInfo);
+  }
+
+  const checkAdmin = (inputId: string) => {
+    if (props.channel.admins) {
+      for (const tmp of props.channel.admins) {
+        if (tmp.userId === inputId) {
+          return true;
+        }
+      }
+    }
+    return false;
   };
 
   return (
@@ -44,12 +94,31 @@ const MemberItem: React.FC<{ member: UserProp; channelTitle: string }> = (
           <h1>{props.member.username}</h1>
         </div>
         <div>
-          <button onClick={handleBan}>
-            {isBanned ? "unBan user" : "Ban user"}
-          </button>
-          <button onClick={handleMute}>
-            {isMuted ? "unMute user" : "Mute user"}
-          </button>
+          { checkAdmin(myId) ? (
+            <button onClick={handleUnban}>
+              unBan user
+            </button>
+              ) : null}
+          { checkAdmin(myId) ? (
+            <button onClick={handleBan}>
+              Ban user
+            </button>
+              ) : null}
+          { checkAdmin(myId) ? (
+            <button onClick={handleUnmute}>
+              unMute user
+            </button>
+              ) : null}
+          { checkAdmin(myId) ? (
+            <button onClick={handleMute}>
+              Mute user
+            </button>
+              ) : null}
+            { checkAdmin(myId) ? (
+            <button onClick={handleAdmin}>
+              Add admin
+            </button>
+              ) : null}
         </div>
       </div>
     </React.Fragment>

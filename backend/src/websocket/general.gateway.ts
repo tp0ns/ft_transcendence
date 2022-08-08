@@ -11,12 +11,11 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
 import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
-import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
-import { UserService } from '../user/user.service';
 import { GameService } from '../game/game.service';
 import { Match } from '../game/interfaces/game.interface';
+import UserEntity from 'src/user/models/user.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -35,6 +34,7 @@ export class GeneralGateway
 
 	private logger: Logger = new Logger('GeneralGateway');
 	private beginMatch: Match = this.gameService.setDefaultPos();
+
 	/**
 	 * Handles server initialization behaviour
 	 */
@@ -42,6 +42,7 @@ export class GeneralGateway
 	afterInit(server: Server) {
 		this.logger.log(`Server is properly initialized !`);
 	}
+
 	/**
 	 * Handles client connection behaviour
 	 */
@@ -74,13 +75,13 @@ export class GeneralGateway
 	 */
 
 	/**
-	 *
+	 * @brief Creation d'un channel 
+	 * 
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le
 	 * set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
 	 * @emits updatedChannels permet au front de savoir qu'il est temps de
 	 * recuperer les channels
-	 *
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -94,7 +95,8 @@ export class GeneralGateway
 	}
 
 	/**
-	 *
+	 * @brief Modification d'un channel 
+	 * 
 	 * @param client besoin d'envoyer le user qui souhaite modifier le channel pour
 	 * verifier qu'il a les droits (owner / admins )
 	 * @param modifications interface envoye avec le titre du channel et les
@@ -111,12 +113,14 @@ export class GeneralGateway
 	}
 
 	/**
-	 *
-	 * @param client pour checker si le user qui souhaite modifier le channel a
+	 * @brief Suppresion d'un channel 
+	 * 
+	 * @param client pour checker si le user qui souhaite supprimer le channel a
 	 * les droits
 	 * @param chanName nom du channel a supprimer
 	 * @emits updatedChannels permet au front de savoir qu'il est temps de
 	 * recuperer les channels
+	 * 
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -163,11 +167,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
 	async leaveRoom(client: Socket, channel : ChannelEntity) {
-		let check: boolean = await this.channelService.getIfUserInChan(
-			client.data.user,
-			channel,
-		);
-		if (check == true) {
+		if (channel.members.find((member: UserEntity) => member.username === client.data.user.username)) {
 			client.leave(channel.title);
 			this.server.emit('leftRoom');
 		}
