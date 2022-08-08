@@ -1,12 +1,9 @@
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { useNavigate } from "react-router-dom";
-import Settings from "../../components/channel/Settings";
 import NavBar from "../../components/NavBar/NavBar";
 import UserProp from "../../interfaces/User.interface";
 import Modal from "../../ui/Modal/Modal";
-import ChatPage from "../ChatPage";
 import SettingsUser from "./SettingsUser";
 import classes from "./UserPage.module.css";
 
@@ -14,7 +11,6 @@ const UserPage = () => {
 	const [user, setUser] = useState<UserProp>();
 	const [settings, setSettings] = useState<boolean>(false);
 	const [cookies] = useCookies();
-	const navigate = useNavigate();
 	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
 
 	useEffect(() => {
@@ -34,8 +30,8 @@ const UserPage = () => {
 	function settingsLayout(settings: boolean) {
 		if (settings) {
 			return (
-				<Modal title="Settings" onClick={clickHandler}>
-					<SettingsUser />
+				<Modal title="Settings" btnText="Save" onClick={clickHandler}>
+					<SettingsUser user={user} />
 				</Modal>
 			);
 		}
