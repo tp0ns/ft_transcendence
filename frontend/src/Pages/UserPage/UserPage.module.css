@@ -5,9 +5,20 @@
 	z-index: 2;
 }
 
-.actions {
+.settings {
 	position: fixed;
 	z-index: auto;
+	width: 40px;
+	height: 40px;
+	filter: invert(15%) sepia(6%) saturate(679%) hue-rotate(314deg)
+		brightness(88%) contrast(78%) drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+	margin-top: 2vh;
+	margin-left: 2vh;
+}
+
+.settings:hover {
+	filter: invert(15%) sepia(6%) saturate(679%) hue-rotate(314deg)
+		brightness(88%) contrast(78%);
 }
 
 .badge {

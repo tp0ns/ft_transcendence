@@ -37,14 +37,13 @@ const UserPage = () => {
 		<React.Fragment>
 			<NavBar />
 			{clientId === user?.userId ? (
-				<button onClick={clickHandler} className={classes.actions}>
-					Settings
-				</button>
-			) : (
-				<button onClick={() => navigate(-1)} className={classes.actions}>
-					Back
-				</button>
-			)}
+				<img
+					src="/gear.svg"
+					alt="Option button"
+					onClick={clickHandler}
+					className={classes.settings}
+				/>
+			) : null}
 			<div className={classes.resume}>
 				{settings ? (
 					<ErrorModal
