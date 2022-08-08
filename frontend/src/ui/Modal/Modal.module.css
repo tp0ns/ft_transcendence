@@ -16,9 +16,11 @@
 	z-index: 100;
 	overflow: scroll;
 	background: #fdd05d;
+	border-radius: 15px;
 }
 
 .header {
+	width: 100%;
 	background: #3a3636;
 	padding: 1rem;
 	text-align: center;
@@ -46,6 +48,8 @@
 	border: 1px solid #3a3636;
 	background-color: #3a3636;
 	color: #f4edde;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
 	border-radius: 12px;
 }
 

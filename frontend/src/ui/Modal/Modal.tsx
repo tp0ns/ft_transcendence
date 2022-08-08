@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import ReactDOM from "react-dom";
+import { JsxElement } from "typescript";
 import classes from "./Modal.module.css";
 
 const Backdrop: React.FC<{ onClick: () => any }> = (props) => {
@@ -8,7 +9,7 @@ const Backdrop: React.FC<{ onClick: () => any }> = (props) => {
 
 const ModalOverlay: React.FC<{
 	title: string;
-	message: string;
+	children: JSX.Element;
 	onClick: () => any;
 }> = (props) => {
 	return (
@@ -16,37 +17,33 @@ const ModalOverlay: React.FC<{
 			<header className={classes.header}>
 				<h2>{props.title}</h2>
 			</header>
-			<div className={classes.content}>
-				<p>{props.message}</p>
-			</div>
+			{props.children}
 			<footer className={classes.actions}>
-				<button onClick={props.onClick}>Okay</button>
+				<button onClick={props.onClick}>Close</button>
 			</footer>
 		</div>
 	);
 };
 
-const ErrorModal: React.FC<{
+const Modal: React.FC<{
 	title: string;
-	message: string;
+	children: JSX.Element;
 	onClick: () => any;
 }> = (props) => {
 	return (
 		<Fragment>
-			{/* {ReactDOM.createPortal( */}
-			<Backdrop onClick={props.onClick} />,
-			{/* document.getElementById("backdrop-root") as Element */}
-			{/* )} */}
-			{/* {ReactDOM.createPortal( */}
-			<ModalOverlay
-				title={props.title}
-				message={props.message}
-				onClick={props.onClick}
-			/>
-			{/* , document.getElementById("overlay-root") as Element */}
-			{/* )} */}
+			{ReactDOM.createPortal(
+				<Backdrop onClick={props.onClick} />,
+				document.getElementById("backdrop-root") as Element
+			)}
+			{ReactDOM.createPortal(
+				<ModalOverlay title={props.title} onClick={props.onClick}>
+					{props.children}
+				</ModalOverlay>,
+				document.getElementById("overlay-root") as Element
+			)}
 		</Fragment>
 	);
 };
 
-export default ErrorModal;
+export default Modal;
