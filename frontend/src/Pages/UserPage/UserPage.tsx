@@ -4,6 +4,7 @@ import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../components/NavBar/NavBar";
 import UserProp from "../../interfaces/User.interface";
+import ErrorModal from "../../ui/Modal/Modal";
 import classes from "./UserPage.module.css";
 
 const UserPage = () => {
@@ -36,15 +37,22 @@ const UserPage = () => {
 		<React.Fragment>
 			<NavBar />
 			{clientId === user?.userId ? (
-				<button onClick={clickHandler} className={classes.settings}>
+				<button onClick={clickHandler} className={classes.actions}>
 					Settings
 				</button>
 			) : (
-				<button onClick={() => navigate(-1)} className={classes.back}>
+				<button onClick={() => navigate(-1)} className={classes.actions}>
 					Back
 				</button>
 			)}
 			<div className={classes.resume}>
+				{settings ? (
+					<ErrorModal
+						title="Settings"
+						message="Those are the settings"
+						onClick={clickHandler}
+					/>
+				) : null}
 				<img
 					src={user?.profileImage ? user.profileImage : user?.image_url}
 					alt="Profile picture"

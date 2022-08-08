@@ -1,0 +1,57 @@
+.backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100vh;
+	z-index: 10;
+	background: rgb(0, 0, 0, 0.75);
+}
+
+.modal {
+	position: fixed;
+	top: 30vh;
+	left: 10%;
+	width: 80%;
+	z-index: 100;
+	overflow: scroll;
+	background: #fdd05d;
+}
+
+.header {
+	background: #3a3636;
+	padding: 1rem;
+	text-align: center;
+}
+
+.header h2 {
+	margin: 0;
+	color: #f4edde;
+}
+
+.content {
+	padding: 1rem;
+}
+
+.actions {
+	padding: 1rem;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.actions button {
+	font: inherit;
+	cursor: pointer;
+	padding: 1rem 2rem;
+	border: 1px solid #3a3636;
+	background-color: #3a3636;
+	color: #f4edde;
+	border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+	.modal {
+		left: calc(50% - 20rem);
+		width: 40rem;
+	}
+}

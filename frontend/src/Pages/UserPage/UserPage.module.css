@@ -2,13 +2,19 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	z-index: -1;
+	z-index: 2;
+}
+
+.actions {
+	position: fixed;
+	z-index: auto;
 }
 
 .badge {
 	border-radius: 50%;
 	height: 10%;
 	width: 10%;
+	margin-top: 2vh;
 }
 
 .username {
