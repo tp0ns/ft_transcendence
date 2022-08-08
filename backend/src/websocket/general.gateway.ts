@@ -29,7 +29,8 @@ export class GeneralGateway
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
-	) {}
+	) // private friendService: FriendService;
+	{}
 
 	@WebSocketServer() server: Server;
 
@@ -86,7 +87,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-		const channel : ChannelEntity = await this.channelService.createNewChan(
+		const channel: ChannelEntity = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
 		);
@@ -136,7 +137,7 @@ export class GeneralGateway
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
 	 * @todo mettre l'erreur dans le service
-	 * @todo faire en sorte de recuperer tous les messages du channel 
+	 * @todo faire en sorte de recuperer tous les messages du channel
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -146,13 +147,13 @@ export class GeneralGateway
 		// 	client.data.user,
 		// 	channel,
 		// );
-		// if (check == true) 
+		// if (check == true)
 		// {
-			client.join(channel.title);
-			this.server.emit('joinedRoom');
-		// } 
-		// else 
-			// console.log(`You need to be a member of the channel`);
+		client.join(channel.title);
+		this.server.emit('joinedRoom');
+		// }
+		// else
+		// console.log(`You need to be a member of the channel`);
 	}
 
 	/**
@@ -162,7 +163,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
-	async leaveRoom(client: Socket, channel : ChannelEntity) {
+	async leaveRoom(client: Socket, channel: ChannelEntity) {
 		let check: boolean = await this.channelService.getIfUserInChan(
 			client.data.user,
 			channel,
@@ -269,4 +270,17 @@ export class GeneralGateway
 			this.beginMatch.ball,
 		);
 	}
+
+	/*
+  ______ _____  _____ ______ _   _ _____   _____ 
+ |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
+ | |__  | |__) | | | | |__  |  \| | |  | | (___  
+ |  __| |  _  /  | | |  __| | . ` | |  | |\___ \ 
+ | |    | | \ \ _| |_| |____| |\  | |__| |____) |
+ |_|    |_|  \_\_____|______|_| \_|_____/|_____/                                              
+	/*
+	 * ------------------------ GET FRIEND LIST  ------------------------- *
+	*/
+
+	@UseGuards(WsGuard)
 }
