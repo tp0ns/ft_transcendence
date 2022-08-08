@@ -57,7 +57,7 @@ const UserPage = () => {
 			<div className={classes.resume}>
 				<img
 					src={user?.profileImage ? user.profileImage : user?.image_url}
-					alt="Profile picture"
+					alt="Avatar"
 					className={classes.badge}
 				/>
 				<div className={classes.username}>{user?.username}</div>

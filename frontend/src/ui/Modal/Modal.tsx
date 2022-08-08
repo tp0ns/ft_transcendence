@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
 import ReactDOM from "react-dom";
-import { JsxElement } from "typescript";
 import classes from "./Modal.module.css";
 
 const Backdrop: React.FC<{ onClick: () => any }> = (props) => {
