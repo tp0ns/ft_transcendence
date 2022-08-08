@@ -10,10 +10,12 @@ const Backdrop: React.FC<{ onClick: () => any }> = (props) => {
 const ModalOverlay: React.FC<{
 	title: string;
 	children: JSX.Element;
+	className?: any;
 	onClick: () => any;
 }> = (props) => {
+	const styling = `${classes.modal} ${props.className}`;
 	return (
-		<div className={classes.modal}>
+		<div className={styling}>
 			<header className={classes.header}>
 				<h2>{props.title}</h2>
 			</header>
@@ -28,6 +30,7 @@ const ModalOverlay: React.FC<{
 const Modal: React.FC<{
 	title: string;
 	children: JSX.Element;
+	className?: any;
 	onClick: () => any;
 }> = (props) => {
 	return (
@@ -37,7 +40,11 @@ const Modal: React.FC<{
 				document.getElementById("backdrop-root") as Element
 			)}
 			{ReactDOM.createPortal(
-				<ModalOverlay title={props.title} onClick={props.onClick}>
+				<ModalOverlay
+					title={props.title}
+					onClick={props.onClick}
+					className={props.className}
+				>
 					{props.children}
 				</ModalOverlay>,
 				document.getElementById("overlay-root") as Element
