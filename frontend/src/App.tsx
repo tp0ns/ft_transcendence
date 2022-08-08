@@ -8,7 +8,7 @@ import GamePage from "./Pages/GamePage";
 import LoginPage from "./Pages/Login/LoginPage";
 import SocialPage from "./Pages/SocialPage";
 import TwoFAPAge from "./Pages/Login/TwoFAPage";
-import UserPage from "./Pages/UserPage";
+import UserPage from "./Pages/UserPage/UserPage";
 
 export const socket = io("http://localhost/");
 
