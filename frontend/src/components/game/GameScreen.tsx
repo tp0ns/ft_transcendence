@@ -57,10 +57,11 @@ const GameScreen = () => {
 			context!.fillStyle = "#3a3636";
 			context!.fillRect(
 				leftPadPosition.x,
-				leftPadPosition.y - leftPadPosition.h, // in order to be at the middle of the pad
+				leftPadPosition.y - leftPadPosition.h, // / 2, // in order to be at the middle of the pad
 				leftPadPosition.w,
 				leftPadPosition.h
 			);
+
 			//draw right pad
 			context!.fillRect(
 				rightPadPosition.x,
@@ -77,7 +78,7 @@ const GameScreen = () => {
 		socket.emit("move", direction);
 	};
 
-	const gameFunctions = (func: any) => {
+	const gameFunctions = (func: string) => {
 		socket.emit("gameFunctions", func);
 	};
 
@@ -139,8 +140,8 @@ const GameScreen = () => {
 			}
 			// collisions with the left pad
 			if (
-				leftPadPosition.y - leftPadPosition.h / 2 <= ballPosition.y &&
-				ballPosition.y <= leftPadPosition.y + leftPadPosition.h / 2 &&
+				leftPadPosition.y - leftPadPosition.h <= ballPosition.y &&
+				ballPosition.y <= leftPadPosition.y &&
 				ballPosition.x <= leftPadPosition.x + leftPadPosition.w
 			) {
 				impact = ballPosition.y - leftPadPosition.y + leftPadPosition.h / 2;

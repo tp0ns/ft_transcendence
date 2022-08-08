@@ -79,4 +79,15 @@ export class GameService {
 		else
 			match.leftPad.y = mousePosy;
 	}
+
+	// gameFunction : Switch with all functions related to the match
+	async gameFunction(func: string, match: Match) {
+	switch(func) {
+		case "resetBall":
+			match.ball.y = 250;
+			match.ball.x = 250;
+			match.ball.speedy = 0;
+			match.ball.goRight = true;
+		}
+	}
 }

@@ -14,7 +14,7 @@ import { CreateChanDto } from './chat/channel/dtos/createChan.dto';
 import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from './chat/channel/channel.entity';
 import { GameService } from './game/game.service';
-import { Match } from './game/interfaces/game.interface';
+import { Ball, Match } from './game/interfaces/game.interface';
 import { ModifyChanDto } from './chat/channel/dtos/modifyChan.dto';
 import { channel } from 'diagnostics_channel';
 
@@ -285,6 +285,32 @@ export class GeneralGateway
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
 		await this.gameService.moveMouse(mousePosy, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	//	Game Functions, start, reset
+	@UseGuards(WsGuard)
+	@SubscribeMessage('gameFunctions')
+	async gameFunctions(client: Socket, func: string) {
+		await this.gameService.gameFunction(func, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	// get the position of the ball and emit it
+	@UseGuards(WsGuard)
+	@SubscribeMessage('ballMovement')
+	async ballMovement(client: Socket, ballPos: any) {
+		this.beginMatch.ball = ballPos;
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
