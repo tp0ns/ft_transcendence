@@ -17,12 +17,14 @@ const ModalOverlay: React.FC<{
 	return (
 		<div className={styling}>
 			<header className={classes.header}>
-				<h2>{props.title}</h2>
+				<div className={classes.header_content}>
+					<h2>{props.title}</h2>
+					<button onClick={props.onClick} className={classes.actions}>
+						X
+					</button>
+				</div>
 			</header>
 			{props.children}
-			<footer className={classes.actions}>
-				<button onClick={props.onClick}>{props.btnText}</button>
-			</footer>
 		</div>
 	);
 };

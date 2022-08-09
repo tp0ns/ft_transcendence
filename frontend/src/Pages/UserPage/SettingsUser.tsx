@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import UserProp from "../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 import UserPage from "./UserPage";
@@ -8,6 +9,7 @@ const SettingsUser: React.FC<{
 	onUserchange: (newUser: UserProp) => void;
 }> = (props) => {
 	const nameInput = useRef<HTMLInputElement>(null);
+	const navigate = useNavigate();
 
 	async function nameSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
@@ -26,20 +28,32 @@ const SettingsUser: React.FC<{
 		nameInput.current!.value = "";
 	}
 
+	async function logout() {
+		try {
+			const response = await await fetch(
+				"http://localhost/backend/auth/logout"
+			);
+			if (!response.ok) throw new Error("Request failed!");
+			else navigate("/login");
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
 	return (
 		<div className={classes.list}>
 			{/* <label className={classes.switch}>
 				<input type="checkbox" />
 				<span className={`${classes.slider} ${classes.round}`}></span>
 			</label> */}
-
 			<form onSubmit={nameSubmitHandler} className={classes.form_name}>
-				{/* <div className={classes.form_content}> */}
-				<label htmlFor="text">Enter a new nickname</label>
+				<label htmlFor="text">New nickname</label>
 				<input ref={nameInput} type="text" id="text"></input>
 				<button>Save</button>
-				{/* </div> */}
 			</form>
+			<div className={classes.logout} onClick={logout}>
+				Logout
+			</div>
 		</div>
 	);
 };

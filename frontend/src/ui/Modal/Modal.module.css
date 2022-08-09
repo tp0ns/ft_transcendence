@@ -21,12 +21,19 @@
 
 .header {
 	background: #3a3636;
-	padding: 1rem;
-	text-align: center;
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+.header_content {
+	width: 55%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 }
 
 .header h2 {
-	margin: 0;
+	display: inline;
 	color: #f4edde;
 }
 
@@ -35,19 +42,14 @@
 }
 
 .actions {
-	padding: 1rem;
-	display: flex;
+	padding: 1rem 2rem;
+	display: inline-flex;
 	justify-content: flex-end;
-}
-
-.actions button {
 	font: inherit;
 	cursor: pointer;
-	padding: 1rem 2rem;
 	border: 1px solid #3a3636;
 	background-color: #3a3636;
 	color: #f4edde;
-	font-family: "Courier New", Courier, monospace;
 	font-weight: bolder;
 	border-radius: 12px;
 }
