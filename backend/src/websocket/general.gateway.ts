@@ -201,7 +201,7 @@ export class GeneralGateway
 	handleMessageToChan(client: Socket, payload: string) {
 		client.join(payload[0]);
 		this.channelService.sendMessage(client.data.user, payload);
-		// this.server.to(chanName).emit('channelMessage', payload);
+		this.server.to(payload[0]).emit('channelMessage', payload);
 		this.server.emit('channelMessage', payload);
 	}
 

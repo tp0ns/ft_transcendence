@@ -18,6 +18,7 @@ function ChatPage() {
 
   const handleNewChannel = () => {
     setNewChannel(true);
+    setOpenedChannel(null);
   };
 
   useEffect(() => {
@@ -55,6 +56,7 @@ function ChatPage() {
   const handleOpenedChannel = (channel: ChannelProp) => {
     socket.emit("joinRoom", channel);
     setOpenedChannel(channel);
+    setNewChannel(false);
   };
 
   const leaveChannelHandler = () => {
@@ -101,7 +103,6 @@ function ChatPage() {
         <div id={classes["channel_settings_groups"]}>
           <div id={classes["channel_settings"]}>
             {channelSettings ? <Settings channel={channelSettings} /> : null}
-            channel settings
           </div>
           <div id={classes["channel_members"]}>
             {openedChannel ? (
