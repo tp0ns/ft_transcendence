@@ -18,10 +18,10 @@ const UserPage = () => {
 			const response = await (
 				await fetch("http://localhost/backend/users/me")
 			).json();
-			if (response.ok) setUser(response);
-			getUserData();
+			setUser(response);
 		}
-	}, [settings]);
+		getUserData();
+	}, []);
 
 	function changeUser(newUser: UserProp) {
 		setUser(newUser);

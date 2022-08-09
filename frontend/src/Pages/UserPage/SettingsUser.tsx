@@ -22,10 +22,8 @@ const SettingsUser: React.FC<{
 				}),
 			})
 		).json();
-		if (response.ok) {
-			props.onUserchange(response);
-			nameInput.current!.value = "";
-		}
+		props.onUserchange(response);
+		nameInput.current!.value = "";
 	}
 
 	return (
