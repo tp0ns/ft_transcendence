@@ -1,26 +1,21 @@
 .parent {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  position: relative;
-  top: 0%;
-  left: 0%;
-  width: 100%;
-  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 30px;
 }
 
 .searchBar {
   border: 3px solid #3a3636;
   border-radius: 20px;
-  top: 30px;
   width: 35%;
   padding-top: 0.2%;
   padding-bottom: 0.2%;
   display: flex;
   justify-content: flex-start;
   /* adjustment */
-  position: absolute;
   /* new */
 }
 
@@ -42,22 +37,28 @@
 }
 
 .friendsTitle {
-  position: absolute;
-  top: 60px;
-  width: 40%;
-  display: flex;
   justify-content: center;
   align-self: center;
 }
 
-/* .friendsTitle hr {
-  height: 1px;
-  margin: 40px;
-  fill: black;
-  background-color: black;
-  width: 20%;
-} */
-.friendsTitle h1 {
-  width: 60%;
-  text-align: center;
+.relationsList {
+  /* width: 40%; */
+}
+
+.relationItem {
+  box-sizing: border-box;
+
+  /* Auto layout */
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 25px;
+  gap: 28px;
+
+  /* Jet */
+
+  border: 2px solid #3a3636;
+  border-radius: 20px;
 }

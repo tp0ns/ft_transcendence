@@ -23,8 +23,9 @@ const SocialPage = () => {
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
     console.log("Entered add friend front");
     if (event.key === "Enter") {
-      console.log("entered if");
+      event.preventDefault();
       socket.emit("addFriend", event.target.value);
+      event.target.value = "";
     }
   };
 
@@ -41,9 +42,7 @@ const SocialPage = () => {
             onKeyDown={addFriend}
           />
         </div>
-        <div className={classes.friendsTitle}>
-          <h1>Friends List</h1>
-        </div>
+        <h1 className={classes.friendsTitle}>Friends List</h1>
         <RelationsList relations={receivedRelations} />
       </div>
     </React.Fragment>
