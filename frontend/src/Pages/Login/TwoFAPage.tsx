@@ -8,29 +8,20 @@ const TwoFAPAge = () => {
 
 	async function submitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		console.log(event.target);
 		if (userInput.current?.value === "") return;
-		try {
-			const response = await fetch(
-				"http://localhost/backend/auth/2fa/authenticate",
-				{
-					method: "POST",
-					headers: {
-						"Content-type": "application/json; charset=UTF-8",
-					},
-					body: JSON.stringify({
-						twoFACode: userInput.current!.value,
-					}),
-				}
-			);
-			if (!response.ok) {
-				throw new Error("Request failed!");
-			} else {
-				navigate("/");
+		const response = await fetch(
+			"http://localhost/backend/auth/2fa/authenticate",
+			{
+				method: "POST",
+				headers: {
+					"Content-type": "application/json; charset=UTF-8",
+				},
+				body: JSON.stringify({
+					twoFACode: userInput.current!.value,
+				}),
 			}
-		} catch (err) {
-			console.log(err);
-		}
+		);
+		if (response.ok) navigate("/");
 		userInput.current!.value = "";
 	}
 
