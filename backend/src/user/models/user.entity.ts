@@ -7,7 +7,7 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { RelationEntity } from '../relations/models/relations.entity';
+import { RelationEntity } from '../../relations/models/relations.entity';
 
 @Entity()
 export class UserEntity {
@@ -45,7 +45,6 @@ export class UserEntity {
 		default: false,
 	})
 	twoFa: boolean;
-
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];

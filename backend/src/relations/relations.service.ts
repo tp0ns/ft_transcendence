@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../models/user.entity';
-import { UserService } from '../user.service';
+import { UserEntity } from '../user/models/user.entity';
+import { UserService } from '../user/user.service';
 import { RelationEntity } from './models/relations.entity';
 import { Relation, Relation_Status } from './models/relations.interface';
 
@@ -41,20 +41,21 @@ export class RelationsService {
 			where: [
 				{
 					creator: {
-						userId: user1.userId
+						userId: user1.userId,
 					},
 					receiver: {
-						userId: user2.userId
-					}
+						userId: user2.userId,
+					},
 				},
 				{
 					creator: {
-						userId: user2.userId
+						userId: user2.userId,
 					},
 					receiver: {
-						userId: user1.userId
-					}
-				}],
+						userId: user1.userId,
+					},
+				},
+			],
 		});
 		return Relation;
 	}
@@ -164,6 +165,16 @@ export class RelationsService {
 	async getRelationById(Relationid: string): Promise<RelationEntity> {
 		return await this.RelationRepo.findOne({
 			where: { requestId: Relationid },
+		});
+	}
+
+	async getAllRelations(user: UserEntity): Promise<RelationEntity[]> {
+		return await this.RelationRepo.find({
+			relations: ['creator', 'receiver'],
+			where: [
+				{ creator: { userId: user.userId } },
+				{ receiver: { userId: user.userId } },
+			],
 		});
 	}
 }

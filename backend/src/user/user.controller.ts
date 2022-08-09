@@ -35,7 +35,7 @@ import {
 	Relation,
 	RelationStatus,
 	Relation_Status,
-} from './relations/models/relations.interface';
+} from '../relations/models/relations.interface';
 import { find, Observable } from 'rxjs';
 import { UserEntity } from './models/user.entity';
 import { UpdateRequestStatusDto } from './dtos/UpdateRequestStatusDto';

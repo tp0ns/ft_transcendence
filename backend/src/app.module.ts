@@ -8,7 +8,7 @@ import { ChatModule } from './websocket/general.module';
 import { AuthModule } from './auth/auth.module';
 import { TwoFAModule } from './auth/2FA/twoFA.module';
 import { ConfigModule } from '@nestjs/config';
-import { RelationsModule } from './user/relations/relations.module';
+import { RelationsModule } from './relations/relations.module';
 
 @Module({
 	imports: [

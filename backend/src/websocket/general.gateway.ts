@@ -17,6 +17,8 @@ import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { UserService } from '../user/user.service';
 import { GameService } from '../game/game.service';
 import { Match } from '../game/interfaces/game.interface';
+import { RelationsService } from 'src/relations/relations.service';
+import RelationEntity from 'src/relations/models/relations.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -29,8 +31,8 @@ export class GeneralGateway
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
-	) // private friendService: FriendService;
-	{}
+		private relationsService: RelationsService,
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -283,4 +285,18 @@ export class GeneralGateway
 	*/
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('getRelations')
+	async getRelations(client: Socket) {
+		const relations: RelationEntity[] =
+			await this.relationsService.getAllRelations(client.data.user);
+		this.server.emit('sendRelations', relations);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('addFriend')
+	async addFriend(client: Socket, username: string) {
+		console.log('entered backend addFriend');
+		await this.relationsService.sendFriendRequest(username, client.data.user);
+		this.server.emit('updatedRelations');
+	}
 }
