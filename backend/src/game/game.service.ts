@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import UserEntity from 'src/user/models/user.entity';
 import { Match, Pad, Ball, Player } from './interfaces/game.interface';
@@ -45,5 +46,48 @@ export class GameService {
 			player2: initPlayer,
 		};
 		return match;
+	}
+
+	// set new position according to keyboard
+	async movePad(direction: string, match: Match) {
+		switch (direction) {
+			case 'up':
+				if (match.rightPad.y - match.rightPad.speed < 50) {
+					match.rightPad.y = 50;
+				}
+				else
+					match.rightPad.y -= match.rightPad.speed;
+				break;
+			case 'down':
+				if (match.rightPad.y + match.rightPad.speed >= 433) {
+					match.rightPad.y = 433;
+				}
+				else
+					match.rightPad.y += match.rightPad.speed;
+				break;
+		}
+	}
+
+	// set new position according to mouse (for left pad only)
+	async moveMouse(mousePosy: number, match: Match) {
+		if (mousePosy <= 0 + 100) {
+			match.leftPad.y = 0 + 100;
+		}
+		else if (mousePosy >= 480) {
+			match.leftPad.y = 480;
+		}
+		else
+			match.leftPad.y = mousePosy;
+	}
+
+	// gameFunction : Switch with all functions related to the match
+	async gameFunction(func: string, match: Match) {
+	switch(func) {
+		case "resetBall":
+			match.ball.y = 250;
+			match.ball.x = 250;
+			match.ball.speedy = 0;
+			match.ball.goRight = true;
+		}
 	}
 }

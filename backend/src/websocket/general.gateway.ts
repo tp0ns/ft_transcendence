@@ -11,10 +11,8 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
 import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
-import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
-import { UserService } from '../user/user.service';
 import { GameService } from '../game/game.service';
 import { Match } from '../game/interfaces/game.interface';
 
@@ -136,7 +134,7 @@ export class GeneralGateway
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
 	 * @todo mettre l'erreur dans le service
-	 * @todo faire en sorte de recuperer tous les messages du channel 
+	 * @todo faire en sorte de recuperer tous les messages du channel
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -146,12 +144,12 @@ export class GeneralGateway
 		// 	client.data.user,
 		// 	channel,
 		// );
-		// if (check == true) 
+		// if (check == true)
 		// {
 			client.join(channel.title);
 			this.server.emit('joinedRoom');
-		// } 
-		// else 
+		// }
+		// else
 			// console.log(`You need to be a member of the channel`);
 	}
 
@@ -257,11 +255,62 @@ export class GeneralGateway
 	 *
 	 */
 
+	//Join Match event, draw the game for the user
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
 	async sendDefaultPos(socket: Socket) {
-		console.log('sendDefaultPos entry');
-		console.log('beginMatch', this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	// Move event, allow the user to move its pad
+	@UseGuards(WsGuard)
+	@SubscribeMessage('move')
+	async move(client: Socket, direction: string) {
+		await this.gameService.movePad(direction, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	// Move event, allow the user to move its pad with mouse
+	@UseGuards(WsGuard)
+	@SubscribeMessage('mouseMove')
+	async mouseMove(client: Socket, mousePosy: number) {
+		await this.gameService.moveMouse(mousePosy, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	//	Game Functions, start, reset
+	@UseGuards(WsGuard)
+	@SubscribeMessage('gameFunctions')
+	async gameFunctions(client: Socket, func: string) {
+		await this.gameService.gameFunction(func, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+		);
+	}
+
+	// get the position of the ball and emit it
+	@UseGuards(WsGuard)
+	@SubscribeMessage('ballMovement')
+	async ballMovement(client: Socket, ballPos: any) {
+		this.beginMatch.ball = ballPos;
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
