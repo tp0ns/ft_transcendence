@@ -4,15 +4,24 @@ import NavBar from "../components/NavBar/NavBar";
 import classes from "./SocialPage.module.css";
 import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
+import UserProp from "../interfaces/User.interface";
 
 const SocialPage = () => {
   const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
     []
   );
 
+  const [myId, setMyId] = useState<string>("");
+
   useEffect(() => {
     socket.emit("getRelations");
     socket.on("sendRelations", (relations) => setReceivedRelations(relations));
+
+    fetch("http://localhost/backend/users/me")
+      .then((response) => response.json())
+      .then((data) => {
+        setMyId(data.userId);
+      });
   }, []);
 
   socket.on("updatedRelations", () => {
@@ -43,7 +52,7 @@ const SocialPage = () => {
           />
         </div>
         <h1 className={classes.friendsTitle}>Friends List</h1>
-        <RelationsList relations={receivedRelations} />
+        <RelationsList relations={receivedRelations} myId={myId} />
       </div>
     </React.Fragment>
   );

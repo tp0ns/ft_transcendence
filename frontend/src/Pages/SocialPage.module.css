@@ -62,3 +62,17 @@
   border: 2px solid #3a3636;
   border-radius: 20px;
 }
+
+.img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+}
+
+.leftSide {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
