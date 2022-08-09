@@ -15,23 +15,23 @@ const UserPage = () => {
 
 	useEffect(() => {
 		async function getUserData() {
-			try {
-				const response = await (
-					await fetch("http://localhost/backend/users/me")
-				).json();
-				setUser(response);
-			} catch (err) {
-				console.log(err);
-			}
+			const response = await (
+				await fetch("http://localhost/backend/users/me")
+			).json();
+			if (response.ok) setUser(response);
+			getUserData();
 		}
-		getUserData();
 	}, [settings]);
+
+	function changeUser(newUser: UserProp) {
+		setUser(newUser);
+	}
 
 	function settingsLayout(settings: boolean) {
 		if (settings) {
 			return (
 				<Modal title="Settings" btnText="Save" onClick={clickHandler}>
-					<SettingsUser user={user} />
+					<SettingsUser user={user} onUserchange={changeUser} />
 				</Modal>
 			);
 		}
