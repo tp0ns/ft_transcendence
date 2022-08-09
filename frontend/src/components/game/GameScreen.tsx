@@ -27,15 +27,20 @@ let rightPadPosition = {
 	speed: 20,
 };
 
+let player1Score : number = 0;
+let player2Score : number = 0;
+
 const GameScreen = () => {
 	const canvas = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
 		const context = canvas.current!.getContext("2d");
 		socket.emit("joinMatch");
-		socket.on("setPosition", (leftPos, rightPos, ballPos) => {
+		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
 			leftPadPosition = leftPos;
 			rightPadPosition = rightPos;
+			player1Score = p1Score;
+			player2Score = p2Score;
 			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
 
 			//  draw the ball
@@ -57,7 +62,7 @@ const GameScreen = () => {
 			context!.fillStyle = "#3a3636";
 			context!.fillRect(
 				leftPadPosition.x,
-				leftPadPosition.y - leftPadPosition.h, // / 2, // in order to be at the middle of the pad
+				leftPadPosition.y - leftPadPosition.h, // in order to be at the middle of the pad
 				leftPadPosition.w,
 				leftPadPosition.h
 			);
@@ -69,6 +74,12 @@ const GameScreen = () => {
 				rightPadPosition.w,
 				rightPadPosition.h
 			);
+
+			//draw the score:
+			context!.font = "80px blippoblack";
+			context!.fillStyle = "#3a36367c";
+			context!.fillText(player1Score.toString(), 150, 100);
+			context!.fillText(player2Score.toString(), 490, 100);
 		});
 
 		// do something here with the canvas
@@ -78,8 +89,8 @@ const GameScreen = () => {
 		socket.emit("move", direction);
 	};
 
-	const gameFunctions = (func: string) => {
-		socket.emit("gameFunctions", func);
+	const gameFunctions = (func: string, score: number) => {
+		socket.emit("gameFunctions", func, score);
 	};
 
 	const mouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -87,6 +98,7 @@ const GameScreen = () => {
 	};
 
 	const moveBall = () => {
+		// var p1: number = 0;
 		if (ballPosition.goRight === 0) {
 			if (
 				ballPosition.y + ballPosition.speedy <= 10 ||
@@ -98,7 +110,9 @@ const GameScreen = () => {
 				// collision with left wall. 630 = point of contact in px
 				ballPosition.x = 630;
 				//end of the round - need to add score management
-				gameFunctions("resetBall");
+				// collision with left wall -> point to right
+				// p1 += 1;
+				gameFunctions("resetBall", 2);
 				return;
 			} else {
 				ballPosition.x += ballPosition.speedx;
@@ -132,7 +146,14 @@ const GameScreen = () => {
 				// collision with left wall. 10 = point of contact in px
 				ballPosition.x = 10;
 				//end of the round - need to add score management
-				gameFunctions("resetBall");
+				// collision with right wall -> point to left
+				
+				// let numberScore: number = +player1Score;
+				// numberScore++;
+				// player1Score = numberScore.toString();
+				
+				// p1 += 1;
+				gameFunctions("resetBall", 1);
 				return;
 			} else {
 				ballPosition.x -= ballPosition.speedx;
@@ -159,7 +180,7 @@ const GameScreen = () => {
 			// animation until the ball touches the wall
 			requestAnimationFrame(moveBall);
 		}
-		socket.emit("ballMovement", ballPosition);
+		socket.emit("ballMovement", ballPosition)//, p1)//, player2Score);
 	};
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
@@ -167,7 +188,7 @@ const GameScreen = () => {
 			moveBall();
 		}
 		if (event.key === "Space") {
-			gameFunctions("resetBall");
+			gameFunctions("resetBall", 0);
 		}
 		if (event.key === "w") {
 			move("up");
@@ -184,7 +205,7 @@ const GameScreen = () => {
 	};
 
 	const handleReset = () => {
-		gameFunctions("resetBall");
+		gameFunctions("resetBall", 0);
 	};
 
 	return (

@@ -14,7 +14,7 @@ import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
-import { Match } from '../game/interfaces/game.interface';
+import { Ball, Match } from '../game/interfaces/game.interface';
 
 @WebSocketGateway({
 	cors: {
@@ -84,7 +84,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-		const channel : ChannelEntity = await this.channelService.createNewChan(
+		const channel: ChannelEntity = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
 		);
@@ -264,6 +264,8 @@ export class GeneralGateway
 			this.beginMatch.leftPad,
 			this.beginMatch.rightPad,
 			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
 		);
 	}
 
@@ -277,6 +279,8 @@ export class GeneralGateway
 			this.beginMatch.leftPad,
 			this.beginMatch.rightPad,
 			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
 		);
 	}
 
@@ -290,32 +294,50 @@ export class GeneralGateway
 			this.beginMatch.leftPad,
 			this.beginMatch.rightPad,
 			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
 		);
 	}
 
 	//	Game Functions, start, reset
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameFunctions')
-	async gameFunctions(client: Socket, func: string) {
-		await this.gameService.gameFunction(func, this.beginMatch);
+	async gameFunctions(client: Socket, payload) {
+		console.log(payload);
+		await this.gameService.gameFunction(
+			payload[0], //function
+			payload[1], //score
+			this.beginMatch,
+		);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
 			this.beginMatch.rightPad,
 			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
 		);
 	}
 
 	// get the position of the ball and emit it
 	@UseGuards(WsGuard)
 	@SubscribeMessage('ballMovement')
-	async ballMovement(client: Socket, ballPos: any) {
-		this.beginMatch.ball = ballPos;
+	async ballMovement(
+		client: Socket,
+		ballPosition: Ball,
+		// player2Score: number,
+	) {
+		// console.log('p1:', payload[1]);
+		this.beginMatch.ball = ballPosition;
+		// this.beginMatch.p1Score += payload[1];
+		// this.beginMatch.p2Score = player2Score;
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
 			this.beginMatch.rightPad,
 			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
 		);
 	}
 }

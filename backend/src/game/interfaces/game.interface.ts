@@ -26,6 +26,8 @@ export class Match {
 	ball: Ball;
 	player1: Player;
 	player2: Player;
+	p1Score: number;
+	p2Score: number;
 }
 
 // export default Match;
