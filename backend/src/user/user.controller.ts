@@ -86,7 +86,7 @@ export class UserController {
 	@Post('/upload')
 	@UseInterceptors(FileInterceptor('file', storage))
 	uploadFile(@UploadedFile() file, @Req() req) {
-		return this.userService.update(req.userId, {
+		return this.userService.update(req.user.userId, {
 			profileImage: './uploads/profileimages/' + file.filename,
 		});
 	}

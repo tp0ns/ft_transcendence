@@ -14,12 +14,9 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
 
 	useEffect(() => {
-		// console.log(props.userId);
 		async function getUserData() {
 			const url = "http://localhost/backend/users/" + props.userId;
-			// console.log(url);
 			const response = await (await fetch(url)).json();
-			// console.log(JSON.stringify(response));
 			setUser(response);
 		}
 		getUserData();
@@ -41,7 +38,6 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 
 	function clickHandler() {
 		setSettings((prev) => !prev);
-		console.log(settings);
 	}
 
 	return (

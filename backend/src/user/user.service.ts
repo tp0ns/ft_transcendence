@@ -35,7 +35,6 @@ export class UserService {
 			where: { schoolId: profile.id },
 		});
 		if (!user) {
-			console.log(profile.username);
 			while (
 				(user = await this.userRepo.findOne({
 					where: { username: profile.username },
@@ -90,7 +89,6 @@ export class UserService {
 			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
 		}
 		Object.assign(user, attrs);
-		console.log(user);
 		return this.userRepo.save(user);
 	}
 	// async	createUser(newUser: CreateUserDto) {
