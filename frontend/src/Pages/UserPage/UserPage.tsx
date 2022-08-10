@@ -7,17 +7,19 @@ import Modal from "../../ui/Modal/Modal";
 import SettingsUser from "./SettingsUser";
 import classes from "./UserPage.module.css";
 
-const UserPage = () => {
+const UserPage: React.FC<{ userId: string }> = (props) => {
 	const [user, setUser] = useState<UserProp>();
 	const [settings, setSettings] = useState<boolean>(false);
 	const [cookies] = useCookies();
 	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
 
 	useEffect(() => {
+		// console.log(props.userId);
 		async function getUserData() {
-			const response = await (
-				await fetch("http://localhost/backend/users/me")
-			).json();
+			const url = "http://localhost/backend/users/" + props.userId;
+			// console.log(url);
+			const response = await (await fetch(url)).json();
+			// console.log(JSON.stringify(response));
 			setUser(response);
 		}
 		getUserData();

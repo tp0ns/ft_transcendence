@@ -35,7 +35,7 @@ function App() {
 				path="/user"
 				element={
 					<Auth>
-						<UserPage />
+						<UserPage userId="me" />
 					</Auth>
 				}
 			/>

@@ -63,8 +63,8 @@ export class UserController {
 	// })
 	@UseGuards(JwtAuthGuard)
 	@Get('/:id')
-	async getUserbyId(@Param('id') id: uuidDto) {
-		return await this.userService.getUserById(id.id);
+	async getUserbyId(@Param('id') id: string) {
+		return await this.userService.getUserById(id);
 	}
 
 	/* Uploads an image locally and stores location in db*/
