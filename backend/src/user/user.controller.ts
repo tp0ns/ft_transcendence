@@ -41,7 +41,6 @@ import {
 import { find, Observable } from 'rxjs';
 import { UserEntity } from './models/user.entity';
 import { UpdateRequestStatusDto } from './dtos/UpdateRequestStatusDto';
-import { Update2FaDto } from './dtos/Update2FaDto';
 
 @ApiTags('users')
 @Controller('users')
@@ -106,12 +105,11 @@ export class UserController {
 		});
 	}
 
-	@ApiBody({ type: Update2FaDto })
 	@UseGuards(JwtAuthGuard)
-	@Put('/updateUsername')
-	async update2Fa(@Body() update2FaDto: Update2FaDto, @Req() req: Request) {
+	@Get('/delete2fa')
+	async delete2Fa(@Req() req: Request) {
 		return this.userService.update(req.user['userId'], {
-			twoFa: update2FaDto.twoFa,
+			isTwoFAEnabled: false,
 		});
 	}
 }

@@ -30,6 +30,7 @@ export class UserEntity {
 
 	@Column({ default: false })
 	public isTwoFAEnabled: boolean;
+
 	@Column({
 		type: 'varchar',
 	})
@@ -40,12 +41,6 @@ export class UserEntity {
 		type: 'varchar',
 	})
 	profileImage: string;
-
-	@Column({
-		default: false,
-	})
-	twoFa: boolean;
-
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];
