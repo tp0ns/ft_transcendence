@@ -57,9 +57,10 @@ export class UserService {
 		});
 	}
 	async turnOnTwoFA(userId: string) {
-		return this.userRepo.update(userId, {
+		this.userRepo.update(userId, {
 			isTwoFAEnabled: true,
 		});
+		return this.getUserById(userId);
 	}
 
 	async getUserById(id: string) {

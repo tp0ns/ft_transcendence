@@ -10,10 +10,12 @@
 
 .modal {
 	position: fixed;
-	top: 30vh;
+	top: 20vh;
 	left: 10%;
 	width: 80%;
 	z-index: 100;
+	display: flex;
+	flex-direction: column;
 	overflow: scroll;
 	background: #fdd05d;
 	border-radius: 15px;

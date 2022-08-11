@@ -15,7 +15,7 @@ import {
 	ValidationPipe,
 } from '@nestjs/common';
 import { TwoFAService } from './twoFA.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { UserService } from 'src/user/user.service';
 import { TwoFACodeDto } from './dto/twoFACodeDto';
 import RequestWithUser from './interfaces/requestWithUser.interface';
@@ -71,7 +71,7 @@ export class TwoFAController {
 	@UseGuards(JwtAuthGuard)
 	@HttpCode(200)
 	async turnOnTwoFA(
-		@Req() request: RequestWithUser,
+		@Req() request: Request,
 		@Body() { twoFACode }: TwoFACodeDto,
 	) {
 		const isCodeValid = this.twoFAService.is2FACodeValid(
@@ -92,11 +92,15 @@ export class TwoFAController {
 	 */
 	@Get('generate')
 	@UseGuards(JwtAuthGuard)
-	async register(@Res() response: Response, @Req() request: RequestWithUser) {
-		const { otpauthUrl } = await this.twoFAService.generateTwoFASecret(
+	async register(@Req() request: RequestWithUser) {
+		const [secret, otpauthUrl] = await this.twoFAService.generateTwoFASecret(
 			request.user,
 		);
+		const qr = await this.twoFAService.pipeQrCodeStream(otpauthUrl);
 
-		return this.twoFAService.pipeQrCodeStream(response, otpauthUrl);
+		return {
+			secret,
+			qr,
+		};
 	}
 }
