@@ -3,13 +3,14 @@ import { InjectRepository } from "@nestjs/typeorm";
 import UserEntity from "src/user/models/user.entity";
 import { Repository } from "typeorm";
 import { ChannelEntity } from "../channel/channel.entity";
+import { ChannelService } from "../channel/channel.service";
 import { MessagesEntity } from './messages.entity';
 
 @Injectable()
 export class MessageService {
 	constructor(
-		@InjectRepository(MessagesEntity) private MessagesRepository: Repository<MessagesEntity>,
-		@Inject (forwardRef(() => ChannelEntity)) private channelRepository: Repository<ChannelEntity>,
+		@InjectRepository(MessagesEntity) private MessageRepository: Repository<MessagesEntity>,
+		@Inject(forwardRef(() => ChannelService)) private channelService: ChannelService,
 	) {}
 
 
@@ -23,12 +24,26 @@ export class MessageService {
 		// 	user: sender,
 		// 	message: msg,
 		// })
-		let message: MessagesEntity = await this.MessagesRepository.save({
+		const message: MessagesEntity = await this.MessageRepository.save({
 			channel : chan, 
 			user: sender,
 			message: msg,
 		})
 		return message;
+	}
+
+	async getChannelMessages(user: UserEntity, chanName: string) : Promise<MessagesEntity[]>
+	{
+		let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
+		const messages: MessagesEntity[] = await this.MessageRepository
+			.createQueryBuilder('messages')
+			.leftJoinAndSelect('messages.user', 'sender')
+			.leftJoinAndSelect('messages.channel', 'channel')
+			.where('channel.channelId = :id', {id : channel.channelId})
+			.getMany()
+
+		return messages;
+
 	}
 
 	// public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) //: Promise<Channel>

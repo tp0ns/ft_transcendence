@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
-import { ChatModule } from './websocket/general.module';
+import { GeneralModule } from './websocket/general.module';
 import { AuthModule } from './auth/auth.module';
 import { TwoFAModule } from './auth/2FA/twoFA.module';
 import { ConfigModule } from '@nestjs/config';
@@ -19,7 +19,7 @@ import { RelationsModule } from './user/relations/relations.module';
 		RelationsModule,
 		AuthModule,
 		TwoFAModule,
-		ChatModule,
+		GeneralModule,
 		TypeOrmModule.forRoot(typeOrmConfig),
 	],
 	controllers: [AppController],

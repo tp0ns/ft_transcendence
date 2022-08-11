@@ -13,7 +13,9 @@
   justify-content: center;
   overflow: hidden;
   flex-direction: column;
+  height: 100%;
 }
+
 
 #channel_group {
   width: 60%;
@@ -110,8 +112,8 @@
 .channel button:active {
   background-color: rgb(124, 111, 111);
   border-color: rgb(124, 111, 111);
-  height: 53px;
-  width:100%;
+  height: 50px;
+  width: 50%;
   border-radius: 8px;
 }
 

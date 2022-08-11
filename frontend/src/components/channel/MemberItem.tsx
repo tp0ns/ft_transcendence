@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { classicNameResolver } from "typescript";
 import { socket } from "../../App";
 import ChannelProp from "../../interfaces/Channel.interface";
 import ModifiedChannelInfoProp from "../../interfaces/modifyChannelInterface";
@@ -30,7 +29,7 @@ const MemberItem: React.FC<{ member: UserProp; channel: ChannelProp }> = (
     setBanned((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
       title: props.channel.title,
-      newBan: isBanned ? props.member.username : undefined,
+      newBan: props.member.username,
     };
     socket.emit("modifyChannel", modifiedInfo);
   };
@@ -39,7 +38,7 @@ const MemberItem: React.FC<{ member: UserProp; channel: ChannelProp }> = (
     setBanned((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
       title: props.channel.title,
-      deleteBan: !isBanned ? props.member.username : undefined,
+      deleteBan: props.member.username,
     }
     socket.emit("modifyChannel", modifiedInfo);
   }
@@ -48,7 +47,7 @@ const MemberItem: React.FC<{ member: UserProp; channel: ChannelProp }> = (
     setMuted((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
       title: props.channel.title,
-      newMute: isMuted ? props.member.username : undefined,
+      newMute: props.member.username,
     };
     socket.emit("modifyChannel", modifiedInfo);
   };
@@ -57,7 +56,7 @@ const MemberItem: React.FC<{ member: UserProp; channel: ChannelProp }> = (
     setMuted((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
       title: props.channel.title,
-      deleteMute: isMuted ? props.member.username : undefined,
+      deleteMute: props.member.username
     };
     socket.emit("modifyChannel", modifiedInfo);
   }
@@ -66,7 +65,7 @@ const MemberItem: React.FC<{ member: UserProp; channel: ChannelProp }> = (
     setAdmin((prevState) => !prevState);
     const modifiedInfo: ModifiedChannelInfoProp = {
       title: props.channel.title,
-      newAdmin: isAdmin ? props.member.username : undefined,
+      newAdmin: props.member.username,
     }
     socket.emit("modifyChannel", modifiedInfo);
   }

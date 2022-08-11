@@ -15,6 +15,7 @@ function ChatPage() {
   const [channelsReceived, setChannelsReceived] = useState([]);
   const [channelSettings, setSettings] = useState<ChannelProp | null>(null);
   const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
+  const [messagesChannel, setMessagesChannel] = useState([]);
 
   const handleNewChannel = () => {
     setNewChannel(true);
@@ -43,6 +44,10 @@ function ChatPage() {
     socket.emit("getAllChannels");
     socket.on("sendChans", (channels) => {
       setChannelsReceived(channels);
+    for(const channel of channels) 
+    {
+        socket.emit('joinRoom', channel);
+    }
     });
   });
 
@@ -54,7 +59,11 @@ function ChatPage() {
   };
 
   const handleOpenedChannel = (channel: ChannelProp) => {
-    socket.emit("joinRoom", channel);
+    // socket.emit("joinRoom", channel);
+    socket.emit('getChannelMessages');
+    socket.on("sendChannelMessages", ( messages ) => {
+      setMessagesChannel(messages);
+    })
     setOpenedChannel(channel);
     setNewChannel(false);
   };
