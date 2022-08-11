@@ -11,6 +11,8 @@ import {
 	Req,
 	Body,
 	Delete,
+	UsePipes,
+	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -62,9 +64,10 @@ export class UserController {
 	// 	type: 'string',
 	// })
 	@UseGuards(JwtAuthGuard)
-	@Get('/:id')
-	async getUserbyId(@Param('id') id: string) {
-		return await this.userService.getUserById(id);
+	@UsePipes(ValidationPipe)
+	@Get(':id')
+	async getUserbyId(@Param() id: uuidDto) {
+		return await this.userService.getUserById(id.id);
 	}
 
 	/* Uploads an image locally and stores location in db*/
