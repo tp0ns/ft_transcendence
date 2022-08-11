@@ -8,7 +8,6 @@ const TwoFAPAge = () => {
 
 	async function submitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		console.log(event.target);
 		if (userInput.current?.value === "") return;
 		try {
 			const response = await fetch(

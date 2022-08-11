@@ -74,7 +74,6 @@ export class TwoFAController {
 		@Req() request: RequestWithUser,
 		@Body() twoFACode: TwoFACodeDto,
 	) {
-		console.log(twoFACode.twoFACode);
 		const isCodeValid = this.twoFAService.is2FACodeValid(
 			twoFACode.twoFACode,
 			request.user,

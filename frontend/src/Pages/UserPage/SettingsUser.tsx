@@ -58,7 +58,6 @@ const SettingsUser: React.FC<{
 
 	async function twoFASubmitHandler(event: any) {
 		event.preventDefault();
-		console.log(twoFAInput.current?.value);
 		try {
 			const response: UserProp = await (
 				await fetch("http://localhost/backend/auth/2fa/turn-on", {
