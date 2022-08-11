@@ -286,9 +286,15 @@ export class ChannelService {
 	 */
 	async addBanMembers(banningUser: UserEntity, channel: ChannelEntity, newBanUser: string) 
 	{
-		let newBan: UserEntity = await this.checkConditionOfModifications(banningUser, newBanUser, channel);
-		if (newBan)
+		console.log(`enter in banmembers`);
+		let newBan: UserEntity = await this.userService.getUserByUsername(newBanUser);
+		if (newBan 
+			&& banningUser != newBan
+			&& channel.members.find((member: UserEntity) => member.username === newBan.username
+			 && channel.admins.find((admin: UserEntity) => admin.username === banningUser.username
+			 && channel.owner.userId != newBan.userId)))
 		{
+			console.log(`condiitons ok`);
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await channel.save();
 			this.deleteMember(newBan, channel);
@@ -307,8 +313,12 @@ export class ChannelService {
 	 */
 	async addMuteMembers(muttingUser: UserEntity, channel: ChannelEntity, newMuteUser: string) 
 	{
-		let newMute: UserEntity = await this.checkConditionOfModifications(muttingUser, newMuteUser, channel);
-		if (newMute)
+		let newMute: UserEntity = await this.userService.getUserByUsername(newMuteUser);
+		if (newMute 
+			&& muttingUser != newMute
+			&& channel.members.find((member: UserEntity) => member.username === newMute.username
+			 && channel.admins.find((admin: UserEntity) => admin.username === muttingUser.username))
+			 && channel.owner.userId != newMute.userId)
 		{
 			channel.mutedMembers = [...channel.mutedMembers, newMute];
 			await channel.save();
@@ -326,8 +336,11 @@ export class ChannelService {
 	 */
 	async deleteBanMember(unbanningUser: UserEntity, channel: ChannelEntity, deleteBanUser: string) 
 	{
-		let deleteBan: UserEntity = await this.checkConditionOfModifications(unbanningUser, deleteBanUser, channel);
-		if (deleteBan)
+		let deleteBan: UserEntity = await this.userService.getUserByUsername(deleteBanUser);
+		if (deleteBan 
+				&& unbanningUser != deleteBan
+				&& channel.admins.find((admin: UserEntity) => admin.username === unbanningUser.username)
+				&& channel.owner.userId != deleteBan.userId)
 		{
 			channel.bannedMembers = channel.bannedMembers.filter((banned) => {
 				return banned.userId !== deleteBan.userId;
@@ -348,8 +361,11 @@ export class ChannelService {
 	 */
 	async deleteMuteMember( unmuttingUser: UserEntity, channel: ChannelEntity, deleteMuteUser: string) 
 	{
-		let deleteMute: UserEntity = await this.checkConditionOfModifications(unmuttingUser, deleteMuteUser, channel);
-		if (deleteMute)
+		let deleteMute: UserEntity = await this.userService.getUserByUsername(deleteMuteUser);
+		if (deleteMute 
+			&& unmuttingUser != deleteMute
+			&& channel.admins.find((admin: UserEntity) => admin.username === unmuttingUser.username)
+			&& channel.owner.userId != deleteMute.userId)
 		{
 			channel.mutedMembers = channel.mutedMembers.filter((mutted) => {
 				return mutted.userId !== deleteMute.userId;

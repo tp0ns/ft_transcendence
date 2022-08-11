@@ -129,6 +129,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('modifyChannel')
 	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
+		console.log(`enter in modifyChannel`);
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}

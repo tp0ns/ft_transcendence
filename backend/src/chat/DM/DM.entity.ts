@@ -4,8 +4,6 @@ import {
 	Column,
 	Entity,
 	JoinColumn,
-	JoinTable,
-	ManyToMany,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
@@ -46,6 +44,6 @@ export class DMEntity extends BaseEntity {
 	})
 	update: Date;
 
-	@OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
-	messages: MessagesEntity[];
+	// @OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
+	// messages: MessagesEntity[];
 }

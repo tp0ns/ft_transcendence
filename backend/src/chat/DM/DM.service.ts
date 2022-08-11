@@ -52,8 +52,8 @@ export class DMService {
 	{
 		let DMs: DMEntity[] = await this.DMRepository
 		.createQueryBuilder('DM')
-		.leftJoinAndSelect('channel.user1', 'user1')
-		.leftJoinAndSelect('channel.user2', 'user2')
+		.leftJoinAndSelect('DM.user1', 'user1')
+		.leftJoinAndSelect('DM.user2', 'user2')
 		.where('user1.userId = :id', { id: user.userId })
 		.orWhere('user2.userId = :id', { id: user.userId})
 		.getMany();

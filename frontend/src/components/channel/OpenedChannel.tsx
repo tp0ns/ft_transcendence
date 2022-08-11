@@ -31,17 +31,16 @@ const OpenedChannel: React.FC<{
   };
 
   useEffect(() => {
-    props.socket.on("channelMessage", (payload, username) => {
+    props.socket.on("channelMessage", (payload) => {
       // console.log("message from server: ", payload);
-      let msg: string = username+" : "+payload[0];
-      console.log(msg);
-      setNewMessage([...messages, msg]);
+      setNewMessage([...messages, payload[0]]);
     });
   }, [messages, props.socket]);
 
   return (
     <div className={classes.openedChannel}>
       <h1>{props.channel.title}</h1>
+      <div className={classes.messages}></div>
       <MessagesList messages={messages} />
       <input type="text" required id="image" ref={messageInputRef} />
       <button onClick={messageHandler}>Send message</button>
