@@ -94,7 +94,7 @@ export class RelationsService {
 		if (Relation.status === 'blocked')
 			throw new ForbiddenException('Status already blocked!');
 		Object.assign(Relation, { status: statusResponse });
-		this.RelationRepo.save(Relation);
+		await this.RelationRepo.save(Relation);
 		return Relation;
 	}
 
@@ -133,7 +133,7 @@ export class RelationsService {
 				receiver: blocked,
 				status: 'blocked',
 			});
-			this.RelationRepo.save(relation);
+			await this.RelationRepo.save(relation);
 			return relation;
 		}
 		let blockedRequest: Relation = {
@@ -152,7 +152,10 @@ export class RelationsService {
 		const relation: RelationEntity = await this.getRelationById(RelationId);
 		if (relation.status === 'blocked') {
 			if (user.userId === relation.creator.userId) {
-				await this.RelationRepo.remove(relation);
+				Object.assign(relation, {
+					status: 'accepted',
+				});
+				await this.RelationRepo.save(relation);
 				return true;
 			} else
 				throw new ForbiddenException(

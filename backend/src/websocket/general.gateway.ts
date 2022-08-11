@@ -295,8 +295,28 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('addFriend')
 	async addFriend(client: Socket, username: string) {
-		console.log('entered backend addFriend');
 		await this.relationsService.sendFriendRequest(username, client.data.user);
+		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('blockUser')
+	async blockUser(client: Socket, username: string) {
+		await this.relationsService.blockUser(username, client.data.user);
+		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('unblockUser')
+	async unblockUser(client: Socket, relationId: string) {
+		await this.relationsService.unblockUser(relationId, client.data.user);
+		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('acceptRequest')
+	async acceptRequest(client: Socket, requestId: string) {
+		await this.relationsService.respondToFriendRequest(requestId, 'accepted');
 		this.server.emit('updatedRelations');
 	}
 }

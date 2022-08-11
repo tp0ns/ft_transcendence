@@ -42,7 +42,10 @@
 }
 
 .relationsList {
-  /* width: 40%; */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 35%;
 }
 
 .relationItem {
@@ -55,12 +58,31 @@
   justify-content: space-between;
   align-items: center;
   padding: 0px 25px;
-  gap: 28px;
+  gap: 70px;
 
   /* Jet */
 
   border: 2px solid #3a3636;
   border-radius: 20px;
+}
+
+.relationItemBlocked {
+  box-sizing: border-box;
+
+  /* Auto layout */
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 25px;
+  gap: 70px;
+
+  /* Jet */
+
+  border: 2px solid #3a3636;
+  border-radius: 20px;
+  background-color: #3a3636;
 }
 
 .img {
@@ -75,4 +97,7 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
+}
+
+.blockButton {
 }
