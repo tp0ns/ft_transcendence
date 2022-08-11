@@ -26,22 +26,20 @@ const TwoFAPAge = () => {
 			if (!response.ok) {
 				throw new Error("Request failed!");
 			} else {
-				navigate("/");
+				userInput.current!.value = "";
+				navigate(0);
 			}
 		} catch (err) {
 			console.log(err);
 		}
-		userInput.current!.value = "";
 	}
 
 	return (
 		<React.Fragment>
 			<form onSubmit={submitHandler} className={classes.form}>
-				{/* <div className={classes.form_content}> */}
 				<label htmlFor="text">Enter your verification code</label>
 				<input ref={userInput} type="text" id="text" maxLength={6}></input>
 				<button>Connect</button>
-				{/* </div> */}
 			</form>
 		</React.Fragment>
 	);
