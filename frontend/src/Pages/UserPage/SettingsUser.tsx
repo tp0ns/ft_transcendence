@@ -11,9 +11,7 @@ const SettingsUser: React.FC<{
 	const navigate: any = useNavigate();
 	const [twofa, settwofa] = useState<boolean>(props.user.isTwoFAEnabled);
 	const [qrcode, setqrcode] = useState<any>([]);
-	const [twoFAForm, settwoFAForm] = useState<boolean>(
-		!props.user.isTwoFAEnabled
-	);
+	const [twoFAForm, settwoFAForm] = useState<boolean>(false);
 	const twoFAInput = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
