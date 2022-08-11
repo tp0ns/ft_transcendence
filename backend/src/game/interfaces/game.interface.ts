@@ -28,6 +28,9 @@ export class Match {
 	player2: Player;
 	p1Score: number;
 	p2Score: number;
+	p1User: UserEntity;
+	p2User: UserEntity;
+	isLocal: boolean;
 }
 
 // export default Match;

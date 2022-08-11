@@ -46,7 +46,6 @@ export class UserEntity {
 	})
 	twoFa: boolean;
 
-
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];
 

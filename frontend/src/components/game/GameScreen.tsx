@@ -70,7 +70,7 @@ const GameScreen = () => {
 			//draw right pad
 			context!.fillRect(
 				rightPadPosition.x,
-				rightPadPosition.y - rightPadPosition.h / 2,
+				rightPadPosition.y - rightPadPosition.h,
 				rightPadPosition.w,
 				rightPadPosition.h
 			);
