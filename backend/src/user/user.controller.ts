@@ -6,11 +6,9 @@ import {
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
-	UseFilters,
 	Put,
 	Req,
 	Body,
-	Delete,
 	UsePipes,
 	ValidationPipe,
 } from '@nestjs/common';
@@ -20,27 +18,15 @@ import {
 	ApiConsumes,
 	ApiCreatedResponse,
 	ApiOkResponse,
-	ApiParam,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from './storage/storage';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
-import { uuidv4 } from 'uuid';
-import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 import { uuidDto } from './dtos/uuidDto';
 import { Request } from 'express';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
-import { UserDto } from './dtos/user.dto';
-import {
-	Relation,
-	RelationStatus,
-	Relation_Status,
-} from './relations/models/relations.interface';
-import { find, Observable } from 'rxjs';
-import { UserEntity } from './models/user.entity';
-import { UpdateRequestStatusDto } from './dtos/UpdateRequestStatusDto';
 
 @ApiTags('users')
 @Controller('users')
@@ -106,7 +92,7 @@ export class UserController {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Get('/delete2fa')
+	@Post('/delete2fa')
 	async delete2Fa(@Req() req: Request) {
 		return this.userService.update(req.user['userId'], {
 			isTwoFAEnabled: false,
