@@ -40,6 +40,7 @@ const OpenedChannel: React.FC<{
   return (
     <div className={classes.openedChannel}>
       <h1>{props.channel.title}</h1>
+      <div className={classes.messages}></div>
       <MessagesList messages={messages} />
       <input type="text" required id="image" ref={messageInputRef} />
       <button onClick={messageHandler}>Send message</button>

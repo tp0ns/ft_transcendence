@@ -9,7 +9,7 @@ const ChannelsList: React.FC<{
   channels: any;
 }> = (props) => {
   return (
-    <div>
+    <div >
       {props.channels.map((channel: any) => {
         return (
           <ChannelItem

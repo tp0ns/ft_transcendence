@@ -19,12 +19,11 @@ const ChannelItem: React.FC<{
 
   return (
     <div className={classes.channelItem}>
-      <h1>{props.name}</h1>
-      <div>
-        <button onClick={props.displayChannel}>Join channel</button>
+    <div className={classes.chanName}>
+      <button onClick={props.displayChannel}>{props.name}</button>
+      </div>
         <button onClick={props.displaySettings}>Settings</button>
         <button onClick={deleteChannel}>Delete</button>
-      </div>
     </div>
   );
 };

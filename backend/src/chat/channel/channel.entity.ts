@@ -27,10 +27,6 @@ export class ChannelEntity extends BaseEntity {
 	})
 	title: string;
 
-	/**
-	 * Un Channel ne peut avoir qu'un seul owner mais un user
-	 * peut etre owner de plusieurs channels
-	 */
 	@ManyToOne(() => UserEntity, { 
 		eager: true,
 		cascade: true, 

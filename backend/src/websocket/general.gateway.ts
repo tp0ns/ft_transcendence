@@ -11,14 +11,19 @@ import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
 import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
-import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
-import { UserService } from '../user/user.service';
 import { GameService } from '../game/game.service';
 import { Match } from '../game/interfaces/game.interface';
 import { RelationsService } from 'src/relations/relations.service';
 import RelationEntity from 'src/relations/models/relations.entity';
+import UserEntity from 'src/user/models/user.entity';
+import { MessageService } from 'src/chat/messages/messages.service';
+import { CreateDMDto } from 'src/chat/DM/createDM.dto';
+import { DMService } from 'src/chat/DM/DM.service';
+import { DMEntity } from 'src/chat/DM/DM.entity';
+import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
+import { UserService } from 'src/user/user.service';
 
 @WebSocketGateway({
 	cors: {
@@ -32,12 +37,16 @@ export class GeneralGateway
 		private channelService: ChannelService,
 		private gameService: GameService,
 		private relationsService: RelationsService,
+		private messageService: MessageService,
+		private DMService: DMService,
+		private userService: UserService,
 	) {}
 
 	@WebSocketServer() server: Server;
 
 	private logger: Logger = new Logger('GeneralGateway');
 	private beginMatch: Match = this.gameService.setDefaultPos();
+
 	/**
 	 * Handles server initialization behaviour
 	 */
@@ -45,12 +54,14 @@ export class GeneralGateway
 	afterInit(server: Server) {
 		this.logger.log(`Server is properly initialized !`);
 	}
+
 	/**
 	 * Handles client connection behaviour
 	 */
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
+		this.channelService.newConnection(client.data.user);
 		this.server.emit('updatedChannels');
 	}
 
@@ -73,17 +84,17 @@ export class GeneralGateway
 	 */
 
 	/**
-	 * ------------------------ CREATE/MODIFY/DELETE CHANNEL  ------------------------- *
+	 * ------------------------ SETTINGS CHANNEL  ------------------------- *
 	 */
 
 	/**
+	 * @brief Creation d'un channel
 	 *
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le
 	 * set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
 	 * @emits updatedChannels permet au front de savoir qu'il est temps de
 	 * recuperer les channels
-	 *
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -96,7 +107,18 @@ export class GeneralGateway
 		this.server.emit('updatedChannels');
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('createDM')
+	async CreateDM(client: Socket, userToInvite: string) {
+		const DM: DMEntity = await this.DMService.createNewDM(
+			client.data.user,
+			userToInvite,
+		);
+		this.server.emit('updatedDMs');
+	}
+
 	/**
+	 * @brief Modification d'un channel
 	 *
 	 * @param client besoin d'envoyer le user qui souhaite modifier le channel pour
 	 * verifier qu'il a les droits (owner / admins )
@@ -109,17 +131,20 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('modifyChannel')
 	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
+		console.log(`enter in modifyChannel`);
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
 
 	/**
+	 * @brief Suppresion d'un channel
 	 *
-	 * @param client pour checker si le user qui souhaite modifier le channel a
+	 * @param client pour checker si le user qui souhaite supprimer le channel a
 	 * les droits
 	 * @param chanName nom du channel a supprimer
 	 * @emits updatedChannels permet au front de savoir qu'il est temps de
 	 * recuperer les channels
+	 *
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -127,6 +152,27 @@ export class GeneralGateway
 	async deleteChan(client: Socket, chanName: string) {
 		await this.channelService.deleteChan(client.data.user, chanName);
 		this.server.emit('updatedChannels');
+	}
+
+	/**
+	 * @brief Checker si le password est valide
+	 *
+	 * @param client
+	 * @param informations
+	 *
+	 * @return false : le user n'a pas rentrer le bon mdp
+	 * @return true : le user a rentrer le bon mdp
+	 *
+	 * @todo est ce que je dois verifier si le cryptage des 2 mdp est equivalent?
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('chanWithPassword')
+	async chatWithPassword(client: Socket, informations: JoinChanDto) {
+		let bool: boolean = await this.channelService.chanWithPassword(
+			client.data.user,
+			informations,
+		);
+		this.server.emit('chanWithPassword', bool);
 	}
 
 	/**
@@ -166,11 +212,11 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
 	async leaveRoom(client: Socket, channel: ChannelEntity) {
-		let check: boolean = await this.channelService.getIfUserInChan(
-			client.data.user,
-			channel,
-		);
-		if (check == true) {
+		if (
+			channel.members.find(
+				(member: UserEntity) => member.username === client.data.user.username,
+			)
+		) {
 			client.leave(channel.title);
 			this.server.emit('leftRoom');
 		}
@@ -185,7 +231,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
-	handleMessage(client: Socket, payload: string) {
+	handleMessage(client: Socket, payload: string[]) {
 		this.channelService.sendMessage(client.data.user, payload);
 		this.server.emit('msgToClient', payload);
 		return payload;
@@ -201,11 +247,12 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	handleMessageToChan(client: Socket, payload: string) {
-		client.join(payload[0]);
+	handleMessageToChan(client: Socket, payload: string[]) {
+		let chanName: string = payload[1];
 		this.channelService.sendMessage(client.data.user, payload);
-		// this.server.to(chanName).emit('channelMessage', payload);
-		this.server.emit('channelMessage', payload);
+		this.server
+			.to(chanName)
+			.emit('channelMessage', payload, client.data.user.username);
 	}
 
 	/**
@@ -217,8 +264,10 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToUser')
-	handleMessagerToClient(client: Socket, payload: string) {
-		this.server.to(client.data.user.username).emit('directMessage', payload);
+	handleMessagerToClient(client: Socket, payload: string[]) {
+		this.server
+			.to(payload[1])
+			.emit('directMessage', payload, client.data.user.username);
 	}
 
 	/**
@@ -247,8 +296,24 @@ export class GeneralGateway
 	async getMemberChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
-		this.server.emit('sendMemberChannels', channels);
+		this.server.emit('sendMemberChans', channels);
 	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMemberDMs')
+	async getMemberDMs(client: Socket) {
+		const DMs: DMEntity[] = await this.DMService.getMyDM(client.data.user);
+		this.server.emit('sendMemberDMs', DMs);
+	}
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('getChannelMessages')
+	// async getChannelMessages(client: Socket, payload: string)
+	// {
+	// 	const messages: MessagesEntity[] =
+	// 		await this.messageService.getChannelMessages(client.data.user, payload[0]);
+	// 	this.server.emit('sendChannelMessages', messages);
+	// }
 
 	/**
 	 *   _____          __  __ ______
@@ -263,8 +328,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
 	async sendDefaultPos(socket: Socket) {
-		console.log('sendDefaultPos entry');
-		console.log('beginMatch', this.beginMatch);
+		// console.log('sendDefaultPos entry');
+		// console.log('beginMatch', this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,

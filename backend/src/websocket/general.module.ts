@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RelationEntity } from 'src/relations/models/relations.entity';
 import { UserEntity } from 'src/user/models/user.entity';
-import { UserModule } from 'src/user/user.module';
 import { UserService } from 'src/user/user.service';
 import { ChannelController } from '../chat/channel/channel.controller';
 import { ChannelEntity } from '../chat/channel/channel.entity';
@@ -13,6 +12,8 @@ import { MessagesEntity } from '../chat/messages/messages.entity';
 import { MessageService } from '../chat/messages/messages.service';
 import { GameService } from 'src/game/game.service';
 import { RelationsService } from 'src/relations/relations.service';
+import { DMEntity } from 'src/chat/DM/DM.entity';
+import { DMService } from 'src/chat/DM/DM.service';
 
 @Module({
 	imports: [
@@ -21,6 +22,7 @@ import { RelationsService } from 'src/relations/relations.service';
 			UserEntity,
 			RelationEntity,
 			MessagesEntity,
+			DMEntity,
 		]),
 	],
 	providers: [
@@ -31,7 +33,8 @@ import { RelationsService } from 'src/relations/relations.service';
 		RelationsService,
 		MessageService,
 		GameService,
+		DMService,
 	],
 	controllers: [ChannelController],
 })
-export class ChatModule {}
+export class GeneralModule {}

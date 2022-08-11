@@ -1,10 +1,8 @@
 import { Body, Controller, Get, HttpCode, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import UserEntity from 'src/user/models/user.entity';
 import { ChannelEntity } from './channel.entity';
 import { ChannelService } from './channel.service';
-import { CreateChanDto } from './dtos/createChan.dto';
 
 @Controller('channel')
 export class ChannelController {
