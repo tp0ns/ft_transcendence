@@ -56,12 +56,10 @@ export class TwoFAService {
 	 * Check if the code given by the user is right or not
 	 */
 	public is2FACodeValid(twoFACode: string, user: any) {
-		console.log(twoFACode);
 		const valide = authenticator.verify({
 			token: twoFACode,
 			secret: user.twoFASecret,
 		});
-		console.log(valide);
 		return valide;
 	}
 }
