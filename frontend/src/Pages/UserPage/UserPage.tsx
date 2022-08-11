@@ -30,7 +30,7 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 		if (settings) {
 			return (
 				<Modal title="Settings" btnText="Save" onClick={clickHandler}>
-					<SettingsUser user={user} onUserchange={changeUser} />
+					<SettingsUser user={user as UserProp} onUserchange={changeUser} />
 				</Modal>
 			);
 		}
