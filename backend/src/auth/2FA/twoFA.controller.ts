@@ -71,17 +71,18 @@ export class TwoFAController {
 	@UseGuards(JwtAuthGuard)
 	@HttpCode(200)
 	async turnOnTwoFA(
-		@Req() request: Request,
-		@Body() { twoFACode }: TwoFACodeDto,
+		@Req() request: RequestWithUser,
+		@Body() twoFACode: TwoFACodeDto,
 	) {
+		console.log(twoFACode.twoFACode);
 		const isCodeValid = this.twoFAService.is2FACodeValid(
-			twoFACode,
+			twoFACode.twoFACode,
 			request.user,
 		);
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
-		await this.userService.turnOnTwoFA(request.user.userId);
+		return await this.userService.turnOnTwoFA(request.user.userId);
 	}
 
 	/**

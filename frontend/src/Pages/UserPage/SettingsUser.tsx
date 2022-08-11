@@ -11,7 +11,9 @@ const SettingsUser: React.FC<{
 	const navigate: any = useNavigate();
 	const [twofa, settwofa] = useState<boolean>(props.user.isTwoFAEnabled);
 	const [qrcode, setqrcode] = useState<any>([]);
-	const [twoFAForm, settwoFAForm] = useState<boolean>(false);
+	const [twoFAForm, settwoFAForm] = useState<boolean>(
+		!props.user.isTwoFAEnabled
+	);
 	const twoFAInput = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -58,28 +60,24 @@ const SettingsUser: React.FC<{
 
 	async function twoFASubmitHandler(event: any) {
 		event.preventDefault();
+		console.log(twoFAInput.current?.value);
 		try {
-			const response = (
+			const response: UserProp = await (
 				await fetch("http://localhost/backend/auth/2fa/turn-on", {
 					method: "POST",
 					headers: {
 						"Content-type": "application/json; charset=UTF-8",
 					},
 					body: JSON.stringify({
-						twoFACode: twoFAInput.current!.value,
+						twoFACode: twoFAInput.current?.value,
 					}),
 				})
 			).json();
-			console.log(response);
-			if (!response.ok) {
-				throw new Error("Request failed!");
-			} else {
-				props.onUserchange(response);
-			}
+			props.onUserchange(response);
+			twoFAInput.current!.value = "";
 		} catch (err) {
 			console.log(err);
 		}
-		twoFAInput.current!.value = "";
 	}
 
 	async function logout() {
