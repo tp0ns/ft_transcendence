@@ -286,15 +286,9 @@ export class ChannelService {
 	 */
 	async addBanMembers(banningUser: UserEntity, channel: ChannelEntity, newBanUser: string) 
 	{
-		console.log(`enter in banmembers`);
-		let newBan: UserEntity = await this.userService.getUserByUsername(newBanUser);
-		if (newBan 
-			&& banningUser != newBan
-			&& channel.members.find((member: UserEntity) => member.username === newBan.username
-			 && channel.admins.find((admin: UserEntity) => admin.username === banningUser.username
-			 && channel.owner.userId != newBan.userId)))
+		let newBan: UserEntity = await this.checkConditionOfModifications(banningUser, newBanUser, channel);
+		if (newBan)
 		{
-			console.log(`condiitons ok`);
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await channel.save();
 			this.deleteMember(newBan, channel);
@@ -336,12 +330,14 @@ export class ChannelService {
 	 */
 	async deleteBanMember(unbanningUser: UserEntity, channel: ChannelEntity, deleteBanUser: string) 
 	{
+		console.log(`enter in delete ban`)
 		let deleteBan: UserEntity = await this.userService.getUserByUsername(deleteBanUser);
 		if (deleteBan 
 				&& unbanningUser != deleteBan
 				&& channel.admins.find((admin: UserEntity) => admin.username === unbanningUser.username)
 				&& channel.owner.userId != deleteBan.userId)
 		{
+			console.log(`conditions ok`)
 			channel.bannedMembers = channel.bannedMembers.filter((banned) => {
 				return banned.userId !== deleteBan.userId;
 			});
