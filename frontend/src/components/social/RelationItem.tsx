@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { classicNameResolver, isPropertySignature } from "typescript";
 import { socket } from "../../App";
 import RelationsProp from "../../interfaces/Relations.interface";
@@ -11,6 +12,7 @@ const RelationItem: React.FC<{
 }> = (props) => {
   const [toDisplay, setToDisplay] = useState<UserProp>();
   const [status, setStatus] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const manageStatus = () => {
     if (props.relation.status === "blocked") {
@@ -33,12 +35,13 @@ const RelationItem: React.FC<{
     manageStatus();
   }, []);
 
-  socket.on("updatedRelations", () => {
-    console.log("status after update: ", props.relation.status);
-    manageStatus();
-  });
+  // socket.on("updatedRelations", () => {
+  //   console.log("status after update: ", props.relation.status);
+  //   manageStatus();
+  // });
 
   const handleBlock = () => {
+    setStatus("blocker");
     if (props.myId === props.relation.creator?.userId)
       socket.emit("blockUser", props.relation.receiver?.username);
     else socket.emit("blockUser", props.relation.creator?.username);
@@ -49,8 +52,15 @@ const RelationItem: React.FC<{
   };
 
   const handleUnblock = () => {
-    console.log("YOUU");
+    setStatus("accepted");
     socket.emit("unblockUser", props.relation.requestId);
+  };
+
+  const sendMessage = () => {
+    if (props.myId === props.relation.creator?.userId)
+      socket.emit("createDM", props.relation.receiver?.username);
+    else socket.emit("createDM", props.relation.creator?.username);
+    navigate("/chat");
   };
 
   return (
@@ -67,17 +77,24 @@ const RelationItem: React.FC<{
       </div>
       <div className={classes.rightSide}>
         {status === "accepted" ? (
-          <button className={classes.blockButton} onClick={handleBlock}>
-            Block
-          </button>
+          <div className={classes.tmp}>
+            <button className={classes.button} onClick={handleBlock}>
+              Block
+            </button>
+            <img
+              onClick={sendMessage}
+              className={classes.logo}
+              src="chat.svg"
+            />
+          </div>
         ) : null}
         {status === "blocker" ? (
-          <button className={classes.blockButton} onClick={handleUnblock}>
+          <button className={classes.button} onClick={handleUnblock}>
             unblock
           </button>
         ) : null}
         {status === "requested" ? (
-          <button className={classes.requestButton} onClick={handleRequest}>
+          <button className={classes.button} onClick={handleRequest}>
             Accept
           </button>
         ) : null}

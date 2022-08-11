@@ -44,10 +44,19 @@ function ChatPage() {
     socket.emit("getAllChannels");
     socket.on("sendChans", (channels) => {
       setChannelsReceived(channels);
-    for(const channel of channels) 
-    {
-        socket.emit('joinRoom', channel);
-    }
+      for (const channel of channels) {
+        socket.emit("joinRoom", channel);
+      }
+    });
+  });
+
+  socket.on("updatedDMs", () => {
+    socket.emit("getAllChannels");
+    socket.on("sendChans", (channels) => {
+      setChannelsReceived(channels);
+      for (const channel of channels) {
+        socket.emit("joinRoom", channel);
+      }
     });
   });
 
@@ -60,10 +69,10 @@ function ChatPage() {
 
   const handleOpenedChannel = (channel: ChannelProp) => {
     // socket.emit("joinRoom", channel);
-    socket.emit('getChannelMessages');
-    socket.on("sendChannelMessages", ( messages ) => {
+    socket.emit("getChannelMessages");
+    socket.on("sendChannelMessages", (messages) => {
       setMessagesChannel(messages);
-    })
+    });
     setOpenedChannel(channel);
     setNewChannel(false);
   };
@@ -87,11 +96,11 @@ function ChatPage() {
       <NavBar />
       <section className={classes.section}>
         <div id={classes["channels_list"]}>
-          {(
+          {
             <button className={classes.addChannel} onClick={handleNewChannel}>
               +
             </button>
-          )}
+          }
           <ChannelsList
             selectedChannel={handleOpenedChannel}
             displaySettings={settingsHandler}
