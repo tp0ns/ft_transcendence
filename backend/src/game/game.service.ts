@@ -12,7 +12,7 @@ export class GameService {
 	setDefaultPos() {
 		const initLeftPad: Pad = {
 			x: 0,
-			y: 50,
+			y: 150,
 			w: 20,
 			h: 100,
 			speed: 5,
@@ -44,6 +44,8 @@ export class GameService {
 			ball: initBall,
 			player1: initPlayer,
 			player2: initPlayer,
+			p1Score: 0,
+			p2Score: 0,
 		};
 		return match;
 	}
@@ -81,13 +83,23 @@ export class GameService {
 	}
 
 	// gameFunction : Switch with all functions related to the match
-	async gameFunction(func: string, match: Match) {
+	async gameFunction(func: string, score: number, match: Match) {
 	switch(func) {
 		case "resetBall":
 			match.ball.y = 250;
 			match.ball.x = 250;
 			match.ball.speedy = 0;
 			match.ball.goRight = true;
+		}
+		switch(score) {
+			case 0:
+				break;
+			case 1:
+				match.p2Score++;
+				break;
+			case 2:
+				match.p1Score++;
+				break;
 		}
 	}
 }
