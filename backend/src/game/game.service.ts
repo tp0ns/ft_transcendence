@@ -46,40 +46,58 @@ export class GameService {
 			player2: initPlayer,
 			p1Score: 0,
 			p2Score: 0,
+			p1User: null,
+			p2User: null,
+			isLocal: true,
 		};
 		return match;
 	}
 
 	// set new position according to keyboard
 	async movePad(direction: string, match: Match) {
-		switch (direction) {
-			case 'up':
-				if (match.rightPad.y - match.rightPad.speed < 50) {
-					match.rightPad.y = 50;
-				}
-				else
-					match.rightPad.y -= match.rightPad.speed;
-				break;
-			case 'down':
-				if (match.rightPad.y + match.rightPad.speed >= 433) {
-					match.rightPad.y = 433;
-				}
-				else
-					match.rightPad.y += match.rightPad.speed;
-				break;
+		if (match.isLocal == true)
+		{
+			switch (direction) {
+				case 'up':
+					if (match.rightPad.y - match.rightPad.speed <= 100) {
+						match.rightPad.y = 100;
+					}
+					else
+						match.rightPad.y -= match.rightPad.speed;
+					break;
+				case 'down':
+					if (match.rightPad.y + match.rightPad.speed >= 480) {
+						match.rightPad.y = 480;
+					}
+					else
+						match.rightPad.y += match.rightPad.speed;
+					break;
+			}
 		}
 	}
 
 	// set new position according to mouse (for left pad only)
-	async moveMouse(mousePosy: number, match: Match) {
-		if (mousePosy <= 0 + 100) {
-			match.leftPad.y = 0 + 100;
+	async moveMouseLeft(mousePosy: number, match: Match) {
+		if (mousePosy <= 100) {
+			match.leftPad.y = 100;
 		}
 		else if (mousePosy >= 480) {
 			match.leftPad.y = 480;
 		}
 		else
 			match.leftPad.y = mousePosy;
+	}
+
+	// set new position according to mouse (for right pad only)
+	async moveMouseRight(mousePosy: number, match: Match) {
+		if (mousePosy <= 100) {
+			match.rightPad.y = 100;
+		}
+		else if (mousePosy >= 480) {
+			match.rightPad.y = 480;
+		}
+		else
+			match.rightPad.y = mousePosy;
 	}
 
 	// gameFunction : Switch with all functions related to the match

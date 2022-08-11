@@ -258,7 +258,17 @@ export class GeneralGateway
 	//Join Match event, draw the game for the user
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
-	async sendDefaultPos(socket: Socket) {
+	async sendDefaultPos(client: Socket) {
+		if (this.beginMatch.p1User == null) {
+			this.beginMatch.player1 = client.data.user;
+			this.beginMatch.p1User = this.beginMatch.player1;
+			// eslint-disable-next-line prettier/prettier
+		}
+		else if (this.beginMatch.p2User == null && this.beginMatch.p1User != client.data.user) {
+			this.beginMatch.player2 = client.data.user;
+			this.beginMatch.p2User = this.beginMatch.player2;
+		}
+		console.log('beginMatch', this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
@@ -288,7 +298,10 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
-		await this.gameService.moveMouse(mousePosy, this.beginMatch);
+		if (client.data.user.userId == this.beginMatch.player1.userId)
+			await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
+		else if (client.data.user.userId == this.beginMatch.player2.userId)
+				await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
@@ -303,7 +316,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameFunctions')
 	async gameFunctions(client: Socket, payload) {
-		console.log(payload);
 		await this.gameService.gameFunction(
 			payload[0], //function
 			payload[1], //score
@@ -322,15 +334,8 @@ export class GeneralGateway
 	// get the position of the ball and emit it
 	@UseGuards(WsGuard)
 	@SubscribeMessage('ballMovement')
-	async ballMovement(
-		client: Socket,
-		ballPosition: Ball,
-		// player2Score: number,
-	) {
-		// console.log('p1:', payload[1]);
+	async ballMovement(client: Socket, ballPosition: Ball) {
 		this.beginMatch.ball = ballPosition;
-		// this.beginMatch.p1Score += payload[1];
-		// this.beginMatch.p2Score = player2Score;
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
