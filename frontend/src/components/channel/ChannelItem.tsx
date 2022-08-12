@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Socket } from "socket.io-client";
-import Card from "../../ui/Card";
 import { socket } from "../../App";
+import classes from "../../Pages/ChatPage.module.css";
 
 const ChannelItem: React.FC<{
   displayChannel: () => void;
@@ -18,13 +18,13 @@ const ChannelItem: React.FC<{
   };
 
   return (
-    <Card>
-      <h1>{props.name}</h1>
-      {props.private ? <h2>PRIVATE</h2> : null}
-      <button onClick={props.displayChannel}>Join channel</button>
-      <button onClick={props.displaySettings}>Settings</button>
-      <button onClick={deleteChannel}>Delete</button>
-    </Card>
+    <div className={classes.channelItem}>
+    <div className={classes.chanName}>
+      <button onClick={props.displayChannel}>{props.name}</button>
+      </div>
+        <button onClick={props.displaySettings}>Settings</button>
+        <button onClick={deleteChannel}>Delete</button>
+    </div>
   );
 };
 

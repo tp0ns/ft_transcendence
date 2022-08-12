@@ -11,7 +11,7 @@ const NewChannelForm: React.FC<{
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const [privateChan, setPrivateChan] = useState(false);
   const [protectedChan, setProtectedChan] = useState(false);
-  
+
   function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -28,7 +28,7 @@ const NewChannelForm: React.FC<{
       private: privateChan,
       protected: protectedChan,
     };
-    console.log("ChannelData in new item form: ", channelData);
+    // console.log("ChannelData in new item form: ", channelData);
     // channelsCtx.addChannel(channelData);
     props.sendChan(channelData);
   }
