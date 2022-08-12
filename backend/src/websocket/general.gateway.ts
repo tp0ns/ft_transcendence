@@ -99,11 +99,9 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('setupNewUser')
-	async setupNewUser(client: Socket)
-	{
+	async setupNewUser(client: Socket) {
 		this.channelService.newConnection(client.data.user);
 	}
-
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
@@ -341,8 +339,10 @@ export class GeneralGateway
 			this.beginMatch.player1 = client.data.user;
 			this.beginMatch.p1User = this.beginMatch.player1;
 			// eslint-disable-next-line prettier/prettier
-		}
-		else if (this.beginMatch.p2User == null && this.beginMatch.p1User != client.data.user) {
+		} else if (
+			this.beginMatch.p2User == null &&
+			this.beginMatch.p1User != client.data.user
+		) {
 			this.beginMatch.player2 = client.data.user;
 			this.beginMatch.p2User = this.beginMatch.player2;
 		}
@@ -436,6 +436,7 @@ export class GeneralGateway
 	@SubscribeMessage('toggleMatchMaking')
 	async toggleMatchMaking(client: Socket) {
 		await this.gameService.toggleMatchMaking(this.beginMatch);
+	}
 	/*
   ______ _____  _____ ______ _   _ _____   _____ 
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
