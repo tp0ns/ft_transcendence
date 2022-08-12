@@ -32,5 +32,3 @@ export class Match {
 	p2User: UserEntity;
 	isLocal: boolean;
 }
-
-// export default Match;
