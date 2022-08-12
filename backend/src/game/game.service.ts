@@ -48,7 +48,7 @@ export class GameService {
 			p2Score: 0,
 			p1User: null,
 			p2User: null,
-			isLocal: true,
+			isLocal: false,
 		};
 		return match;
 	}
@@ -90,14 +90,17 @@ export class GameService {
 
 	// set new position according to mouse (for right pad only)
 	async moveMouseRight(mousePosy: number, match: Match) {
-		if (mousePosy <= 100) {
-			match.rightPad.y = 100;
+		if (match.isLocal == false)
+		{
+			if (mousePosy <= 100) {
+				match.rightPad.y = 100;
+			}
+			else if (mousePosy >= 480) {
+				match.rightPad.y = 480;
+			}
+			else
+				match.rightPad.y = mousePosy;
 		}
-		else if (mousePosy >= 480) {
-			match.rightPad.y = 480;
-		}
-		else
-			match.rightPad.y = mousePosy;
 	}
 
 	// gameFunction : Switch with all functions related to the match
@@ -119,5 +122,17 @@ export class GameService {
 				match.p1Score++;
 				break;
 		}
+	}
+
+		// toggle SinglePlayer : launch the SinglePlayer
+		// and disable keyboard commands
+		async toggleLocalGame(match: Match) {
+			match.isLocal = true;
+		}
+
+	// toggle MatchMaking : launch the matchmaking
+	// and disable keyboard commands
+	async toggleMatchMaking(match: Match) {
+			match.isLocal = false;
 	}
 }
