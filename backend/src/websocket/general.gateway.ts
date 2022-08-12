@@ -346,7 +346,6 @@ export class GeneralGateway
 			this.beginMatch.player2 = client.data.user;
 			this.beginMatch.p2User = this.beginMatch.player2;
 		}
-		console.log('beginMatch', this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
@@ -438,7 +437,7 @@ export class GeneralGateway
 		await this.gameService.toggleMatchMaking(this.beginMatch);
 	}
 	/*
-  ______ _____  _____ ______ _   _ _____   _____ 
+  ______ _____  _____ ______ _   _ _____   _____  
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
  | |__  | |__) | | | | |__  |  \| | |  | | (___  
  |  __| |  _  /  | | |  __| | . ` | |  | |\___ \ 
