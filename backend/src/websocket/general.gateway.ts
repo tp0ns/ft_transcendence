@@ -371,7 +371,7 @@ export class GeneralGateway
 		if (client.data.user.userId == this.beginMatch.player1.userId)
 			await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
 		else if (client.data.user.userId == this.beginMatch.player2.userId)
-				await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
+			await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
@@ -414,5 +414,19 @@ export class GeneralGateway
 			this.beginMatch.p1Score,
 			this.beginMatch.p2Score,
 		);
+	}
+
+	//able keyboard commands for local game
+	@UseGuards(WsGuard)
+	@SubscribeMessage('toggleLocalGame')
+	async toggleSinglePlayer(client: Socket) {
+		await this.gameService.toggleLocalGame(this.beginMatch);
+	}
+
+	//disable keyboard commands for local game
+	@UseGuards(WsGuard)
+	@SubscribeMessage('toggleMatchMaking')
+	async toggleMatchMaking(client: Socket) {
+		await this.gameService.toggleMatchMaking(this.beginMatch);
 	}
 }
