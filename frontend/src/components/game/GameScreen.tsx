@@ -128,12 +128,11 @@ const GameScreen = () => {
 			}
 			// collisions with the right pad
 			if (
-				rightPadPosition.y - rightPadPosition.h / 2 <= ballPosition.y &&
-				ballPosition.y <= rightPadPosition.y + rightPadPosition.h / 2 &&
+				rightPadPosition.y - rightPadPosition.h <= ballPosition.y &&
+				ballPosition.y <= rightPadPosition.y &&
 				ballPosition.x >= rightPadPosition.x - rightPadPosition.w
 			) {
-				var impact =
-					ballPosition.y - rightPadPosition.y + rightPadPosition.h / 2;
+				var impact = ballPosition.y - rightPadPosition.y + rightPadPosition.h / 2;
 				var ratio = 100 / (rightPadPosition.h / 2);
 				var angle = Math.round((impact * ratio) / 10);
 				if (angle >= 10) {
