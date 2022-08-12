@@ -97,6 +97,14 @@ const GameScreen = () => {
 		socket.emit("mouseMove", event.clientY);
 	};
 
+	const toggleLocalGame = () => {
+		socket.emit("toggleLocalGame");
+	};
+
+	const toggleMatchMaking = () => {
+		socket.emit("toggleMatchMaking");
+	};
+
 	const moveBall = () => {
 		// var p1: number = 0;
 		if (ballPosition.goRight === 0) {
@@ -120,12 +128,11 @@ const GameScreen = () => {
 			}
 			// collisions with the right pad
 			if (
-				rightPadPosition.y - rightPadPosition.h / 2 <= ballPosition.y &&
-				ballPosition.y <= rightPadPosition.y + rightPadPosition.h / 2 &&
+				rightPadPosition.y - rightPadPosition.h <= ballPosition.y &&
+				ballPosition.y <= rightPadPosition.y &&
 				ballPosition.x >= rightPadPosition.x - rightPadPosition.w
 			) {
-				var impact =
-					ballPosition.y - rightPadPosition.y + rightPadPosition.h / 2;
+				var impact = ballPosition.y - rightPadPosition.y + rightPadPosition.h / 2;
 				var ratio = 100 / (rightPadPosition.h / 2);
 				var angle = Math.round((impact * ratio) / 10);
 				if (angle >= 10) {
@@ -208,6 +215,14 @@ const GameScreen = () => {
 		gameFunctions("resetBall", 0);
 	};
 
+	const handleLocalGame = () => {
+		toggleLocalGame();
+	}
+
+	const handleMatchMaking = () => {
+		toggleMatchMaking();
+	}
+
 	return (
 		<div>
 			<canvas
@@ -222,6 +237,8 @@ const GameScreen = () => {
 			<p>
 				<button onClick={handleStart}>Start</button>
 				<button onClick={handleReset}>Reset Ball</button>
+				<button onClick={handleLocalGame}>Local Game</button>
+				<button onClick={handleMatchMaking}>Match Making</button>
 			</p>
 		</div>
 	);
