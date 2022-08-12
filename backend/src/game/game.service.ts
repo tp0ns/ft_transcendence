@@ -90,14 +90,17 @@ export class GameService {
 
 	// set new position according to mouse (for right pad only)
 	async moveMouseRight(mousePosy: number, match: Match) {
-		if (mousePosy <= 100) {
-			match.rightPad.y = 100;
+		if (match.isLocal == false)
+		{
+			if (mousePosy <= 100) {
+				match.rightPad.y = 100;
+			}
+			else if (mousePosy >= 480) {
+				match.rightPad.y = 480;
+			}
+			else
+				match.rightPad.y = mousePosy;
 		}
-		else if (mousePosy >= 480) {
-			match.rightPad.y = 480;
-		}
-		else
-			match.rightPad.y = mousePosy;
 	}
 
 	// gameFunction : Switch with all functions related to the match
