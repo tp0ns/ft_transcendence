@@ -3,7 +3,7 @@ import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from 'src/user/models/user.entity';
 import { authenticator } from 'otplib';
-import { toFileStream } from 'qrcode';
+import { toDataURL, toFileStream } from 'qrcode';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import TokenPayload from './dto/token.interface';
@@ -42,26 +42,24 @@ export class TwoFAService {
 			secret,
 		);
 		await this.userService.setTwoFASecret(secret, user.userId);
-		return {
-			secret,
-			otpauthUrl,
-		};
+		return [secret, otpauthUrl];
 	}
 
 	/**
 	 * Display the QR code to access google auth
 	 */
-	public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
-		return toFileStream(stream, otpauthUrl);
+	public async pipeQrCodeStream(otpauthUrl: string) {
+		return (await toDataURL(otpauthUrl)).toString();
 	}
 
 	/**
 	 * Check if the code given by the user is right or not
 	 */
-	public is2FACodeValid(twoFACode, user: UserEntity) {
-		return authenticator.verify({
+	public is2FACodeValid(twoFACode: string, user: any) {
+		const valide = authenticator.verify({
 			token: twoFACode,
 			secret: user.twoFASecret,
 		});
+		return valide;
 	}
 }

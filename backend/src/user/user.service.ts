@@ -8,9 +8,7 @@ import {
 import { UserEntity } from './models/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { uuidv4 } from 'uuid';
 import { Profile } from 'passport-42';
-import { from, map, Observable, of, switchMap } from 'rxjs';
 import {
 	Relation,
 	RelationStatus,
@@ -35,7 +33,6 @@ export class UserService {
 			where: { schoolId: profile.id },
 		});
 		if (!user) {
-			console.log(profile.username);
 			while (
 				(user = await this.userRepo.findOne({
 					where: { username: profile.username },
@@ -57,8 +54,9 @@ export class UserService {
 			twoFASecret: secret,
 		});
 	}
+
 	async turnOnTwoFA(userId: string) {
-		return this.userRepo.update(userId, {
+		return await this.update(userId, {
 			isTwoFAEnabled: true,
 		});
 	}
@@ -96,7 +94,6 @@ export class UserService {
 			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
 		}
 		Object.assign(user, attrs);
-		console.log(user);
 		return this.userRepo.save(user);
 	}
 	// async	createUser(newUser: CreateUserDto) {

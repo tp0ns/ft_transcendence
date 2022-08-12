@@ -48,7 +48,7 @@ services:
       - "traefik.docker.network=ft_transcendence_front_back"
       - "traefik.http.routers.pong-backend.entrypoints=web"
       - "traefik.http.services.pong-backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.pong-backend.rule=Host(`localhost`) && PathPrefix(`/backend`, `/socket.io`)"
+      - "traefik.http.routers.pong-backend.rule=Host(`localhost`) && PathPrefix(`/backend`, `/socket.io`, `/uploads`)"
 
   pong-db:
     image: postgres:alpine

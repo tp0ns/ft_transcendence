@@ -6,11 +6,11 @@ import {
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
-	UseFilters,
 	Put,
 	Req,
 	Body,
-	Delete,
+	UsePipes,
+	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -18,28 +18,15 @@ import {
 	ApiConsumes,
 	ApiCreatedResponse,
 	ApiOkResponse,
-	ApiParam,
 	ApiTags,
 	ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from './storage/storage';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
-import { uuidv4 } from 'uuid';
-import { UnauthorizedExceptionFilter } from 'src/unauthorized.filter';
 import { uuidDto } from './dtos/uuidDto';
 import { Request } from 'express';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
-import { UserDto } from './dtos/user.dto';
-import {
-	Relation,
-	RelationStatus,
-	Relation_Status,
-} from './relations/models/relations.interface';
-import { find, Observable } from 'rxjs';
-import { UserEntity } from './models/user.entity';
-import { UpdateRequestStatusDto } from './dtos/UpdateRequestStatusDto';
-import { Update2FaDto } from './dtos/Update2FaDto';
 
 @ApiTags('users')
 @Controller('users')
@@ -62,8 +49,9 @@ export class UserController {
 	// 	type: 'string',
 	// })
 	@UseGuards(JwtAuthGuard)
-	@Get('/:id')
-	async getUserbyId(@Param('id') id: uuidDto) {
+	@UsePipes(ValidationPipe)
+	@Get(':id')
+	async getUserbyId(@Param() id: uuidDto) {
 		return await this.userService.getUserById(id.id);
 	}
 
@@ -86,7 +74,7 @@ export class UserController {
 	@Post('/upload')
 	@UseInterceptors(FileInterceptor('file', storage))
 	uploadFile(@UploadedFile() file, @Req() req) {
-		return this.userService.update(req.userId, {
+		return this.userService.update(req.user.userId, {
 			profileImage: './uploads/profileimages/' + file.filename,
 		});
 	}
@@ -100,15 +88,6 @@ export class UserController {
 	) {
 		return this.userService.update(req.user['userId'], {
 			username: updateUsernameDto.username,
-		});
-	}
-
-	@ApiBody({ type: Update2FaDto })
-	@UseGuards(JwtAuthGuard)
-	@Put('/updateUsername')
-	async update2Fa(@Body() update2FaDto: Update2FaDto, @Req() req: Request) {
-		return this.userService.update(req.user['userId'], {
-			twoFa: update2FaDto.twoFa,
 		});
 	}
 }
