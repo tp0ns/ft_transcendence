@@ -48,7 +48,7 @@ export class GameService {
 			p2Score: 0,
 			p1User: null,
 			p2User: null,
-			isLocal: true,
+			isLocal: false,
 		};
 		return match;
 	}
@@ -119,5 +119,17 @@ export class GameService {
 				match.p1Score++;
 				break;
 		}
+	}
+
+		// toggle SinglePlayer : launch the SinglePlayer
+		// and disable keyboard commands
+		async toggleLocalGame(match: Match) {
+			match.isLocal = true;
+		}
+
+	// toggle MatchMaking : launch the matchmaking
+	// and disable keyboard commands
+	async toggleMatchMaking(match: Match) {
+			match.isLocal = false;
 	}
 }
