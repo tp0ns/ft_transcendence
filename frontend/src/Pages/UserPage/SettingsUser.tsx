@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { parseJsonSourceFileConfigFileContent } from "typescript";
 import UserProp from "../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 
@@ -17,12 +18,21 @@ const SettingsUser: React.FC<{
 	useEffect(() => {
 		if (!twoFAForm) return;
 		async function getQrCode() {
+			console.log("ici");
 			const response = await fetch("/backend/auth/2fa/generate");
 			const data = await response.json();
 			setqrcode(data);
 		}
 		getQrCode();
 	}, [twoFAForm]);
+
+	useEffect(() => {
+		if (props.user.isTwoFAEnabled) {
+			console.log("la");
+			settwoFAForm(false);
+			settwofa(true);
+		}
+	}, [props.user]);
 
 	async function nameSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
@@ -70,7 +80,6 @@ const SettingsUser: React.FC<{
 					}),
 				})
 			).json();
-			console.log(response);
 			props.onUserchange(response);
 			twoFAInput.current!.value = "";
 		} catch (err) {
@@ -85,7 +94,6 @@ const SettingsUser: React.FC<{
 					method: "POST",
 				})
 			).json();
-			console.log(response);
 			props.onUserchange(response);
 			settwofa(false);
 		} catch (err) {
@@ -135,7 +143,7 @@ const SettingsUser: React.FC<{
 						Activate 2FA Authentication
 					</button>
 				) : null}
-				{twoFAForm ? (
+				{twoFAForm && !twofa ? (
 					<form
 						onSubmit={twoFASubmitHandler}
 						className={classes.form_avatar}
