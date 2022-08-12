@@ -8,9 +8,7 @@ import {
 import { UserEntity } from './models/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { uuidv4 } from 'uuid';
 import { Profile } from 'passport-42';
-import { from, map, Observable, of, switchMap } from 'rxjs';
 import {
 	Relation,
 	RelationStatus,
@@ -56,11 +54,11 @@ export class UserService {
 			twoFASecret: secret,
 		});
 	}
+
 	async turnOnTwoFA(userId: string) {
-		this.userRepo.update(userId, {
+		return await this.update(userId, {
 			isTwoFAEnabled: true,
 		});
-		return this.getUserById(userId);
 	}
 
 	async getUserById(id: string) {
