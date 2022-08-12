@@ -1,0 +1,64 @@
+.backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100vh;
+	z-index: 10;
+	background: rgb(0, 0, 0, 0.75);
+}
+
+.modal {
+	position: fixed;
+	top: 20vh;
+	left: 10%;
+	width: 80%;
+	z-index: 100;
+	display: flex;
+	flex-direction: column;
+	overflow: scroll;
+	background: #fdd05d;
+	border-radius: 15px;
+}
+
+.header {
+	background: #3a3636;
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+.header_content {
+	width: 55%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.header h2 {
+	display: inline;
+	color: #f4edde;
+}
+
+.content {
+	padding: 1rem;
+}
+
+.actions {
+	padding: 1rem 2rem;
+	display: inline-flex;
+	justify-content: flex-end;
+	font: inherit;
+	cursor: pointer;
+	border: 1px solid #3a3636;
+	background-color: #3a3636;
+	color: #f4edde;
+	font-weight: bolder;
+	border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+	.modal {
+		left: calc(50% - 20rem);
+		width: 40rem;
+	}
+}

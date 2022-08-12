@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsNotEmpty, isNotEmpty, IsUUID } from 'class-validator';
 
 export class uuidDto {
 	@ApiProperty()
-	@IsUUID()
+	@IsUUID('all')
+	@IsNotEmpty()
 	id: string;
 }
