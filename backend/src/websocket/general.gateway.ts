@@ -84,8 +84,8 @@ export class GeneralGateway
 	 */
 
 	/**
-	 * @brief Creation d'un channel 
-	 * 
+	 * @brief Creation d'un channel
+	 *
 	 * @param client Besoin d'envoyer le user qui a cree le channel pour pouvoir le
 	 * set en tant que owner
 	 * @param channel Pouvoir set les donnees du chan
@@ -124,8 +124,8 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Modification d'un channel 
-	 * 
+	 * @brief Modification d'un channel
+	 *
 	 * @param client besoin d'envoyer le user qui souhaite modifier le channel pour
 	 * verifier qu'il a les droits (owner / admins )
 	 * @param modifications interface envoye avec le titre du channel et les
@@ -143,14 +143,14 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Suppresion d'un channel 
-	 * 
+	 * @brief Suppresion d'un channel
+	 *
 	 * @param client pour checker si le user qui souhaite supprimer le channel a
 	 * les droits
 	 * @param chanName nom du channel a supprimer
 	 * @emits updatedChannels permet au front de savoir qu'il est temps de
 	 * recuperer les channels
-	 * 
+	 *
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -161,15 +161,15 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Checker si le password est valide 
-	 * 
-	 * @param client 
-	 * @param informations 
-	 * 
-	 * @return false : le user n'a pas rentrer le bon mdp 
-	 * @return true : le user a rentrer le bon mdp 
-	 * 
-	 * @todo est ce que je dois verifier si le cryptage des 2 mdp est equivalent? 
+	 * @brief Checker si le password est valide
+	 *
+	 * @param client
+	 * @param informations
+	 *
+	 * @return false : le user n'a pas rentrer le bon mdp
+	 * @return true : le user a rentrer le bon mdp
+	 *
+	 * @todo est ce que je dois verifier si le cryptage des 2 mdp est equivalent?
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('chanWithPassword')
@@ -289,7 +289,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
-	async getMemberChannels(client: Socket) 
+	async getMemberChannels(client: Socket)
 	{
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
@@ -300,7 +300,7 @@ export class GeneralGateway
 	@SubscribeMessage('getMemberDMs')
 	async getMemberDMs(client: Socket)
 	{
-		const DMs: DMEntity[] = 
+		const DMs: DMEntity[] =
 			await this.DMService.getMyDM(client.data.user);
 		this.server.emit('sendMemberDMs', DMs);
 	}
@@ -309,7 +309,7 @@ export class GeneralGateway
 	// @SubscribeMessage('getChannelMessages')
 	// async getChannelMessages(client: Socket, payload: string)
 	// {
-	// 	const messages: MessagesEntity[] = 
+	// 	const messages: MessagesEntity[] =
 	// 		await this.messageService.getChannelMessages(client.data.user, payload[0]);
 	// 	this.server.emit('sendChannelMessages', messages);
 	// }
@@ -338,7 +338,6 @@ export class GeneralGateway
 			this.beginMatch.player2 = client.data.user;
 			this.beginMatch.p2User = this.beginMatch.player2;
 		}
-		console.log('beginMatch', this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
