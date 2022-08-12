@@ -58,7 +58,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
-		this.channelService.newConnection(client.data.user);
 		this.server.emit('updatedChannels');
 	}
 
@@ -94,6 +93,15 @@ export class GeneralGateway
 	 * recuperer les channels
 	 *
 	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('setupNewUser')
+	async setupNewUser(client: Socket)
+	{
+		this.channelService.newConnection(client.data.user);
+	}
+
+
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
