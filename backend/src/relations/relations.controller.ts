@@ -12,7 +12,7 @@ import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { Request } from 'express';
 import { RelationsService } from './relations.service';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { UpdateRequestStatusDto } from '../dtos/UpdateRequestStatusDto';
+import { UpdateRequestStatusDto } from '../user/dtos/UpdateRequestStatusDto';
 import { Relation, RelationStatus } from './models/relations.interface';
 
 @ApiTags('users')

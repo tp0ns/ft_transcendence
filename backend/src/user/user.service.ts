@@ -13,8 +13,8 @@ import {
 	Relation,
 	RelationStatus,
 	Relation_Status,
-} from './relations/models/relations.interface';
-import { RelationEntity } from './relations/models/relations.entity';
+} from '../relations/models/relations.interface';
+import { RelationEntity } from '../relations/models/relations.entity';
 
 @Injectable()
 export class UserService {
@@ -77,8 +77,7 @@ export class UserService {
 		return user;
 	}
 
-	async getAllUsers()
-	{
+	async getAllUsers() {
 		const users: UserEntity[] = await this.userRepo.find();
 		return users;
 	}

@@ -1,27 +1,61 @@
-import React, { useState } from "react";
-import NavBar from "../components/NavBar/NavBar";
+import React, { useEffect, useState } from "react";
 import { socket } from "../App";
-import InputAndButton from "../ui/InputAndButton";
-
+import NavBar from "../components/NavBar/NavBar";
+import classes from "./SocialPage.module.css";
+import RelationsProp from "../interfaces/Relations.interface";
+import RelationsList from "../components/social/RelationsList";
+import UserProp from "../interfaces/User.interface";
 
 const SocialPage = () => {
+  const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
+    []
+  );
 
-	const handleNewDM = (inputUser: string) => {
-		socket.emit("createDM", inputUser);
-	  };
+  const [myId, setMyId] = useState<string>("");
 
+  useEffect(() => {
+    socket.emit("getRelations");
+    socket.on("sendRelations", (relations) => setReceivedRelations(relations));
 
-	return (
-		<React.Fragment>
-				<NavBar />
-			<div>Social Page</div>
-			<InputAndButton
-            buttonName="createDM"
-            capturedInfo={handleNewDM}
+    fetch("http://localhost/backend/users/me")
+      .then((response) => response.json())
+      .then((data) => {
+        setMyId(data.userId);
+      });
+  }, []);
+
+  socket.on("updatedRelations", () => {
+    socket.emit("getRelations");
+    socket.on("sendRelations", (relations) => setReceivedRelations(relations));
+  });
+
+  const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log("Entered add friend front");
+    if (event.key === "Enter") {
+      event.preventDefault();
+      socket.emit("addFriend", event.target.value);
+      event.target.value = "";
+    }
+  };
+
+  return (
+    <React.Fragment>
+      <NavBar />
+      <div className={classes.parent}>
+        <div className={classes.searchBar}>
+          <img src="search.svg" className={classes.searchLogo} />
+          <input
+            tabIndex={0}
+            className={classes.input}
+            placeholder="Add a new friend"
+            onKeyDown={addFriend}
           />
-		</React.Fragment>
-	);
+        </div>
+        <h1 className={classes.friendsTitle}>Friends List</h1>
+        <RelationsList relations={receivedRelations} myId={myId} />
+      </div>
+    </React.Fragment>
+  );
 };
 
 export default SocialPage;
-
