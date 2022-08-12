@@ -90,12 +90,4 @@ export class UserController {
 			username: updateUsernameDto.username,
 		});
 	}
-
-	@UseGuards(JwtAuthGuard)
-	@Post('/delete2fa')
-	async delete2Fa(@Req() req: Request) {
-		return this.userService.update(req.user['userId'], {
-			isTwoFAEnabled: false,
-		});
-	}
 }

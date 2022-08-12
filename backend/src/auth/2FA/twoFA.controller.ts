@@ -84,6 +84,14 @@ export class TwoFAController {
 		return await this.userService.turnOnTwoFA(request.user.userId);
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@Post('/turn-off')
+	async delete2Fa(@Req() req: Request) {
+		return this.userService.update(req.user['userId'], {
+			isTwoFAEnabled: false,
+		});
+	}
+
 	/**
 	 * Generate a QR code to add the account on google auth
 	 * @param response the QR code
