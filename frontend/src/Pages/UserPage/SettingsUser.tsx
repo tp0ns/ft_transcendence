@@ -70,8 +70,24 @@ const SettingsUser: React.FC<{
 					}),
 				})
 			).json();
+			console.log(response);
 			props.onUserchange(response);
 			twoFAInput.current!.value = "";
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
+	async function disableTwoFA() {
+		try {
+			const response: UserProp = await (
+				await fetch("http://localhost/backend/auth/2fa/turn-off", {
+					method: "POST",
+				})
+			).json();
+			console.log(response);
+			props.onUserchange(response);
+			settwofa(false);
 		} catch (err) {
 			console.log(err);
 		}
@@ -91,7 +107,11 @@ const SettingsUser: React.FC<{
 
 	return (
 		<div className={classes.list}>
-			<form onSubmit={nameSubmitHandler} className={classes.form_name}>
+			<form
+				onSubmit={nameSubmitHandler}
+				className={classes.form_name}
+				autoComplete="off"
+			>
 				<label htmlFor="text">New nickname</label>
 				<input ref={nameInput} type="text" id="text"></input>
 				<button>Save</button>
@@ -104,13 +124,7 @@ const SettingsUser: React.FC<{
 			<div className={classes.form_2fa}>
 				<p>2FA Authentication</p>
 				{twofa ? (
-					<button
-						onClick={() => {
-							settwofa(false);
-						}}
-					>
-						Disable 2FA Authentication
-					</button>
+					<button onClick={disableTwoFA}>Disable 2FA Authentication</button>
 				) : null}
 				{!twofa && !twoFAForm ? (
 					<button
@@ -122,7 +136,11 @@ const SettingsUser: React.FC<{
 					</button>
 				) : null}
 				{twoFAForm ? (
-					<form onSubmit={twoFASubmitHandler} className={classes.form_avatar}>
+					<form
+						onSubmit={twoFASubmitHandler}
+						className={classes.form_avatar}
+						autoComplete="off"
+					>
 						<label htmlFor="twofa">
 							<img src={qrcode.qr} alt="qr code for 2fa" />
 							<p className={classes.secret}>{qrcode.secret}</p>
