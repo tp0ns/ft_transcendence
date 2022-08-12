@@ -10,6 +10,7 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
+import { MessagesEntity } from '../messages/messages.entity';
 
 @Entity('channel')
 export class ChannelEntity extends BaseEntity {
@@ -26,10 +27,6 @@ export class ChannelEntity extends BaseEntity {
 	})
 	title: string;
 
-	/**
-	 * Un Channel ne peut avoir qu'un seul owner mais un user
-	 * peut etre owner de plusieurs channels
-	 */
 	@ManyToOne(() => UserEntity, { 
 		eager: true,
 		cascade: true, 
@@ -81,4 +78,7 @@ export class ChannelEntity extends BaseEntity {
 		nullable: false,
 	})
 	update: Date;
+
+	@OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
+	messages: MessagesEntity[];
 }

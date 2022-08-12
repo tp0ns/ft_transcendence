@@ -72,9 +72,15 @@ export class UserService {
 	async getUserByUsername(username: string) {
 		const user = await this.userRepo.findOne({ where: { username: username } });
 		if (!user) {
-			throw new NotFoundException('user not found');
+			return null;
 		}
 		return user;
+	}
+
+	async getAllUsers()
+	{
+		const users: UserEntity[] = await this.userRepo.find();
+		return users;
 	}
 
 	/* This functions takes a user_id and updates it with the attributes of its entity to be updated.

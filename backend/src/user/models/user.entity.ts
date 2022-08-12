@@ -48,8 +48,9 @@ export class UserEntity {
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.receiver)
 	receivedRelations: RelationEntity[];
 
-	@OneToMany(() => MessagesEntity, (message) => message.channel)
+	@OneToMany(() => MessagesEntity, (message) => message.user)
 	messages: MessagesEntity[];
+
 }
 
 export default UserEntity;
