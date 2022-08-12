@@ -14,7 +14,6 @@ import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
-import { Match } from '../game/interfaces/game.interface';
 import UserEntity from 'src/user/models/user.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { CreateDMDto } from 'src/chat/DM/createDM.dto';
@@ -22,6 +21,7 @@ import { DMService } from 'src/chat/DM/DM.service';
 import { DMEntity } from 'src/chat/DM/DM.entity';
 import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
+import { Ball, Match } from '../game/interfaces/game.interface';
 
 @WebSocketGateway({
 	cors: {
@@ -105,7 +105,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
-		const channel : ChannelEntity = await this.channelService.createNewChan(
+		const channel: ChannelEntity = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
 		);
@@ -189,7 +189,7 @@ export class GeneralGateway
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
 	 * @todo mettre l'erreur dans le service
-	 * @todo faire en sorte de recuperer tous les messages du channel 
+	 * @todo faire en sorte de recuperer tous les messages du channel
 	 *
 	 */
 	@UseGuards(WsGuard)
@@ -199,12 +199,12 @@ export class GeneralGateway
 		// 	client.data.user,
 		// 	channel,
 		// );
-		// if (check == true) 
+		// if (check == true)
 		// {
 			client.join(channel.title);
 			this.server.emit('joinedRoom');
-		// } 
-		// else 
+		// }
+		// else
 			// console.log(`You need to be a member of the channel`);
 	}
 
@@ -325,16 +325,94 @@ export class GeneralGateway
 	 *
 	 */
 
+	//Join Match event, draw the game for the user
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
-	async sendDefaultPos(socket: Socket) {
-		// console.log('sendDefaultPos entry');
-		// console.log('beginMatch', this.beginMatch);
+	async sendDefaultPos(client: Socket) {
+		if (this.beginMatch.p1User == null) {
+			this.beginMatch.player1 = client.data.user;
+			this.beginMatch.p1User = this.beginMatch.player1;
+			// eslint-disable-next-line prettier/prettier
+		}
+		else if (this.beginMatch.p2User == null && this.beginMatch.p1User != client.data.user) {
+			this.beginMatch.player2 = client.data.user;
+			this.beginMatch.p2User = this.beginMatch.player2;
+		}
+		console.log('beginMatch', this.beginMatch);
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
 			this.beginMatch.rightPad,
 			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
+		);
+	}
+
+	// Move event, allow the user to move its pad
+	@UseGuards(WsGuard)
+	@SubscribeMessage('move')
+	async move(client: Socket, direction: string) {
+		await this.gameService.movePad(direction, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
+		);
+	}
+
+	// Move event, allow the user to move its pad with mouse
+	@UseGuards(WsGuard)
+	@SubscribeMessage('mouseMove')
+	async mouseMove(client: Socket, mousePosy: number) {
+		if (client.data.user.userId == this.beginMatch.player1.userId)
+			await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
+		else if (client.data.user.userId == this.beginMatch.player2.userId)
+				await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
+		);
+	}
+
+	//	Game Functions, start, reset
+	@UseGuards(WsGuard)
+	@SubscribeMessage('gameFunctions')
+	async gameFunctions(client: Socket, payload) {
+		await this.gameService.gameFunction(
+			payload[0], //function
+			payload[1], //score
+			this.beginMatch,
+		);
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
+		);
+	}
+
+	// get the position of the ball and emit it
+	@UseGuards(WsGuard)
+	@SubscribeMessage('ballMovement')
+	async ballMovement(client: Socket, ballPosition: Ball) {
+		this.beginMatch.ball = ballPosition;
+		this.server.emit(
+			'setPosition',
+			this.beginMatch.leftPad,
+			this.beginMatch.rightPad,
+			this.beginMatch.ball,
+			this.beginMatch.p1Score,
+			this.beginMatch.p2Score,
 		);
 	}
 }
