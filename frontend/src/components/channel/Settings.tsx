@@ -13,8 +13,6 @@ import classes from "./NewChannelForm.module.css";
 
 const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
   const [myId, setMyId] = useState<string>("");
-  const [isBanned, setBanned] = useState<boolean>(false);
-  const [isMuted, setMuted] = useState<boolean>(false);
   const [isProtected, setProtected] = useState<boolean>(
     props.channel.protected
   );
@@ -27,22 +25,12 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
         setMyId(data.userId);
       });
     setPrivate(props.channel.private);
+    // console.log("channel: ", props.channel);
   }, []);
 
   const isOwner = () => {
+    // console.log("My id: ", myId);
     return myId === props.channel.owner.userId;
-  };
-
-  const isAdmin = (inputId: string) => {
-    if (isOwner()) {
-      return true;
-    }
-    if (props.channel.admins) {
-      props.channel.admins!.map((admin) => {
-        if (admin.userId === inputId) return true;
-      });
-    }
-    return false;
   };
 
   const isMember = (inputId: string) => {
@@ -62,21 +50,6 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
     socket.emit("modifyChannel", modifiedInfo);
   };
 
-  const handleNewAdmin = (inputUser: string) => {
-    console.log("input user: ", inputUser);
-    console.log("Channel members: ", props.channel.members);
-    props.channel.members!.map((member) => {
-      if (member.username === inputUser) {
-        const modifiedInfo: ModifiedChannelInfoProp = {
-          title: props.channel.title,
-          newAdmin: inputUser,
-        };
-        console.log("Modified info: ", modifiedInfo);
-        socket.emit("modifyChannel", modifiedInfo);
-      }
-    });
-  };
-
   const handleNewMember = (inputUser: string) => {
     const modifiedInfo: ModifiedChannelInfoProp = {
       title: props.channel.title,
@@ -85,26 +58,6 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
     if (props.channel.private) {
       socket.emit("modifyChannel", modifiedInfo);
     }
-  };
-
-  const handleBan = (inputUser: string) => {
-    setBanned((prevState) => !prevState);
-    const modifiedInfo: ModifiedChannelInfoProp = {
-      title: props.channel.title,
-      newBan: isBanned ? inputUser : undefined,
-      deleteBan: !isBanned ? inputUser : undefined,
-    };
-    socket.emit("modifyChannel", modifiedInfo);
-  };
-
-  const handleMute = (inputUser: string) => {
-    setMuted((prevState) => !prevState);
-    const modifiedInfo: ModifiedChannelInfoProp = {
-      title: props.channel.title,
-      newMute: isMuted ? inputUser : undefined,
-      deleteMute: !isMuted ? inputUser : undefined,
-    };
-    socket.emit("modifyChannel", modifiedInfo);
   };
 
   const handleProtected = () => {
@@ -132,22 +85,6 @@ const Settings: React.FC<{ channel: ChannelProp }> = (props) => {
         <button onClick={handleProtected}>
           {isProtected ? "Unprotect" : "Protect"}
         </button>
-      ) : null}
-      {isAdmin(myId) ? (
-        <div>
-          <InputAndButton
-            buttonName="Add admin"
-            capturedInfo={handleNewAdmin}
-          />
-          <InputAndButton
-            buttonName={isBanned ? "unBan user" : "Ban user"}
-            capturedInfo={handleBan}
-          />
-          <InputAndButton
-            buttonName={isMuted ? "unMute user" : "Mute user"}
-            capturedInfo={handleMute}
-          />
-        </div>
       ) : null}
       {isMember(myId) && isPrivate ? (
         <InputAndButton
