@@ -75,7 +75,7 @@ export class AuthController {
 
 		const dummy = {
 			id: Math.floor(100000 + Math.random() * 900000),
-			username: fake.name,
+			username: fake.name.split(' ')[1],
 			image_url:
 				'https://www.myinstants.com/media/instants_images/non.gif.pagespeed.ce.C9gtkT1Vx9.gif',
 		};

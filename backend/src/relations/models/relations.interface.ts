@@ -1,4 +1,4 @@
-import { UserEntity } from '../../models/user.entity';
+import { UserEntity } from '../../user/models/user.entity';
 
 export type Relation_Status = 'pending' | 'accepted' | 'declined' | 'blocked';
 

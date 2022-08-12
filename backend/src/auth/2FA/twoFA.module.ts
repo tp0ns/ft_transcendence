@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RelationEntity } from 'src/user/relations/models/relations.entity';
+import { RelationEntity } from 'src/relations/models/relations.entity';
 import { UserController } from 'src/user/user.controller';
 import { UserService } from 'src/user/user.service';
 import { TwoFAController } from './twoFA.controller';

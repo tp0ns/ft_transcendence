@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import UserEntity from 'src/user/models/user.entity';
-import { UserModule } from '../user.module';
-import { UserService } from '../user.service';
+import { UserModule } from '../user/user.module';
+import { UserService } from '../user/user.service';
 import { RelationEntity } from './models/relations.entity';
 import { RelationsController } from './relations.controller';
 import { RelationsService } from './relations.service';
