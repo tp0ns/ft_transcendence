@@ -41,26 +41,27 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 	}
 
 	return (
-		<React.Fragment>
-			<NavBar />
-			{clientId === user?.userId ? (
-				<img
-					src="/gear.svg"
-					alt="Option button"
-					onClick={clickHandler}
-					className={classes.settings}
-				/>
-			) : null}
-			{settingsLayout(settings)}
-			<div className={classes.resume}>
-				<img
-					src={user?.profileImage ? user.profileImage : user?.image_url}
-					alt="Avatar"
-					className={classes.badge}
-				/>
-				<div className={classes.username}>{user?.username}</div>
-			</div>
-		</React.Fragment>
+		<NavBar>
+			<React.Fragment>
+				{clientId === user?.userId ? (
+					<img
+						src="/gear.svg"
+						alt="Option button"
+						onClick={clickHandler}
+						className={classes.settings}
+					/>
+				) : null}
+				{settingsLayout(settings)}
+				<div className={classes.resume}>
+					<img
+						src={user?.profileImage ? user.profileImage : user?.image_url}
+						alt="Avatar"
+						className={classes.badge}
+					/>
+					<div className={classes.username}>{user?.username}</div>
+				</div>
+			</React.Fragment>
+		</NavBar>
 	);
 };
 

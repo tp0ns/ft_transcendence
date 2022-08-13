@@ -9,13 +9,14 @@
 }
 
 body {
-	padding-top: 4rem;
+	min-height: 100vh;
 	font-family: "blippoblack", "Courier New", Courier, monospace, "Segoe UI",
 		"Roboto", sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	color: #3a3636;
 	background-color: #fdd05d;
+	margin: 0;
 }
 
 code {

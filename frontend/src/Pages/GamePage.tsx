@@ -2,12 +2,11 @@ import GameScreen from "../components/game/GameScreen";
 import NavBar from "../components/NavBar/NavBar";
 
 const GamePage = () => {
-  return (
-    <div>
-		<NavBar />
-      <GameScreen />
-    </div>
-  );
+	return (
+		<NavBar>
+			<GameScreen />
+		</NavBar>
+	);
 };
 
 export default GamePage;
