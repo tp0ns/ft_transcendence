@@ -1,5 +1,6 @@
 .form {
-	margin: auto;
+	margin-top: 50px;
+	margin-inline: auto;
 	width: 300px;
 	height: 150px;
 	border-radius: 20px;
@@ -14,7 +15,6 @@
 
 .form label {
 	font-size: 130%;
-	
 }
 
 .form input {

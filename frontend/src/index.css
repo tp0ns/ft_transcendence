@@ -9,7 +9,6 @@
 }
 
 body {
-	min-height: 100vh;
 	font-family: "blippoblack", "Courier New", Courier, monospace, "Segoe UI",
 		"Roboto", sans-serif;
 	-webkit-font-smoothing: antialiased;

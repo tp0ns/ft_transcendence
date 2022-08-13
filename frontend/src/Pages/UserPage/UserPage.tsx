@@ -1,7 +1,7 @@
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import NavBar from "../../components/NavBar/NavBar";
+import Layout from "../../components/Layout/Layout";
 import UserProp from "../../interfaces/User.interface";
 import Modal from "../../ui/Modal/Modal";
 import SettingsUser from "./SettingsUser";
@@ -41,8 +41,8 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 	}
 
 	return (
-		<NavBar>
-			<React.Fragment>
+		<Layout>
+			<div>
 				{clientId === user?.userId ? (
 					<img
 						src="/gear.svg"
@@ -60,8 +60,8 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 					/>
 					<div className={classes.username}>{user?.username}</div>
 				</div>
-			</React.Fragment>
-		</NavBar>
+			</div>
+		</Layout>
 	);
 };
 

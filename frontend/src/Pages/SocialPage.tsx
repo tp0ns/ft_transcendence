@@ -5,6 +5,7 @@ import classes from "./SocialPage.module.css";
 import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
 import UserProp from "../interfaces/User.interface";
+import Layout from "../components/Layout/Layout";
 
 const SocialPage = () => {
 	const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
@@ -39,7 +40,7 @@ const SocialPage = () => {
 	};
 
 	return (
-		<NavBar>
+		<Layout>
 			<div className={classes.parent}>
 				<div className={classes.searchBar}>
 					<img src="search.svg" className={classes.searchLogo} />
@@ -53,7 +54,7 @@ const SocialPage = () => {
 				<h1 className={classes.friendsTitle}>Friends List</h1>
 				<RelationsList relations={receivedRelations} myId={myId} />
 			</div>
-		</NavBar>
+		</Layout>
 	);
 };
 

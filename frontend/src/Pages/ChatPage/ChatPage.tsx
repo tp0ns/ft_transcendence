@@ -3,10 +3,10 @@ import ChannelProp from "../../interfaces/Channel.interface";
 import { socket } from "../../App";
 import classes from "./ChatPage.module.css";
 import React from "react";
-import NavBar from "../../components/NavBar/NavBar";
 import { ChatContextProvider } from "../../context/chat-context";
 import ChanList from "../../components/chat/ChanList/ChanList";
 import ChanContent from "../../components/chat/ChanContent";
+import Layout from "../../components/Layout/Layout";
 
 function ChatPage() {
 	const [newChannel, setNewChannel] = useState(false);
@@ -90,14 +90,14 @@ function ChatPage() {
 	}, [channelSettings]);
 
 	return (
-		<NavBar>
+		<Layout>
 			<ChatContextProvider>
 				<div className={classes.layout}>
 					<ChanList />
 					<ChanContent />
 				</div>
 			</ChatContextProvider>
-		</NavBar>
+		</Layout>
 	);
 }
 

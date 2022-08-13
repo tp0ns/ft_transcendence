@@ -3,12 +3,12 @@ import ReactDOM from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./NavBar.module.css";
 
-const NavBar: React.FC<{ children: JSX.Element }> = (props) => {
+function NavBar() {
 	const location = useLocation();
 
 	return (
 		<React.Fragment>
-			<div className={classes.layout}>
+			<div className={classes.navbar_layout}>
 				<div className={classes.links}>
 					{/* Logo */}
 					<Link to="/" className={classes.logo}>
@@ -62,9 +62,8 @@ const NavBar: React.FC<{ children: JSX.Element }> = (props) => {
 					</div>
 				</div>
 			</div>
-			{props.children}
 		</React.Fragment>
 	);
-};
+}
 
 export default NavBar;

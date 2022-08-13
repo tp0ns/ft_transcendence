@@ -1,12 +1,13 @@
-.layout {
+
+.navbar_layout {
 	width: 100%;
-	height: 65px;
+	height: 100%;
 	background-color: #3a3636;
 	color: #f4edde;
 	overflow: hidden;
 }
 
-.layout a {
+.navbar_layout a {
 	color: inherit;
 	text-decoration: none;
 }
