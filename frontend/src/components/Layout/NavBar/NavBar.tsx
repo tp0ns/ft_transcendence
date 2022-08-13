@@ -8,7 +8,7 @@ function NavBar() {
 
 	return (
 		<React.Fragment>
-			<div className={classes.navbar_layout}>
+			<div className={classes.layout}>
 				<div className={classes.links}>
 					{/* Logo */}
 					<Link to="/" className={classes.logo}>
