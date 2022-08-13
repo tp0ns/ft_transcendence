@@ -21,12 +21,12 @@ function ChatPage() {
 	};
 
 	useEffect(() => {
-		console.log("entered useEffect");
+		//console.log("entered useEffect");
 		socket.emit("getMemberChannels");
 		socket.on("sendMemberChannels", (channels) => {
 			setChannelsReceived(channels);
 		});
-		console.log("NewChannel", channelsReceived);
+		//console.log("NewChannel", channelsReceived);
 	}, [newChannel]);
 
 	useEffect(() => {
@@ -35,7 +35,7 @@ function ChatPage() {
 			setChannelsReceived(channels);
 			setOpenedChannel(channels[0]);
 		});
-		console.log("First render", channelsReceived);
+		//console.log("First render", channelsReceived);
 	}, []);
 
 	socket.on("updatedChannels", () => {
@@ -59,8 +59,8 @@ function ChatPage() {
 	});
 
 	const sendChannel = (channelData: ChannelProp) => {
-		console.log("entered sendChan");
-		console.log("Channel Data in chat page: ", channelData);
+		//console.log("entered sendChan");
+		//console.log("Channel Data in chat page: ", channelData);
 		socket.emit("createChan", channelData);
 		setNewChannel(false);
 	};
@@ -81,12 +81,12 @@ function ChatPage() {
 	};
 
 	const settingsHandler = (channel: ChannelProp) => {
-		console.log("channel in settings handler: ", channel);
+		//console.log("channel in settings handler: ", channel);
 		setSettings(channel);
 	};
 
 	useEffect(() => {
-		console.log("channelSettings in useEffect: ", channelSettings);
+		//console.log("channelSettings in useEffect: ", channelSettings);
 	}, [channelSettings]);
 
 	return (

@@ -1,6 +1,6 @@
 import UserProp from "./User.interface";
 
-interface ChannelProp {
+interface ChannelInterface {
 	title: string;
 	password?: string;
 	private: boolean;
@@ -12,4 +12,4 @@ interface ChannelProp {
 	mutedMembers?: UserProp[];
 }
 
-export default ChannelProp;
+export default ChannelInterface;

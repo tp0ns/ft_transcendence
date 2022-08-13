@@ -15,7 +15,7 @@ const OpenedChannel: React.FC<{
 
   const messageHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    console.log(messageInputRef.current!.value);
+    // console.log(messageInputRef.current!.value);
     if (messageInputRef.current!.value) {
       props.socket.emit(
         "msgToChannel",

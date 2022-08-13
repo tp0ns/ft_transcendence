@@ -18,7 +18,6 @@ const SettingsUser: React.FC<{
 	useEffect(() => {
 		if (!twoFAForm) return;
 		async function getQrCode() {
-			console.log("ici");
 			const response = await fetch("/backend/auth/2fa/generate");
 			const data = await response.json();
 			setqrcode(data);
@@ -28,7 +27,6 @@ const SettingsUser: React.FC<{
 
 	useEffect(() => {
 		if (props.user.isTwoFAEnabled) {
-			console.log("la");
 			settwoFAForm(false);
 			settwofa(true);
 		}
