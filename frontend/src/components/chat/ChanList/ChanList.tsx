@@ -8,14 +8,25 @@ function ChanList() {
 	const ctx = useContext(ChatContext);
 
 	useEffect(() => {
+		console.log("hi there im asking for channels");
 		socket.emit("getMemberChannels");
-	}, channels);
+		socket.on("sendMemberChans", (channels) => {
+			setChannels(channels);
+		});
+	}, []);
 
-	socket.on("sendMemberChannels", (channels) => {
-		setChannels(channels);
-	});
-
-	return <div className={classes.layout}>List</div>;
+	return (
+		<div className={classes.layout}>
+			<button
+				onClick={() => {
+					ctx.changeActiveChan("new_chan");
+				}}
+				className={classes.new_chan}
+			>
+				+
+			</button>
+		</div>
+	);
 }
 
 export default ChanList;

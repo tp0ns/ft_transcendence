@@ -1,0 +1,12 @@
+.layout {
+	display: grid;
+	grid-template-columns: auto 34%;
+	height: 100%;
+}
+
+.form_layout {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}

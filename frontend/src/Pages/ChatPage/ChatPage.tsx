@@ -5,8 +5,8 @@ import classes from "./ChatPage.module.css";
 import React from "react";
 import { ChatContextProvider } from "../../context/chat-context";
 import ChanList from "../../components/chat/ChanList/ChanList";
-import ChanContent from "../../components/chat/ChanContent";
 import Layout from "../../components/Layout/Layout";
+import ChanContent from "../../components/chat/ChanContent/ChanContent";
 
 function ChatPage() {
 	const [newChannel, setNewChannel] = useState(false);
