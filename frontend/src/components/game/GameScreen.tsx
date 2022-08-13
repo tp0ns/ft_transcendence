@@ -29,10 +29,10 @@ let rightPadPosition = {
 
 let player1Score: number = 0;
 let player2Score: number = 0;
-let lockEnter = false;
 
 const GameScreen = () => {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const [lockEnter, setLockEnter] = useState<boolean>(false);
 
   useEffect(() => {
     const context = canvas.current!.getContext("2d");
@@ -155,6 +155,7 @@ const GameScreen = () => {
 
         // p1 += 1;
         gameFunctions("resetBall", 1);
+        setLockEnter(false);
         return;
       } else {
         ballPosition.x -= ballPosition.speedx;
@@ -184,15 +185,14 @@ const GameScreen = () => {
     socket.emit("ballMovement", ballPosition); //, p1)//, player2Score);
   };
 
-  const handleKeyDown = async (
-    event: React.KeyboardEvent<HTMLCanvasElement>
-  ) => {
+  useEffect(() => {
+    console.log("Lock enter in useEffect; ", lockEnter);
+    if (lockEnter) moveBall();
+  }, [lockEnter]);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
     if (event.key === "Enter" && !lockEnter) {
-      console.log("lockEnter: ", lockEnter);
-      lockEnter = true;
-      console.log("lockEnter: ", lockEnter);
-      moveBall();
-      lockEnter = false;
+      setLockEnter(true);
     }
     if (event.key === "Space") {
       gameFunctions("resetBall", 0);
@@ -219,7 +219,6 @@ const GameScreen = () => {
       <div>
         <div className={classes.profile1}>
           <img src={classes.img} />
-          // match
         </div>
         <canvas
           tabIndex={0}
