@@ -18,7 +18,7 @@ function ChanList() {
 		<div className={classes.layout}>
 			<button
 				onClick={() => {
-					ctx.changeActiveChan("new_chan");
+					ctx.changeActiveChan("");
 				}}
 				className={classes.new_chan}
 			>

@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { JsxElement } from "typescript";
 
 const ChatContext = React.createContext({
-	activeChan: "new_chan",
+	activeChan: "",
 	changeActiveChan: (chat: string) => {},
 });
 
 export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	props
 ) => {
-	const [activeChan, setactiveChan] = useState("new_chan");
+	const [activeChan, setactiveChan] = useState("");
 
 	function changeActiveChan(chat_name: string) {
 		console.log("change chat to : " + chat_name);
