@@ -1,4 +1,40 @@
 .layout {
 	display: flex;
 	flex-direction: column;
+	gap: 10px;
+}
+
+.new_chan {
+	font-family: inherit; /* 1 */
+	font-size: xx-large; /* 1 */
+	height: 50px;
+	cursor: pointer;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: none;
+	border-radius: 10px;
+}
+
+.chan_list {
+	overflow-x: hidden;
+	overflow-y: auto;
+	text-align: justify;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	gap: 10px;
+	overflow: scroll;
+	scroll-behavior: smooth;
+}
+
+.chan_list button {
+	font-family: inherit; /* 1 */
+	font-size: xx-large; /* 1 */
+	height: 100px;
+	cursor: pointer;
+	margin: 0; /* 2 */
+	background-color: #fdd05d;
+	color: #3a3636;
+	border: 1px #3a3636 solid;
+	border-radius: 10px;
 }

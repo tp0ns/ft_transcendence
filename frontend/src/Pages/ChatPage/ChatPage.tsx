@@ -15,79 +15,79 @@ function ChatPage() {
 	const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
 	const [messagesChannel, setMessagesChannel] = useState([]);
 
-	const handleNewChannel = () => {
-		setNewChannel(true);
-		setOpenedChannel(null);
-	};
+	// const handleNewChannel = () => {
+	// 	setNewChannel(true);
+	// 	setOpenedChannel(null);
+	// };
 
-	useEffect(() => {
-		//console.log("entered useEffect");
-		socket.emit("getMemberChannels");
-		socket.on("sendMemberChannels", (channels) => {
-			setChannelsReceived(channels);
-		});
-		//console.log("NewChannel", channelsReceived);
-	}, [newChannel]);
+	// useEffect(() => {
+	// 	//console.log("entered useEffect");
+	// 	socket.emit("getMemberChannels");
+	// 	socket.on("sendMemberChannels", (channels) => {
+	// 		setChannelsReceived(channels);
+	// 	});
+	// 	//console.log("NewChannel", channelsReceived);
+	// }, [newChannel]);
 
-	useEffect(() => {
-		socket.emit("getMemberChannels");
-		socket.on("sendMemberChannels", (channels) => {
-			setChannelsReceived(channels);
-			setOpenedChannel(channels[0]);
-		});
-		//console.log("First render", channelsReceived);
-	}, []);
+	// useEffect(() => {
+	// 	socket.emit("getMemberChannels");
+	// 	socket.on("sendMemberChannels", (channels) => {
+	// 		setChannelsReceived(channels);
+	// 		setOpenedChannel(channels[0]);
+	// 	});
+	// 	//console.log("First render", channelsReceived);
+	// }, []);
 
-	socket.on("updatedChannels", () => {
-		socket.emit("getAllChannels");
-		socket.on("sendChans", (channels) => {
-			setChannelsReceived(channels);
-			for (const channel of channels) {
-				socket.emit("joinRoom", channel);
-			}
-		});
-	});
+	// socket.on("updatedChannels", () => {
+	// 	socket.emit("getAllChannels");
+	// 	socket.on("sendChans", (channels) => {
+	// 		setChannelsReceived(channels);
+	// 		for (const channel of channels) {
+	// 			socket.emit("joinRoom", channel);
+	// 		}
+	// 	});
+	// });
 
-	socket.on("updatedDMs", () => {
-		socket.emit("getAllChannels");
-		socket.on("sendChans", (channels) => {
-			setChannelsReceived(channels);
-			for (const channel of channels) {
-				socket.emit("joinRoom", channel);
-			}
-		});
-	});
+	// socket.on("updatedDMs", () => {
+	// 	socket.emit("getAllChannels");
+	// 	socket.on("sendChans", (channels) => {
+	// 		setChannelsReceived(channels);
+	// 		for (const channel of channels) {
+	// 			socket.emit("joinRoom", channel);
+	// 		}
+	// 	});
+	// });
 
-	const sendChannel = (channelData: ChannelProp) => {
-		//console.log("entered sendChan");
-		//console.log("Channel Data in chat page: ", channelData);
-		socket.emit("createChan", channelData);
-		setNewChannel(false);
-	};
+	// const sendChannel = (channelData: ChannelProp) => {
+	// 	//console.log("entered sendChan");
+	// 	//console.log("Channel Data in chat page: ", channelData);
+	// 	socket.emit("createChan", channelData);
+	// 	setNewChannel(false);
+	// };
 
-	const handleOpenedChannel = (channel: ChannelProp) => {
-		// socket.emit("joinRoom", channel);
-		socket.emit("getChannelMessages");
-		socket.on("sendChannelMessages", (messages) => {
-			setMessagesChannel(messages);
-		});
-		setOpenedChannel(channel);
-		setNewChannel(false);
-	};
+	// const handleOpenedChannel = (channel: ChannelProp) => {
+	// 	// socket.emit("joinRoom", channel);
+	// 	socket.emit("getChannelMessages");
+	// 	socket.on("sendChannelMessages", (messages) => {
+	// 		setMessagesChannel(messages);
+	// 	});
+	// 	setOpenedChannel(channel);
+	// 	setNewChannel(false);
+	// };
 
-	const leaveChannelHandler = () => {
-		socket.emit("leaveRoom");
-		setOpenedChannel(null);
-	};
+	// const leaveChannelHandler = () => {
+	// 	socket.emit("leaveRoom");
+	// 	setOpenedChannel(null);
+	// };
 
-	const settingsHandler = (channel: ChannelProp) => {
-		//console.log("channel in settings handler: ", channel);
-		setSettings(channel);
-	};
+	// const settingsHandler = (channel: ChannelProp) => {
+	// 	//console.log("channel in settings handler: ", channel);
+	// 	setSettings(channel);
+	// };
 
-	useEffect(() => {
-		//console.log("channelSettings in useEffect: ", channelSettings);
-	}, [channelSettings]);
+	// useEffect(() => {
+	// 	//console.log("channelSettings in useEffect: ", channelSettings);
+	// }, [channelSettings]);
 
 	return (
 		<Layout>

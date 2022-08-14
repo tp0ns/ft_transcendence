@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { JsxElement } from "typescript";
+import React, { useState } from "react";
 
 const ChatContext = React.createContext({
 	activeChan: "",

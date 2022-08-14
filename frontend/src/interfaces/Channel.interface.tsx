@@ -1,15 +1,18 @@
 import UserProp from "./User.interface";
 
 interface ChannelInterface {
-	title: string;
-	password?: string;
-	private: boolean;
-	protected: boolean;
+	admins: UserProp[];
+	bannedMembers: UserProp[];
+	channelId: string;
+	creation: string;
+	members: UserProp[];
+	mutedMembers: [];
 	owner: UserProp;
-	admins?: UserProp[];
-	members?: UserProp[];
-	bannedMembers?: UserProp[];
-	mutedMembers?: UserProp[];
+	password: null;
+	private: false;
+	protected: false;
+	title: string;
+	update: string;
 }
 
 export default ChannelInterface;
