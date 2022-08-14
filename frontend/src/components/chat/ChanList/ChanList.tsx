@@ -8,7 +8,6 @@ function ChanList() {
 	const ctx = useContext(ChatContext);
 
 	useEffect(() => {
-		console.log("hi there im asking for channels");
 		socket.emit("getMemberChannels");
 		socket.on("sendMemberChans", (channels) => {
 			setChannels(channels);

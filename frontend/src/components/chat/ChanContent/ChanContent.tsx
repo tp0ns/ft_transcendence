@@ -7,12 +7,7 @@ import ChanSettings from "./ChanSettings/ChanSettings";
 function ChanContent() {
 	const ctx = useContext(ChatContext);
 
-	if (ctx.activeChan === "new_chan")
-		return (
-			<div className={classes.form_layout}>
-				<ChanForm />
-			</div>
-		);
+	if (ctx.activeChan === "new_chan") return <ChanForm />;
 	return (
 		<div className={classes.layout}>
 			<div>Messages</div>
