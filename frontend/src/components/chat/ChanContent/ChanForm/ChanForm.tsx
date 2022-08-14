@@ -1,42 +1,29 @@
-import { Reducer, ReducerAction, ReducerState, useReducer } from "react";
-import NewChannelI from "../../../../interfaces/newChannel.interface";
+import React, { useRef, useState } from "react";
+import { createTextChangeRange } from "typescript";
+import { socket } from "../../../../App";
 import classes from "./ChanForm.module.css";
 
-type ACTIONTYPE = { type: string; val: NewChannelI };
-
-function chanReducer(state: NewChannelI, action: ACTIONTYPE): NewChannelI {
-	switch (action.type) {
-		case "reset": {
-			return action.val;
-		}
-		case "": {
-			return;
-		}
-		case "": {
-			return;
-		}
-		case "": {
-			return;
-		}
-		case "": {
-			return;
-		}
-		default:
-			break;
-	}
-}
-
 function ChanForm() {
-	const [newChan, dispatchChan] = useReducer(chanReducer, {
-		id: "",
-		title: "",
-		private: false,
-		protected: false,
-		password: "",
-	});
+	const name = useRef<HTMLInputElement>(null);
+	const privacy = useRef<HTMLInputElement>(null);
+	const protection = useRef<HTMLInputElement>(null);
+	const [pwForm, setPwForm] = useState<boolean>(false);
+	const password = useRef<HTMLInputElement>(null);
 
-	function chanSubmitHandler(event: any) {
-		console.log(newChan);
+	function chanSubmitHandler(event: React.FormEvent) {
+		event.preventDefault();
+		const newChan = {
+			id: "",
+			title: name.current?.value,
+			private: privacy.current?.checked,
+			protected: protection.current?.checked,
+			password: password.current?.value ? password.current!.value : "",
+		};
+		socket.emit("createChan", newChan);
+		name.current!.value = "";
+		privacy.current!.checked = false;
+		setPwForm(false);
+		protection.current!.checked = false;
 	}
 
 	return (
@@ -46,23 +33,26 @@ function ChanForm() {
 			autoComplete="off"
 		>
 			<label htmlFor="name">Channel Name</label>
-			<input type="text" id="name" />
-			<label htmlFor="name">Public</label>
-			<input
-				type="checkbox"
-				id="privacy"
-				onChange={() => {
-					console.log("privacy");
-				}}
-			/>
-			<label htmlFor="name">Protect with password</label>
+			<input type="text" id="name" ref={name} />
+			<label htmlFor="privacy">Public</label>
+			<input type="checkbox" id="privacy" ref={privacy} />
+			<label htmlFor="protection">Protect with password</label>
 			<input
 				type="checkbox"
 				id="protection"
+				ref={protection}
 				onChange={() => {
-					console.log("protection");
+					setPwForm((prev) => {
+						return !prev;
+					});
 				}}
 			/>
+			{pwForm ? (
+				<React.Fragment>
+					<label htmlFor="pw">Enter password :</label>
+					<input type="password" id="pw" ref={password} />
+				</React.Fragment>
+			) : null}
 			<button className={classes.button}>Create Channel</button>
 		</form>
 	);
