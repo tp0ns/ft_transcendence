@@ -9,11 +9,11 @@ import Layout from "../../components/Layout/Layout";
 import ChanContent from "../../components/chat/ChanContent/ChanContent";
 
 function ChatPage() {
-	const [newChannel, setNewChannel] = useState(false);
-	const [channelsReceived, setChannelsReceived] = useState([]);
-	const [channelSettings, setSettings] = useState<ChannelProp | null>(null);
-	const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
-	const [messagesChannel, setMessagesChannel] = useState([]);
+	// const [newChannel, setNewChannel] = useState(false);
+	// const [channelsReceived, setChannelsReceived] = useState([]);
+	// const [channelSettings, setSettings] = useState<ChannelProp | null>(null);
+	// const [openedChannel, setOpenedChannel] = useState<ChannelProp | null>(null);
+	// const [messagesChannel, setMessagesChannel] = useState([]);
 
 	// const handleNewChannel = () => {
 	// 	setNewChannel(true);
