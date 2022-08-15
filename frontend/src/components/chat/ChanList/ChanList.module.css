@@ -16,25 +16,11 @@
 }
 
 .chan_list {
-	overflow-x: hidden;
-	overflow-y: auto;
-	text-align: justify;
+	height: 81vh;
 	display: flex;
 	flex-direction: column;
-	height: 100%;
 	gap: 10px;
-	overflow: scroll;
+	overflow-x: hidden;
+	overflow-y: scroll;
 	scroll-behavior: smooth;
-}
-
-.chan_list button {
-	font-family: inherit; /* 1 */
-	font-size: xx-large; /* 1 */
-	height: 100px;
-	cursor: pointer;
-	margin: 0; /* 2 */
-	background-color: #fdd05d;
-	color: #3a3636;
-	border: 1px #3a3636 solid;
-	border-radius: 10px;
 }

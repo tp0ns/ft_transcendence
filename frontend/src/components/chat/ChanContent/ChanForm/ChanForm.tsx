@@ -15,7 +15,7 @@ function ChanForm() {
 		const newChan = {
 			id: "",
 			title: name.current?.value,
-			private: !privacy.current?.checked,
+			private: privacy.current?.checked,
 			protected: protection.current?.checked,
 			password: password.current?.value ? password.current!.value : "",
 		};
@@ -34,7 +34,7 @@ function ChanForm() {
 		>
 			<label htmlFor="name">Channel Name</label>
 			<input type="text" id="name" ref={name} />
-			<label htmlFor="privacy">Public</label>
+			<label htmlFor="privacy">Private</label>
 			<input type="checkbox" id="privacy" ref={privacy} />
 			<label htmlFor="protection">Protect with password</label>
 			<input
