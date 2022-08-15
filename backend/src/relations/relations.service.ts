@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../models/user.entity';
-import { UserService } from '../user.service';
+import { UserEntity } from '../user/models/user.entity';
+import { UserService } from '../user/user.service';
 import { RelationEntity } from './models/relations.entity';
 import { Relation, Relation_Status } from './models/relations.interface';
 
@@ -41,20 +41,21 @@ export class RelationsService {
 			where: [
 				{
 					creator: {
-						userId: user1.userId
+						userId: user1.userId,
 					},
 					receiver: {
-						userId: user2.userId
-					}
+						userId: user2.userId,
+					},
 				},
 				{
 					creator: {
-						userId: user2.userId
+						userId: user2.userId,
 					},
 					receiver: {
-						userId: user1.userId
-					}
-				}],
+						userId: user1.userId,
+					},
+				},
+			],
 		});
 		return Relation;
 	}
@@ -93,7 +94,7 @@ export class RelationsService {
 		if (Relation.status === 'blocked')
 			throw new ForbiddenException('Status already blocked!');
 		Object.assign(Relation, { status: statusResponse });
-		this.RelationRepo.save(Relation);
+		await this.RelationRepo.save(Relation);
 		return Relation;
 	}
 
@@ -132,7 +133,7 @@ export class RelationsService {
 				receiver: blocked,
 				status: 'blocked',
 			});
-			this.RelationRepo.save(relation);
+			await this.RelationRepo.save(relation);
 			return relation;
 		}
 		let blockedRequest: Relation = {
@@ -151,7 +152,10 @@ export class RelationsService {
 		const relation: RelationEntity = await this.getRelationById(RelationId);
 		if (relation.status === 'blocked') {
 			if (user.userId === relation.creator.userId) {
-				await this.RelationRepo.remove(relation);
+				Object.assign(relation, {
+					status: 'accepted',
+				});
+				await this.RelationRepo.save(relation);
 				return true;
 			} else
 				throw new ForbiddenException(
@@ -164,6 +168,16 @@ export class RelationsService {
 	async getRelationById(Relationid: string): Promise<RelationEntity> {
 		return await this.RelationRepo.findOne({
 			where: { requestId: Relationid },
+		});
+	}
+
+	async getAllRelations(user: UserEntity): Promise<RelationEntity[]> {
+		return await this.RelationRepo.find({
+			relations: ['creator', 'receiver'],
+			where: [
+				{ creator: { userId: user.userId } },
+				{ receiver: { userId: user.userId } },
+			],
 		});
 	}
 }

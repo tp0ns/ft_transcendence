@@ -10,7 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './jwt/jwt.constants';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { UserService } from 'src/user/user.service';
-import { RelationEntity } from 'src/user/relations/models/relations.entity';
+import { RelationEntity } from 'src/relations/models/relations.entity';
 
 @Module({
 	imports: [

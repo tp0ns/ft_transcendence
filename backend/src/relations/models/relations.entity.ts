@@ -8,15 +8,15 @@ import {
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from '../../models/user.entity';
+import { UserEntity } from '../../user/models/user.entity';
 import { Relation_Status } from './relations.interface';
 
-@Entity('request')
+@Entity('relation')
 export class RelationEntity {
 	@PrimaryGeneratedColumn('uuid')
 	requestId: string;
 
-	@ManyToOne(() => UserEntity, (user) => user.sentRelations, { 
+	@ManyToOne(() => UserEntity, (user) => user.sentRelations, {
 		eager: true,
 	})
 	@JoinColumn()
