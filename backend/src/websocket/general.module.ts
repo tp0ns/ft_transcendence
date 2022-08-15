@@ -11,8 +11,6 @@ import { GeneralGateway } from './general.gateway';
 import { MessagesEntity } from '../chat/messages/messages.entity';
 import { MessageService } from '../chat/messages/messages.service';
 import { GameService } from 'src/game/game.service';
-import { DMEntity } from 'src/chat/DM/DM.entity';
-import { DMService } from 'src/chat/DM/DM.service';
 
 @Module({
 	imports: [
@@ -21,7 +19,6 @@ import { DMService } from 'src/chat/DM/DM.service';
 			UserEntity,
 			RelationEntity,
 			MessagesEntity,
-			DMEntity,
 		]),
 	],
 	providers: [
@@ -31,7 +28,6 @@ import { DMService } from 'src/chat/DM/DM.service';
 		ChannelService,
 		MessageService,
 		GameService,
-		DMService,
 	],
 	controllers: [ChannelController],
 })

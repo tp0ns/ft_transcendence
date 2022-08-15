@@ -9,13 +9,16 @@ const NewChannelForm: React.FC<{
 }> = (props: any) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const memberInputRef = useRef<HTMLInputElement>(null);
   const [privateChan, setPrivateChan] = useState(false);
+  const [DMChan, setDMChan] = useState(false);
   const [protectedChan, setProtectedChan] = useState(false);
 
   function submitHandler(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const enteredTitle: string = titleInputRef.current!.value;
+    const enteredMember: string = memberInputRef.current!.value;
     let enteredPassword: string = "";
     if (passwordInputRef.current) {
       enteredPassword = passwordInputRef.current!.value;
@@ -27,6 +30,8 @@ const NewChannelForm: React.FC<{
       password: enteredPassword,
       private: privateChan,
       protected: protectedChan,
+      DM: DMChan,
+      user2: enteredMember,
     };
     // console.log("ChannelData in new item form: ", channelData);
     // channelsCtx.addChannel(channelData);
@@ -36,6 +41,14 @@ const NewChannelForm: React.FC<{
   function handlePrivate(event: any) {
     event.preventDefault();
     setPrivateChan((prevState) => {
+      return !prevState;
+    });
+  }
+
+
+  function handleDM(event: any) {
+    event.preventDefault();
+    setDMChan((prevState) => {
       return !prevState;
     });
   }
@@ -70,6 +83,17 @@ const NewChannelForm: React.FC<{
             {!privateChan ? "Make private" : "Make public"}
           </button>
         </div>
+        <div className={classes.control}>
+          <button onClick={handleDM}>
+            {!DMChan ? "Make DM" : "Make public"}
+          </button>
+        </div>
+        {DMChan ? (
+          <div className={classes.control}>
+            <label htmlFor="image">Add member</label>
+            <input type="text" required id="image" ref={memberInputRef} />
+          </div>
+        ) : null}
 
         <div className={classes.actions}>
           <button>Add Channel</button>

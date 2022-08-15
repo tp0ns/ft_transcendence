@@ -37,6 +37,7 @@ export class ChannelService {
 	 */
 	async createNewChan(user: UserEntity, chan: CreateChanDto) : Promise<ChannelEntity>
 	{
+		console.log(`check dto : `, chan);
 		let channel: ChannelEntity;
 		if (await this.getIfUniqueName(chan.title)) 
 			channel = await this.saveNewChan(user, chan);
@@ -48,11 +49,16 @@ export class ChannelService {
 	
 	async saveNewChan(user: UserEntity, chan: CreateChanDto) : Promise<ChannelEntity>
 	{
-		const date = new Date();
+		const date = Date.now();
 		let newPassword: string = null;
 		let channel: ChannelEntity;
+		if (chan.DM)
+		{
+			this.saveNewDM(user, chan);
+			return;
+		}
 		if (chan.password != '')
-		newPassword = await bcrypt.hash(chan.password, 10);
+			newPassword = await bcrypt.hash(chan.password, 10);
 		channel = await this.channelRepository.save({
 			title: chan.title,
 			owner: user,
@@ -60,7 +66,7 @@ export class ChannelService {
 			private: chan.private,
 			protected: chan.protected,
 			creation: date,
-			update: date,
+			DM: chan.DM
 			});
 		this.addMember(user, channel.title);
 		this.addAdmin(user, channel.title);
@@ -72,6 +78,22 @@ export class ChannelService {
 				}
 			}
 		return channel;
+	}
+
+	async saveNewDM(user: UserEntity, chan: CreateChanDto)
+	{
+		const date = Date.now();
+		let user2: UserEntity = await this.userService.getUserByUsername(chan.user2)
+		let dm : ChannelEntity = await this.channelRepository.save({
+			title: user.username+"+"+user2.username,
+			DM: chan.DM, 
+			private: true,
+			creation: date,
+			owner: user,
+		})
+		this.addMember(user, dm.title);
+		this.addMember(user2, dm.title);
+		return dm;
 	}
 
 
@@ -105,6 +127,8 @@ export class ChannelService {
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) 
 	{
 		const channel : ChannelEntity = await this.getChanByName(modifications.title);
+		if (channel.DM) 
+			return ;
 		if (modifications.newPassword || modifications.protected)
 			await this.modifyPassword(user, channel, modifications.newPassword, modifications.protected);
 		if (modifications.newAdmin) 
@@ -424,6 +448,7 @@ export class ChannelService {
 			.leftJoinAndSelect('channel.admins', 'admins')
 			.where('channel.private = false')
 			.orWhere('members.userId = :id', { id: member.userId })
+			.orderBy('channel.update', "DESC")
 			.getMany();
 		return channels;
 	}
@@ -492,8 +517,10 @@ export class ChannelService {
 	 */
 	async sendMessage(user: UserEntity, payload: string[])
 	{
+		const date = Date.now();
 		let channel: ChannelEntity = await this.getChanByName(payload[1]);
 		this.messageService.addNewMessage(user, channel, payload[0]);
+		channel.update = date;
 	}
 }
 

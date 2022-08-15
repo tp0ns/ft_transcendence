@@ -33,7 +33,7 @@ function ChatPage() {
 
   useEffect(() => {
     socket.emit("getMemberChannels");
-    socket.on("sendMemberChannels", (channels) => {
+    socket.on("sendMemberChans", (channels) => {
       setChannelsReceived(channels);
       setOpenedChannel(channels[0]);
     });
@@ -41,8 +41,8 @@ function ChatPage() {
   }, []);
 
   socket.on("updatedChannels", () => {
-    socket.emit("getAllChannels");
-    socket.on("sendChans", (channels) => {
+    socket.emit("getMemberChannels");
+    socket.on("sendMemberChans", (channels) => {
       setChannelsReceived(channels);
     for(const channel of channels) 
     {

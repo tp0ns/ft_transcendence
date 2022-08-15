@@ -16,12 +16,10 @@ import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
 import UserEntity from 'src/user/models/user.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
-import { CreateDMDto } from 'src/chat/DM/createDM.dto';
-import { DMService } from 'src/chat/DM/DM.service';
-import { DMEntity } from 'src/chat/DM/DM.entity';
 import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -35,7 +33,6 @@ export class GeneralGateway
 		private channelService: ChannelService,
 		private gameService: GameService,
 		private messageService: MessageService,
-		private DMService: DMService,
 		private userService: UserService,
 	) {}
 
@@ -101,7 +98,11 @@ export class GeneralGateway
 		this.channelService.newConnection(client.data.user);
 	}
 
-
+	/**
+	 * 
+	 * @param client 
+	 * @param channelEntity 
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
@@ -110,17 +111,6 @@ export class GeneralGateway
 			channelEntity,
 		);
 		this.server.emit('updatedChannels');
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('createDM')
-	async CreateDM(client : Socket, userToInvite: string)
-	{
-		const DM : DMEntity = await this.DMService.createNewDM(
-			client.data.user,
-			userToInvite,
-		);
-		this.server.emit('updatedDMs');
 	}
 
 	/**
@@ -244,6 +234,7 @@ export class GeneralGateway
 	 * @param chanName
 	 *
 	 * @todo faire un emit.to
+	 * @todo envoyer au service les 2 arguments decomposes 
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
@@ -297,22 +288,22 @@ export class GeneralGateway
 	}
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('getMemberDMs')
-	async getMemberDMs(client: Socket)
+	@SubscribeMessage('getChannelMessages')
+	async getChannelMessages(client: Socket, payload: string)
 	{
-		const DMs: DMEntity[] = 
-			await this.DMService.getMyDM(client.data.user);
-		this.server.emit('sendMemberDMs', DMs);
+		const messages: MessagesEntity[] = 
+			await this.messageService.getChannelMessages(client.data.user, payload);
+		this.server.emit('sendChannelMessages', messages);
 	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getChannelMessages')
-	// async getChannelMessages(client: Socket, payload: string)
-	// {
-	// 	const messages: MessagesEntity[] = 
-	// 		await this.messageService.getChannelMessages(client.data.user, payload[0]);
-	// 	this.server.emit('sendChannelMessages', messages);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getChanByName')
+	async getChanByName(client: Socket, payload: string)
+	{
+		const channel: ChannelEntity = 
+			await this.channelService.getChanByName(payload);
+		this.server.emit('sendChannel', channel);
+	}
 
 
 	/**
