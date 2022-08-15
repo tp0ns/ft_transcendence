@@ -50,15 +50,13 @@ export class ChannelService {
 	async saveNewChan(user: UserEntity, chan: CreateChanDto) : Promise<ChannelEntity>
 	{
 		const date = Date.now();
-		let newPassword: string = null;
+		// let newPassword: string = null;
 		let channel: ChannelEntity;
 		if (chan.DM)
-		{
-			this.saveNewDM(user, chan);
-			return;
-		}
-		if (chan.password != '')
-			newPassword = await bcrypt.hash(chan.password, 10);
+			return this.saveNewDM(user, chan);
+		// if (chan.password != '')
+		// 	newPassword = await bcrypt.hash(chan.password, 10);
+		const newPassword = chan.password != '' ? bcrypt.hashSync(chan.password, 10) : null;
 		channel = await this.channelRepository.save({
 			title: chan.title,
 			owner: user,
