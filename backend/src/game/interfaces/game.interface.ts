@@ -16,6 +16,8 @@ export class Ball {
 	speedx: number;
 	speedy: number;
 	goRight: boolean;
+	p1Touches: number;
+	p2Touches: number;
 }
 
 export class Player extends UserEntity {}
@@ -26,8 +28,12 @@ export class Match {
 	ball: Ball;
 	player1: Player;
 	player2: Player;
+	// stats
 	p1Score: number;
 	p2Score: number;
+	p1Touches: number;
+	p2Touches: number;
+	//end stats
 	p1User: UserEntity;
 	p2User: UserEntity;
 	isLocal: boolean;
