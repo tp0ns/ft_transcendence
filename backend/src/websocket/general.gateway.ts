@@ -405,6 +405,8 @@ export class GeneralGateway
 	@SubscribeMessage('ballMovement')
 	async ballMovement(client: Socket, ballPosition: Ball) {
 		this.beginMatch.ball = ballPosition;
+		this.beginMatch.p1Touches = this.beginMatch.ball.p1Touches;
+		this.beginMatch.p2Touches = this.beginMatch.ball.p2Touches;
 		this.server.emit(
 			'setPosition',
 			this.beginMatch.leftPad,
