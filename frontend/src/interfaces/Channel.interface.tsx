@@ -5,6 +5,7 @@ interface ChannelInterface {
 	bannedMembers: UserProp[];
 	channelId: string;
 	creation: string;
+	DM: boolean;
 	members: UserProp[];
 	mutedMembers: [];
 	owner: UserProp;

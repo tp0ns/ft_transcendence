@@ -8,6 +8,7 @@ const ChannelsList: React.FC<{
   socket: Socket;
   channels: any;
 }> = (props) => {
+  console.log(`channels recu dans le front :`, props.channels);
   return (
     <div >
       {props.channels.map((channel: any) => {

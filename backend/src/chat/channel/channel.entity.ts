@@ -22,6 +22,11 @@ export class ChannelEntity extends BaseEntity {
 	})
 	private: boolean;
 
+	@Column({
+		default: false,
+	})
+	DM: boolean;
+
 	@Column('text', {
 		default: '',
 	})
@@ -71,13 +76,17 @@ export class ChannelEntity extends BaseEntity {
 
 	@Column({
 		nullable: false,
+		default: 0,
+		type: "float",
 	})
-	creation: Date;
+	creation: number;
 
 	@Column({
 		nullable: false,
+		default: 0,
+		type: "float",
 	})
-	update: Date;
+	update: number;
 
 	@OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
 	messages: MessagesEntity[];
