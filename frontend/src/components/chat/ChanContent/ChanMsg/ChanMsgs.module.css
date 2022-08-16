@@ -1,0 +1,9 @@
+.layout {
+	display: grid;
+	grid-template-rows: 60px auto 30px;
+	gap: 10px;
+}
+
+.msg_form input {
+	width: 80%;
+}
