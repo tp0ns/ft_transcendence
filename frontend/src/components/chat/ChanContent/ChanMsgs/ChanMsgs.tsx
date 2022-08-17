@@ -50,9 +50,12 @@ function ChanMsgs() {
 				{settings ? <ChanSettings onClick={settingsClickHandler} /> : null}
 			</div>
 			<div className={classes.msgs}>
-				{msgs.map((msg) => {
-					return <Message key={msg.message} message={msg} />;
-				})}
+				{msgs
+					.slice()
+					.reverse()
+					.map((msg) => {
+						return <Message key={msg.id} message={msg} />;
+					})}
 			</div>
 			<form onSubmit={msgSubmitHandler} className={classes.msg_form}>
 				<input ref={msg} type="text" placeholder="Enter a message" />

@@ -1,7 +1,7 @@
 .layout {
 	display: grid;
-	grid-template-rows: 60px auto 50px;
-	gap: 10px;
+	grid-template-rows: 50px 78vh 50px;
+	gap: 2px;
 	border-left: 2px solid #3a3636;
 	border-right: 2px solid #3a3636;
 }
@@ -22,6 +22,14 @@
 	width: 25px;
 }
 
+.msgs {
+	display: flex;
+	flex-direction: column-reverse;
+	overflow: scroll;
+	gap: 10px;
+	margin-inline: 10px;
+}
+
 .msg_form {
 	display: flex;
 	align-content: center;
@@ -37,12 +45,17 @@
 	border-radius: 10px;
 	font-weight: bolder;
 	align-self: center;
+	overflow: scroll;
+	text-indent: 10px;
 }
 
 .msg_form button {
-	font-family: blippoblack;
-	font-size: large;
-	background-color: #fdd05d;
-	height: 50%;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: 2px solid #3a3636;
+	border-radius: 10px;
+	height: 62%;
 	align-self: center;
 }
