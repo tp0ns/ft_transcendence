@@ -1,6 +1,4 @@
-import jwtDecode, { JwtPayload } from "jwt-decode";
 import { useContext, useEffect, useRef, useState } from "react";
-import { useCookies } from "react-cookie";
 import { socket } from "../../../../App";
 import ChatContext from "../../../../context/chat-context";
 import ChannelInterface from "../../../../interfaces/Channel.interface";
