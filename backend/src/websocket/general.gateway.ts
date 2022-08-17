@@ -96,8 +96,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('setupNewUser')
-	async setupNewUser(client: Socket)
-	{
+	async setupNewUser(client: Socket) {
 		this.channelService.newConnection(client.data.user);
 	}
 
@@ -247,12 +246,16 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	handleMessageToChan(client: Socket, payload: string[]) {
-		let chanName: string = payload[1];
-		this.channelService.sendMessage(client.data.user, payload);
-		this.server
-			.to(chanName)
-			.emit('channelMessage', payload, client.data.user.username);
+	async handleMessageToChan(client: Socket, payload: string[]) {
+		const new_msg = await this.channelService.sendMessage(
+			client.data.user,
+			payload,
+		);
+		const messages = await this.messageService.getChannelMessages(
+			client.data.user,
+			payload[1],
+		);
+		this.server.to(payload[1]).emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -293,8 +296,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
-	async getMemberChannels(client: Socket)
-	{
+	async getMemberChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
 		this.server.emit('sendMemberChans', channels);
@@ -302,8 +304,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
-	async getChannelMessages(client: Socket, payload: string)
-	{
+	async getChannelMessages(client: Socket, payload: string) {
 		const messages: MessagesEntity[] =
 			await this.messageService.getChannelMessages(client.data.user, payload);
 		this.server.emit('sendChannelMessages', messages);
@@ -311,13 +312,13 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChanByName')
-	async getChanByName(client: Socket, payload: string)
-	{
-		const channel: ChannelEntity =
-			await this.channelService.getChanByName(payload);
-		this.server.emit('sendChannel', channel);
+	async getChanByName(client: Socket, payload: string) {
+		const channel: ChannelEntity = await this.channelService.getChanByName(
+			payload,
+		);
+		// .to(client.data.user.userId) // on devrait renvoyer les infos qu'au socket qui les demande pas aux autres
+		this.server.to(channel.title).emit('sendChannel', channel);
 	}
-
 
 	/**
 	 *   _____          __  __ ______

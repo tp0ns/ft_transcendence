@@ -19,6 +19,9 @@ function ChanList() {
 		socket.on("sendMemberChans", (channels) => {
 			console.log(channels);
 			setChannels(channels);
+			for (const channel of channels) {
+				socket.emit("joinRoom", channel);
+			}
 		});
 	}, []);
 
