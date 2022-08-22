@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { parseJsonSourceFileConfigFileContent } from "typescript";
-import UserProp from "../../interfaces/User.interface";
+import UserProp from "../../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 
 const SettingsUser: React.FC<{

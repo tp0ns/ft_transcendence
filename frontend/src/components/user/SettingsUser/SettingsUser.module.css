@@ -1,10 +1,15 @@
 .list {
-	margin-block: 20px;
+	margin-inline: 15px;
+	padding-bottom: 5px;
+	height: fit-content;
+	overflow: scroll;
+	/* height: 51vh; */
+	/* overflow: scroll; */
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	gap: 5px;
+	/* justify-content: center; */
 	align-items: center;
-	gap: 20px;
 }
 
 .form_name label {

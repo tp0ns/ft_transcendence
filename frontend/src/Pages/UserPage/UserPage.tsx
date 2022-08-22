@@ -4,7 +4,7 @@ import { useCookies } from "react-cookie";
 import Layout from "../../components/Layout/Layout";
 import UserProp from "../../interfaces/User.interface";
 import Modal from "../../ui/Modal/Modal";
-import SettingsUser from "./SettingsUser";
+import SettingsUser from "../../components/user/SettingsUser/SettingsUser";
 import classes from "./UserPage.module.css";
 
 const UserPage: React.FC<{ userId: string }> = (props) => {
@@ -29,7 +29,11 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 	function settingsLayout(settings: boolean) {
 		if (settings) {
 			return (
-				<Modal title="Settings" btnText="Save" onClick={clickHandler}>
+				<Modal
+					title="Settings"
+					onClick={clickHandler}
+					className={classes.modal_layout}
+				>
 					<SettingsUser user={user as UserProp} onUserchange={changeUser} />
 				</Modal>
 			);

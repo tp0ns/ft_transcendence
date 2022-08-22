@@ -1,0 +1,10 @@
+.modal_layout {
+	height: 60vh;
+}
+
+.settings {
+	margin-inline: 15px;
+	padding-bottom: 5px;
+	height: 51vh;
+	overflow: scroll;
+}

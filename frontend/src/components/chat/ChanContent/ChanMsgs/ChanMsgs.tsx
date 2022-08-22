@@ -11,6 +11,7 @@ function ChanMsgs() {
 	const ctx = useContext(ChatContext);
 	const [chan, setChan] = useState<ChannelInterface>();
 	const [msgs, setMsgs] = useState<MessageInterface[]>([]);
+	const bottomScroll = useRef<any>(null);
 	const [settings, setSettings] = useState<boolean>(false);
 	const msg = useRef<HTMLInputElement>(null);
 
@@ -25,6 +26,10 @@ function ChanMsgs() {
 			setMsgs(messages);
 		});
 	}, [ctx.activeChan]);
+
+	useEffect(() => {
+		bottomScroll.current?.scrollIntoView({ behavior: "smooth" });
+	}, [msgs]);
 
 	function settingsClickHandler() {
 		setSettings((prev) => {
@@ -48,6 +53,7 @@ function ChanMsgs() {
 				{settings ? <ChanSettings onClick={settingsClickHandler} /> : null}
 			</div>
 			<div className={classes.msgs}>
+				<div ref={bottomScroll} />
 				{msgs
 					.slice()
 					.reverse()

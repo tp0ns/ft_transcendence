@@ -20,6 +20,7 @@
 .client_message {
 	display: flex;
 	flex-direction: row-reverse;
+	overflow-wrap: break-word;
 	gap: 10px;
 }
 
@@ -31,6 +32,7 @@
 
 .others_message {
 	display: flex;
+	overflow-wrap: break-word;
 	gap: 10px;
 }
 

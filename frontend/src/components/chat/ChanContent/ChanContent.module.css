@@ -1,6 +1,7 @@
 .layout {
 	display: grid;
-	grid-template-columns: auto 34%;
+	grid-template-columns: auto;
+	/* 34%; */
 	height: 100%;
 	gap: 10px;
 }
