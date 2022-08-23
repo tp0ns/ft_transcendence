@@ -19,21 +19,21 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 		});
 		socket.on("sendMemberChans", (channels: ChannelInterface[]) => {
 			setChannels(channels);
-			// setactiveChan(new_activeChan);
 		});
 	}, []);
 
 	useEffect(() => {
-		if (channels.length === 0 || !activeChan) return;
-		console.log(
-			channels.filter((value) => {
-				return value.channelId === activeChan!.channelId;
-			})
-		);
+		setactiveChan((prevChan) => {
+			if (prevChan === null) return prevChan;
+			const newActiveChan = channels.find((channel) => {
+				return channel.channelId === prevChan!.channelId;
+			}) as ChannelInterface;
+			return newActiveChan;
+		});
 	}, [channels]);
 
 	function changeActiveChan(chan: ChannelInterface | null) {
-		if (activeChan) socket.emit("leaveChan", activeChan);
+		if (activeChan) socket.emit("leaveRoom", activeChan);
 		setactiveChan(chan);
 		if (!chan) return;
 		socket.emit("joinRoom", chan);

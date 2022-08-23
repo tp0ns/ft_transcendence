@@ -35,7 +35,7 @@ function ChanMsgs() {
 
 	function msgSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		socket.emit("msgToChannel", inputMsg.current?.value, ctx.activeChan);
+		socket.emit("msgToChannel", inputMsg.current?.value, ctx.activeChan!.title);
 		inputMsg.current!.value = "";
 	}
 
