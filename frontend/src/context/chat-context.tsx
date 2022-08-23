@@ -1,23 +1,48 @@
-import React, { useState } from "react";
+import { channel } from "diagnostics_channel";
+import React, { useEffect, useState } from "react";
+import { socket } from "../App";
+import ChannelInterface from "../interfaces/Channel.interface";
+import { ChatContextType } from "../types/ChatContextType";
 
-const ChatContext = React.createContext({
-	activeChan: "",
-	changeActiveChan: (chat: string) => {},
-});
+const ChatContext = React.createContext<ChatContextType | null>(null);
 
 export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	props
 ) => {
-	const [activeChan, setactiveChan] = useState("");
+	const [channels, setChannels] = useState<ChannelInterface[]>([]);
+	const [activeChan, setactiveChan] = useState<ChannelInterface | null>(null);
 
-	function changeActiveChan(chat_name: string) {
-		console.log("change chat to : " + chat_name);
-		setactiveChan(chat_name);
+	useEffect(() => {
+		socket.emit("getMemberChannels");
+		socket.on("updatedChannels", () => {
+			socket.emit("getMemberChannels");
+		});
+		socket.on("sendMemberChans", (channels: ChannelInterface[]) => {
+			setChannels(channels);
+			// setactiveChan(new_activeChan);
+		});
+	}, []);
+
+	useEffect(() => {
+		if (channels.length === 0 || !activeChan) return;
+		console.log(
+			channels.filter((value) => {
+				return value.channelId === activeChan!.channelId;
+			})
+		);
+	}, [channels]);
+
+	function changeActiveChan(chan: ChannelInterface | null) {
+		if (activeChan) socket.emit("leaveChan", activeChan);
+		setactiveChan(chan);
+		if (!chan) return;
+		socket.emit("joinRoom", chan);
 	}
 
 	return (
 		<ChatContext.Provider
 			value={{
+				channels: channels,
 				activeChan: activeChan,
 				changeActiveChan: changeActiveChan,
 			}}

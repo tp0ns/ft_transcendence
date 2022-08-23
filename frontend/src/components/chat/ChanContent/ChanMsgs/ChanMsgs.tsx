@@ -1,27 +1,23 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { socket } from "../../../../App";
 import ChatContext from "../../../../context/chat-context";
-import ChannelInterface from "../../../../interfaces/Channel.interface";
 import MessageInterface from "../../../../interfaces/Message.interface";
+import { ChatContextType } from "../../../../types/ChatContextType";
+import ChanProtect from "../ChanProtect/ChanProtect";
 import classes from "./ChanMsgs.module.css";
 import ChanSettings from "./ChanSettings/ChanSettings";
 import Message from "./Message/Message";
 
 function ChanMsgs() {
-	const ctx = useContext(ChatContext);
-	const [chan, setChan] = useState<ChannelInterface>();
+	const ctx = useContext(ChatContext) as ChatContextType;
 	const [msgs, setMsgs] = useState<MessageInterface[]>([]);
+	// const [connected, setConnected] = useState<boolean>(false);
 	const bottomScroll = useRef<any>(null);
 	const [settings, setSettings] = useState<boolean>(false);
-	const msg = useRef<HTMLInputElement>(null);
+	const inputMsg = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		socket.emit("getChanByName", ctx.activeChan);
-		socket.emit("getChannelMessages", ctx.activeChan);
-
-		socket.on("sendChannel", (channel) => {
-			setChan(channel);
-		});
+		socket.emit("getChannelMessages", ctx.activeChan?.title);
 		socket.on("sendChannelMessages", (messages) => {
 			setMsgs(messages);
 		});
@@ -39,14 +35,31 @@ function ChanMsgs() {
 
 	function msgSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		socket.emit("msgToChannel", msg.current?.value, ctx.activeChan);
-		msg.current!.value = "";
+		socket.emit("msgToChannel", inputMsg.current?.value, ctx.activeChan);
+		inputMsg.current!.value = "";
 	}
+
+	// function changeConnected() {
+	// 	setConnected((prev) => {
+	// 		return !prev;
+	// 	});
+	// }
+
+	// if (ctx.activeChan!.protected && !connected) {
+	// 	return (
+	// 		<ChanProtect
+	// 			title={ctx.activeChan!.title}
+	// 			changeConnected={() => {
+	// 				changeConnected;
+	// 			}}
+	// 		/>
+	// 	);
+	// }
 
 	return (
 		<div className={classes.layout}>
 			<div className={classes.title}>
-				<div>{chan?.title}</div>
+				<div>{ctx.activeChan!.title}</div>
 				<div onClick={settingsClickHandler} className={classes.settings}>
 					<img src="settings-chat.svg" alt="settings" />
 				</div>
@@ -62,7 +75,7 @@ function ChanMsgs() {
 					})}
 			</div>
 			<form onSubmit={msgSubmitHandler} className={classes.msg_form}>
-				<input ref={msg} type="text" placeholder="Enter a message" />
+				<input ref={inputMsg} type="text" placeholder="Enter a message" />
 				<button>Send</button>
 			</form>
 		</div>

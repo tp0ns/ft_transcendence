@@ -68,13 +68,13 @@ export class ChannelService {
 			creation: date,
 			DM: chan.DM,
 		});
-		this.addMember(user, channel.title);
-		this.addAdmin(user, channel.title);
+		await this.addMember(user, channel.title);
+		await this.addAdmin(user, channel.title);
 		if (!channel.private) {
 			let users: UserEntity[] = await this.userService.getAllUsers();
 			for (const newUser of users) {
 				if (user.userId != newUser.userId)
-					this.addMember(newUser, channel.title);
+					await this.addMember(newUser, channel.title);
 			}
 		}
 		return channel;
