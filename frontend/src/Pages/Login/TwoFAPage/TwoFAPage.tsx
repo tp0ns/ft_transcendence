@@ -10,18 +10,15 @@ const TwoFAPAge = () => {
 		event.preventDefault();
 		if (userInput.current?.value === "") return;
 		try {
-			const response = await fetch(
-				"http://localhost/backend/auth/2fa/authenticate",
-				{
-					method: "POST",
-					headers: {
-						"Content-type": "application/json; charset=UTF-8",
-					},
-					body: JSON.stringify({
-						twoFACode: userInput.current!.value,
-					}),
-				}
-			);
+			const response = await fetch("/backend/auth/2fa/authenticate", {
+				method: "POST",
+				headers: {
+					"Content-type": "application/json; charset=UTF-8",
+				},
+				body: JSON.stringify({
+					twoFACode: userInput.current!.value,
+				}),
+			});
 			if (!response.ok) {
 				throw new Error("Request failed!");
 			} else {

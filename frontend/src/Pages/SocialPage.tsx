@@ -18,7 +18,7 @@ const SocialPage = () => {
 		socket.emit("getRelations");
 		socket.on("sendRelations", (relations) => setReceivedRelations(relations));
 
-		fetch("http://localhost/backend/users/me")
+		fetch("/backend/users/me")
 			.then((response) => response.json())
 			.then((data) => {
 				setMyId(data.userId);

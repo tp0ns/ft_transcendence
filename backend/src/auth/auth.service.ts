@@ -34,7 +34,7 @@ export class AuthService {
 		res.header('Set-Cookie', new_cookie);
 
 		// rediriger soit vers la page front de la 2fa soit vers l'acceuil
-		if (user.isTwoFAEnabled) res.redirect('http://localhost/2fa');
-		else res.redirect('http://localhost/');
+		if (user.isTwoFAEnabled) res.redirect('/2fa');
+		else res.redirect('/');
 	}
 }

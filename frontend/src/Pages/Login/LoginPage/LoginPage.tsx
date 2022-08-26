@@ -8,10 +8,7 @@ const LoginPage = () => {
 				<div className={classes.o}>O</div>
 				<div>NG</div>
 			</div>
-			<a
-				href="http://localhost/backend/auth/login"
-				className={classes.login_school}
-			>
+			<a href="/backend/auth/login" className={classes.login_school}>
 				<p>Connect with</p>
 				<img src="/42_Logo.png" alt="42 school logo" />
 			</a>

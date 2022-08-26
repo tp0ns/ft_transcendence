@@ -12,7 +12,7 @@ function ChanContent() {
 	return (
 		<div className={classes.layout}>
 			<ChanMsgs />
-			{/* <div>Users list</div> */}
+			<div>Users list</div>
 			{/* <ChanSettings /> */}
 		</div>
 	);

@@ -15,7 +15,7 @@ const UserPage: React.FC<{ userId: string }> = (props) => {
 
 	useEffect(() => {
 		async function getUserData() {
-			const url = "http://localhost/backend/users/" + props.userId;
+			const url = "/backend/users/" + props.userId;
 			const response = await (await fetch(url)).json();
 			setUser(response);
 		}

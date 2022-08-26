@@ -36,7 +36,7 @@ const SettingsUser: React.FC<{
 		event.preventDefault();
 		if (!nameInput.current?.value) return;
 		const response = await (
-			await fetch("http://localhost/backend/users/updateUsername", {
+			await fetch("/backend/users/updateUsername", {
 				method: "PUT",
 				headers: {
 					"Content-type": "application/json; charset=UTF-8",
@@ -56,7 +56,7 @@ const SettingsUser: React.FC<{
 		file.append("file", event.target[0].files[0]);
 		if (file === null) return;
 		const response = await (
-			await fetch("http://localhost/backend/users/upload", {
+			await fetch("/backend/users/upload", {
 				method: "POST",
 				body: file,
 			})
@@ -68,7 +68,7 @@ const SettingsUser: React.FC<{
 		event.preventDefault();
 		try {
 			const response: UserProp = await (
-				await fetch("http://localhost/backend/auth/2fa/turn-on", {
+				await fetch("/backend/auth/2fa/turn-on", {
 					method: "POST",
 					headers: {
 						"Content-type": "application/json; charset=UTF-8",
@@ -88,7 +88,7 @@ const SettingsUser: React.FC<{
 	async function disableTwoFA() {
 		try {
 			const response: UserProp = await (
-				await fetch("http://localhost/backend/auth/2fa/turn-off", {
+				await fetch("/backend/auth/2fa/turn-off", {
 					method: "POST",
 				})
 			).json();
@@ -101,9 +101,7 @@ const SettingsUser: React.FC<{
 
 	async function logout() {
 		try {
-			const response = await await fetch(
-				"http://localhost/backend/auth/logout"
-			);
+			const response = await await fetch("/backend/auth/logout");
 			if (!response.ok) throw new Error("Request failed!");
 			else navigate("/login");
 		} catch (err) {

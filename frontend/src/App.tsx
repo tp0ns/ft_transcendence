@@ -10,13 +10,13 @@ import SocialPage from "./Pages/SocialPage";
 import TwoFAPAge from "./Pages/Login/TwoFAPage/TwoFAPage";
 import UserPage from "./Pages/UserPage/UserPage";
 
-export const socket = io("http://localhost/");
+export const socket = io("/");
 
 function App() {
 	return (
 		<Routes>
 			<Route path="/login" element={<LoginPage />} />
-      <Route
+			<Route
 				path="/2fa"
 				element={
 					<Auth>
@@ -56,12 +56,7 @@ function App() {
 					</Auth>
 				}
 			/>
-      <Route 
-        path="/debug"
-        element={
-          <Debug />
-        }
-        />
+			<Route path="/debug" element={<Debug />} />
 		</Routes>
 	);
 }

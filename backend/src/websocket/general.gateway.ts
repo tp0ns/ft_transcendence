@@ -25,7 +25,7 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 
 @WebSocketGateway({
 	cors: {
-		origin: 'http://localhost/',
+		origin: '/',
 	},
 })
 export class GeneralGateway
