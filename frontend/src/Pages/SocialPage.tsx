@@ -4,7 +4,6 @@ import NavBar from "../components/NavBar/NavBar";
 import classes from "./SocialPage.module.css";
 import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
-import UserProp from "../interfaces/User.interface";
 
 const SocialPage = () => {
   const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
@@ -14,8 +13,11 @@ const SocialPage = () => {
   const [myId, setMyId] = useState<string>("");
 
   useEffect(() => {
+    console.log("entered initial useEffect");
     socket.emit("getRelations");
-    socket.on("sendRelations", (relations) => setReceivedRelations(relations));
+    socket.on("sendRelations", (relations) => {
+      console.log("SENDRELATIONS received relations: ", receivedRelations)
+      setReceivedRelations(relations)});
 
     fetch("http://localhost/backend/users/me")
       .then((response) => response.json())
@@ -24,15 +26,9 @@ const SocialPage = () => {
       });
   }, []);
 
-  socket.on("updatedRelations", () => {
-    socket.emit("getRelations");
-    socket.on("sendRelations", (relations) => setReceivedRelations(relations));
-  });
-
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log("Entered add friend front");
     if (event.key === "Enter") {
-      event.preventDefault();
+      console.log("entered enter!!!");
       socket.emit("addFriend", event.target.value);
       event.target.value = "";
     }
@@ -43,7 +39,7 @@ const SocialPage = () => {
       <NavBar />
       <div className={classes.parent}>
         <div className={classes.searchBar}>
-          <img src="search.svg" className={classes.searchLogo} />
+          <img src="search.svg" alt="searchLogo" className={classes.searchLogo} />
           <input
             tabIndex={0}
             className={classes.input}
