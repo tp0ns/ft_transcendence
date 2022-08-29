@@ -11,6 +11,10 @@ import TwoFAPAge from "./Pages/Login/TwoFAPage";
 import UserPage from "./Pages/UserPage/UserPage";
 
 export const socket = io("http://localhost/");
+export const socketId = socket.on('connect', () => {
+	console.log(socket.id);
+	return socket.id
+})
 
 function App() {
 	return (
