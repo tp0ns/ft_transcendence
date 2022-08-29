@@ -14,7 +14,7 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	const [activeChan, setactiveChan] = useState<ChannelInterface | null>(null);
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
 	const [cookies] = useCookies();
-	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
+	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub as string;
 
 	useEffect(() => {
 		socket.emit("getMemberChannels");
@@ -60,6 +60,7 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 				channels: channels,
 				activeChan: activeChan,
 				isAdmin: isAdmin,
+				clientId: clientId,
 				changeActiveChan: changeActiveChan,
 			}}
 		>

@@ -170,7 +170,7 @@ export class GeneralGateway
 			client.data.user,
 			informations,
 		);
-		this.server.emit('chanWithPassword', bool);
+		client.emit('chanWithPassword', bool);
 	}
 
 	/**
@@ -286,7 +286,7 @@ export class GeneralGateway
 	async getChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getAllChannels();
-		this.server.emit('sendChans', channels);
+		client.emit('sendChans', channels);
 	}
 
 	/**
@@ -299,7 +299,7 @@ export class GeneralGateway
 	async getMemberChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
-		this.server.emit('sendMemberChans', channels);
+		client.emit('sendMemberChans', channels);
 	}
 
 	@UseGuards(WsGuard)
@@ -307,7 +307,7 @@ export class GeneralGateway
 	async getChannelMessages(client: Socket, payload: string) {
 		const messages: MessagesEntity[] =
 			await this.messageService.getChannelMessages(client.data.user, payload);
-		this.server.emit('sendChannelMessages', messages);
+		client.emit('sendChannelMessages', messages);
 	}
 
 	@UseGuards(WsGuard)
