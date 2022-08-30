@@ -39,11 +39,14 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 
 	function changeIsAdmin(chan: ChannelInterface | null) {
 		if (!chan) return;
-		chan!.admins.some((admin) => {
-			admin.userId === clientId;
-		}) || chan!.owner.userId === clientId
-			? setIsAdmin(true)
-			: setIsAdmin(false);
+		const isAdmin: boolean = chan!.admins.some((admin) => {
+			return admin.userId === clientId;
+		});
+		if (isAdmin) {
+			setIsAdmin(true);
+		} else {
+			setIsAdmin(false);
+		}
 	}
 
 	function changeActiveChan(chan: ChannelInterface | null) {
