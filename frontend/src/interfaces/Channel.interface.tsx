@@ -7,7 +7,7 @@ interface ChannelInterface {
 	creation: string;
 	DM: boolean;
 	members: UserProp[];
-	mutedMembers: [];
+	mutedMembers: UserProp[];
 	owner: UserProp;
 	password: null;
 	private: false;
