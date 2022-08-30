@@ -25,7 +25,6 @@ function MemberList() {
 			})}
 			<div className={classes.category}>Members</div>
 			{excludeAdmins().map((member) => {
-				console.log(ctx);
 				if (!ctx?.isAdmin)
 					return <NormalMemberItem key={member.userId} member={member} />;
 				return <AdminMemberItem key={member.userId} member={member} />;
