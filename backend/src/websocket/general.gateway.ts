@@ -346,14 +346,16 @@ export class GeneralGateway
 			this.beginMatch.player2 = client.data.user;
 			this.beginMatch.p2User = this.beginMatch.player2;
 		}
-		this.server.emit(
-			'setPosition',
-			this.beginMatch.leftPad,
-			this.beginMatch.rightPad,
-			this.beginMatch.ball,
-			this.beginMatch.p1Score,
-			this.beginMatch.p2Score,
-		);
+		this.server
+			.to('gameRoom')
+			.emit(
+				'setPosition',
+				this.beginMatch.leftPad,
+				this.beginMatch.rightPad,
+				this.beginMatch.ball,
+				this.beginMatch.p1Score,
+				this.beginMatch.p2Score,
+			);
 	}
 
 	// Move event, allow the user to move its pad
@@ -361,14 +363,16 @@ export class GeneralGateway
 	@SubscribeMessage('move')
 	async move(client: Socket, direction: string) {
 		await this.gameService.movePad(direction, this.beginMatch);
-		this.server.emit(
-			'setPosition',
-			this.beginMatch.leftPad,
-			this.beginMatch.rightPad,
-			this.beginMatch.ball,
-			this.beginMatch.p1Score,
-			this.beginMatch.p2Score,
-		);
+		this.server
+			.to('gameRoom')
+			.emit(
+				'setPosition',
+				this.beginMatch.leftPad,
+				this.beginMatch.rightPad,
+				this.beginMatch.ball,
+				this.beginMatch.p1Score,
+				this.beginMatch.p2Score,
+			);
 	}
 
 	// Move event, allow the user to move its pad with mouse
@@ -379,14 +383,16 @@ export class GeneralGateway
 			await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
 		else if (client.data.user.userId == this.beginMatch.player2.userId)
 			await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
-		this.server.emit(
-			'setPosition',
-			this.beginMatch.leftPad,
-			this.beginMatch.rightPad,
-			this.beginMatch.ball,
-			this.beginMatch.p1Score,
-			this.beginMatch.p2Score,
-		);
+		this.server
+			.to('gameRoom')
+			.emit(
+				'setPosition',
+				this.beginMatch.leftPad,
+				this.beginMatch.rightPad,
+				this.beginMatch.ball,
+				this.beginMatch.p1Score,
+				this.beginMatch.p2Score,
+			);
 	}
 
 	//	Game Functions, start, reset
@@ -398,14 +404,16 @@ export class GeneralGateway
 			payload[1], //score
 			this.beginMatch,
 		);
-		this.server.emit(
-			'setPosition',
-			this.beginMatch.leftPad,
-			this.beginMatch.rightPad,
-			this.beginMatch.ball,
-			this.beginMatch.p1Score,
-			this.beginMatch.p2Score,
-		);
+		this.server
+			.to('gameRoom')
+			.emit(
+				'setPosition',
+				this.beginMatch.leftPad,
+				this.beginMatch.rightPad,
+				this.beginMatch.ball,
+				this.beginMatch.p1Score,
+				this.beginMatch.p2Score,
+			);
 	}
 
 	// get the position of the ball and emit it
@@ -415,14 +423,16 @@ export class GeneralGateway
 		this.beginMatch.ball = ballPosition;
 		this.beginMatch.p1Touches = this.beginMatch.ball.p1Touches;
 		this.beginMatch.p2Touches = this.beginMatch.ball.p2Touches;
-		this.server.emit(
-			'setPosition',
-			this.beginMatch.leftPad,
-			this.beginMatch.rightPad,
-			this.beginMatch.ball,
-			this.beginMatch.p1Score,
-			this.beginMatch.p2Score,
-		);
+		this.server
+			.to('gameRoom')
+			.emit(
+				'setPosition',
+				this.beginMatch.leftPad,
+				this.beginMatch.rightPad,
+				this.beginMatch.ball,
+				this.beginMatch.p1Score,
+				this.beginMatch.p2Score,
+			);
 	}
 
 	//able keyboard commands for local game
@@ -436,15 +446,16 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleMatchMaking')
 	async toggleMatchMaking(client: Socket) {
-		await this.gameService.toggleMatchMaking(this.beginMatch);
+		await this.gameService.toggleMatchMaking(client, this.beginMatch);
+		console.log('room size:', this.server.sockets.adapter.rooms.get('gameRoom').size);
 	}
 	/*
-  ______ _____  _____ ______ _   _ _____   _____  
+  ______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
- | |__  | |__) | | | | |__  |  \| | |  | | (___  
- |  __| |  _  /  | | |  __| | . ` | |  | |\___ \ 
+ | |__  | |__) | | | | |__  |  \| | |  | | (___
+ |  __| |  _  /  | | |  __| | . ` | |  | |\___ \
  | |    | | \ \ _| |_| |____| |\  | |__| |____) |
- |_|    |_|  \_\_____|______|_| \_|_____/|_____/                                              
+ |_|    |_|  \_\_____|______|_| \_|_____/|_____/
 	/*
 	 * ------------------------ GET FRIEND LIST  ------------------------- *
 	*/

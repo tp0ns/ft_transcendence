@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
+import { Socket } from 'socket.io';
 import UserEntity from 'src/user/models/user.entity';
 import { Match, Pad, Ball, Player } from './interfaces/game.interface';
 
@@ -136,7 +137,9 @@ export class GameService {
 
 	// toggle MatchMaking : launch the matchmaking
 	// and disable keyboard commands
-	async toggleMatchMaking(match: Match) {
+	async toggleMatchMaking(client: Socket, match: Match) {
+			client.join("gameRoom");
 			match.isLocal = false;
+
 	}
 }

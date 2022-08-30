@@ -48,7 +48,7 @@ let ballPosition = {
 };
 
 SocketIo.on('connection', (socket) => {
-	SocketIo.emit(
+	SocketIo.to('gameRoom').emit(
 		'setPosition',
 		rectPosition.leftRectPosition,
 		rectPosition.rightRectPosition,
@@ -63,7 +63,7 @@ SocketIo.on('connection', (socket) => {
 				ballPosition.x = 250;
 				ballPosition.speedy = 0;
 				ballPosition.goRight = 0;
-				SocketIo.emit(
+				SocketIo.to('gameRoom').emit(
 					'setPosition',
 					rectPosition.leftRectPosition,
 					rectPosition.rightRectPosition,
@@ -74,7 +74,7 @@ SocketIo.on('connection', (socket) => {
 	});
 	socket.on('ballMovement', (ballPos) => {
 		ballPosition = ballPos;
-		SocketIo.emit(
+		SocketIo.to('gameRoom').emit(
 			'setPosition',
 			rectPosition.leftRectPosition,
 			rectPosition.rightRectPosition,
@@ -95,7 +95,7 @@ SocketIo.on('connection', (socket) => {
 				else
 					rectPosition.rightRectPosition.y -=
 						rectPosition.rightRectPosition.speed;
-				SocketIo.emit(
+				SocketIo.to('gameRoom').emit(
 					'setPosition',
 					rectPosition.leftRectPosition,
 					rectPosition.rightRectPosition,
@@ -112,7 +112,7 @@ SocketIo.on('connection', (socket) => {
 				else
 					rectPosition.rightRectPosition.y +=
 						rectPosition.rightRectPosition.speed;
-				SocketIo.emit(
+				SocketIo.to('gameRoom').emit(
 					'setPosition',
 					rectPosition.leftRectPosition,
 					rectPosition.rightRectPosition,
@@ -126,7 +126,7 @@ SocketIo.on('connection', (socket) => {
 		if (mousePosy <= 0 + 50) rectPosition.leftRectPosition.y = 0 + 50;
 		else if (mousePosy >= 383 + 50) rectPosition.leftRectPosition.y = 383 + 50;
 		else rectPosition.leftRectPosition.y = mousePosy;
-		SocketIo.emit(
+		SocketIo.to('gameRoom').emit(
 			'setPosition',
 			rectPosition.leftRectPosition,
 			rectPosition.rightRectPosition,
