@@ -19,6 +19,22 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 		});
 	}
 
+	function mute() {
+		let modifyChan;
+		if (isMuted()) {
+			modifyChan = {
+				title: ctx?.activeChan?.title,
+				deleteMute: props.member.username,
+			};
+		} else {
+			modifyChan = {
+				title: ctx?.activeChan?.title,
+				newMute: props.member.username,
+			};
+		}
+		socket.emit("modifyChannel", modifyChan);
+	}
+
 	function makeAdmin() {
 		const modifyChan = {
 			title: ctx?.activeChan?.title,
@@ -35,8 +51,6 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 		socket.emit("modifyChannel", modifyChan);
 	}
 
-	function isBanned() {}
-
 	if (itemSide)
 		return (
 			<div
@@ -51,7 +65,12 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				<div className={classes.button}>
 					<img src="pong.svg" alt="game" />
 				</div>
-				<div className={classes.button}>
+				<div
+					className={classes.button}
+					onClick={() => {
+						mute();
+					}}
+				>
 					<img
 						src={isMuted() ? "unmute.svg" : "mute.svg"}
 						alt={isMuted() ? "unmute" : "mute"}

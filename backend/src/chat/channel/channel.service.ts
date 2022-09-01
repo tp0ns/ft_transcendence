@@ -345,7 +345,7 @@ export class ChannelService {
 		if (newBan) {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await channel.save();
-			this.deleteMember(newBan, channel);
+			await this.deleteMember(newBan, channel);
 		}
 	}
 
@@ -415,7 +415,7 @@ export class ChannelService {
 				return banned.userId !== deleteBan.userId;
 			});
 			await channel.save();
-			this.addMember(deleteBan, channel.title);
+			await this.addMember(deleteBan, channel.title);
 		}
 	}
 
