@@ -2,11 +2,13 @@ import classes from "./AdminMemberItem.module.css";
 import UserProp from "../../../../interfaces/User.interface";
 import { useContext, useState } from "react";
 import ChatContext from "../../../../context/chat-context";
-import MemberItem from "../../MemberItem";
 import { socket } from "../../../../App";
+import Modal from "../../../../ui/Modal/Modal";
+import UserContent from "../../../user/UserContent/UserContent";
 
 const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const [itemSide, setItemSide] = useState<boolean>(false);
+	const [userModal, setUserModal] = useState<boolean>(false);
 	const ctx = useContext(ChatContext);
 
 	function changeItemSide(value: boolean) {
@@ -51,6 +53,13 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 		socket.emit("modifyChannel", modifyChan);
 	}
 
+	function changeUserModal() {
+		setUserModal((prev) => {
+			return !prev;
+		});
+		setItemSide(false);
+	}
+
 	if (itemSide)
 		return (
 			<div
@@ -59,7 +68,17 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 					changeItemSide(false);
 				}}
 			>
-				<div className={classes.button}>
+				{userModal ? (
+					<Modal title={props.member.username} onClick={changeUserModal}>
+						<UserContent userId={props.member.userId} />
+					</Modal>
+				) : null}
+				<div
+					className={classes.button}
+					onClick={() => {
+						changeUserModal();
+					}}
+				>
 					<img src="user.svg" alt="user" />
 				</div>
 				<div className={classes.button}>
@@ -101,6 +120,11 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				changeItemSide(true);
 			}}
 		>
+			{userModal ? (
+				<Modal title={props.member.username} onClick={changeUserModal}>
+					<UserContent userId={props.member.userId} />
+				</Modal>
+			) : null}
 			<img
 				src={
 					props.member?.profileImage
