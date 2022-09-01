@@ -1,0 +1,38 @@
+.itemLayout {
+	display: grid;
+	grid-template-columns: 50px auto 40px;
+	align-items: center;
+	gap: 10px;
+	padding-inline: 10px;
+	height: 60px;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: 1px #3a3636 solid;
+	border-radius: 10px;
+}
+
+.badge {
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	cursor: pointer;
+}
+
+.button {
+	display: flex;
+	height: 40px;
+	width: 40px;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	cursor: pointer;
+	background-color: #fdd05d;
+	color: #3a3636;
+}
+
+.button img {
+	width: 20px;
+	height: 20px;
+	filter: invert(15%) sepia(6%) saturate(679%) hue-rotate(314deg)
+		brightness(88%) contrast(78%);
+}

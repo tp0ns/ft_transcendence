@@ -24,7 +24,14 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 			title: ctx?.activeChan?.title,
 			newAdmin: props.member.username,
 		};
+		socket.emit("modifyChannel", modifyChan);
+	}
 
+	function ban() {
+		const modifyChan = {
+			title: ctx?.activeChan?.title,
+			newBan: props.member.username,
+		};
 		socket.emit("modifyChannel", modifyChan);
 	}
 
@@ -58,7 +65,12 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				>
 					<img src="crown.svg" alt="make admin" />
 				</div>
-				<div className={classes.button}>
+				<div
+					className={classes.button}
+					onClick={() => {
+						ban();
+					}}
+				>
 					<img src="ban.svg" alt="ban" />
 				</div>
 			</div>
