@@ -98,8 +98,10 @@ export class ChannelService {
 	}
 
 	async newConnection(newUser: UserEntity) {
+		console.log(`enter in newConnection`)
 		let channels: ChannelEntity[] = await this.getAllPublicChannels();
-		for (let channel of channels) this.addMember(newUser, channel.title);
+		for (let channel of channels) 
+			this.addMember(newUser, channel.title);
 	}
 
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
@@ -123,7 +125,7 @@ export class ChannelService {
 			modifications.title,
 		);
 		if (channel.DM) return;
-		if (modifications.newPassword || modifications.protected)
+		if (modifications.newPassword && modifications.protected)
 			await this.modifyPassword(
 				user,
 				channel,
@@ -568,6 +570,16 @@ export class ChannelService {
 	async sendMessage(user: UserEntity, payload: string[]) {
 		const date = Date.now();
 		let channel: ChannelEntity = await this.getChanByName(payload[1]);
+		// if (channel.mutedMembers.includes(user))
+		// {
+		// 	console.log(`you're mute, you can't send message`)
+		// }
+		for (let checkUsers of channel.mutedMembers)
+		{
+			if (user.userId === checkUsers.userId)
+				console.log(`you're mute, you can't send message`);
+			return ;
+		}
 		const new_msg = await this.messageService.addNewMessage(
 			user,
 			channel,

@@ -58,6 +58,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
+		// this.channelService.newConnection(client.data.user);
 		this.server.emit('updatedChannels');
 	}
 
@@ -83,6 +84,14 @@ export class GeneralGateway
 	 * ------------------------ SETTINGS CHANNEL  ------------------------- *
 	 */
 
+	
+	@UseGuards(WsGuard)
+	@SubscribeMessage('setupNewUser')
+	async setupNewUser(client: Socket) {
+		this.channelService.newConnection(client.data.user);
+	}
+	
+
 	/**
 	 * @brief Creation d'un channel
 	 *
@@ -92,18 +101,6 @@ export class GeneralGateway
 	 * @emits updatedChannels permet au front de savoir qu'il est temps de
 	 * recuperer les channels
 	 *
-	 */
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('setupNewUser')
-	async setupNewUser(client: Socket) {
-		this.channelService.newConnection(client.data.user);
-	}
-
-	/**
-	 *
-	 * @param client
-	 * @param channelEntity
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
