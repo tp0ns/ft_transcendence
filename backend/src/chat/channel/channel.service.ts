@@ -9,7 +9,6 @@ import { CreateChanDto } from './dtos/createChan.dto';
 import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {
@@ -35,28 +34,22 @@ export class ChannelService {
 	 * @param chan toutes les informations permettant la creation du channel
 	 *
 	 */
-	async createNewChan(
-		user: UserEntity,
-		chan: CreateChanDto,
-	): Promise<ChannelEntity> {
-		console.log(`check dto : `, chan);
+	async createNewChan(user: UserEntity, chan: CreateChanDto): Promise<ChannelEntity> 
+	{
 		let channel: ChannelEntity;
 		if (await this.getIfUniqueName(chan.title))
 			channel = await this.saveNewChan(user, chan);
-		else console.log(`An another channel have already this name`);
+		else 
+			console.log(`An another channel have already this name`);
 		return channel;
 	}
 
-	async saveNewChan(
-		user: UserEntity,
-		chan: CreateChanDto,
-	): Promise<ChannelEntity> {
+	async saveNewChan(user: UserEntity, chan: CreateChanDto): Promise<ChannelEntity> 
+	{
 		const date = Date.now();
-		// let newPassword: string = null;
 		let channel: ChannelEntity;
-		if (chan.DM) return this.saveNewDM(user, chan);
-		// if (chan.password != '')
-		// 	newPassword = await bcrypt.hash(chan.password, 10);
+		if (chan.DM) 
+			return this.saveNewDM(user, chan);
 		const newPassword =
 			chan.password != '' ? bcrypt.hashSync(chan.password, 10) : null;
 		channel = await this.channelRepository.save({
@@ -65,7 +58,7 @@ export class ChannelService {
 			password: newPassword,
 			private: chan.private,
 			protected: chan.protected,
-			creation: date,
+			update: date,
 			DM: chan.DM,
 		});
 		await this.addMember(user, channel.title);
@@ -89,7 +82,7 @@ export class ChannelService {
 			title: user.username + '+' + user2.username,
 			DM: chan.DM,
 			private: true,
-			creation: date,
+			update: date,
 			owner: user,
 		});
 		this.addMember(user, dm.title);
@@ -97,16 +90,19 @@ export class ChannelService {
 		return dm;
 	}
 
+	/**
+	 * Permet d'ajouter le nouvel utilisateur a tous les channels publics
+	 * qui existe deja
+	 * 
+	 * @param newUser nouvelle connection d'un utilisateur 
+	 */
 	async newConnection(newUser: UserEntity) {
-		console.log(`enter in newConnection`)
 		let channels: ChannelEntity[] = await this.getAllPublicChannels();
 		for (let channel of channels)
-		{
-			console.log(`user is : `, newUser);
-			console.log(`channel title is : `, channel.title);
 			this.addMember(newUser, channel.title);
-		}
 	}
+
+
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(informations.title);
 		if (channel.password == informations.password) return true;
@@ -575,23 +571,19 @@ export class ChannelService {
 		const msg: string = payload[0];
 		const date = Date.now();
 		let channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.mutedId.includes(user.userId) || channel.bannedId.includes(user.userId))
+		if (channel.mutedId.includes(user.userId) || channel.bannedId.includes(user.userId)
+			|| msg == "")
 		{
 			console.log(`you can't send message`)
 			return ;
 		}
-		// for (let checkUsers of channel.mutedMembers)
-		// {
-		// 	if (user.userId === checkUsers.userId)
-		// 		console.log(`you're mute, you can't send message`);
-		// 	return ;
-		// }
 		const new_msg = await this.messageService.addNewMessage(
 			user,
 			channel,
 			msg,
 		);
 		channel.update = date;
+		await channel.save();
 		return new_msg;
 	}
 }

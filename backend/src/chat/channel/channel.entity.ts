@@ -81,12 +81,12 @@ export class ChannelEntity extends BaseEntity {
 	})
 	protected: boolean;
 
-	@Column({
-		nullable: false,
-		default: 0,
-		type: "float",
-	})
-	creation: number;
+	// @Column({
+	// 	nullable: false,
+	// 	default: 0,
+	// 	type: "float",
+	// })
+	// creation: number;
 
 	@Column({
 		nullable: false,

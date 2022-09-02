@@ -252,6 +252,7 @@ export class GeneralGateway
 			payload[1],
 		);
 		this.server.to(payload[1]).emit('sendChannelMessages', messages);
+		this.server.emit('updatedChannels');
 	}
 
 	/**
