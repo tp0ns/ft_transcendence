@@ -58,7 +58,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
-		// this.channelService.newConnection(client.data.user);
 		this.server.emit('updatedChannels');
 	}
 

@@ -100,10 +100,13 @@ export class ChannelService {
 	async newConnection(newUser: UserEntity) {
 		console.log(`enter in newConnection`)
 		let channels: ChannelEntity[] = await this.getAllPublicChannels();
-		for (let channel of channels) 
+		for (let channel of channels)
+		{
+			console.log(`user is : `, newUser);
+			console.log(`channel title is : `, channel.title);
 			this.addMember(newUser, channel.title);
+		}
 	}
-
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(informations.title);
 		if (channel.password == informations.password) return true;
@@ -568,22 +571,25 @@ export class ChannelService {
 	 * - payload[1] : le nom du channel (string)
 	 */
 	async sendMessage(user: UserEntity, payload: string[]) {
+		const chanName: string = payload[1];
+		const msg: string = payload[0];
 		const date = Date.now();
-		let channel: ChannelEntity = await this.getChanByName(payload[1]);
-		// if (channel.mutedMembers.includes(user))
-		// {
-		// 	console.log(`you're mute, you can't send message`)
-		// }
-		for (let checkUsers of channel.mutedMembers)
+		let channel: ChannelEntity = await this.getChanByName(chanName);
+		if (channel.mutedId.includes(user.userId) || channel.bannedId.includes(user.userId))
 		{
-			if (user.userId === checkUsers.userId)
-				console.log(`you're mute, you can't send message`);
+			console.log(`you can't send message`)
 			return ;
 		}
+		// for (let checkUsers of channel.mutedMembers)
+		// {
+		// 	if (user.userId === checkUsers.userId)
+		// 		console.log(`you're mute, you can't send message`);
+		// 	return ;
+		// }
 		const new_msg = await this.messageService.addNewMessage(
 			user,
 			channel,
-			payload[0],
+			msg,
 		);
 		channel.update = date;
 		return new_msg;

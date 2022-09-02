@@ -9,6 +9,7 @@ import {
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
+	RelationId,
 } from 'typeorm';
 import { MessagesEntity } from '../messages/messages.entity';
 
@@ -63,11 +64,17 @@ export class ChannelEntity extends BaseEntity {
 	@JoinTable()
 	bannedMembers: UserEntity[];
 
+	@RelationId((channel: ChannelEntity) => channel.bannedMembers)
+	bannedId: string[];
+
 	@ManyToMany(() => UserEntity, {
 		cascade: true,
 	})
 	@JoinTable()
 	mutedMembers: UserEntity[];
+
+	@RelationId((channel: ChannelEntity) => channel.mutedMembers)
+	mutedId: string[];
 
 	@Column({
 		default: false,

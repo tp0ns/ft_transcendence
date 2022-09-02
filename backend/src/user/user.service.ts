@@ -46,7 +46,7 @@ export class UserService {
 				image_url: profile.image_url,
 			});
 		}
-		return await user;
+		return user;
 	}
 
 	async setTwoFASecret(secret: string, userId: string) {
