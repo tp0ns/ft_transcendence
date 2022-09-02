@@ -20,14 +20,14 @@ export class Ball {
 	p2Touches: number;
 }
 
-export class Player extends UserEntity {}
+// export class Player extends UserEntity {}
 
 export class Match {
 	rightPad: Pad;
 	leftPad: Pad;
 	ball: Ball;
-	player1: Player;
-	player2: Player;
+	player1: UserEntity;
+	player2: UserEntity;
 	// stats
 	p1Score: number;
 	p2Score: number;
@@ -37,4 +37,6 @@ export class Match {
 	p1User: UserEntity;
 	p2User: UserEntity;
 	isLocal: boolean;
+	//name of the associated room for sockets
+	roomName: string;
 }

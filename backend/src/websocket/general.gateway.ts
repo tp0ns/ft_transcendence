@@ -45,7 +45,8 @@ export class GeneralGateway
 	@WebSocketServer() server: Server;
 
 	private logger: Logger = new Logger('GeneralGateway');
-	private beginMatch: Match = this.gameService.setDefaultPos();
+	// private beginMatch: Match;
+	// private beginMatch: Match = this.gameService.setDefaultPos();
 
 	/**
 	 * Handles server initialization behaviour
@@ -335,43 +336,45 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
 	async sendDefaultPos(client: Socket) {
-		if (this.beginMatch.p1User == null) {
-			this.beginMatch.player1 = client.data.user;
-			this.beginMatch.p1User = this.beginMatch.player1;
-			// eslint-disable-next-line prettier/prettier
-		} else if (
-			this.beginMatch.p2User == null &&
-			this.beginMatch.p1User != client.data.user
-		) {
-			this.beginMatch.player2 = client.data.user;
-			this.beginMatch.p2User = this.beginMatch.player2;
-		}
-		this.server
-			.to('gameRoom')
-			.emit(
-				'setPosition',
-				this.beginMatch.leftPad,
-				this.beginMatch.rightPad,
-				this.beginMatch.ball,
-				this.beginMatch.p1Score,
-				this.beginMatch.p2Score,
-			);
+		// client.data.currentMatch = this.gameService.setDefaultPos();
+		// if (client.data.currentMatch.p1User == null) {
+		// 	client.data.currentMatch.player1 = client.data.user;
+		// 	client.data.currentMatch.p1User = client.data.currentMatch.player1;
+		// 	// eslint-disable-next-line prettier/prettier
+		// } else if (
+		// 	client.data.currentMatch.p2User == null &&
+		// 	client.data.currentMatch.p1User != client.data.user
+		// ) {
+		// 	client.data.currentMatch.player2 = client.data.user;
+		// 	client.data.currentMatch.p2User = client.data.currentMatch.player2;
+		// }
+		if (client.data.currentMatch)
+			this.server
+				.to(client.data.currentMatch.roomName)
+				.emit(
+					'setPosition',
+					client.data.currentMatch.leftPad,
+					client.data.currentMatch.rightPad,
+					client.data.currentMatch.ball,
+					client.data.currentMatch.p1Score,
+					client.data.currentMatch.p2Score,
+				);
 	}
 
 	// Move event, allow the user to move its pad
 	@UseGuards(WsGuard)
 	@SubscribeMessage('move')
 	async move(client: Socket, direction: string) {
-		await this.gameService.movePad(direction, this.beginMatch);
+		await this.gameService.movePad(direction, client.data.currentMatch);
 		this.server
-			.to('gameRoom')
+			.to(client.data.currentMatch.roomName)
 			.emit(
 				'setPosition',
-				this.beginMatch.leftPad,
-				this.beginMatch.rightPad,
-				this.beginMatch.ball,
-				this.beginMatch.p1Score,
-				this.beginMatch.p2Score,
+				client.data.currentMatch.leftPad,
+				client.data.currentMatch.rightPad,
+				client.data.currentMatch.ball,
+				client.data.currentMatch.p1Score,
+				client.data.currentMatch.p2Score,
 			);
 	}
 
@@ -379,19 +382,22 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
-		if (client.data.user.userId == this.beginMatch.player1.userId)
-			await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
-		else if (client.data.user.userId == this.beginMatch.player2.userId)
-			await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
+		if (client.data.user.userId == client.data.currentMatch.player1.userId)
+			await this.gameService.moveMouseLeft(mousePosy, client.data.currentMatch);
+		else if (client.data.user.userId == client.data.currentMatch.player2.userId)
+			await this.gameService.moveMouseRight(
+				mousePosy,
+				client.data.currentMatch,
+			);
 		this.server
-			.to('gameRoom')
+			.to(client.data.currentMatch.roomName)
 			.emit(
 				'setPosition',
-				this.beginMatch.leftPad,
-				this.beginMatch.rightPad,
-				this.beginMatch.ball,
-				this.beginMatch.p1Score,
-				this.beginMatch.p2Score,
+				client.data.currentMatch.leftPad,
+				client.data.currentMatch.rightPad,
+				client.data.currentMatch.ball,
+				client.data.currentMatch.p1Score,
+				client.data.currentMatch.p2Score,
 			);
 	}
 
@@ -402,17 +408,17 @@ export class GeneralGateway
 		await this.gameService.gameFunction(
 			payload[0], //function
 			payload[1], //score
-			this.beginMatch,
+			client.data.currentMatch,
 		);
 		this.server
-			.to('gameRoom')
+			.to(client.data.currentMatch.roomName)
 			.emit(
 				'setPosition',
-				this.beginMatch.leftPad,
-				this.beginMatch.rightPad,
-				this.beginMatch.ball,
-				this.beginMatch.p1Score,
-				this.beginMatch.p2Score,
+				client.data.currentMatch.leftPad,
+				client.data.currentMatch.rightPad,
+				client.data.currentMatch.ball,
+				client.data.currentMatch.p1Score,
+				client.data.currentMatch.p2Score,
 			);
 	}
 
@@ -420,18 +426,20 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('ballMovement')
 	async ballMovement(client: Socket, ballPosition: Ball) {
-		this.beginMatch.ball = ballPosition;
-		this.beginMatch.p1Touches = this.beginMatch.ball.p1Touches;
-		this.beginMatch.p2Touches = this.beginMatch.ball.p2Touches;
+		client.data.currentMatch.ball = ballPosition;
+		client.data.currentMatch.p1Touches =
+			client.data.currentMatch.ball.p1Touches;
+		client.data.currentMatch.p2Touches =
+			client.data.currentMatch.ball.p2Touches;
 		this.server
-			.to('gameRoom')
+			.to(client.data.currentMatch.roomName)
 			.emit(
 				'setPosition',
-				this.beginMatch.leftPad,
-				this.beginMatch.rightPad,
-				this.beginMatch.ball,
-				this.beginMatch.p1Score,
-				this.beginMatch.p2Score,
+				client.data.currentMatch.leftPad,
+				client.data.currentMatch.rightPad,
+				client.data.currentMatch.ball,
+				client.data.currentMatch.p1Score,
+				client.data.currentMatch.p2Score,
 			);
 	}
 
@@ -439,15 +447,14 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
-		await this.gameService.toggleLocalGame(this.beginMatch);
+		await this.gameService.toggleLocalGame(client.data.currentMatch);
 	}
 
 	//disable keyboard commands for local game
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleMatchMaking')
 	async toggleMatchMaking(client: Socket) {
-		await this.gameService.toggleMatchMaking(client, this.beginMatch);
-		console.log('room size:', this.server.sockets.adapter.rooms.get('gameRoom').size);
+		await this.gameService.toggleMatchMaking(client);
 	}
 	/*
   ______ _____  _____ ______ _   _ _____   _____

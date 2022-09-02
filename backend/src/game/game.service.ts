@@ -2,7 +2,10 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import UserEntity from 'src/user/models/user.entity';
-import { Match, Pad, Ball, Player } from './interfaces/game.interface';
+import { Match, Pad, Ball } from './interfaces/game.interface';
+
+const matchMakingSet = new Set<Socket>();
+let match: Match;
 
 @Injectable()
 export class GameService {
@@ -10,7 +13,7 @@ export class GameService {
 	 * set the default position of the elements in the game
 	 * @param match interface of the match
 	 */
-	setDefaultPos() {
+	setDefaultPos(room: string) {
 		const initLeftPad: Pad = {
 			x: 0,
 			y: 150,
@@ -53,8 +56,10 @@ export class GameService {
 			p2Touches: 0,
 			p1User: null,
 			p2User: null,
-			isLocal: false,
+			isLocal: true,
+			roomName: room,
 		};
+		console.log(match.roomName);
 		return match;
 	}
 
@@ -137,9 +142,33 @@ export class GameService {
 
 	// toggle MatchMaking : launch the matchmaking
 	// and disable keyboard commands
-	async toggleMatchMaking(client: Socket, match: Match) {
-			client.join("gameRoom");
-			match.isLocal = false;
-
+	async toggleMatchMaking(client: Socket) {
+		matchMakingSet.add(client);
+		console.log('set size:', matchMakingSet.size);
+		if (matchMakingSet.size == 2)
+		{
+			const roomName = 'room'+ Math.random();
+			match = this.setDefaultPos(roomName);
+			for (const item of matchMakingSet)
+			{
+				if (match.p1User == null) {
+					match.player1 = item.data.user;
+					match.p1User = match.player1;
+				} else if (
+					match.p2User == null &&
+					match.p1User != item.data.user
+				) {
+					match.player2 = item.data.user;
+					match.p2User = match.player2;
+				}
+				item.join(roomName);
+				match.isLocal = false;
+			}
+			for (const item of matchMakingSet)
+			{
+				item.data.currentMatch = match;
+			}
+			matchMakingSet.clear();
+		}
 	}
 }

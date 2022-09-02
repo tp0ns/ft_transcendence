@@ -37,7 +37,7 @@ const GameScreen = () => {
 
 	useEffect(() => {
 		const context = canvas.current!.getContext("2d");
-		socket.emit("joinMatch");
+		// socket.emit("joinMatch");
 		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
 			leftPadPosition = leftPos;
 			rightPadPosition = rightPos;
@@ -105,6 +105,8 @@ const GameScreen = () => {
 
 	const toggleMatchMaking = () => {
 		socket.emit("toggleMatchMaking");
+		socket.emit("joinMatch");
+
 	};
 
 	const moveBall = () => {
