@@ -136,8 +136,15 @@ export class GameService {
 
 		// toggle SinglePlayer : launch the SinglePlayer
 		// and disable keyboard commands
-		async toggleLocalGame(match: Match) {
-			match.isLocal = true;
+		async toggleLocalGame(client: Socket) {
+			const roomName = 'room'+ Math.random();
+			client.join(roomName)
+			client.data.currentMatch = this.setDefaultPos(roomName);
+			client.data.currentMatch.isLocal = true;
+			client.data.currentMatch.p1User = client.data.user;
+			client.data.currentMatch.p2User = client.data.currentMatch.p1User;
+			client.data.currentMatch.player1 = client.data.currentMatch.p1User;
+			client.data.currentMatch.player2 = client.data.currentMatch.p1User;
 		}
 
 	// toggle MatchMaking : launch the matchmaking
@@ -169,6 +176,29 @@ export class GameService {
 				item.data.currentMatch = match;
 			}
 			matchMakingSet.clear();
+		}
+	}
+
+	//ends the game
+	async endGame(match: Match, winner: UserEntity) {
+		if (match.isLocal == false) {
+			// -> send the data to the db
+			// trigger the pop-up(?modal) with victory info and home button
+			console.log(winner.username, ' has won.');
+			console.log(match.player2.username, ' has lost.');
+		}
+		else {
+			// trigger the pop-up(?modal) with victory info and home button
+			console.log('We have a winner !');
+		}
+	}
+	//check if the game should end and exec the proper funciton if so
+	async checkEndGame(match: Match) {
+		if (match.p1Score >= 2){
+			this.endGame(match, match.player1);
+		}
+		if (match.p2Score >= 2) {
+			this.endGame(match, match.player2);
 		}
 	}
 }

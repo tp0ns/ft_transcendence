@@ -336,18 +336,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
 	async sendDefaultPos(client: Socket) {
-		// client.data.currentMatch = this.gameService.setDefaultPos();
-		// if (client.data.currentMatch.p1User == null) {
-		// 	client.data.currentMatch.player1 = client.data.user;
-		// 	client.data.currentMatch.p1User = client.data.currentMatch.player1;
-		// 	// eslint-disable-next-line prettier/prettier
-		// } else if (
-		// 	client.data.currentMatch.p2User == null &&
-		// 	client.data.currentMatch.p1User != client.data.user
-		// ) {
-		// 	client.data.currentMatch.player2 = client.data.user;
-		// 	client.data.currentMatch.p2User = client.data.currentMatch.player2;
-		// }
 		if (client.data.currentMatch)
 			this.server
 				.to(client.data.currentMatch.roomName)
@@ -420,6 +408,8 @@ export class GeneralGateway
 				client.data.currentMatch.p1Score,
 				client.data.currentMatch.p2Score,
 			);
+		//end of the game
+		await this.gameService.checkEndGame(client.data.currentMatch);
 	}
 
 	// get the position of the ball and emit it
@@ -447,7 +437,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
-		await this.gameService.toggleLocalGame(client.data.currentMatch);
+		await this.gameService.toggleLocalGame(client);
 	}
 
 	//disable keyboard commands for local game
