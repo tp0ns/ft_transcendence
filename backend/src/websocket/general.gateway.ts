@@ -370,23 +370,30 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
-		if (client.data.user.userId == client.data.currentMatch.player1.userId)
-			await this.gameService.moveMouseLeft(mousePosy, client.data.currentMatch);
-		else if (client.data.user.userId == client.data.currentMatch.player2.userId)
-			await this.gameService.moveMouseRight(
-				mousePosy,
-				client.data.currentMatch,
-			);
-		this.server
-			.to(client.data.currentMatch.roomName)
-			.emit(
-				'setPosition',
-				client.data.currentMatch.leftPad,
-				client.data.currentMatch.rightPad,
-				client.data.currentMatch.ball,
-				client.data.currentMatch.p1Score,
-				client.data.currentMatch.p2Score,
-			);
+		if (client.data.currentMatch) {
+			if (client.data.user.userId == client.data.currentMatch.player1.userId)
+				await this.gameService.moveMouseLeft(
+					mousePosy,
+					client.data.currentMatch,
+				);
+			else if (
+				client.data.user.userId == client.data.currentMatch.player2.userId
+			)
+				await this.gameService.moveMouseRight(
+					mousePosy,
+					client.data.currentMatch,
+				);
+			this.server
+				.to(client.data.currentMatch.roomName)
+				.emit(
+					'setPosition',
+					client.data.currentMatch.leftPad,
+					client.data.currentMatch.rightPad,
+					client.data.currentMatch.ball,
+					client.data.currentMatch.p1Score,
+					client.data.currentMatch.p2Score,
+				);
+		}
 	}
 
 	//	Game Functions, start, reset
