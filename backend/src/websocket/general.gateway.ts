@@ -82,13 +82,6 @@ export class GeneralGateway
 	/**
 	 * ------------------------ SETTINGS CHANNEL  ------------------------- *
 	 */
-
-	
-	@UseGuards(WsGuard)
-	@SubscribeMessage('setupNewUser')
-	async setupNewUser(client: Socket) {
-		this.channelService.newConnection(client.data.user);
-	}
 	
 
 	/**
@@ -103,7 +96,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('createChan')
-	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
+	async CreateChan(client: Socket, channelEntity: CreateChanDto) 
+	{
 		const channel: ChannelEntity = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
@@ -124,8 +118,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('modifyChannel')
-	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
-		console.log(`enter in modifyChannel`);
+	async modifyChannel(client: Socket, modifications: ModifyChanDto) 
+	{
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
@@ -143,7 +137,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
-	async deleteChan(client: Socket, chanName: string) {
+	async deleteChan(client: Socket, chanName: string) 
+	{
 		await this.channelService.deleteChan(client.data.user, chanName);
 		this.server.emit('updatedChannels');
 	}
@@ -161,7 +156,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('chanWithPassword')
-	async chatWithPassword(client: Socket, informations: JoinChanDto) {
+	async chatWithPassword(client: Socket, informations: JoinChanDto) 
+	{
 		let bool: boolean = await this.channelService.chanWithPassword(
 			client.data.user,
 			informations,
@@ -184,7 +180,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
-	async joinRoom(client: Socket, channel: ChannelEntity) {
+	async joinRoom(client: Socket, channel: ChannelEntity) 
+	{
 		// let check: boolean = await this.channelService.getIfUserInChan(
 		// 	client.data.user,
 		// 	channel,
@@ -205,12 +202,11 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
-	async leaveRoom(client: Socket, channel: ChannelEntity) {
-		if (
-			channel.members.find(
-				(member: UserEntity) => member.username === client.data.user.username,
-			)
-		) {
+	async leaveRoom(client: Socket, channel: ChannelEntity) 
+	{
+		if ( channel.members.find(
+				(member: UserEntity) => member.userId === client.data.user.userId))
+		{
 			client.leave(channel.title);
 			this.server.emit('leftRoom');
 		}
@@ -225,7 +221,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
-	handleMessage(client: Socket, payload: string[]) {
+	handleMessage(client: Socket, payload: string[])
+	{
 		this.channelService.sendMessage(client.data.user, payload);
 		this.server.emit('msgToClient', payload);
 		return payload;
@@ -242,7 +239,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	async handleMessageToChan(client: Socket, payload: string[]) {
+	async handleMessageToChan(client: Socket, payload: string[]) 
+	{
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
@@ -264,7 +262,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToUser')
-	handleMessagerToClient(client: Socket, payload: string[]) {
+	handleMessagerToClient(client: Socket, payload: string[]) 
+	{
 		this.server
 			.to(payload[1])
 			.emit('directMessage', payload, client.data.user.username);
@@ -280,7 +279,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
-	async getChannels(client: Socket) {
+	async getChannels(client: Socket) 
+	{
 		const channels: ChannelEntity[] =
 			await this.channelService.getAllChannels();
 		client.emit('sendChans', channels);
@@ -293,7 +293,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
-	async getMemberChannels(client: Socket) {
+	async getMemberChannels(client: Socket) 
+	{
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
 		client.emit('sendMemberChans', channels);
@@ -301,7 +302,8 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
-	async getChannelMessages(client: Socket, payload: string) {
+	async getChannelMessages(client: Socket, payload: string) 
+	{
 		const messages: MessagesEntity[] =
 			await this.messageService.getChannelMessages(client.data.user, payload);
 		client.emit('sendChannelMessages', messages);
@@ -309,7 +311,8 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChanByName')
-	async getChanByName(client: Socket, payload: string) {
+	async getChanByName(client: Socket, payload: string) 
+	{
 		const channel: ChannelEntity = await this.channelService.getChanByName(
 			payload,
 		);
