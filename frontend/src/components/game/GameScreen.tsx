@@ -10,6 +10,8 @@ let ballPosition = {
 	speedx: 5,
 	speedy: 0,
 	goRight: 0,
+	p1Touches: 0,
+	p2Touches: 0,
 };
 let leftPadPosition = {
 	x: 0,
@@ -141,6 +143,7 @@ const GameScreen = () => {
 				}
 				ballPosition.speedy = angle;
 				ballPosition.goRight = 1;
+				ballPosition.p2Touches++;
 			}
 		} else {
 			if (
@@ -181,6 +184,7 @@ const GameScreen = () => {
 				}
 				ballPosition.speedy = angle;
 				ballPosition.goRight = 0;
+				ballPosition.p1Touches++;
 			}
 		}
 		if (ballPosition.x !== 10 && ballPosition.x !== 630) {

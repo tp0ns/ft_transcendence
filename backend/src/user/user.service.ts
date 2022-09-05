@@ -1,7 +1,9 @@
 import {
 	ForbiddenException,
+	forwardRef,
 	HttpException,
 	HttpStatus,
+	Inject,
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
@@ -15,11 +17,14 @@ import {
 	Relation_Status,
 } from '../relations/models/relations.interface';
 import { RelationEntity } from '../relations/models/relations.entity';
+import { ChannelService } from 'src/chat/channel/channel.service';
 
 @Injectable()
 export class UserService {
 	constructor(
 		@InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
+		@Inject(forwardRef(() => ChannelService))
+		private channelService: ChannelService,
 	) {}
 
 	/**
@@ -40,13 +45,15 @@ export class UserService {
 			) {
 				profile.username += Math.floor(1 + Math.random() * 999).toString();
 			}
-			return await this.userRepo.save({
+			let newUser: UserEntity = await this.userRepo.save({
 				schoolId: profile.id,
 				username: profile.username,
 				image_url: profile.image_url,
 			});
+			this.channelService.newConnection(newUser);
+			return newUser;
 		}
-		return await user;
+		return user;
 	}
 
 	async setTwoFASecret(secret: string, userId: string) {

@@ -34,6 +34,8 @@ export class GameService {
 			speedx: 5,
 			speedy: 0,
 			goRight: false,
+			p1Touches: 0,
+			p2Touches: 0,
 		};
 		let initPlayer: UserEntity; // check if this init is good
 
@@ -46,6 +48,8 @@ export class GameService {
 			player2: initPlayer,
 			p1Score: 0,
 			p2Score: 0,
+			p1Touches: 0,
+			p2Touches: 0,
 			p1User: null,
 			p2User: null,
 			isLocal: false,
