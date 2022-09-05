@@ -234,23 +234,25 @@ export class GeneralGateway
 	 * @param payload
 	 * @param chanName
 	 *
-	 * @todo faire un emit.to
 	 * @todo envoyer au service les 2 arguments decomposes
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) 
 	{
+		let chanName: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
 		);
 		const messages = await this.messageService.getChannelMessages(
 			client.data.user,
-			payload[1],
+			chanName,
 		);
-		this.server.to(payload[1]).emit('sendChannelMessages', messages);
+		
+		// this.server.to(chanName).emit('sendChannelMessages', messages);
 		this.server.emit('updatedChannels');
+		// client.emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -262,7 +264,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToUser')
-	handleMessagerToClient(client: Socket, payload: string[]) 
+	handleMessageToClient(client: Socket, payload: string[]) 
 	{
 		this.server
 			.to(payload[1])

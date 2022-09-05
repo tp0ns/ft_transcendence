@@ -35,6 +35,12 @@ export class MessageService {
 	async getChannelMessages(user: UserEntity, chanName: string) : Promise<MessagesEntity[]>
 	{
 		let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
+		
+		// if (channel.bannedId.includes(user.userId))
+		// {
+		// 	console.log(`t'es banni mon frere`)
+		// 	return ;
+		// }
 		const messages: MessagesEntity[] = await this.MessageRepository
 			.createQueryBuilder('messages')
 			.leftJoinAndSelect('messages.user', 'sender')
@@ -45,20 +51,4 @@ export class MessageService {
 		return messages;
 
 	}
-
-	// public async sendMessageToChannel(chanIdentifier : string, user : User, msg : string) //: Promise<Channel>
-	// {
-	// 	const channel : Channel = await this.chanService.getChannelByIdentifier(chanIdentifier);
-	// 	if (channel.mutedId.includes(user.id))
-	// 		throw (new HttpException('You are mute and cannot send message to channel.', HttpStatus.FORBIDDEN))
-	// 	if (channel.bannedId.includes(user.id))
-	// 		throw (new HttpException('You are banned and cannot temporary send message to channel.', HttpStatus.FORBIDDEN))
-	// 	const newMessage = await this.chatRepo.save({
-	// 		sender: user,
-	// 		message: msg,
-	// 	});
-	// 	channel.messages = [...channel.messages, newMessage]; /* if pb of is not iterable, it is because we did not get the
-	// 	 ealtions in the find one */
-	// 	await channel.save();
-	// }
 }
