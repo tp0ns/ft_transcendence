@@ -6,23 +6,28 @@
 
 .search_bar {
 	display: flex;
-	gap: 10px;
-	height: 20px;
+	gap: 5px;
+	height: 26px;
 	align-items: center;
 	justify-content: center;
+	border: 2px solid #363636;
+	border-radius: 10px;
 }
 
 .search_bar img {
-	height: 20px;
-	width: 20px;
+	height: 25px;
+	width: 25px;
 	align-self: center;
 }
 .search_bar input {
 	height: 20px;
-	background-color: #fdd05d;
+	background: none;
+	border: none;
 	border-radius: 10px;
-	border-color: #363636;
 	flex-grow: 1;
+	outline: inherit;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
 }
 
 .list {

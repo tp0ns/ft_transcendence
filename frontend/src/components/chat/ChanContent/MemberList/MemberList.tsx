@@ -32,13 +32,14 @@ function MemberList() {
 
 	return (
 		<div className={classes.layout}>
-			{ctx?.isAdmin ? (
+			{ctx?.isAdmin && ctx?.activeChan?.private ? (
 				<form onSubmit={handleNewMember} className={classes.search_bar}>
+					<img src="adduser.svg" alt="Add user" />
 					<input
 						ref={newMember}
 						type="text"
 						id="addUser"
-						placeholder="Add user..."
+						placeholder="Add user and press Enter..."
 						autoComplete="off"
 					/>
 				</form>
