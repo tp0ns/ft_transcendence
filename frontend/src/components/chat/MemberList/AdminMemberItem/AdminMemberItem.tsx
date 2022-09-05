@@ -26,12 +26,12 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 		if (isMuted()) {
 			modifyChan = {
 				title: ctx?.activeChan?.title,
-				deleteMute: props.member.username,
+				deleteMute: props.member.userId,
 			};
 		} else {
 			modifyChan = {
 				title: ctx?.activeChan?.title,
-				newMute: props.member.username,
+				newMute: props.member.userId,
 			};
 		}
 		socket.emit("modifyChannel", modifyChan);
@@ -40,7 +40,7 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	function makeAdmin() {
 		const modifyChan = {
 			title: ctx?.activeChan?.title,
-			newAdmin: props.member.username,
+			newAdmin: props.member.userId,
 		};
 		socket.emit("modifyChannel", modifyChan);
 	}
@@ -48,7 +48,7 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	function ban() {
 		const modifyChan = {
 			title: ctx?.activeChan?.title,
-			newBan: props.member.username,
+			newBan: props.member.userId,
 		};
 		socket.emit("modifyChannel", modifyChan);
 	}

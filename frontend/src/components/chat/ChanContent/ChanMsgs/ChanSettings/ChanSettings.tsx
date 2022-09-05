@@ -13,14 +13,6 @@ const ChanSettings: React.FC<{
 	function handleModifySubmit() {
 		socket.emit("modifyChannel", {
 			title: title.current?.value,
-			newMember: null,
-			newPassword: null,
-			newAdmin: null,
-			newBan: null,
-			newMute: null,
-			deleteBan: null,
-			deleteMute: null,
-			protected: null,
 		});
 	}
 
