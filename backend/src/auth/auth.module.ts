@@ -11,18 +11,22 @@ import { jwtConstants } from './jwt/jwt.constants';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { UserService } from 'src/user/user.service';
 import { RelationEntity } from 'src/relations/models/relations.entity';
+import { ChannelService } from 'src/chat/channel/channel.service';
+import { MessageService } from 'src/chat/messages/messages.service';
+import { ChannelEntity } from 'src/chat/channel/channel.entity';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
 
 @Module({
 	imports: [
 		PassportModule.register(SchoolStrategy),
-		TypeOrmModule.forFeature([UserEntity, RelationEntity]),
+		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity]),
 		JwtModule.register({
 			secret: jwtConstants.secret,
 			signOptions: { expiresIn: jwtConstants.expire },
 		}),
 		HttpModule,
 	],
-	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy],
+	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy, ChannelService, MessageService],
 	controllers: [AuthController],
 })
 export class AuthModule {}

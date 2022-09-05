@@ -1,6 +1,7 @@
 import { useLocation, Navigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import jwtDecode from "jwt-decode";
+import React from "react";
 
 const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 	const [cookies] = useCookies();
@@ -20,7 +21,7 @@ const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 	if (location.pathname === "/2fa" && token.twoFAAuthenticated === true) {
 		return <Navigate to="/" state={{ from: location }} replace />;
 	}
-	return <div>{props.children}</div>;
+	return <React.Fragment>{props.children}</React.Fragment>;
 };
 
 export default Auth;

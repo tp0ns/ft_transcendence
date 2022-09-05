@@ -2,21 +2,21 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { io } from "socket.io-client";
 import Auth from "./components/Auth";
-import ChatPage from "./Pages/ChatPage";
+import ChatPage from "./Pages/ChatPage/ChatPage";
 import Debug from "./Pages/Debug";
 import GamePage from "./Pages/GamePage";
-import LoginPage from "./Pages/Login/LoginPage";
+import LoginPage from "./Pages/Login/LoginPage/LoginPage";
 import SocialPage from "./Pages/SocialPage";
-import TwoFAPAge from "./Pages/Login/TwoFAPage";
+import TwoFAPAge from "./Pages/Login/TwoFAPage/TwoFAPage";
 import UserPage from "./Pages/UserPage/UserPage";
 
-export const socket = io("http://localhost/");
+export const socket = io("/");
 
 function App() {
 	return (
 		<Routes>
 			<Route path="/login" element={<LoginPage />} />
-      <Route
+			<Route
 				path="/2fa"
 				element={
 					<Auth>
@@ -56,12 +56,7 @@ function App() {
 					</Auth>
 				}
 			/>
-      <Route 
-        path="/debug"
-        element={
-          <Debug />
-        }
-        />
+			<Route path="/debug" element={<Debug />} />
 		</Routes>
 	);
 }

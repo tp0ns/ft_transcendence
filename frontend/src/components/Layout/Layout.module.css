@@ -1,0 +1,10 @@
+.layout {
+	min-height: 100vh;
+	display: grid;
+	grid-template-rows: 65px auto;
+	gap: 8px;
+}
+
+.content {
+	margin-inline: 8px;
+}

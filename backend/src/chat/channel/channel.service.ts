@@ -9,8 +9,6 @@ import { CreateChanDto } from './dtos/createChan.dto';
 import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
-import { channel } from 'diagnostics_channel';
-
 @Injectable()
 export class ChannelService {
 	constructor(
@@ -26,75 +24,97 @@ export class ChannelService {
 	 */
 
 	/**
-	 * @brief Setup d'un nouveau channel : 
-	 * - ajout d'un mot de passe si chan protege 
-	 * - verification du unique name 
+	 * @brief Setup d'un nouveau channel :
+	 * - ajout d'un mot de passe si chan protege
+	 * - verification du unique name
 	 * - ajout de l'owner (le createur)
-	 * 
-	 * @param user le user createur du channel 
-	 * @param chan toutes les informations permettant la creation du channel 
+	 *
+	 * @param user le user createur du channel
+	 * @param chan toutes les informations permettant la creation du channel
 	 *
 	 */
-	async createNewChan(user: UserEntity, chan: CreateChanDto) : Promise<ChannelEntity>
+	async createNewChan(user: UserEntity, chan: CreateChanDto): Promise<ChannelEntity> 
 	{
 		let channel: ChannelEntity;
-		if (await this.getIfUniqueName(chan.title)) 
+		if (await this.getIfUniqueName(chan.title))
 			channel = await this.saveNewChan(user, chan);
-		else
-			console.log(`An another channel have already this name`);	
+		else 
+			console.log(`An another channel have already this name`);
 		return channel;
 	}
-	
-	
-	async saveNewChan(user: UserEntity, chan: CreateChanDto) : Promise<ChannelEntity>
+
+	async saveNewChan(user: UserEntity, chan: CreateChanDto): Promise<ChannelEntity> 
 	{
-		const date = new Date();
-		let newPassword: string = null;
+		const date = Date.now();
 		let channel: ChannelEntity;
-		if (chan.password != '')
-		newPassword = await bcrypt.hash(chan.password, 10);
+		if (chan.DM) 
+			return this.saveNewDM(user, chan);
+		const newPassword =
+			chan.password != '' ? bcrypt.hashSync(chan.password, 10) : null;
 		channel = await this.channelRepository.save({
 			title: chan.title,
 			owner: user,
 			password: newPassword,
 			private: chan.private,
 			protected: chan.protected,
-			creation: date,
 			update: date,
-			});
-		this.addMember(user, channel.title);
-		this.addAdmin(user, channel.title);
+			DM: chan.DM,
+		});
+		await this.addMember(user, channel.title);
+		await this.addAdmin(user, channel.title);
 		if (!channel.private) {
 			let users: UserEntity[] = await this.userService.getAllUsers();
 			for (const newUser of users) {
 				if (user.userId != newUser.userId)
-					this.addMember(newUser, channel.title);
-				}
+					await this.addMember(newUser, channel.title);
 			}
+		}
 		return channel;
 	}
 
+	async saveNewDM(user: UserEntity, chan: CreateChanDto) 
+	{
+		const date = Date.now();
+		let user2: UserEntity = await this.userService.getUserByUsername(
+			chan.user2);
+		// let user1: UserEntity = await this.userService.getUserById(chan.user1);
+		let dm: ChannelEntity = await this.channelRepository.save({
+			title: user.username + '+' + user2.username,
+			DM: chan.DM,
+			private: true,
+			update: date,
+			owner: user,
+		});
+		this.addMember(user, dm.title);
+		this.addMember(user2, dm.title);
+		return dm;
+	}
 
-	async newConnection(newUser: UserEntity)
+	/**
+	 * Permet d'ajouter le nouvel utilisateur a tous les channels publics
+	 * qui existe deja
+	 * 
+	 * @param newUser nouvelle connection d'un utilisateur 
+	 */
+	async newConnection(newUser: UserEntity) 
 	{
 		let channels: ChannelEntity[] = await this.getAllPublicChannels();
 		for (let channel of channels)
 			this.addMember(newUser, channel.title);
 	}
 
-	async chanWithPassword(user: UserEntity, informations: JoinChanDto)
+
+	async chanWithPassword(user: UserEntity, informations: JoinChanDto) 
 	{
 		let channel: ChannelEntity = await this.getChanByName(informations.title);
-		if (channel.password == informations.password)
+		if (channel.password == informations.password) 
 			return true;
 		return false;
 	}
 
-
-
 	/**
-	 * @brief Changement d'un element du channel 
-	 * 
+	 * @brief Changement d'un element du channel
+	 *
 	 * @param user le user qui souhaite effectuer la modification
 	 * - la plupart du temps : necessaire que ce soit un admin ou le owner
 	 * - sauf dans le cas de l'ajout d'un membre dans un channel privee
@@ -104,16 +124,25 @@ export class ChannelService {
 	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) 
 	{
-		const channel : ChannelEntity = await this.getChanByName(modifications.title);
-		if (modifications.newPassword || modifications.protected)
-			await this.modifyPassword(user, channel, modifications.newPassword, modifications.protected);
-		if (modifications.newAdmin) 
+		const channel: ChannelEntity = await this.getChanByName(
+			modifications.title);
+		if (channel.DM) 
+			return;
+		if (modifications.newPassword && modifications.protected)
+		{
+			await this.modifyPassword(
+				user,
+				channel,
+				modifications.newPassword,
+				modifications.protected);
+		}
+		if (modifications.newAdmin)
 			await this.modifyAdmins(user, channel, modifications.newAdmin);
-		if (modifications.newMember) 
+		if (modifications.newMember)
 			await this.modifyMembers(user, channel, modifications.newMember);
-		if (modifications.newBan) 
+		if (modifications.newBan)
 			await this.addBanMembers(user, channel, modifications.newBan);
-		if (modifications.newMute) 
+		if (modifications.newMute)
 			await this.addMuteMembers(user, channel, modifications.newMute);
 		if (modifications.deleteBan)
 			await this.deleteBanMember(user, channel, modifications.deleteBan);
@@ -122,22 +151,29 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Modification du password 
-	 * 
+	 * @brief Modification du password
+	 *
 	 * @param user le user qui souhaite effectuer la modification
 	 * -> doit etre owner
 	 * @param modifications l'interface dans laquelle le password
 	 * sera rempli pour modifier celui du channel.
 	 *
 	 */
-	async modifyPassword(user: UserEntity, channel: ChannelEntity, newPassword: string, protection: boolean) 
+	async modifyPassword(
+		user: UserEntity,
+		channel: ChannelEntity,
+		newPassword: string,
+		protection: boolean)
 	{
 		if (channel?.owner.userId != user.userId)
 			console.log(`You can't modify the channel`);
-		else if (protection) {
+		else if (protection) 
+		{
 			channel.protected = false;
 			channel.password = null;
-		} else {
+		} 
+		else
+		{
 			channel.protected = true;
 			channel.password = await bcrypt.hash(newPassword, 10);
 		}
@@ -146,28 +182,31 @@ export class ChannelService {
 
 	/**
 	 * @brief Ajout d'un admin
-	 * 
+	 *
 	 * @param user le user qui souhaite effectuer la modification
-	 * -> doit etre admin 
+	 * -> doit etre admin
 	 * @param modifications l'interface dans laquelle un username dans admin
 	 * sera rempli pour ajouter un admin au channel.
 	 *
 	 */
-	async modifyAdmins(user: UserEntity, channel: ChannelEntity, newAdmin: string) 
+	async modifyAdmins(
+		user: UserEntity,
+		channel: ChannelEntity,
+		newAdmin: string)
 	{
-		if (channel.admins.find((admin: UserEntity) => admin.username === user.username))
+		if (channel.adminsId.includes(user.userId))
 		{
-			let userToAdd: UserEntity = await this.userService.getUserByUsername(
-				newAdmin);
-			if (!channel.admins.includes(userToAdd)) {
+			let userToAdd: UserEntity = 
+				await this.userService.getUserByUsername(newAdmin);
+			if (!channel.adminsId.includes(userToAdd.userId)) {
 				await this.addAdmin(userToAdd, channel.title);
-				}
+			}
 		}
 	}
 
 	/**
-	 * @brief Ajout d'un membre dans un channel privee 
-	 * 
+	 * @brief Ajout d'un membre dans un channel privee
+	 *
 	 * @param invitingUser le user qui souhaite effectuer la modification
 	 * -> peut etre un simple membre
 	 * @param modifications l'interface dans laquelle :
@@ -176,37 +215,34 @@ export class ChannelService {
 	 * - le titre d'un channel sera rempli pour verifier qu'il s'agit d'un
 	 * channel privee
 	 *
-	 *
-	 * ❓ - est ce que si y'a une invitation mais un password il faut rentrer
-	 * le password pour pouvoir rejoindre le channel ? c chiant a fair
 	 */
-	async modifyMembers(invitingUser: UserEntity, channel: ChannelEntity, newMember: string) 
+	async modifyMembers(
+		invitingUser: UserEntity,
+		channel: ChannelEntity,
+		newMember: string) 
 	{
 		let user: UserEntity = await this.userService.getUserByUsername(newMember);
-		if ( channel?.private &&
-			channel.members.find((member: UserEntity) => member.username === invitingUser.username))
+		if (channel?.private && channel.membersId.includes(invitingUser.userId)) 
 		{
-			if (!channel.members.includes(user)) {
+			if (!channel.membersId.includes(user.userId)) {
 				await this.addMember(user, channel.title);
 				//rejoindre la room aussi
 			}
 		}
 	}
 
-
-
 	/**
-	 * @brief Suppression d'un channel 
-	 * 
+	 * @brief Suppression d'un channel
+	 *
 	 * @param user le user qui souhaite supprimer le channel :
-	 * -> seulement le owner 
+	 * -> seulement le owner
 	 * @param chanName le channel a supprimer
 	 *
 	 */
 	async deleteChan(user: UserEntity, chanName: string) 
 	{
 		const channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.admins.find((admin: UserEntity) => admin.username === user.username))
+		if (channel.adminsId.includes(user.userId))
 		{
 			await this.channelRepository
 				.createQueryBuilder()
@@ -221,35 +257,39 @@ export class ChannelService {
 	 * ------------------------ MODIFY MEMBERS LIST  ------------------------- *
 	 */
 
-
 	/**
-	 * 
-	 * @param modifyingUser 
-	 * @param newModifiedUser 
-	 * @param channel 
-	 * 
+	 *
+	 * @param modifyingUser
+	 * @param newModifiedUser
+	 * @param channel
+	 *
 	 * @todo faire un check sur userId plutot que username non?
 	 */
-	async checkConditionOfModifications(modifyingUser: UserEntity, newModifiedUser: string, channel: ChannelEntity) : Promise<UserEntity>
+	async checkConditionOfModifications(
+		modifyingUser: UserEntity,
+		newModifiedUser: string,
+		channel: ChannelEntity): Promise<UserEntity> 
 	{
-		let modifiedUser: UserEntity = await this.userService.getUserByUsername(newModifiedUser);
-		if (modifiedUser
-				&& modifiedUser != modifyingUser
-				&& channel.members.find((member: UserEntity) => member.username === modifiedUser.username)
-				&& channel.admins.find((admin: UserEntity) => admin.username === modifyingUser.username)
-				&& channel.owner.userId != modifiedUser.userId)
-			return modifiedUser;
+		let modifiedUser: UserEntity = await this.userService.getUserByUsername(
+			newModifiedUser,
+		);
+		if (modifiedUser &&
+			modifiedUser != modifyingUser &&
+			channel.membersId.includes(modifiedUser.userId) &&
+			channel.adminsId.includes(modifyingUser.userId) &&
+			channel.owner.userId != modifiedUser.userId)
+				return modifiedUser;
 		return null;
 	}
 
 	/**
-	 * @brief Ajout d'un membre dans le channel 
-	 * -> lors d'un unban 
-	 * -> lors de l'ajout d'un membre : dans un chan privee 
+	 * @brief Ajout d'un membre dans le channel
+	 * -> lors d'un unban
+	 * -> lors de l'ajout d'un membre : dans un chan privee
 	 * -> pour tous les users connectes : dans un chan public
-	 * 
+	 *
 	 * @param user le user qui rejoint le channel
-	 * @param chanName 
+	 * @param chanName
 	 *
 	 */
 
@@ -261,11 +301,11 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Ajout d'un admin dans un channel 
-	 * 
-	 * @param user le user qui rejoint le channel en tant qu'admin 
-	 * @param chanName 
-	 * 
+	 * @brief Ajout d'un admin dans un channel
+	 *
+	 * @param user le user qui rejoint le channel en tant qu'admin
+	 * @param chanName
+	 *
 	 */
 	async addAdmin(user: UserEntity, chanName: string) 
 	{
@@ -275,44 +315,55 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Ajout d'un user en tant que membre bannit 
-	 * 
-	 * @param banningUser le user qui souhaite bannir 
+	 * @brief Ajout d'un user en tant que membre bannit
+	 *
+	 * @param banningUser le user qui souhaite bannir
 	 * -> doit etre admin
-	 * @param userToBan le user a bannit 
-	 * -> doit etre membre du channel 
+	 * @param userToBan le user a bannit
+	 * -> doit etre membre du channel
 	 * @param chanName
 	 *
 	 */
-	async addBanMembers(banningUser: UserEntity, channel: ChannelEntity, newBanUser: string) 
+	async addBanMembers(
+		banningUser: UserEntity,
+		channel: ChannelEntity,
+		newBanUser: string)
 	{
-		let newBan: UserEntity = await this.checkConditionOfModifications(banningUser, newBanUser, channel);
-		if (newBan)
+		let newBan: UserEntity = await this.checkConditionOfModifications(
+			banningUser,
+			newBanUser,
+			channel);
+		if (newBan) 
 		{
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
+			await this.deleteMember(newBan, channel);
 			await channel.save();
-			this.deleteMember(newBan, channel);
 		}
 	}
 
 	/**
-	 * @brief Ajout d'un user en tant que membre mute 
-	 * 
+	 * @brief Ajout d'un user en tant que membre mute
+	 *
 	 * @param muttingUser le user qui souhaite mute
-	 * -> doit etre admin 
-	 * @param userToMute le user a mute 
-	 * -> doit etre membre du channel 
+	 * -> doit etre admin
+	 * @param userToMute le user a mute
+	 * -> doit etre membre du channel
 	 * @param chanName
 	 *
 	 */
-	async addMuteMembers(muttingUser: UserEntity, channel: ChannelEntity, newMuteUser: string) 
+	async addMuteMembers(
+		muttingUser: UserEntity,
+		channel: ChannelEntity,
+		newMuteUser: string)
 	{
-		let newMute: UserEntity = await this.userService.getUserByUsername(newMuteUser);
-		if (newMute 
-			&& muttingUser != newMute
-			&& channel.members.find((member: UserEntity) => member.username === newMute.username
-			 && channel.admins.find((admin: UserEntity) => admin.username === muttingUser.username))
-			 && channel.owner.userId != newMute.userId)
+		let newMute: UserEntity = await this.userService.getUserByUsername(
+			newMuteUser,
+		);
+		if (newMute &&
+			muttingUser != newMute &&
+			channel.membersId.includes(newMute.userId) &&
+			channel.adminsId.includes(muttingUser.userId) &&
+			channel.owner.userId != newMute.userId)
 		{
 			channel.mutedMembers = [...channel.mutedMembers, newMute];
 			await channel.save();
@@ -320,49 +371,58 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Suppression d'un user bannit 
-	 * -> le rajoute a la liste de membre 
-	 * 
+	 * @brief Suppression d'un user bannit
+	 * -> le rajoute a la liste de membre
+	 *
 	 * @param unbanningUser le user qui souhaite unban
 	 * @param userToUnban le user a rajouter a la liste des membres
 	 * @param chanName
 	 *
 	 */
-	async deleteBanMember(unbanningUser: UserEntity, channel: ChannelEntity, deleteBanUser: string) 
+	async deleteBanMember(
+		unbanningUser: UserEntity,
+		channel: ChannelEntity,
+		deleteBanUser: string)
 	{
-		console.log(`enter in delete ban`)
-		let deleteBan: UserEntity = await this.userService.getUserByUsername(deleteBanUser);
-		if (deleteBan 
-				&& unbanningUser != deleteBan
-				&& channel.admins.find((admin: UserEntity) => admin.username === unbanningUser.username)
-				&& channel.owner.userId != deleteBan.userId)
-		{
-			console.log(`conditions ok`)
+		let deleteBan: UserEntity = await this.userService.getUserByUsername(
+			deleteBanUser,
+		);
+		if (deleteBan &&
+			unbanningUser != deleteBan &&
+			channel.adminsId.includes(unbanningUser.userId) &&
+			channel.owner.userId != deleteBan.userId
+		) {
 			channel.bannedMembers = channel.bannedMembers.filter((banned) => {
 				return banned.userId !== deleteBan.userId;
 			});
 			await channel.save();
-			this.addMember(deleteBan, channel.title);
+			await this.addMember(deleteBan, channel.title);
 		}
 	}
 
 	/**
-	 * @brief Suppression d'un user mute 
-	 * 
-	 * @param unmuttingUser le user qui souhaite unmute 
-	 * @param userToUnmute le user unmute 
+	 * @brief Suppression d'un user mute
+	 *
+	 * @param unmuttingUser le user qui souhaite unmute
+	 * @param userToUnmute le user unmute
 	 * @param chanName
 	 *
 	 * @todo verifier que le user est deja mute
 	 */
-	async deleteMuteMember( unmuttingUser: UserEntity, channel: ChannelEntity, deleteMuteUser: string) 
+	async deleteMuteMember(
+		unmuttingUser: UserEntity,
+		channel: ChannelEntity,
+		deleteMuteUser: string)
 	{
-		let deleteMute: UserEntity = await this.userService.getUserByUsername(deleteMuteUser);
-		if (deleteMute 
-			&& unmuttingUser != deleteMute
-			&& channel.admins.find((admin: UserEntity) => admin.username === unmuttingUser.username)
-			&& channel.owner.userId != deleteMute.userId)
-		{
+		let deleteMute: UserEntity = await this.userService.getUserByUsername(
+			deleteMuteUser,
+		);
+		if (
+			deleteMute &&
+			unmuttingUser != deleteMute &&
+			channel.adminsId.includes(unmuttingUser.userId) &&
+			channel.owner.userId != deleteMute.userId
+		) {
 			channel.mutedMembers = channel.mutedMembers.filter((mutted) => {
 				return mutted.userId !== deleteMute.userId;
 			});
@@ -373,11 +433,11 @@ export class ChannelService {
 	/**
 	 * @brief Suppression d'un user de la liste de membre d'un channel
 	 * - Si le user a ete banni, il est supprime le la liste des membres
-	 * 
+	 *
 	 * @param userToDelete le user a supprimer de la liste de membres
-	 * @param chanName 
+	 * @param chanName
 	 */
-	async deleteMember( userToDelete: UserEntity, channel: ChannelEntity )
+	async deleteMember(userToDelete: UserEntity, channel: ChannelEntity) 
 	{
 		channel.members = channel.members.filter((member) => {
 			return member.userId !== userToDelete.userId;
@@ -390,8 +450,8 @@ export class ChannelService {
 	 */
 
 	/**
-	 * @brief Pouvoir recuperer tous les channels existants 
-	 * 
+	 * @brief Pouvoir recuperer tous les channels existants
+	 *
 	 */
 	async getAllChannels(): Promise<ChannelEntity[]> 
 	{
@@ -408,12 +468,12 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Permet de recuperer seulement les channels du user 
+	 * @brief Permet de recuperer seulement les channels du user
 	 * Autant privees que publiques
 	 *
 	 * @todo est-ce que j'envoie aussi si le user est mute ou ban ?
 	 */
-	async getMemberChannels(member: UserEntity): Promise<ChannelEntity[]> 
+	async getMemberChannels(member: UserEntity): Promise<ChannelEntity[]>
 	{
 		let channels: ChannelEntity[] = await this.channelRepository
 			.createQueryBuilder('channel')
@@ -424,11 +484,25 @@ export class ChannelService {
 			.leftJoinAndSelect('channel.admins', 'admins')
 			.where('channel.private = false')
 			.orWhere('members.userId = :id', { id: member.userId })
+			.orderBy('channel.update', 'DESC')
 			.getMany();
+		let banChannels: ChannelEntity[] = await this.getBanMemberChannel(member);
+
 		return channels;
 	}
 
-	async getAllPublicChannels() : Promise<ChannelEntity[]>
+	async getBanMemberChannel(member: UserEntity) : Promise<ChannelEntity[]>
+	{
+		let banChannels: ChannelEntity[] = await this.channelRepository
+			.createQueryBuilder('channel')
+			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+			.where('bannedMembers.userId = :id', { id: member.userId})
+			.orderBy('channel.update', 'DESC')
+			.getMany();
+		return banChannels; 
+	}
+
+	async getAllPublicChannels(): Promise<ChannelEntity[]> 
 	{
 		let channels: ChannelEntity[] = await this.channelRepository
 			.createQueryBuilder('channel')
@@ -458,22 +532,24 @@ export class ChannelService {
 				'mutedMembers',
 			],
 		});
-		if (!channel)
+		if (!channel) 
 			return null;
 		return channel;
 	}
 
 	/**
 	 * @brief Permet de n'avoir pas 2 channel du meme nom.
-	 * 
+	 *
 	 * @param chanName
 	 * @TODO check if name is unique directly in DB
 	 */
 	async getIfUniqueName(chanName: string): Promise<boolean> 
 	{
 		let channels: ChannelEntity[] = await this.getAllChannels();
-		for (let channel of channels) {
-			if (channel.title == chanName) return false;
+		for (let channel of channels) 
+		{
+			if (channel.title == chanName) 
+				return false;
 		}
 		return true;
 	}
@@ -484,17 +560,31 @@ export class ChannelService {
 
 	/**
 	 * @brief Stocke le message envoyer dans le DB
-	 * 
-	 * @param user le user qui envoie le message 
-	 * @param payload un tableau avec les informations du messages envoye 
+	 *
+	 * @param user le user qui envoie le message
+	 * @param payload un tableau avec les informations du messages envoye
 	 * - payload[0] : message (string)
 	 * - payload[1] : le nom du channel (string)
 	 */
-	async sendMessage(user: UserEntity, payload: string[])
+	async sendMessage(user: UserEntity, payload: string[]) 
 	{
-		let channel: ChannelEntity = await this.getChanByName(payload[1]);
-		this.messageService.addNewMessage(user, channel, payload[0]);
+		const chanName: string = payload[1];
+		const msg: string = payload[0];
+		const date = Date.now();
+		let channel: ChannelEntity = await this.getChanByName(chanName);
+		if (channel.mutedId.includes(user.userId) || channel.bannedId.includes(user.userId)
+			|| msg == "")
+		{
+			console.log(`you can't send message`)
+			return ;
+		}
+		const new_msg = await this.messageService.addNewMessage(
+			user,
+			channel,
+			msg,
+		);
+		channel.update = date;
+		await channel.save();
+		return new_msg;
 	}
 }
-
-
