@@ -1,0 +1,17 @@
+.layout {
+	height: 81vh;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scroll-behavior: smooth;
+}
+
+.category {
+	font-family: "Courier New", Courier, monospace;
+	font-size: large;
+	font-weight: bolder;
+	text-align: center;
+	border-bottom: 1px solid #363636;
+}

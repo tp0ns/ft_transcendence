@@ -1,13 +1,12 @@
 import GameScreen from "../components/game/GameScreen";
-import NavBar from "../components/NavBar/NavBar";
+import Layout from "../components/Layout/Layout";
 
 const GamePage = () => {
-  return (
-    <div>
-		<NavBar />
-      <GameScreen />
-    </div>
-  );
+	return (
+		<Layout>
+			<GameScreen />
+		</Layout>
+	);
 };
 
 export default GamePage;

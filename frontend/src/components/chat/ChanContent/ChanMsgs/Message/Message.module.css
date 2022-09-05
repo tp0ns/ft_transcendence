@@ -1,0 +1,43 @@
+.picture {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	align-self: flex-end;
+}
+
+.message {
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+	justify-content: center;
+	padding: 5px 10px 5px 10px;
+	border-radius: 20px;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	max-width: 70%;
+}
+
+.client_message {
+	display: flex;
+	flex-direction: row-reverse;
+	overflow-wrap: break-word;
+	gap: 10px;
+}
+
+.client_message .message {
+	color: #3a3636;
+	background-color: #fdd05d;
+	border: 2px solid #3a3636;
+}
+
+.others_message {
+	display: flex;
+	overflow-wrap: break-word;
+	gap: 10px;
+}
+
+.others_message .message {
+	color: #fdd05d;
+	background-color: #3a3636;
+	border: 2px solid #3a3636;
+}
