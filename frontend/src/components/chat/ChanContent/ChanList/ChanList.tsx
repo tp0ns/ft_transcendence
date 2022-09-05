@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import ChatContext from "../../../context/chat-context";
-import { ChatContextType } from "../../../types/ChatContextType";
+import ChatContext from "../../../../context/chat-context";
+import { ChatContextType } from "../../../../types/ChatContextType";
 import Chan from "./Chan/Chan";
 import classes from "./ChanList.module.css";
 
