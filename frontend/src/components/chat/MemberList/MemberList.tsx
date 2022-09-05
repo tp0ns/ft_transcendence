@@ -1,4 +1,5 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { socket } from "../../../App";
 import ChatContext from "../../../context/chat-context";
 import UserProp from "../../../interfaces/User.interface";
 import AdminMemberItem from "./AdminMemberItem/AdminMemberItem";
@@ -8,6 +9,7 @@ import NormalMemberItem from "./NormalMemberItem/NormalMemberItem";
 
 function MemberList() {
 	const ctx = useContext(ChatContext);
+	const newMember = useRef<HTMLInputElement>(null);
 
 	function excludeAdmins(): UserProp[] {
 		var result = ctx?.activeChan?.members.filter((member) => {
@@ -18,26 +20,49 @@ function MemberList() {
 		return result as UserProp[];
 	}
 
+	function handleNewMember(event: any) {
+		event.preventDefault();
+		const modifyChan = {
+			title: ctx?.activeChan?.title,
+			newMember: newMember.current?.value,
+		};
+		socket.emit("modifyChannel", modifyChan);
+		newMember.current!.value = "";
+	}
+
 	return (
 		<div className={classes.layout}>
-			<div className={classes.category}>Admins</div>
-			{ctx?.activeChan?.admins.map((admin) => {
-				return <NormalMemberItem key={admin.userId} member={admin} />;
-			})}
-			<div className={classes.category}>Members</div>
-			{excludeAdmins().map((member) => {
-				if (!ctx?.isAdmin)
-					return <NormalMemberItem key={member.userId} member={member} />;
-				return <AdminMemberItem key={member.userId} member={member} />;
-			})}
-			{ctx?.activeChan?.bannedMembers.length !== 0 ? (
-				<div className={classes.category}>Banned</div>
+			{ctx?.isAdmin ? (
+				<form onSubmit={handleNewMember} className={classes.search_bar}>
+					<input
+						ref={newMember}
+						type="text"
+						id="addUser"
+						placeholder="Add user..."
+						autoComplete="off"
+					/>
+				</form>
 			) : null}
-			{ctx?.activeChan?.bannedMembers.map((bannedMember) => {
-				return (
-					<BannedMemberItem key={bannedMember.userId} member={bannedMember} />
-				);
-			})}
+			<div className={classes.list}>
+				<div className={classes.category}>Admins</div>
+				{ctx?.activeChan?.admins.map((admin) => {
+					return <NormalMemberItem key={admin.userId} member={admin} />;
+				})}
+				<div className={classes.category}>Members</div>
+				{excludeAdmins().map((member) => {
+					if (!ctx?.isAdmin)
+						return <NormalMemberItem key={member.userId} member={member} />;
+					return <AdminMemberItem key={member.userId} member={member} />;
+				})}
+				{ctx?.activeChan?.bannedMembers.length !== 0 ? (
+					<div className={classes.category}>Banned</div>
+				) : null}
+				{ctx?.activeChan?.bannedMembers.map((bannedMember) => {
+					return (
+						<BannedMemberItem key={bannedMember.userId} member={bannedMember} />
+					);
+				})}
+			</div>
 		</div>
 	);
 }
