@@ -6,15 +6,24 @@
 }
 
 .message {
-	display: flex;
-	flex-direction: column;
-	align-content: center;
-	justify-content: center;
 	padding: 5px 10px 5px 10px;
 	border-radius: 20px;
 	font-family: "Courier New", Courier, monospace;
 	font-weight: bolder;
-	max-width: 70%;
+	max-width: 90%;
+}
+
+.msg_layout {
+	display: flex;
+	flex-direction: column;
+	width: 70%;
+}
+
+.author {
+	display: inline-flex;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	font-size: smaller;
 }
 
 .client_message {
@@ -24,7 +33,18 @@
 	gap: 10px;
 }
 
+.client_message .msg_layout {
+	align-items: flex-end;
+}
+
+.client_message .author {
+	color: #3a363677;
+	text-align: right;
+	margin-right: 10px;
+}
+
 .client_message .message {
+	width: fit-content;
 	color: #3a3636;
 	background-color: #fdd05d;
 	border: 2px solid #3a3636;
@@ -32,11 +52,18 @@
 
 .others_message {
 	display: flex;
+	flex-direction: row;
 	overflow-wrap: break-word;
 	gap: 10px;
 }
 
+.others_message .author {
+	color: #3a363677;
+	margin-left: 10px;
+}
+
 .others_message .message {
+	width: fit-content;
 	color: #fdd05d;
 	background-color: #3a3636;
 	border: 2px solid #3a3636;
