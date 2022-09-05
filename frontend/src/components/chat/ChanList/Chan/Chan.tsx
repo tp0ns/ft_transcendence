@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import ChatContext from "../../../../../context/chat-context";
-import ChannelInterface from "../../../../../interfaces/Channel.interface";
-import { ChatContextType } from "../../../../../types/ChatContextType";
+import ChatContext from "../../../../context/chat-context";
+import ChannelInterface from "../../../../interfaces/Channel.interface";
+import { ChatContextType } from "../../../../types/ChatContextType";
 import classes from "./Chan.module.css";
 
 const Chan: React.FC<{ key: string; chan: ChannelInterface }> = (props) => {

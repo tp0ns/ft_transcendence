@@ -1,5 +1,5 @@
 import classes from "./NormalMemberItem.module.css";
-import UserProp from "../../../../interfaces/User.interface";
+import UserProp from "../../../../../interfaces/User.interface";
 
 const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	return (

@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { socket } from "../../../../App";
-import ChatContext from "../../../../context/chat-context";
-import UserProp from "../../../../interfaces/User.interface";
+import { socket } from "../../../../../App";
+import ChatContext from "../../../../../context/chat-context";
+import UserProp from "../../../../../interfaces/User.interface";
 import classes from "./BannedMemberItem.module.css";
 
 const BannedMemberItem: React.FC<{ member: UserProp }> = (props) => {

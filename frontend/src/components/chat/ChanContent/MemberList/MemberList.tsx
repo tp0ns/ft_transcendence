@@ -1,7 +1,7 @@
 import { useContext, useRef, useState } from "react";
-import { socket } from "../../../App";
-import ChatContext from "../../../context/chat-context";
-import UserProp from "../../../interfaces/User.interface";
+import { socket } from "../../../../App";
+import ChatContext from "../../../../context/chat-context";
+import UserProp from "../../../../interfaces/User.interface";
 import AdminMemberItem from "./AdminMemberItem/AdminMemberItem";
 import BannedMemberItem from "./BannedMemberItem/BannedMemberItem";
 import classes from "./MemberList.module.css";
