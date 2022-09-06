@@ -246,14 +246,9 @@ export class GeneralGateway
 			client.data.user,
 			chanName,
 		);
-		if (!messages)
-		{
-			client.emit('userIsBanned');
-			return ;
-		}
 		// this.server.to(chanName).emit('sendChannelMessages', messages);
 		this.server.emit('updatedChannels');
-		client.emit('sendChannelMessages', messages);
+		// client.emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -305,6 +300,8 @@ export class GeneralGateway
 	async getChannelMessages(client: Socket, payload: string) {
 		const messages: MessagesEntity[] =
 			await this.messageService.getChannelMessages(client.data.user, payload);
+		if (!messages)
+			return (client.emit('userisBanned'));
 		client.emit('sendChannelMessages', messages);
 	}
 
