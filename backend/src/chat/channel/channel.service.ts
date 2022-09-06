@@ -124,7 +124,8 @@ export class ChannelService {
 
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(informations.title);
-		if (channel.password == informations.password)
+		const checkPassword: boolean = await bcrypt.compare(informations.password, channel.password)
+		if (checkPassword)
 		{
 			await this.addUserInProtectedChan(user, channel);
 			return true;
@@ -542,7 +543,7 @@ export class ChannelService {
 		const channel : ChannelEntity = await this.channelRepository.findOne({ 
 			where: { title: chanName }, 
 			relations: 
-			['members', 'admins', 'owner', 'bannedMembers', 'mutedMembers'] 
+			['members', 'admins', 'owner', 'bannedMembers', 'mutedMembers', 'userInProtectedChan'] 
 		});
 		// if (!chan)
 		// 	throw new 
