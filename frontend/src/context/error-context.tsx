@@ -19,7 +19,7 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 	useEffect(() => {
 		const identifier = setTimeout(() => {
 			setError(null);
-		}, 500);
+		}, 2500);
 		return () => {
 			clearTimeout(identifier);
 		};
