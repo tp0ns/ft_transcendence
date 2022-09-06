@@ -67,6 +67,15 @@ export class ChannelEntity extends BaseEntity {
 	membersId: string[];
 
 	@ManyToMany(() => UserEntity, {
+		cascade: true
+	})
+	@JoinTable()
+	userInProtectedChan: UserEntity[];
+
+	@RelationId((channel: ChannelEntity) => channel.userInProtectedChan)
+	usersInId: string[];
+
+	@ManyToMany(() => UserEntity, {
 		cascade: true,
 	})
 	@JoinTable()

@@ -124,8 +124,11 @@ export class ChannelService {
 
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(informations.title);
-		if (channel.password == informations.password) 
+		if (channel.password == informations.password)
+		{
+			await this.addUserInProtectedChan(user, channel);
 			return true;
+		}
 		return false;
 	}
 
@@ -313,6 +316,12 @@ export class ChannelService {
 		await channel.save();
 	}
 
+	async addUserInProtectedChan(user: UserEntity, channel: ChannelEntity)
+	{
+		channel.userInProtectedChan = [...channel.userInProtectedChan, user];
+		await channel.save();
+	}
+
 	/**
 	 * @brief Ajout d'un admin dans un channel
 	 *
@@ -482,6 +491,7 @@ export class ChannelService {
 				'owner',
 				'bannedMembers',
 				'mutedMembers',
+				'userInProtectedChan'
 			],
 		});
 		return channels;

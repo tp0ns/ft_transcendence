@@ -5,6 +5,7 @@ import {
 	WebSocketServer,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
+	WsException,
 } from '@nestjs/websockets';
 import { Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
@@ -155,12 +156,15 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('chanWithPassword')
-	async chatWithPassword(client: Socket, informations: JoinChanDto) {
+	async chanWithPassword(client: Socket, informations: JoinChanDto) {
 		let bool: boolean = await this.channelService.chanWithPassword(
 			client.data.user,
 			informations,
 		);
-		client.emit('chanWithPassword', bool);
+		if (bool == true)
+			this.getChannelMessages(client, informations.title);
+		else 
+			throw new WsException('Wrong Password');
 	}
 
 	/**
@@ -298,7 +302,7 @@ export class GeneralGateway
 			await this.messageService.getChannelMessages(client.data.user, chanName);
 		if (!messages)
 			return (client.emit('userIsBanned'));
-		if (channel.protected == true)
+		if (channel.protected == true && !channel.usersInId.includes(client.data.user.userId))
 			return (client.emit('chanNeedPw'));
 		client.emit('sendChannelMessages', messages);
 	}
