@@ -1,10 +1,10 @@
 import classes from "./AdminMemberItem.module.css";
-import UserProp from "../../../../interfaces/User.interface";
+import UserProp from "../../../../../interfaces/User.interface";
 import { useContext, useState } from "react";
-import ChatContext from "../../../../context/chat-context";
-import { socket } from "../../../../App";
-import Modal from "../../../../ui/Modal/Modal";
-import UserContent from "../../../user/UserContent/UserContent";
+import ChatContext from "../../../../../context/chat-context";
+import { socket } from "../../../../../App";
+import Modal from "../../../../../ui/Modal/Modal";
+import UserContent from "../../../../user/UserContent/UserContent";
 
 const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const [itemSide, setItemSide] = useState<boolean>(false);

@@ -24,7 +24,10 @@ const Message: React.FC<{ message: MessageInterface }> = (props) => {
 				alt="Profile"
 				className={classes.picture}
 			/>
-			<div className={classes.message}>{props.message.message}</div>
+			<div className={classes.msg_layout}>
+				<div className={classes.author}>{props.message.user.username}</div>
+				<div className={classes.message}>{props.message.message}</div>
+			</div>
 		</div>
 	);
 };

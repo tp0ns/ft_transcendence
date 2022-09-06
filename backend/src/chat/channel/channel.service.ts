@@ -455,15 +455,15 @@ export class ChannelService {
 	 *
 	 */
 	async getAllChannels(): Promise<ChannelEntity[]> {
-		const channels: ChannelEntity[] = await this.channelRepository.find({
-			relations: [
-				'members',
-				'admins',
-				'owner',
-				'bannedMembers',
-				'mutedMembers',
-			],
-		});
+		const channels: ChannelEntity[] = await this.channelRepository
+			.createQueryBuilder('channel')
+			.leftJoinAndSelect('channel.members', 'members')
+			.leftJoinAndSelect('channel.owner', 'owner')
+			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+			.leftJoinAndSelect('channel.admins', 'admins')
+			.orderBy('channel.update', 'DESC')
+			.getMany();
 		return channels;
 	}
 

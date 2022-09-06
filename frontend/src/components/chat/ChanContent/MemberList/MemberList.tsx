@@ -1,7 +1,7 @@
 import { useContext, useRef, useState } from "react";
-import { socket } from "../../../App";
-import ChatContext from "../../../context/chat-context";
-import UserProp from "../../../interfaces/User.interface";
+import { socket } from "../../../../App";
+import ChatContext from "../../../../context/chat-context";
+import UserProp from "../../../../interfaces/User.interface";
 import AdminMemberItem from "./AdminMemberItem/AdminMemberItem";
 import BannedMemberItem from "./BannedMemberItem/BannedMemberItem";
 import classes from "./MemberList.module.css";
@@ -32,13 +32,14 @@ function MemberList() {
 
 	return (
 		<div className={classes.layout}>
-			{ctx?.isAdmin ? (
+			{ctx?.isAdmin && ctx?.activeChan?.private ? (
 				<form onSubmit={handleNewMember} className={classes.search_bar}>
+					<img src="adduser.svg" alt="Add user" />
 					<input
 						ref={newMember}
 						type="text"
 						id="addUser"
-						placeholder="Add user..."
+						placeholder="Add user and press Enter..."
 						autoComplete="off"
 					/>
 				</form>
