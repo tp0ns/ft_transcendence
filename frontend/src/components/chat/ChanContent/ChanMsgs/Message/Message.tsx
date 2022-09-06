@@ -1,16 +1,16 @@
 import jwtDecode, { JwtPayload } from "jwt-decode";
+import { useContext } from "react";
 import { useCookies } from "react-cookie";
+import ChatContext from "../../../../../context/chat-context";
 import MessageInterface from "../../../../../interfaces/Message.interface";
 import classes from "./Message.module.css";
 
 const Message: React.FC<{ message: MessageInterface }> = (props) => {
-	const [cookies] = useCookies();
-	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
-
+	const ctx = useContext(ChatContext);
 	return (
 		<div
 			className={
-				props.message.user.userId === clientId
+				props.message.user.userId === ctx!.clientId
 					? classes.client_message
 					: classes.others_message
 			}
