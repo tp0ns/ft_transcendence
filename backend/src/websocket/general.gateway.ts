@@ -97,7 +97,6 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@UsePipes(ValidationPipe)
-	@UseFilters()
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
 		const channel: ChannelEntity = await this.channelService.createNewChan(
@@ -247,10 +246,14 @@ export class GeneralGateway
 			client.data.user,
 			chanName,
 		);
-		
+		if (!messages)
+		{
+			client.emit('userIsBanned');
+			return ;
+		}
 		// this.server.to(chanName).emit('sendChannelMessages', messages);
 		this.server.emit('updatedChannels');
-		// client.emit('sendChannelMessages', messages);
+		client.emit('sendChannelMessages', messages);
 	}
 
 	/**

@@ -17,25 +17,27 @@ export class globalExceptionFilter {
 		case HttpException:
 			status = (exception as HttpException).getStatus();
 			break;
-			case WsException:
-				client.emit('errorEvent', exception.message);
-            case QueryFailedError:  // this is a TypeOrm error
-                status = HttpStatus.UNPROCESSABLE_ENTITY
-                // message = (exception as QueryFailedError).message;
-                // code = (exception as any).code;
-                break;
-            // case EntityNotFoundError:  // this is another TypeOrm error
-            //     status = HttpStatus.UNPROCESSABLE_ENTITY
-            //     message = (exception as EntityNotFoundError).message;
-            //     code = (exception as any).code;
-            //     break;
-            // case CannotCreateEntityIdMapError: // and another
-            //     status = HttpStatus.UNPROCESSABLE_ENTITY
-            //     message = (exception as CannotCreateEntityIdMapError).message;
-            //     code = (exception as any).code;
-            //     break;
-            default:
-                status = HttpStatus.INTERNAL_SERVER_ERROR
+		case WsException:
+			client.emit('errorEvent', exception.message);
+		case QueryFailedError:  // this is a TypeOrm error
+			// status = HttpStatus.UNPROCESSABLE_ENTITY
+			// message = (exception as QueryFailedError).message;
+			// code = (exception as any).code;
+			break;
+		case BadRequestException:
+			break;
+		// case EntityNotFoundError:  // this is another TypeOrm error
+		//     status = HttpStatus.UNPROCESSABLE_ENTITY
+		//     message = (exception as EntityNotFoundError).message;
+		//     code = (exception as any).code;
+		//     break;
+		// case CannotCreateEntityIdMapError: // and another
+		//     status = HttpStatus.UNPROCESSABLE_ENTITY
+		//     message = (exception as CannotCreateEntityIdMapError).message;
+		//     code = (exception as any).code;
+		//     break;
+		default:
+			status = HttpStatus.INTERNAL_SERVER_ERROR
         }
   }
 }

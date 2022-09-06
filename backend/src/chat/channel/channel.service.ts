@@ -10,6 +10,7 @@ import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
 import { WsException } from '@nestjs/websockets';
+import { channel } from 'diagnostics_channel';
 @Injectable()
 export class ChannelService {
 	constructor(
@@ -497,6 +498,8 @@ export class ChannelService {
 		const channels = allChannels.filter((channel) => {
 			return channel.members.some((chanmember) => {
 				return chanmember.userId === member.userId;
+			}) || channel.bannedMembers.some((bannedMember) => {
+				return bannedMember.userId === member.userId;
 			});
 		});
 		return channels;
