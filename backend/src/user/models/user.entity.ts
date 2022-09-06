@@ -1,4 +1,5 @@
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { Match } from 'src/game/interfaces/game.interface';
 import {
 	Column,
 	Entity,
@@ -42,6 +43,12 @@ export class UserEntity {
 	})
 	profileImage: string;
 
+	@Column({
+		nullable: true,
+		type: 'json',
+	})
+	public currentMatch: Match | null;
+
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];
 
@@ -50,7 +57,6 @@ export class UserEntity {
 
 	@OneToMany(() => MessagesEntity, (message) => message.user)
 	messages: MessagesEntity[];
-
 }
 
 export default UserEntity;
