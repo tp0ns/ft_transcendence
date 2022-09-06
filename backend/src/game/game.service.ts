@@ -40,6 +40,7 @@ export class GameService {
 			goRight: false,
 			p1Touches: 0,
 			p2Touches: 0,
+			isMoving: false,
 		};
 		let initPlayer: UserEntity; // check if this init is good
 
@@ -58,6 +59,7 @@ export class GameService {
 			p2User: null,
 			isLocal: true,
 			roomName: room,
+			isEnd: false,
 		};
 		console.log(match.roomName);
 		return match;
@@ -121,15 +123,18 @@ export class GameService {
 			match.ball.x = 250;
 			match.ball.speedy = 0;
 			match.ball.goRight = true;
+			match.ball.isMoving = false;
 		}
 		switch(score) {
 			case 0:
 				break;
 			case 1:
 				match.p2Score++;
-				break;
+				match.ball.goRight = false;
+			break;
 			case 2:
 				match.p1Score++;
+				match.ball.goRight = true;
 				break;
 		}
 	}
@@ -181,6 +186,7 @@ export class GameService {
 
 	//ends the game
 	async endGame(match: Match, winner: UserEntity) {
+		match.isEnd = true;
 		if (match.isLocal == false) {
 			// -> send the data to the db
 			// trigger the pop-up(?modal) with victory info and home button
