@@ -292,11 +292,14 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
-	async getChannelMessages(client: Socket, payload: string) {
+	async getChannelMessages(client: Socket, chanName: string) {
+		let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
 		const messages: MessagesEntity[] =
-			await this.messageService.getChannelMessages(client.data.user, payload);
+			await this.messageService.getChannelMessages(client.data.user, chanName);
 		if (!messages)
 			return (client.emit('userIsBanned'));
+		if (channel.protected == true)
+			return (client.emit('chanNeedPw'));
 		client.emit('sendChannelMessages', messages);
 	}
 

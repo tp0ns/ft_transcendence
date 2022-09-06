@@ -528,37 +528,15 @@ export class ChannelService {
 		return channels;
 	}
 
-	/**
-	 * @brief Retrouver un channel avec son nom
-	 *
-	 */
 	async getChanByName(chanName: string): Promise<ChannelEntity> {
-		let channel: ChannelEntity = await this.channelRepository.findOne({
-			where: { title: chanName },
-			relations: [
-				'members',
-				'admins',
-				'owner',
-				'bannedMembers',
-				'mutedMembers',
-			],
+		const channel : ChannelEntity = await this.channelRepository.findOne({ 
+			where: { title: chanName }, 
+			relations: 
+			['members', 'admins', 'owner', 'bannedMembers', 'mutedMembers'] 
 		});
-		if (!channel) return null;
+		// if (!chan)
+		// 	throw new 
 		return channel;
-	}
-
-	/**
-	 * @brief Permet de n'avoir pas 2 channel du meme nom.
-	 *
-	 * @param chanName
-	 * @TODO check if name is unique directly in DB
-	 */
-	async getIfUniqueName(chanName: string): Promise<boolean> {
-		let channels: ChannelEntity[] = await this.getAllChannels();
-		for (let channel of channels) {
-			if (channel.title == chanName) return false;
-		}
-		return true;
 	}
 
 	/**
