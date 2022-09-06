@@ -39,8 +39,6 @@ export class ChannelService {
 		chan: CreateChanDto,
 	): Promise<ChannelEntity> {
 		let channel: ChannelEntity;
-		if (!await this.getIfUniqueName(chan.title))
-			throw new WsException("Another channel have already this name");
 		channel = await this.saveNewChan(user, chan);
 		return channel;
 	}
@@ -119,12 +117,14 @@ export class ChannelService {
 	 */
 	async newConnection(newUser: UserEntity) {
 		let channels: ChannelEntity[] = await this.getAllPublicChannels();
-		for (let channel of channels) this.addMember(newUser, channel.title);
+		for (let channel of channels) 
+			this.addMember(newUser, channel.title);
 	}
 
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
 		let channel: ChannelEntity = await this.getChanByName(informations.title);
-		if (channel.password == informations.password) return true;
+		if (channel.password == informations.password) 
+			return true;
 		return false;
 	}
 
@@ -142,7 +142,8 @@ export class ChannelService {
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
-		if (channel.DM) return;
+		if (channel.DM) 
+			return;
 		if (modifications.newPassword && modifications.protected) {
 			await this.modifyPassword(
 				user,
@@ -181,7 +182,7 @@ export class ChannelService {
 		protection: boolean,
 	) {
 		if (channel?.owner.userId != user.userId)
-			console.log(`You can't modify the channel`);
+			throw new WsException("You can't modify the channel");
 		else if (protection) {
 			channel.protected = false;
 			channel.password = null;
@@ -472,7 +473,7 @@ export class ChannelService {
 	 * @brief Pouvoir recuperer tous les channels existants
 	 *
 	 */
-		async getAllChannels(): Promise<ChannelEntity[]> {
+	async getAllChannels(): Promise<ChannelEntity[]> {
 		const channels: ChannelEntity[] = await this.channelRepository.find({
 			relations: [
 				'members',
@@ -574,14 +575,10 @@ export class ChannelService {
 		const msg: string = payload[0];
 		const date = Date.now();
 		let channel: ChannelEntity = await this.getChanByName(chanName);
-		if (
-			channel.mutedId.includes(user.userId) ||
+		if (channel.mutedId.includes(user.userId) ||
 			channel.bannedId.includes(user.userId) ||
-			msg == ''
-		) {
-			console.log(`you can't send message`);
-			return;
-		}
+			msg == '') 
+				throw new WsException("You can't send a message");
 		const new_msg = await this.messageService.addNewMessage(user, channel, msg);
 		channel.update = date;
 		await channel.save();

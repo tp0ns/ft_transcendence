@@ -6,7 +6,7 @@ import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Logger, UseFilters, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
@@ -22,9 +22,9 @@ import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
-import { WsExceptionFilter } from 'src/globalException.filter';
+import { globalExceptionFilter } from 'src/globalException.filter';
 
-@UseFilters(WsExceptionFilter)
+@UseFilters(globalExceptionFilter)
 @WebSocketGateway({
 	cors: {
 		origin: '/',
@@ -96,6 +96,8 @@ export class GeneralGateway
 	 *
 	 */
 	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
+	@UseFilters()
 	@SubscribeMessage('createChan')
 	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
 		const channel: ChannelEntity = await this.channelService.createNewChan(

@@ -1,3 +1,4 @@
+import { isNotEmpty } from 'class-validator';
 import UserEntity from 'src/user/models/user.entity';
 import {
 	BaseEntity,
@@ -30,6 +31,7 @@ export class ChannelEntity extends BaseEntity {
 
 	@Column('text', {
 		default: '',
+		unique: true,
 	})
 	title: string;
 
@@ -86,13 +88,6 @@ export class ChannelEntity extends BaseEntity {
 		default: false,
 	})
 	protected: boolean;
-
-	// @Column({
-	// 	nullable: false,
-	// 	default: 0,
-	// 	type: "float",
-	// })
-	// creation: number;
 
 	@Column({
 		nullable: false,
