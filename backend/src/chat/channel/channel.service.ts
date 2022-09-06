@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserEntity from 'src/user/models/user.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { CreateChanDto } from './dtos/createChan.dto';
 import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
+import { WsException } from '@nestjs/websockets';
 @Injectable()
 export class ChannelService {
 	constructor(
@@ -38,9 +39,9 @@ export class ChannelService {
 		chan: CreateChanDto,
 	): Promise<ChannelEntity> {
 		let channel: ChannelEntity;
-		if (await this.getIfUniqueName(chan.title))
-			channel = await this.saveNewChan(user, chan);
-		else console.log(`An another channel have already this name`);
+		if (!await this.getIfUniqueName(chan.title))
+			throw new WsException("Another channel have already this name");
+		channel = await this.saveNewChan(user, chan);
 		return channel;
 	}
 
@@ -450,20 +451,37 @@ export class ChannelService {
 	 * ------------------------ GETTERS  ------------------------- *
 	 */
 
+	// /**
+	//  * @brief Pouvoir recuperer tous les channels existants
+	//  *
+	//  */
+	// async getAllChannels(): Promise<ChannelEntity[]> {
+	// 	const channels: ChannelEntity[] = await this.channelRepository
+	// 		.createQueryBuilder('channel')
+	// 		.leftJoinAndSelect('channel.members', 'members')
+	// 		.leftJoinAndSelect('channel.owner', 'owner')
+	// 		.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+	// 		.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+	// 		.leftJoinAndSelect('channel.admins', 'admins')
+	// 		.orderBy('channel.update', 'DESC')
+	// 		.getMany();
+	// 	return channels;
+	// }
+
 	/**
 	 * @brief Pouvoir recuperer tous les channels existants
 	 *
 	 */
-	async getAllChannels(): Promise<ChannelEntity[]> {
-		const channels: ChannelEntity[] = await this.channelRepository
-			.createQueryBuilder('channel')
-			.leftJoinAndSelect('channel.members', 'members')
-			.leftJoinAndSelect('channel.owner', 'owner')
-			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
-			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
-			.leftJoinAndSelect('channel.admins', 'admins')
-			.orderBy('channel.update', 'DESC')
-			.getMany();
+		async getAllChannels(): Promise<ChannelEntity[]> {
+		const channels: ChannelEntity[] = await this.channelRepository.find({
+			relations: [
+				'members',
+				'admins',
+				'owner',
+				'bannedMembers',
+				'mutedMembers',
+			],
+		});
 		return channels;
 	}
 

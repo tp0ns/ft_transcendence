@@ -6,7 +6,7 @@ import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
@@ -22,7 +22,9 @@ import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { WsExceptionFilter } from 'src/globalException.filter';
 
+@UseFilters(WsExceptionFilter)
 @WebSocketGateway({
 	cors: {
 		origin: '/',
