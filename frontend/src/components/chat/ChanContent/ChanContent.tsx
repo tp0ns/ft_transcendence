@@ -11,7 +11,7 @@ import MessageInterface from "../../../interfaces/Message.interface";
 function ChanContent() {
 	const ctx = useContext(ChatContext) as ChatContextType;
 	const [msgs, setMsgs] = useState<MessageInterface[]>([]);
-	const [authorized, setAuthorized] = useState<boolean>(true);
+	const [authorized, setAuthorized] = useState<boolean>(false);
 	const [isBanned, setIsBanned] = useState<boolean>(false);
 	const [needPw, setNeedPw] = useState<boolean>(false);
 

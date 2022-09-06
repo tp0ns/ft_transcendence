@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { dirname, join } from 'path';
 import * as cookieParser from 'cookie-parser';
 import { UnauthorizedExceptionFilter } from './unauthorized.filter';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule);

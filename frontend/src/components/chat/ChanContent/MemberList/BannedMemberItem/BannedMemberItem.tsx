@@ -10,7 +10,7 @@ const BannedMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	function unban() {
 		const modifyChan = {
 			title: ctx?.activeChan?.title,
-			deleteBan: props.member.username,
+			deleteBan: props.member.userId,
 		};
 		socket.emit("modifyChannel", modifyChan);
 	}
