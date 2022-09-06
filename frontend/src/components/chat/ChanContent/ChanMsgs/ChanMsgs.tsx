@@ -4,27 +4,20 @@ import ChatContext from "../../../../context/chat-context";
 import ChannelInterface from "../../../../interfaces/Channel.interface";
 import MessageInterface from "../../../../interfaces/Message.interface";
 import { ChatContextType } from "../../../../types/ChatContextType";
+import MemberList from "../MemberList/MemberList";
 import classes from "./ChanMsgs.module.css";
 import ChanSettings from "./ChanSettings/ChanSettings";
 import Message from "./Message/Message";
 
-function ChanMsgs() {
+const ChanMsgs: React.FC<{ msgs: MessageInterface[] }> = (props) => {
 	const ctx = useContext(ChatContext) as ChatContextType;
-	const [msgs, setMsgs] = useState<MessageInterface[]>([]);
 	const bottomScroll = useRef<any>(null);
 	const [settings, setSettings] = useState<boolean>(false);
 	const inputMsg = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		socket.emit("getChannelMessages", ctx.activeChan?.title);
-		socket.on("sendChannelMessages", (messages) => {
-			setMsgs(messages);
-		});
-	}, [ctx.activeChan]);
-
-	useEffect(() => {
 		bottomScroll.current?.scrollIntoView({ behavior: "smooth" });
-	}, [msgs]);
+	}, [props.msgs]);
 
 	function settingsClickHandler() {
 		setSettings((prev) => {
@@ -56,7 +49,7 @@ function ChanMsgs() {
 			</div>
 			<div className={classes.msgs}>
 				<div ref={bottomScroll} />
-				{msgs
+				{props.msgs
 					.slice()
 					.reverse()
 					.map((msg) => {
@@ -69,6 +62,6 @@ function ChanMsgs() {
 			</form>
 		</div>
 	);
-}
+};
 
 export default ChanMsgs;
