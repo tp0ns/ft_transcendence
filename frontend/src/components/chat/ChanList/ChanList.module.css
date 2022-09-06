@@ -1,0 +1,26 @@
+.layout {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.new_chan {
+	font-family: inherit; /* 1 */
+	font-size: xx-large; /* 1 */
+	height: 50px;
+	cursor: pointer;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: none;
+	border-radius: 10px;
+}
+
+.chan_list {
+	height: 81vh;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scroll-behavior: smooth;
+}

@@ -1,0 +1,20 @@
+.layout {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.layout fieldset {
+	border: 2px solid #3a3636;
+	justify-content: center;
+}
+
+.layout button {
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: 2px solid #3a3636;
+	border-radius: 10px;
+	align-self: center;
+}
