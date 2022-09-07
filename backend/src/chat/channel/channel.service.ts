@@ -184,8 +184,8 @@ export class ChannelService {
 		user: UserEntity,
 		channel: ChannelEntity,
 		newPassword: string,
-		protection: boolean,
-	) {
+		protection: boolean) 
+	{
 		if (channel?.owner.userId != user.userId)
 			throw new WsException("You can't modify the channel");
 		else if (protection) {
@@ -194,6 +194,7 @@ export class ChannelService {
 		} else {
 			channel.protected = true;
 			channel.password = await bcrypt.hash(newPassword, 10);
+			channel.userInProtectedChan = null;
 		}
 		await this.channelRepository.save(channel);
 	}
@@ -457,6 +458,8 @@ export class ChannelService {
 			return member.userId !== userToDelete.userId;
 		});
 	}
+
+
 
 	/**
 	 * ------------------------ GETTERS  ------------------------- *
