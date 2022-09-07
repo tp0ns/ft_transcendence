@@ -16,19 +16,13 @@ const ChanSettings: React.FC<{
 
 	useEffect(() => {
 		protection.current!.checked = ctx!.activeChan!.protected;
-	}, []);
+	}, [ctx?.activeChan]);
 
 	function handleModifySubmit(event: React.FormEvent) {
 		event.preventDefault();
-		console.log(
-			"password : ",
-			password.current?.value,
-			"checked : ",
-			protection.current?.checked
-		);
 		const modifyChan = {
 			title: ctx?.activeChan!.title,
-			password: password.current?.value,
+			newPassword: password.current?.value,
 			protected: protection.current!.checked,
 		};
 		socket.emit("modifyChannel", modifyChan);
