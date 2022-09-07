@@ -1,16 +1,16 @@
 import { ArgumentsHost, BadRequestException, Catch, HttpException, HttpStatus } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
+import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { QueryFailedError } from 'typeorm';
 
 @Catch(WsException, HttpException, QueryFailedError)
 export class globalExceptionFilter {
-  public catch(exception: HttpException, host: ArgumentsHost) {
+  public catch(exception: HttpException | WsException | QueryFailedError, host: ArgumentsHost) {
     const client = host.switchToWs().getClient();
     this.handleError(client, exception);
   }
 
-  public handleError(client: Socket, exception: HttpException | WsException) {
+  public handleError(client: Socket, exception: HttpException | WsException | QueryFailedError) {
 	let status = HttpStatus.INTERNAL_SERVER_ERROR;
 	
 	switch (exception.constructor) {
