@@ -17,19 +17,29 @@ function ChanContent() {
 	const [needPw, setNeedPw] = useState<boolean>(false);
 
 	useEffect(() => {
-		socket.emit("getChannelMessages", ctx.activeChan?.title);
+		setIsBanned(false);
+		setNeedPw(false);
+		if (ctx.activeChan) {
+			setLoading(true);
+			socket.emit("getChannelMessages", ctx.activeChan?.title);
+			return;
+		}
+		setLoading(false);
 	}, [ctx.activeChan]);
 
 	useEffect(() => {
 		socket.on("sendChannelMessages", (messages) => {
 			setLoading(false);
+			// setAuthorized(true);
 			setMsgs(messages);
 		});
 		socket.on("userIsBanned", () => {
+			// setAuthorized(false);
 			setLoading(false);
 			setIsBanned(true);
 		});
 		socket.on("chanNeedPw", () => {
+			// setAuthorized(false);
 			setLoading(false);
 			setNeedPw(true);
 		});
