@@ -150,13 +150,11 @@ export class ChannelService {
 	 *
 	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
-		console.log(`enter in modifyChannel`);
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
 		if (channel.DM) return;
 		if (modifications.newPassword || !modifications.protected) {
-			console.log(`enter in modifyPassword condition`);
 			await this.modifyPassword(
 				user,
 				channel,
@@ -193,44 +191,22 @@ export class ChannelService {
 		newPassword: string,
 		protection: boolean,
 	) {
-		if (!protection) {
-			if (!newPassword)
-				throw new WsException('You need a password to protect channel');
-			channel.protected = false;
-			channel.password = null;
-		} else if (protection) {
-			if (newPassword) throw new WsException("You don't need a password");
+		if (channel?.owner.userId != user.userId)
+			throw new WsException("You can't modify the channel");
+		else if (!newPassword && protection)
+			throw new WsException(
+				'You need to enter a password if you want to protect this channel',
+			);
+		else if (newPassword && protection) {
 			channel.protected = true;
 			channel.password = await bcrypt.hash(newPassword, 10);
 			channel.userInProtectedChan = null;
+		} else {
+			channel.protected = false;
+			channel.password = null;
 		}
 		await this.channelRepository.save(channel);
 	}
-
-	// async modifyPassword(
-	// 	user: UserEntity,
-	// 	channel: ChannelEntity,
-	// 	newPassword: string,
-	// 	protection: boolean,
-	// ) {
-	// 	if (channel?.owner.userId != user.userId)
-	// 		throw new WsException("You can't modify the channel");
-	// 	else if (!newPassword && protection)
-	// 		throw new WsException(
-	// 			'You need to enter a password if you want to protect this channel',
-	// 		);
-	// 	else if (newPassword && protection)
-	// 	{
-	// 		channel.protected = true;
-	// 		channel.password = await bcrypt.hash(newPassword, 10);
-	// 		channel.userInProtectedChan = null;
-	// 	}
-	// 	else {
-	// 		channel.protected = false;
-	// 		channel.password = null;
-	// 	}
-	// 	await this.channelRepository.save(channel);
-	// }
 
 	/**
 	 * @brief Ajout d'un admin
