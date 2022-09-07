@@ -150,11 +150,13 @@ export class ChannelService {
 	 *
 	 */
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
+		console.log(`enter in modifyChannel`);
 		const channel: ChannelEntity = await this.getChanByName(
 			modifications.title,
 		);
 		if (channel.DM) return;
-		if (modifications.newPassword && modifications.protected) {
+		if (modifications.newPassword || !modifications.protected) {
+			console.log(`enter in modifyPassword condition`);
 			await this.modifyPassword(
 				user,
 				channel,
@@ -185,28 +187,25 @@ export class ChannelService {
 	 * sera rempli pour modifier celui du channel.
 	 *
 	 */
-	async modifyPassword(user: UserEntity, 
-		channel: ChannelEntity, 
+	async modifyPassword(
+		user: UserEntity,
+		channel: ChannelEntity,
 		newPassword: string,
-		protection: boolean)
-		{
-			if (!protection && !newPassword)
-			{
-				channel.protected = false;
-				channel.password = null;
-			}
-			else if (protection && newPassword)
-			{
-				channel.protected = true;
-				channel.password = await bcrypt.hash(newPassword, 10);
-				channel.userInProtectedChan = null;
-			}
-			else if (!protection && newPassword || protection && !newPassword)
-				throw new WsException('An error occurred in password change.')
-			await this.channelRepository.save(channel);
+		protection: boolean,
+	) {
+		if (!protection) {
+			if (!newPassword)
+				throw new WsException('You need a password to protect channel');
+			channel.protected = false;
+			channel.password = null;
+		} else if (protection) {
+			if (newPassword) throw new WsException("You don't need a password");
+			channel.protected = true;
+			channel.password = await bcrypt.hash(newPassword, 10);
+			channel.userInProtectedChan = null;
 		}
-
-
+		await this.channelRepository.save(channel);
+	}
 
 	// async modifyPassword(
 	// 	user: UserEntity,
@@ -232,8 +231,6 @@ export class ChannelService {
 	// 	}
 	// 	await this.channelRepository.save(channel);
 	// }
-
-
 
 	/**
 	 * @brief Ajout d'un admin
