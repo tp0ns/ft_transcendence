@@ -36,15 +36,17 @@ export class MessageService {
 	{
 		let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
 		
-		if (channel.bannedId.includes(user.userId))
-			return null;
-		const messages: MessagesEntity[] = await this.MessageRepository
-			.createQueryBuilder('messages')
-			.leftJoinAndSelect('messages.user', 'sender')
-			.leftJoinAndSelect('messages.channel', 'channel')
-			.where('channel.channelId = :id', {id : channel.channelId})
-			.getMany()
-		return messages;
-
+		if (channel)
+		{ 
+			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
+				return null;
+			const messages: MessagesEntity[] = await this.MessageRepository
+				.createQueryBuilder('messages')
+				.leftJoinAndSelect('messages.user', 'sender')
+				.leftJoinAndSelect('messages.channel', 'channel')
+				.where('channel.channelId = :id', {id : channel.channelId})
+				.getMany()
+			return messages;
+		}
 	}
 }

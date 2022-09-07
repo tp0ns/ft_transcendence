@@ -456,7 +456,6 @@ export class ChannelService {
 		channel.members = channel.members.filter((member) => {
 			return member.userId !== userToDelete.userId;
 		});
-		await channel.save();
 	}
 
 	/**

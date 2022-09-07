@@ -204,14 +204,26 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
 	async leaveRoom(client: Socket, channel: ChannelEntity) {
-		if (
-			channel.members.find(
-				(member: UserEntity) => member.userId === client.data.user.userId,
-			)
-		) {
+		if (channel.members.find(
+				(member: UserEntity) => member.userId === client.data.user.userId))
+		{
 			client.leave(channel.title);
 			this.server.emit('leftRoom');
 		}
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('quitChan')
+	async quitChan(client: Socket, channel: ChannelEntity)
+	{
+		if (channel.members.find(
+			(member: UserEntity) => member.userId === client.data.user.userId))
+		{
+			await this.channelService.deleteMember(client.data.user, channel);
+			client.leave(channel.title);
+			await channel.save();
+		}
+		this.server.emit('updatedChannels');
 	}
 
 	/**
