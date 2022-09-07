@@ -219,7 +219,8 @@ export class GeneralGateway
 		if (channel.members.find(
 			(member: UserEntity) => member.userId === client.data.user.userId))
 		{
-			this.channelService.deleteMember(client.data.user, channel);
+			await this.channelService.deleteMember(client.data.user, channel);
+			await channel.save();
 		}
 		this.server.emit('updatedChannels');
 	}
