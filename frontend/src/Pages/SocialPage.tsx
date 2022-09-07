@@ -16,7 +16,7 @@ const SocialPage = () => {
     console.log("entered initial useEffect");
     socket.emit("getRelations");
     socket.on("sendRelations", (relations) => {
-      console.log("SENDRELATIONS received relations: ", receivedRelations)
+      // console.log("SENDRELATIONS received relations: ", receivedRelations)
       setReceivedRelations(relations)});
 
     fetch("http://localhost/backend/users/me")
@@ -26,9 +26,15 @@ const SocialPage = () => {
       });
   }, []);
 
+  socket.on("updatedRelations", () => {
+    socket.emit("getRelations");
+    socket.on("sendRelations", (relations) => {
+      // console.log("SENDRELATIONS received relations: ", receivedRelations)
+      setReceivedRelations(relations)});
+  })
+
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      console.log("entered enter!!!");
       socket.emit("addFriend", event.target.value);
       event.target.value = "";
     }

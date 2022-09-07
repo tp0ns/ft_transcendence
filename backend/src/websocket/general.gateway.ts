@@ -30,6 +30,7 @@ import { IdDto, UsernameDto } from './dtos/Relations.dto';
 		origin: 'http://localhost/',
 	},
 })
+
 export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -452,27 +453,24 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getRelations')
 	async getRelations(client: Socket) {
+		console.log("clientId: ", client.id);
 		const relations: RelationEntity[] =
 			await this.relationsService.getAllRelations(client.data.user);
-		this.server.emit('sendRelations', relations);
+		this.server.to(client.id).emit('sendRelations', relations);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('addFriend')
 	async addFriend(client: Socket, username: UsernameDto) {
 		await this.relationsService.sendFriendRequest(username.username, client.data.user);
-		const relations: RelationEntity[] =
-			await this.relationsService.getAllRelations(client.data.user);
-		this.server.emit('sendRelations', relations);
+		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
 	async blockUser(client: Socket, username: UsernameDto) {
 		await this.relationsService.blockUser(username.username, client.data.user);
-		const relations: RelationEntity[] =
-		await this.relationsService.getAllRelations(client.data.user);
-		this.server.emit('sendRelations', relations);
+		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
@@ -480,9 +478,6 @@ export class GeneralGateway
 	async unblockUser(client: Socket, relationId: IdDto) {
 		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
-		const relations: RelationEntity[] =
-		await this.relationsService.getAllRelations(client.data.user);
-	this.server.emit('sendRelations', relations);
 	}
 
 	@UseGuards(WsGuard)
@@ -490,8 +485,5 @@ export class GeneralGateway
 	async acceptRequest(client: Socket, requestId: IdDto) {
 		await this.relationsService.respondToFriendRequest(requestId.id, 'accepted');
 		this.server.emit('updatedRelations');
-		const relations: RelationEntity[] =
-		await this.relationsService.getAllRelations(client.data.user);
-	this.server.emit('sendRelations', relations);
 	}
 }
