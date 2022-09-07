@@ -125,6 +125,7 @@ export class GeneralGateway
 	 *
 	 */
 	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('modifyChannel')
 	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
 		await this.channelService.modifyChannel(client.data.user, modifications);
@@ -161,6 +162,7 @@ export class GeneralGateway
 	 * @todo est ce que je dois verifier si le cryptage des 2 mdp est equivalent?
 	 */
 	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('chanWithPassword')
 	async chanWithPassword(client: Socket, informations: JoinChanDto) {
 		let bool: boolean = await this.channelService.chanWithPassword(
@@ -168,10 +170,7 @@ export class GeneralGateway
 			informations,
 		);
 		if (bool == true) this.getChannelMessages(client, informations.title);
-		else {
-			client.emit('chanNeedPw');
-			throw new WsException('Wrong Password');
-		}
+		else throw new WsException('Wrong Password');
 	}
 
 	/**
@@ -330,16 +329,6 @@ export class GeneralGateway
 		)
 			return client.emit('chanNeedPw');
 		client.emit('sendChannelMessages', messages);
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getChanByName')
-	async getChanByName(client: Socket, payload: string) {
-		const channel: ChannelEntity = await this.channelService.getChanByName(
-			payload,
-		);
-		// .to(client.data.user.userId) // on devrait renvoyer les infos qu'au socket qui les demande pas aux autres
-		this.server.to(channel.title).emit('sendChannel', channel);
 	}
 
 	/**

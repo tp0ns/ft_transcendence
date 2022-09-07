@@ -6,6 +6,7 @@ import {
 	IsNotEmpty,
 	isNumber,
 	Length,
+	MaxLength,
 } from 'class-validator';
 import { Socket } from 'dgram';
 import { UserEntity } from '../models/user.entity';
@@ -16,6 +17,7 @@ export class UserDto {
 
 	schoolId: number;
 
+	// @MaxLength(9)
 	username: string;
 
 	image_url: string;
@@ -23,5 +25,4 @@ export class UserDto {
 	profileImage: string;
 
 	friends: UserEntity[];
-
 }
