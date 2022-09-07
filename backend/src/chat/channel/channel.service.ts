@@ -454,7 +454,7 @@ export class ChannelService {
 	 */
 	async deleteMember(userToDelete: UserEntity, channel: ChannelEntity) {
 		channel.members = channel.members.filter((member) => {
-			return member.userId !== userToDelete.userId;
+			member.userId !== userToDelete.userId;
 		});
 		await channel.save();
 	}
