@@ -170,7 +170,10 @@ export class GeneralGateway
 			informations,
 		);
 		if (bool == true) this.getChannelMessages(client, informations.title);
-		else throw new WsException('Wrong Password');
+		else {
+			client.emit('chanNeedPw');
+			throw new WsException('Wrong Password');
+		}
 	}
 
 	/**

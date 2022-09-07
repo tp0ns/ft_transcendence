@@ -1,5 +1,6 @@
 .layout {
 	position: absolute;
+	z-index: 30000;
 	top: 70px;
 	right: 5px;
 	display: flex;
