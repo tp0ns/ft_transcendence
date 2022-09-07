@@ -1,5 +1,6 @@
-import { useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { socket } from "../../../../../App";
+import ChatContext from "../../../../../context/chat-context";
 import ChannelInterface from "../../../../../interfaces/Channel.interface";
 import Modal from "../../../../../ui/Modal/Modal";
 import classes from "./ChanSettings.module.css";
@@ -8,12 +9,25 @@ const ChanSettings: React.FC<{
 	onClick: () => void;
 	channel: ChannelInterface;
 }> = (props) => {
-	const title = useRef<HTMLInputElement>(null);
+	const ctx = useContext(ChatContext);
+	const protection = useRef<HTMLInputElement>(null);
+	const [pwForm, setPwForm] = useState<boolean>(ctx!.activeChan!.protected);
+	const password = useRef<HTMLInputElement>(null);
 
-	function handleModifySubmit() {
-		socket.emit("modifyChannel", {
-			title: title.current?.value,
-		});
+	useEffect(() => {
+		protection.current!.checked = ctx!.activeChan!.protected;
+	}, []);
+
+	function handleModifySubmit(event: React.FormEvent) {
+		event.preventDefault();
+		const modifyChan = {
+			title: ctx?.activeChan!.title,
+			password: password.current!.value,
+			protected: protection.current!.checked,
+		};
+		socket.emit("modifyChannel", modifyChan);
+		protection.current!.checked = ctx!.activeChan!.protected;
+		password.current!.value = "";
 	}
 
 	return (
@@ -22,13 +36,26 @@ const ChanSettings: React.FC<{
 			onClick={props.onClick}
 			className={classes.modal_layout}
 		>
-			<div className={classes.settings}>
-				<form onSubmit={handleModifySubmit}>
-					<label htmlFor="title">Change title</label>
-					<input type="text" id="title" />
-					<button>Save changes</button>
-				</form>
-			</div>
+			<form onSubmit={handleModifySubmit} className={classes.settings}>
+				<label htmlFor="protection">Protect with password</label>
+				<input
+					type="checkbox"
+					id="protection"
+					ref={protection}
+					onChange={() => {
+						setPwForm((prev) => {
+							return !prev;
+						});
+					}}
+				/>
+				{pwForm ? (
+					<React.Fragment>
+						<label htmlFor="pw">Set new password :</label>
+						<input type="password" id="pw" ref={password} />
+					</React.Fragment>
+				) : null}
+				<button>Save changes</button>
+			</form>
 		</Modal>
 	);
 };

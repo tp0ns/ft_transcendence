@@ -3,8 +3,24 @@
 }
 
 .settings {
-	margin-inline: 15px;
-	padding-bottom: 5px;
-	height: 51vh;
-	overflow: scroll;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	font-size: x-large;
+}
+
+.settings input {
+	margin-bottom: 10px;
+}
+
+.settings button {
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: 2px solid #3a3636;
+	border-radius: 10px;
+	width: fit-content;
+	align-self: center;
 }
