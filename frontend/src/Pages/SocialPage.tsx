@@ -4,34 +4,28 @@ import NavBar from "../components/NavBar/NavBar";
 import classes from "./SocialPage.module.css";
 import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
+import { useCookies } from "react-cookie";
+import jwtDecode, { JwtPayload } from "jwt-decode";
 
 const SocialPage = () => {
   const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
     []
   );
 
-  const [myId, setMyId] = useState<string>("");
+  const [cookies] = useCookies();
+   const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub as string;
 
   useEffect(() => {
-    console.log("entered initial useEffect");
+    console.log("entered useEffect")
     socket.emit("getRelations");
-    socket.on("sendRelations", (relations) => {
-      // console.log("SENDRELATIONS received relations: ", receivedRelations)
-      setReceivedRelations(relations)});
+    socket.on("updatedRelations", () => {
+      socket.emit("getRelations");
+    })
 
-    fetch("http://localhost/backend/users/me")
-      .then((response) => response.json())
-      .then((data) => {
-        setMyId(data.userId);
-      });
+    socket.on("sendRelations", (relations: RelationsProp[]) => {
+      setReceivedRelations(relations)
+    });
   }, []);
-
-  socket.on("updatedRelations", () => {
-    socket.emit("getRelations");
-    socket.on("sendRelations", (relations) => {
-      // console.log("SENDRELATIONS received relations: ", receivedRelations)
-      setReceivedRelations(relations)});
-  })
 
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -54,7 +48,7 @@ const SocialPage = () => {
           />
         </div>
         <h1 className={classes.friendsTitle}>Friends List</h1>
-        <RelationsList relations={receivedRelations} myId={myId} />
+        <RelationsList relations={receivedRelations} myId={clientId} />
       </div>
     </React.Fragment>
   );

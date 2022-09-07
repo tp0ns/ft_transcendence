@@ -10,7 +10,7 @@ interface RelationsProp {
   requestId?: string;
   creator?: UserProp;
   receiver?: UserProp;
-  status?: Relation_Status;
+  status?: string;
 }
 
 export default RelationsProp;

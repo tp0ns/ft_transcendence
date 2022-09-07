@@ -11,7 +11,7 @@ const RelationsList: React.FC<{
   return (
     <div className={classes.relationsList}>
       {props.relations.map((relation) => (
-        <RelationItem relation={relation} myId={props.myId} key={props.myId}/>
+        <RelationItem relation={relation} myId={props.myId} key={relation.requestId}/>
       ))}
     </div>
   );

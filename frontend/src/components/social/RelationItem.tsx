@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { classicNameResolver, isPropertySignature } from "typescript";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { socket } from "../../App";
 import RelationsProp from "../../interfaces/Relations.interface";
 import UserProp from "../../interfaces/User.interface";
@@ -33,7 +32,7 @@ const RelationItem: React.FC<{
       setToDisplay(props.relation.receiver);
     else setToDisplay(props.relation.creator);
     manageStatus();
-  }, []);
+  }, [props.relation]);
 
   // socket.on("updatedRelations", () => {
   //   console.log("status after update: ", props.relation.status);
@@ -41,7 +40,6 @@ const RelationItem: React.FC<{
   // });
 
   const handleBlock = () => {
-    setStatus("blocker");
     if (props.myId === props.relation.creator?.userId)
       socket.emit("blockUser", props.relation.receiver?.username);
     else socket.emit("blockUser", props.relation.creator?.username);
@@ -52,7 +50,6 @@ const RelationItem: React.FC<{
   };
 
   const handleUnblock = () => {
-    setStatus("accepted");
     socket.emit("unblockUser", props.relation.requestId);
   };
 
