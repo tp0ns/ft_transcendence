@@ -6,8 +6,6 @@ const RelationsList: React.FC<{
   relations: RelationsProp[];
   myId: string;
 }> = (props) => {
-  console.log("relations: ", props.relations);
-  console.log("myId: ", props.myId)
   return (
     <div className={classes.relationsList}>
       {props.relations.map((relation) => (

@@ -453,7 +453,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getRelations')
 	async getRelations(client: Socket) {
-		console.log("clientId: ", client.id);
 		const relations: RelationEntity[] =
 			await this.relationsService.getAllRelations(client.data.user);
 		this.server.to(client.id).emit('sendRelations', relations);
@@ -469,6 +468,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
 	async blockUser(client: Socket, username: UsernameDto) {
+		console.log("client.data.user: ", client.data.user)
+		console.log("username.username: ", username.username)
 		await this.relationsService.blockUser(username.username, client.data.user);
 		this.server.emit('updatedRelations');
 	}

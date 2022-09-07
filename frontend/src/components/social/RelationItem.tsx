@@ -40,17 +40,21 @@ const RelationItem: React.FC<{
   // });
 
   const handleBlock = () => {
+    console.log("myID: ", props.myId)
     if (props.myId === props.relation.creator?.userId)
-      socket.emit("blockUser", props.relation.receiver?.username);
-    else socket.emit("blockUser", props.relation.creator?.username);
+      socket.emit("blockUser", {username: props.relation.receiver?.username});
+    else {
+      console.log("Yale: ", props.relation.creator?.username)
+      socket.emit("blockUser", {username: props.relation.creator?.username});
+    }
   };
 
   const handleRequest = () => {
-    socket.emit("acceptRequest", props.relation.requestId);
+    socket.emit("acceptRequest", {id: props.relation.requestId});
   };
 
   const handleUnblock = () => {
-    socket.emit("unblockUser", props.relation.requestId);
+    socket.emit("unblockUser", {id: props.relation.requestId});
   };
 
   const sendMessage = () => {

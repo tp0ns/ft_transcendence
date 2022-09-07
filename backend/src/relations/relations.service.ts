@@ -119,7 +119,7 @@ export class RelationsService {
 			blockedUsername,
 		);
 		if (blocker.username === blockedUsername)
-			throw new ForbiddenException('It is not possible to add yourself!');
+			throw new ForbiddenException('It is not possible to block yourself!');
 
 		const relation: Relation = await this.findRelationByUserId(
 			blocker,
@@ -136,12 +136,13 @@ export class RelationsService {
 			await this.RelationRepo.save(relation);
 			return relation;
 		}
-		let blockedRequest: Relation = {
-			creator: blocker,
-			receiver: blocked,
-			status: 'blocked',
-		};
-		return await this.RelationRepo.save(blockedRequest);
+		// let blockedRequest: Relation = {
+		// 	creator: blocker,
+		// 	receiver: blocked,
+		// 	status: 'blocked',
+		// };
+		// console.log
+		// return await this.RelationRepo.save(blockedRequest);
 	}
 
 	async unblockUser(

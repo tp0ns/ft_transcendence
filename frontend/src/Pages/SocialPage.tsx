@@ -16,7 +16,6 @@ const SocialPage = () => {
    const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub as string;
 
   useEffect(() => {
-    console.log("entered useEffect")
     socket.emit("getRelations");
     socket.on("updatedRelations", () => {
       socket.emit("getRelations");
@@ -29,7 +28,7 @@ const SocialPage = () => {
 
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      socket.emit("addFriend", event.target.value);
+      socket.emit("addFriend", {username: event.target.value});
       event.target.value = "";
     }
   };
