@@ -154,7 +154,7 @@ export class ChannelService {
 			modifications.title,
 		);
 		if (channel.DM) return;
-		if (modifications.newPassword && modifications.protected) {
+		if (modifications.newPassword || !modifications.protected) {
 			await this.modifyPassword(
 				user,
 				channel,
@@ -193,17 +193,17 @@ export class ChannelService {
 	) {
 		if (channel?.owner.userId != user.userId)
 			throw new WsException("You can't modify the channel");
-		else if ((protection = false)) {
-			channel.protected = false;
-			channel.password = null;
-		} else {
-			if (!newPassword)
-				throw new WsException(
-					'You need to enter a password if you want to protect this channel',
-				);
+		else if (protection && !newPassword)
+			throw new WsException(
+				'You need to enter a password if you want to protect this channel',
+			);
+		else if (protection && newPassword) {
 			channel.protected = true;
 			channel.password = await bcrypt.hash(newPassword, 10);
 			channel.userInProtectedChan = null;
+		} else {
+			channel.protected = false;
+			channel.password = null;
 		}
 		await this.channelRepository.save(channel);
 	}
