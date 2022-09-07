@@ -220,6 +220,7 @@ export class GeneralGateway
 			(member: UserEntity) => member.userId === client.data.user.userId))
 		{
 			await this.channelService.deleteMember(client.data.user, channel);
+			client.leave(channel.title);
 			await channel.save();
 		}
 		this.server.emit('updatedChannels');
