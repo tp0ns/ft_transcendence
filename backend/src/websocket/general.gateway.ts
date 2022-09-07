@@ -7,7 +7,13 @@ import {
 	OnGatewayDisconnect,
 	WsException,
 } from '@nestjs/websockets';
-import { Logger, UseFilters, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+	Logger,
+	UseFilters,
+	UseGuards,
+	UsePipes,
+	ValidationPipe,
+} from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
@@ -161,10 +167,11 @@ export class GeneralGateway
 			client.data.user,
 			informations,
 		);
-		if (bool == true)
-			this.getChannelMessages(client, informations.title);
-		else 
+		if (bool == true) this.getChannelMessages(client, informations.title);
+		else {
+			client.emit('chanNeedPw');
 			throw new WsException('Wrong Password');
+		}
 	}
 
 	/**
@@ -204,9 +211,11 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
 	async leaveRoom(client: Socket, channel: ChannelEntity) {
-		if (channel.members.find(
-				(member: UserEntity) => member.userId === client.data.user.userId))
-		{
+		if (
+			channel.members.find(
+				(member: UserEntity) => member.userId === client.data.user.userId,
+			)
+		) {
 			client.leave(channel.title);
 			this.server.emit('leftRoom');
 		}
@@ -214,11 +223,12 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('quitChan')
-	async quitChan(client: Socket, channel: ChannelEntity)
-	{
-		if (channel.members.find(
-			(member: UserEntity) => member.userId === client.data.user.userId))
-		{
+	async quitChan(client: Socket, channel: ChannelEntity) {
+		if (
+			channel.members.find(
+				(member: UserEntity) => member.userId === client.data.user.userId,
+			)
+		) {
 			await this.channelService.deleteMember(client.data.user, channel);
 			client.leave(channel.title);
 			await channel.save();
@@ -251,8 +261,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	async handleMessageToChan(client: Socket, payload: string[]) 
-	{
+	async handleMessageToChan(client: Socket, payload: string[]) {
 		let chanName: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
@@ -309,13 +318,17 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
 	async getChannelMessages(client: Socket, chanName: string) {
-		let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
+		let channel: ChannelEntity = await this.channelService.getChanByName(
+			chanName,
+		);
 		const messages: MessagesEntity[] =
 			await this.messageService.getChannelMessages(client.data.user, chanName);
-		if (!messages)
-			return (client.emit('userIsBanned'));
-		if (channel.protected == true && !channel.usersInId.includes(client.data.user.userId))
-			return (client.emit('chanNeedPw'));
+		if (!messages) return client.emit('userIsBanned');
+		if (
+			channel.protected == true &&
+			!channel.usersInId.includes(client.data.user.userId)
+		)
+			return client.emit('chanNeedPw');
 		client.emit('sendChannelMessages', messages);
 	}
 

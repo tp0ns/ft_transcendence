@@ -30,6 +30,8 @@ function ChanContent() {
 	useEffect(() => {
 		socket.on("sendChannelMessages", (messages) => {
 			setLoading(false);
+			setNeedPw(false);
+			setIsBanned(false);
 			setMsgs(messages);
 		});
 		socket.on("userIsBanned", () => {
@@ -48,17 +50,23 @@ function ChanContent() {
 			title: ctx.activeChan!.title,
 			password: inputPw.current!.value,
 		});
+		setLoading(true);
 		inputPw.current!.value = "";
 	}
 
 	if (loading) return <div className={classes.spin}></div>;
-	else if (isBanned) return <div>User in unauthorized</div>;
+	else if (isBanned)
+		return (
+			<div className={classes.banned}>
+				<img src="ban.svg" alt="Blocked" />
+				<p>You have been banned from this channel</p>
+			</div>
+		);
 	else if (needPw)
 		return (
 			<form onSubmit={pwSubmitHandler} className={classes.pw_form}>
-				<label>Channel Password :</label>
+				<label>Channel Password</label>
 				<input ref={inputPw} type="password" placeholder="Enter a password" />
-				<button>Send</button>
 			</form>
 		);
 	else {
