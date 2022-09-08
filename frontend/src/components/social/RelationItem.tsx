@@ -63,10 +63,11 @@ const RelationItem: React.FC<{
         DM: true, 
         user2: props.relation.receiver?.userId,
       }),
-    socket.on('newDM', (title) => {
-      //rajouter le title a l'url de redirection
-      navigate("/chat/"+title+"/");
+      socket.on('newDM', (title) => {
+        console.log(`enter in socket.on newDM`);
+      const redirect_path = 'chat/'+title;
     });
+    navigate("/chat");
     }
   };
 

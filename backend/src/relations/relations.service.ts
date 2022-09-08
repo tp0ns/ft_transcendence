@@ -183,10 +183,13 @@ export class RelationsService {
 		});
 	}
 
-	async getBlockedUsersForUser(user: UserEntity): Promise<UserEntity[]> 
-	{
-		return 
+	async getBlockedUsersForUser(user: UserEntity): Promise<UserEntity[]> {
+		let userBlockedRelations: RelationEntity[] =
+			await this.RelationRepo.createQueryBuilder('relations')
+				.where('relations.creator = :id', { id: user.userId })
+				.andWhere('relations.status = :blocked', { blocked: 'blocked' })
+				.getMany();
+		console.log(`blocked userRelations are : `, userBlockedRelations);
+		return;
 	}
-
-	
 }

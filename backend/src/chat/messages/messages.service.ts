@@ -48,45 +48,12 @@ export class MessageService {
 			chanName,
 		);
 		let messages: MessagesEntity[];
-		let blockedUsers: UserEntity[] = await this.relationsService.getBlockedUsersForUser(user);
-		}
+		let blockedUsers: UserEntity[] =
+			await this.relationsService.getBlockedUsersForUser(user);
+
 		if (channel) {
 			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
 				return null;
-
-			messages = await this.MessageRepository.createQueryBuilder('messages')
-				.leftJoinAndSelect('messages.user', 'sender')
-				.leftJoinAndSelect('messages.channel', 'channel')
-				.where('channel.channelId = :id', { id: channel.channelId })
-				.getMany();
-			return messages;
 		}
 	}
 }
-
-// public async getMessage(chanIdentifier: string, user: User) : Promise<Channel>
-// {
-// 	let msgs: Channel;
-// 	if (user.blocked.length > 0)
-// 	{
-// 		msgs = await this.chanRepo.createQueryBuilder("chan")
-// 			.where("chan.name = :chanName", { chanName: chanIdentifier })
-// 			.leftJoinAndSelect("chan.messages", "messages")
-// 			.leftJoinAndSelect("messages.sender", "sender")
-// 			.orderBy("messages.id", "ASC")
-// 			.andWhere("sender.id NOT IN (:...blocked)", { blocked: user.blocked }) // make the query null if no messages
-// 			.getOne()
-
-// 		if (msgs == null) msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier }).getOne();
-
-// 	}
-// 	else
-// 	{
-// 		 msgs = await this.chanRepo.createQueryBuilder("chan").where("chan.name = :chanName", { chanName: chanIdentifier })
-// 			 .leftJoinAndSelect("chan.messages", "messages")
-// 			 .leftJoinAndSelect("messages.sender", "sender")
-// 			.orderBy("messages.id", "ASC")
-// 			.getOne()
-// 	}
-// 	return msgs;
-// }
