@@ -48,12 +48,32 @@ export class MessageService {
 			chanName,
 		);
 		let messages: MessagesEntity[];
-		let blockedUsers: UserEntity[] =
-			await this.relationsService.getBlockedUsersForUser(user);
-
 		if (channel) {
 			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
 				return null;
+			let blockedUsers: string[] =
+				await this.relationsService.getBlockedUsersForUser(user);
+			if (blockedUsers) {
+				// messages = this.MessageRepository
+			}
+			messages = await this.MessageRepository.createQueryBuilder('messages')
+				.leftJoinAndSelect('messages.user', 'sender')
+				.leftJoinAndSelect('messages.channel', 'channel')
+				.where('channel.channelId = :id', { id: channel.channelId })
+				.getMany();
+			return messages;
 		}
 	}
+
+	// async getChannelMessages(user: UserEntity, chanName: string) : Promise<MessagesEntity[]>
+	// {
+	// 	let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
+
+	// 	if (channel)
+	// 	{
+	// 		if (channel.bannedMembers && channel.bannedId.includes(user.userId))
+	// 			return null;
+	//
+	// 	}
+	// }
 }

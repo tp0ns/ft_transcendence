@@ -121,7 +121,7 @@ export class RelationsService {
 			blockedUsername,
 		);
 		if (blocker.username === blockedUsername)
-			throw new ForbiddenException('It is not possible to add yourself!');
+			throw new ForbiddenException('It is not possible to block yourself!');
 
 		const relation: Relation = await this.findRelationByUserId(
 			blocker,
@@ -138,12 +138,13 @@ export class RelationsService {
 			await this.RelationRepo.save(relation);
 			return relation;
 		}
-		let blockedRequest: Relation = {
-			creator: blocker,
-			receiver: blocked,
-			status: 'blocked',
-		};
-		return await this.RelationRepo.save(blockedRequest);
+		// let blockedRequest: Relation = {
+		// 	creator: blocker,
+		// 	receiver: blocked,
+		// 	status: 'blocked',
+		// };
+		// console.log
+		// return await this.RelationRepo.save(blockedRequest);
 	}
 
 	async unblockUser(
@@ -183,13 +184,20 @@ export class RelationsService {
 		});
 	}
 
-	async getBlockedUsersForUser(user: UserEntity): Promise<UserEntity[]> {
-		let userBlockedRelations: RelationEntity[] =
+	async getBlockedUsersForUser(user: UserEntity): Promise<string[]> {
+		let usersBlockedByUser: string[] = [];
+		let userBlockedRelations: any[] =
 			await this.RelationRepo.createQueryBuilder('relations')
+				.select(['relations.requestId', 'receiver.username'])
+				.leftJoin('relations.receiver', 'receiver')
 				.where('relations.creator = :id', { id: user.userId })
 				.andWhere('relations.status = :blocked', { blocked: 'blocked' })
 				.getMany();
-		console.log(`blocked userRelations are : `, userBlockedRelations);
+		for (const relation of userBlockedRelations) {
+			usersBlockedByUser.push(relation.receiver.username);
+		}
+		console.log('username of blockedUsers are : ', usersBlockedByUser);
+
 		return;
 	}
 }
