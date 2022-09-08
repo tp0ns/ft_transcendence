@@ -79,10 +79,10 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						changeUserModal();
 					}}
 				>
-					<img src="user.svg" alt="user" />
+					<img src="/user.svg" alt="user" />
 				</div>
 				<div className={classes.button}>
-					<img src="pong.svg" alt="game" />
+					<img src="/pong.svg" alt="game" />
 				</div>
 				<div
 					className={classes.button}
@@ -91,8 +91,8 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 					}}
 				>
 					<img
-						src={isMuted() ? "unmute.svg" : "mute.svg"}
-						alt={isMuted() ? "unmute" : "mute"}
+						src={isMuted() ? "/unmute.svg" : "/mute.svg"}
+						alt={isMuted() ? "/unmute" : "/mute"}
 					/>
 				</div>
 				<div
@@ -101,7 +101,7 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						makeAdmin();
 					}}
 				>
-					<img src="crown.svg" alt="make admin" />
+					<img src="/crown.svg" alt="make admin" />
 				</div>
 				<div
 					className={classes.button}
@@ -109,7 +109,7 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						ban();
 					}}
 				>
-					<img src="ban.svg" alt="ban" />
+					<img src="/ban.svg" alt="ban" />
 				</div>
 			</div>
 		);

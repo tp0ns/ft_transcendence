@@ -1,6 +1,7 @@
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { useParams } from "react-router-dom";
 import { socket } from "../App";
 import ChannelInterface from "../interfaces/Channel.interface";
 import { ChatContextType } from "../types/ChatContextType";
@@ -15,6 +16,7 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
 	const [cookies] = useCookies();
 	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub as string;
+	const params = useParams();
 
 	useEffect(() => {
 		socket.emit("getMemberChannels");
@@ -27,11 +29,23 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	}, []);
 
 	useEffect(() => {
+		if (params.channelId) {
+			setactiveChan(() => {
+				const newActiveChan = channels.find((channel) => {
+					return channel.title === params.channelId;
+				}) as ChannelInterface;
+				if (!newActiveChan) return null;
+				changeIsAdmin(newActiveChan);
+				return newActiveChan;
+			});
+			return;
+		}
 		setactiveChan((prevChan) => {
 			if (prevChan === null) return prevChan;
 			const newActiveChan = channels.find((channel) => {
 				return channel.channelId === prevChan!.channelId;
 			}) as ChannelInterface;
+			if (!newActiveChan) return null;
 			changeIsAdmin(newActiveChan);
 			return newActiveChan;
 		});

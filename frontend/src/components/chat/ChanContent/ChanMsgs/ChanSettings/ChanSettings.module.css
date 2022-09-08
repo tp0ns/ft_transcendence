@@ -1,5 +1,10 @@
 .modal_layout {
-	height: 60vh;
+	height: 35vh;
+}
+
+.layout {
+	display: flex;
+	flex-direction: column;
 }
 
 .settings {
@@ -23,4 +28,19 @@
 	border-radius: 10px;
 	width: fit-content;
 	align-self: center;
+}
+
+.delete_chan {
+	display: block;
+	justify-self: center;
+	align-self: center;
+	text-align: center;
+	background-color: red;
+	border-radius: 10px;
+	color: #f4edde;
+	margin-top: 15px;
+	padding-block: 5px;
+	padding-inline: 10px;
+	cursor: pointer;
+	width: 120px;
 }

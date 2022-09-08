@@ -25,6 +25,12 @@ const ChanMsgs: React.FC<{ msgs: MessageInterface[] }> = (props) => {
 		});
 	}
 
+	function friendName(): string {
+		return ctx.activeChan!.members.filter((member) => {
+			return ctx.clientId !== member.userId;
+		})[0].username;
+	}
+
 	function msgSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
 		socket.emit("msgToChannel", inputMsg.current?.value, ctx.activeChan!.title);
@@ -34,10 +40,10 @@ const ChanMsgs: React.FC<{ msgs: MessageInterface[] }> = (props) => {
 	return (
 		<div className={classes.layout}>
 			<div className={classes.title}>
-				<div>{ctx.activeChan!.title}</div>
+				<div>{ctx.activeChan?.DM ? friendName() : ctx.activeChan!.title}</div>
 				{ctx.isAdmin ? (
 					<div onClick={settingsClickHandler} className={classes.settings}>
-						<img src="settings-chat.svg" alt="settings" />
+						<img src="/settings-chat.svg" alt="settings" />
 					</div>
 				) : null}
 				{settings ? (

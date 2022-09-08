@@ -58,7 +58,7 @@ function ChanContent() {
 	else if (isBanned)
 		return (
 			<div className={classes.banned}>
-				<img src="ban.svg" alt="Blocked" />
+				<img src="/ban.svg" alt="Blocked" />
 				<p>You have been banned from this channel</p>
 			</div>
 		);

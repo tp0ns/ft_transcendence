@@ -29,32 +29,48 @@ const ChanSettings: React.FC<{
 		props.onClick();
 	}
 
+	function deleteChannel() {
+		socket.emit("deleteChan", ctx?.activeChan!.title);
+	}
+
 	return (
 		<Modal
 			title="Channel settings"
 			onClick={props.onClick}
 			className={classes.modal_layout}
 		>
-			<form onSubmit={handleModifySubmit} className={classes.settings}>
-				<label htmlFor="protection">Protect with password</label>
-				<input
-					type="checkbox"
-					id="protection"
-					ref={protection}
-					onChange={() => {
-						setPwForm((prev) => {
-							return !prev;
-						});
-					}}
-				/>
-				{pwForm ? (
-					<React.Fragment>
-						<label htmlFor="pw">Set new password :</label>
-						<input type="password" id="pw" ref={password} />
-					</React.Fragment>
+			<div className={classes.layout}>
+				<form onSubmit={handleModifySubmit} className={classes.settings}>
+					<label htmlFor="protection">Protect with password</label>
+					<input
+						type="checkbox"
+						id="protection"
+						ref={protection}
+						onChange={() => {
+							setPwForm((prev) => {
+								return !prev;
+							});
+						}}
+					/>
+					{pwForm ? (
+						<React.Fragment>
+							<label htmlFor="pw">Set new password :</label>
+							<input type="password" id="pw" ref={password} />
+						</React.Fragment>
+					) : null}
+					<button>Save changes</button>
+				</form>
+				{ctx?.clientId === ctx?.activeChan?.owner.userId ? (
+					<div
+						onClick={() => {
+							deleteChannel();
+						}}
+						className={classes.delete_chan}
+					>
+						Delete Channel
+					</div>
 				) : null}
-				<button>Save changes</button>
-			</form>
+			</div>
 		</Modal>
 	);
 };

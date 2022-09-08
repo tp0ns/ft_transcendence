@@ -10,7 +10,7 @@ const LoginPage = () => {
 			</div>
 			<a href="/backend/auth/login" className={classes.login_school}>
 				<p>Connect with</p>
-				<img src="/42_Logo.png" alt="42 school logo" />
+				<img src="//42_Logo.png" alt="42 school logo" />
 			</a>
 		</div>
 	);

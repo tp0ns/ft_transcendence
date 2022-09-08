@@ -43,7 +43,7 @@ const SocialPage = () => {
 		<Layout>
 			<div className={classes.parent}>
 				<div className={classes.searchBar}>
-					<img src="search.svg" className={classes.searchLogo} />
+					<img src="/search.svg" className={classes.searchLogo} />
 					<input
 						tabIndex={0}
 						className={classes.input}
