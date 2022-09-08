@@ -1,6 +1,6 @@
 import classes from "./GameScreen.module.css";
 import { socket } from "../../App";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 let ballPosition = {
 	x: 0,
@@ -15,26 +15,27 @@ let ballPosition = {
 	isMoving: false,
 };
 let leftPadPosition = {
-	x: 0,
-	y: 50,
-	w: 20,
-	h: 100,
-	speed: 5,
+  x: 0,
+  y: 50,
+  w: 20,
+  h: 100,
+  speed: 5,
 };
 
 let rightPadPosition = {
-	x: 620,
-	y: 200,
-	w: 20,
-	h: 100,
-	speed: 20,
+  x: 620,
+  y: 200,
+  w: 20,
+  h: 100,
+  speed: 20,
 };
 
-let player1Score : number = 0;
-let player2Score : number = 0;
+let player1Score: number = 0;
+let player2Score: number = 0;
 
 const GameScreen = () => {
 	const canvas = useRef<HTMLCanvasElement>(null);
+	const [lockEnter, setLockEnter] = useState<boolean>(false);
 
 	useEffect(() => {
 		const context = canvas.current!.getContext("2d");
@@ -191,6 +192,11 @@ const GameScreen = () => {
 		socket.emit("ballMovement", ballPosition)//, p1)//, player2Score);
 	};
 
+	useEffect(() => {
+		console.log("Lock enter in useEffect; ", lockEnter);
+		if (lockEnter) moveBall();
+	  }, [lockEnter]);
+
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
 		if (event.key === "Enter") {
 			if (ballPosition.isMoving === true || player1Score === 5 || player2Score === 5) {
@@ -225,23 +231,26 @@ const GameScreen = () => {
 	}
 
 	return (
-		<div>
-			<canvas
-				tabIndex={0}
-				onMouseMove={mouseMove}
-				onKeyDown={handleKeyDown}
-				width="640"
-				height="480"
-				ref={canvas}
-				className={classes.canvas}
-			/>
-			<p>
-				<button onClick={handleStart}>Start</button>
-				<button onClick={handleReset}>Reset Ball</button>
-				<button onClick={handleLocalGame}>Local Game</button>
-				<button onClick={handleMatchMaking}>Match Making</button>
-			</p>
-		</div>
+    <div>
+      <div>
+        <div className={classes.profile1}>
+          <img src={classes.img} />
+        </div>
+        <canvas
+          tabIndex={0}
+          onMouseMove={mouseMove}
+          onKeyDown={handleKeyDown}
+          width="640"
+          height="480"
+          ref={canvas}
+          className={classes.canvas}
+        />
+        <p>
+          <button onClick={handleStart}>Start</button>
+          <button onClick={handleReset}>Reset Ball</button>
+        </p>
+      </div>
+    </div>
 	);
 };
 

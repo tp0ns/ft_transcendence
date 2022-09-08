@@ -195,37 +195,6 @@ export class GameService {
 		}
 	}
 
-/**
- * create a room, initialize it and join it.
- * @param client the user that sends an invitation
- */
-	async	sendInvite(client: Socket, userToInviteId: string) {
-			const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
-			const invitation: InvitationEntity = await this.invitationRepository.save( {
-				creator: client.data.user,
-				receiver: userToInvite,
-				status: 'pending'
-			})
-			//invitation créée, sender et receiver set.
-			//a ce moment, le sender est sur la page jeu
-			const roomName = 'inviteRoom'+ Math.random();
-			match = this.setDefaultPos(roomName);
-					match.player1 = client.data.user;
-					match.p1User = match.player1;
-				client.join(roomName);
-				match.isLocal = false;
-				client.data.currentMatch = match;
-	}
-/**
- * the user accepted the invitation
- * the user is now joining the game
- * @param client the user accepting the invitation
- */
-	async joinInvite(client: Socket, userInvitingId: string) {
-		const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
-		client.data.user.receivedInvitations
-	}
-
 	//ends the game
 	async endGame(match: Match, winner: UserEntity) {
 		match.isEnd = true;
@@ -249,4 +218,62 @@ export class GameService {
 			this.endGame(match, match.player2);
 		}
 	}
+
+	/**
+	 * create a room, initialize it and join it.
+	 * @param client the user that sends an invitation
+	 */
+		async	sendInvite(client: Socket, userToInviteId: string) {
+				const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
+				const invitation: InvitationEntity = await this.invitationRepository.save( {
+					creator: client.data.user,
+					receiver: userToInvite,
+					status: 'pending'
+				})
+				//invitation créée, sender et receiver set.
+				//a ce moment, le sender est sur la page jeu
+				const roomName = 'inviteRoom'+ Math.random();
+				match = this.setDefaultPos(roomName);
+				match.player1 = client.data.user;
+				match.p1User = match.player1;
+				client.join(roomName);
+				match.isLocal = false;
+				client.data.currentMatch = match;
+		}
+	/**
+	 * the user accepted the invitation
+	 * the user is now joining the game
+	 * @param client the user accepting the invitation
+	 */
+		async joinInvite(client: Socket, userInvitingId: string) {
+			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
+			client.data.user.receivedInvitations //query pour retrouver la bonne invitation
+			// passer l'invitation a 'accepted'
+			// set le match avec player2 et join la room
+			userInviting.currentMatch.player2 = client.data.user;
+			userInviting.currentMatch.p2User = userInviting.currentMatch.player2;
+			client.join(userInviting.currentMatch.roomName);
+			client.data.currentMatch = userInviting.currentMatch;
+		}
+
+		/**
+		 * cancels the invitation
+		 */
+		async	refuseInvite(client: Socket, userInvitingId: string) {
+			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
+			client.data.user.receivedInvitations //query pour retrouver la bonne invitation
+			//passer l'invitation a 'declined' (la suppr?)
+			//emit un event pour dire a l'autre user que l'invit est declined
+		}
+
+		/**
+		 * tells the emitter that the invitation
+		 * has been declined
+		 */
+		async inviteIsDeclined(client: Socket) {
+			client.data.user.sentInvitations //query pour retrouver la bonne invitation
+			//passer l'invit. a 'declined', la suppr
+			client.leave(client.data.currentMatch.roomName);
+			//end null game
+		}
 }
