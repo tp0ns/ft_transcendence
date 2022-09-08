@@ -73,7 +73,6 @@ export class ChannelService {
 			);
 		if (channel2) return channel2;
 		let newChannel: ChannelEntity = await this.saveNewDM(user, chan);
-		console.log(`new channel is : `, newChannel.title);
 		return newChannel;
 	}
 

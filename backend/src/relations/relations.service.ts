@@ -1,5 +1,6 @@
 import {
 	ForbiddenException,
+	forwardRef,
 	Inject,
 	Injectable,
 	NotFoundException,
@@ -16,6 +17,7 @@ export class RelationsService {
 	constructor(
 		@InjectRepository(RelationEntity)
 		private RelationRepo: Repository<RelationEntity>,
+		@Inject(forwardRef(() => UserService))
 		private userService: UserService,
 	) {}
 
@@ -179,6 +181,11 @@ export class RelationsService {
 				{ receiver: { userId: user.userId } },
 			],
 		});
+	}
+
+	async getBlockedUsersForUser(user: UserEntity): Promise<UserEntity[]> 
+	{
+		return 
 	}
 
 	

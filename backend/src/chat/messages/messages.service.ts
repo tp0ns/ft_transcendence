@@ -48,8 +48,8 @@ export class MessageService {
 			chanName,
 		);
 		let messages: MessagesEntity[];
-		let userRelations: RelationEntity =
-			await this.relationsService.getAllRelations(user);
+		let blockedUsers: UserEntity[] = await this.relationsService.getBlockedUsersForUser(user);
+		}
 		if (channel) {
 			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
 				return null;

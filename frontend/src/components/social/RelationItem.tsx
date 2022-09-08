@@ -65,7 +65,7 @@ const RelationItem: React.FC<{
       }),
     socket.on('newDM', (title) => {
       //rajouter le title a l'url de redirection
-      navigate("/chat/")
+      navigate("/chat/"+title+"/");
     });
     }
   };
