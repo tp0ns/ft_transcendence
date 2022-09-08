@@ -19,7 +19,7 @@ function App() {
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
 				<Route
-					path="/2fa"
+					path="2fa"
 					element={
 						<Auth>
 							<TwoFAPAge />
@@ -35,7 +35,7 @@ function App() {
 					}
 				/>
 				<Route
-					path="/user"
+					path="user"
 					element={
 						<Auth>
 							<UserPage userId="me" />
@@ -43,7 +43,7 @@ function App() {
 					}
 				/>
 				<Route
-					path="/social"
+					path="social"
 					element={
 						<Auth>
 							<SocialPage />
@@ -51,14 +51,22 @@ function App() {
 					}
 				/>
 				<Route
-					path="/chat"
+					path="chat"
 					element={
 						<Auth>
 							<ChatPage />
 						</Auth>
 					}
 				/>
-				<Route path="/debug" element={<Debug />} />
+				<Route
+					path="chat/:channelId"
+					element={
+						<Auth>
+							<ChatPage />
+						</Auth>
+					}
+				/>
+				<Route path="debug" element={<Debug />} />
 			</Routes>
 		</ErrorContextProvider>
 	);

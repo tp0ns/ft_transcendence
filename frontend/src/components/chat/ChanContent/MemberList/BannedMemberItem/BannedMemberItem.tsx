@@ -34,7 +34,7 @@ const BannedMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						unban();
 					}}
 				>
-					<img src="unban.svg" alt="unban" />
+					<img src="/unban.svg" alt="unban" />
 				</div>
 			) : null}
 		</div>

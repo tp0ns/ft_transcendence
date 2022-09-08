@@ -43,7 +43,7 @@ const ChanMsgs: React.FC<{ msgs: MessageInterface[] }> = (props) => {
 				<div>{ctx.activeChan?.DM ? friendName() : ctx.activeChan!.title}</div>
 				{ctx.isAdmin ? (
 					<div onClick={settingsClickHandler} className={classes.settings}>
-						<img src="settings-chat.svg" alt="settings" />
+						<img src="/settings-chat.svg" alt="settings" />
 					</div>
 				) : null}
 				{settings ? (
