@@ -57,10 +57,14 @@ const RelationItem: React.FC<{
   };
 
   const sendMessage = () => {
-    if (props.myId === props.relation.creator?.userId)
-      socket.emit("createDM", props.relation.receiver?.username);
-    else socket.emit("createDM", props.relation.creator?.username);
+    if (props.myId === props.relation.creator?.userId) {
+      socket.emit("createDM", {
+        title: props.relation.creator?.username+"0"+props.relation.receiver?.username,
+        DM: true, 
+        user2: props.relation.receiver?.userId,
+      }),
     navigate("/chat");
+    }
   };
 
   return (

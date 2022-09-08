@@ -1,45 +1,32 @@
-import { ArgumentsHost, BadRequestException, Catch, HttpException, HttpStatus } from '@nestjs/common';
+import {
+	ArgumentsHost,
+	BadRequestException,
+	Catch,
+	HttpException,
+	HttpStatus,
+} from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { QueryFailedError } from 'typeorm';
-
 @Catch(WsException, HttpException, QueryFailedError)
-export class globalExceptionFilter {
-  public catch(exception: HttpException | WsException | QueryFailedError, host: ArgumentsHost) {
-    const client = host.switchToWs().getClient();
-    this.handleError(client, exception);
-  }
-
-  public handleError(client: Socket, exception: HttpException | WsException | QueryFailedError) {
-	let status = HttpStatus.INTERNAL_SERVER_ERROR;
-	
-	switch (exception.constructor) {
-		case HttpException:
-			status = (exception as HttpException).getStatus();
-			break;
-		case WsException:
-			client.emit('errorEvent', exception.message);
-		case QueryFailedError:  // this is a TypeOrm error
+export class globalExceptionFilter extends BaseWsExceptionFilter {
+	public catch(
+		exception: HttpException | WsException | QueryFailedError,
+		host: ArgumentsHost,
+	) {
+		const client = host.switchToWs().getClient() as Socket;
+		let error: string | object;
+		if (exception instanceof BadRequestException) {
+			error = exception.getResponse();
+			if (typeof error == 'object')
+				error = JSON.parse(JSON.stringify(error)).message[0];
+			client.emit(`errorEvent`, error);
+		} else if (exception instanceof WsException) {
 			client.emit(`errorEvent`, exception.message);
-			// status = HttpStatus.UNPROCESSABLE_ENTITY
-			// message = (exception as QueryFailedError).message;
-			// code = (exception as any).code;
-			break;
-		case BadRequestException:
+		} else if (exception instanceof HttpException) {
 			client.emit(`errorEvent`, exception.message);
-			break;
-		// case EntityNotFoundError:  // this is another TypeOrm error
-		//     status = HttpStatus.UNPROCESSABLE_ENTITY
-		//     message = (exception as EntityNotFoundError).message;
-		//     code = (exception as any).code;
-		//     break;
-		// case CannotCreateEntityIdMapError: // and another
-		//     status = HttpStatus.UNPROCESSABLE_ENTITY
-		//     message = (exception as CannotCreateEntityIdMapError).message;
-		//     code = (exception as any).code;
-		//     break;
-		default:
-			status = HttpStatus.INTERNAL_SERVER_ERROR
-        }
-  }
+		} else if (exception instanceof QueryFailedError) {
+			client.emit(`errorEvent`, exception.message);
+		}
+	}
 }

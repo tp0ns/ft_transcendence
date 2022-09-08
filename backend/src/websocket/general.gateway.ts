@@ -113,6 +113,18 @@ export class GeneralGateway
 		this.server.emit('updatedChannels');
 	}
 
+	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('createDM')
+	async createDM(client: Socket, channelEntity: CreateChanDto) {
+		const DM: ChannelEntity = await this.channelService.createNewDM(
+			client.data.user,
+			channelEntity,
+		);
+		client.emit('newDM', DM.title);
+		this.server.emit('updatedChannels');
+	}
+
 	/**
 	 * @brief Modification d'un channel
 	 *
