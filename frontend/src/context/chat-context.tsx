@@ -32,6 +32,7 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 			const newActiveChan = channels.find((channel) => {
 				return channel.channelId === prevChan!.channelId;
 			}) as ChannelInterface;
+			if (!newActiveChan) return null;
 			changeIsAdmin(newActiveChan);
 			return newActiveChan;
 		});
