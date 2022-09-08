@@ -26,7 +26,7 @@ const ChanSettings: React.FC<{
 			protected: protection.current!.checked,
 		};
 		socket.emit("modifyChannel", modifyChan);
-		protection.current!.checked = ctx!.activeChan!.protected;
+		props.onClick();
 	}
 
 	return (

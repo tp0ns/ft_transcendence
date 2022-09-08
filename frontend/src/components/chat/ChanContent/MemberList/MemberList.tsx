@@ -45,7 +45,9 @@ function MemberList() {
 				</form>
 			) : null}
 			<div className={classes.list}>
-				<div className={classes.category}>Admins</div>
+				{ctx?.activeChan?.admins.length ? (
+					<div className={classes.category}>Admins</div>
+				) : null}
 				{ctx?.activeChan?.admins.map((admin) => {
 					return <NormalMemberItem key={admin.userId} member={admin} />;
 				})}
