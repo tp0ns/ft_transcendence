@@ -40,12 +40,10 @@ const RelationItem: React.FC<{
   // });
 
   const handleBlock = () => {
-    console.log("myID: ", props.myId)
     if (props.myId === props.relation.creator?.userId)
-      socket.emit("blockUser", {username: props.relation.receiver?.username});
+      socket.emit("blockUser", {id: props.relation.receiver?.userId});
     else {
-      console.log("Yale: ", props.relation.creator?.username)
-      socket.emit("blockUser", {username: props.relation.creator?.username});
+      socket.emit("blockUser", {id: props.relation.creator?.userId});
     }
   };
 

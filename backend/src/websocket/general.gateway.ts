@@ -467,10 +467,8 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
-	async blockUser(client: Socket, username: UsernameDto) {
-		console.log("client.data.user: ", client.data.user)
-		console.log("username.username: ", username.username)
-		await this.relationsService.blockUser(username.username, client.data.user);
+	async blockUser(client: Socket, userId: IdDto) {
+		await this.relationsService.blockUser(userId.id, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
