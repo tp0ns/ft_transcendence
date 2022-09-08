@@ -159,14 +159,7 @@ const GameScreen = () => {
 			if (ballPosition.x - ballPosition.speedx <= 10) {
 				// collision with left wall. 10 = point of contact in px
 				ballPosition.x = 10;
-				//end of the round - need to add score management
-				// collision with right wall -> point to left
-				
-				// let numberScore: number = +player1Score;
-				// numberScore++;
-				// player1Score = numberScore.toString();
-				
-				// p1 += 1;
+				//end of the round
 				gameFunctions("resetBall", 1);
 				return;
 			} else {

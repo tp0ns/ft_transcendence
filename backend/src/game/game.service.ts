@@ -1,14 +1,25 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import UserEntity from 'src/user/models/user.entity';
+import { UserService } from 'src/user/user.service';
+import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
+import InvitationEntity from './invitations/invitations.entity';
 
 const matchMakingSet = new Set<Socket>();
+const inviteSet = new Set<Socket>();
 let match: Match;
 
 @Injectable()
 export class GameService {
+	constructor(
+
+		@InjectRepository(InvitationEntity)
+		private invitationRepository: Repository<InvitationEntity>,
+		@Inject(forwardRef(() => UserService)) private userService: UserService,
+	) {}
 	/**
 	 * set the default position of the elements in the game
 	 * @param match interface of the match
@@ -182,6 +193,37 @@ export class GameService {
 			}
 			matchMakingSet.clear();
 		}
+	}
+
+/**
+ * create a room, initialize it and join it.
+ * @param client the user that sends an invitation
+ */
+	async	sendInvite(client: Socket, userToInviteId: string) {
+			const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
+			const invitation: InvitationEntity = await this.invitationRepository.save( {
+				creator: client.data.user,
+				receiver: userToInvite,
+				status: 'pending'
+			})
+			//invitation créée, sender et receiver set.
+			//a ce moment, le sender est sur la page jeu
+			const roomName = 'inviteRoom'+ Math.random();
+			match = this.setDefaultPos(roomName);
+					match.player1 = client.data.user;
+					match.p1User = match.player1;
+				client.join(roomName);
+				match.isLocal = false;
+				client.data.currentMatch = match;
+	}
+/**
+ * the user accepted the invitation
+ * the user is now joining the game
+ * @param client the user accepting the invitation
+ */
+	async joinInvite(client: Socket, userInvitingId: string) {
+		const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
+		client.data.user.receivedInvitations
 	}
 
 	//ends the game

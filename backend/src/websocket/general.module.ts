@@ -12,6 +12,7 @@ import { MessagesEntity } from '../chat/messages/messages.entity';
 import { MessageService } from '../chat/messages/messages.service';
 import { GameService } from 'src/game/game.service';
 import { RelationsService } from 'src/relations/relations.service';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { RelationsService } from 'src/relations/relations.service';
 			UserEntity,
 			RelationEntity,
 			MessagesEntity,
+			InvitationEntity,
 		]),
 	],
 	providers: [
