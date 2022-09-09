@@ -25,6 +25,8 @@ import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
 import { IdDto, UsernameDto } from './dtos/Relations.dto';
 import { CLIENT_RENEG_WINDOW } from 'tls';
+import { jwtConstants } from 'src/auth/jwt/jwt.constants';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
 	cors: {
@@ -42,6 +44,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private DMService: DMService,
 		private userService: UserService,
+		private readonly jwtService: JwtService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -57,16 +60,46 @@ export class GeneralGateway
 		this.logger.log(`Server is properly initialized !`);
 	}
 
-	/**
-	 * Handles client connection behaviour
-	 */
-	@UseGuards(WsGuard)
-	async handleConnection(client: Socket) {
+	async validateConnection(client: Socket): Promise<UserEntity> {
+		try {
+				// let client: Socket = context.switchToWs().getClient();
+				const sessionCookie: string | string[] = client.handshake.headers.cookie
+						.split(';')
+						.find(
+								(cookie: string) =>
+										cookie.startsWith(' Authentication') ||
+										cookie.startsWith('Authentication'),
+						)
+						.split('=')[1];
+
+				const payload = await this.jwtService.verify(sessionCookie, {
+						secret: jwtConstants.secret,
+				});
+				const user = await this.userService.getUserById(payload.sub);
+				client.data.user = user;
+				if (user) return user;
+				return null;
+		} catch (err) {
+				console.log('Error occured in ws guard : ');
+				console.log(err.message);
+				// throw new WsException(err.message);
+		}
+}
+
+/**
+ * Handles client connection behaviour
+ */
+@UseGuards(WsGuard)
+async handleConnection(client: Socket) {
+		const user: UserEntity = await this.validateConnection(client);
+
+		if (user != null) {
+				client.data.user = user;
+				this.userService.connectClient(client.data.user)
+		}
 		this.logger.log(`Client connected: ${client.id}`);
-		if (client.data.user)
-			this.userService.connectClient(client.data.user);
 		this.server.emit('updatedChannels');
-	}
+}
 
 	/**
 	 * Handles client disconnection behaviour
@@ -74,9 +107,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		// console.log("handle disconnect - client.data: ", client.data)
-		// if (client.data.user)
-		// 	this.userService.disconnectClient(client.data.user);
+		if (client.data.user)
+			this.userService.disconnectClient(client.data.user);
 	}
 
 	/**
