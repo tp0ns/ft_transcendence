@@ -134,8 +134,8 @@ export class ChannelService {
 			update: date,
 			owner: user,
 		});
-		this.addMember(user, dm.title);
-		this.addMember(user2, dm.title);
+		await this.addMember(user, dm.title);
+		await this.addMember(user2, dm.title);
 		return dm;
 	}
 
