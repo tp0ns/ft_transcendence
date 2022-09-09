@@ -27,6 +27,7 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42') {
 				id: 'id',
 				username: 'login',
 				image_url: 'image_url',
+				status: 'connected'
 			},
 		});
 	}

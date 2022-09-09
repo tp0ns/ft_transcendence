@@ -24,6 +24,7 @@ import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
 import { IdDto, UsernameDto } from './dtos/Relations.dto';
+import { CLIENT_RENEG_WINDOW } from 'tls';
 
 @WebSocketGateway({
 	cors: {
@@ -62,6 +63,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
+		if (client.data.user)
+			this.userService.connectClient(client.data.user);
 		this.server.emit('updatedChannels');
 	}
 
@@ -71,6 +74,9 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
+		// console.log("handle disconnect - client.data: ", client.data)
+		// if (client.data.user)
+		// 	this.userService.disconnectClient(client.data.user);
 	}
 
 	/**
@@ -376,18 +382,18 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
-		if (client.data.user.userId == this.beginMatch.player1.userId)
-			await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
-		else if (client.data.user.userId == this.beginMatch.player2.userId)
-			await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
-		this.server.emit(
-			'setPosition',
-			this.beginMatch.leftPad,
-			this.beginMatch.rightPad,
-			this.beginMatch.ball,
-			this.beginMatch.p1Score,
-			this.beginMatch.p2Score,
-		);
+		// if (client.data.user.userId == this.beginMatch.player1.userId)
+		// 	await this.gameService.moveMouseLeft(mousePosy, this.beginMatch);
+		// else if (client.data.user.userId == this.beginMatch.player2.userId)
+		// 	await this.gameService.moveMouseRight(mousePosy, this.beginMatch);
+		// this.server.emit(
+		// 	'setPosition',
+		// 	this.beginMatch.leftPad,
+		// 	this.beginMatch.rightPad,
+		// 	this.beginMatch.ball,
+		// 	this.beginMatch.p1Score,
+		// 	this.beginMatch.p2Score,
+		// );
 	}
 
 	//	Game Functions, start, reset
@@ -486,3 +492,7 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 }
+function jwtDecode<T>(Authentication: any) {
+	throw new Error('Function not implemented.');
+}
+
