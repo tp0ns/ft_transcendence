@@ -38,7 +38,6 @@ export class ChannelEntity extends BaseEntity {
 
 	@Column('text', {
 		default: '',
-		unique: true,
 	})
 	title: string;
 
