@@ -60,20 +60,19 @@ export class MessageService {
 				await this.relationsService.getBlockedUsersForUser(user);
 			if (blockedUsers.length > 0) {
 				msgs = await this.MessageRepository.createQueryBuilder('messages')
-				.leftJoinAndSelect('messages.user', 'sender')
-				.leftJoinAndSelect('messages.channel', 'channel')
-				.where('channel.channelId = :id', { id: channel.channelId })
-				.andWhere('sender.username NOT IN (:...blocked)', {
-					blocked: blockedUsers,
-				})
-				.getMany();
-			}
-			else {			
-			msgs = await this.MessageRepository.createQueryBuilder('messages')
-				.leftJoinAndSelect('messages.user', 'sender')
-				.leftJoinAndSelect('messages.channel', 'channel')
-				.where('channel.channelId = :id', { id: channel.channelId })
-				.getMany();
+					.leftJoinAndSelect('messages.user', 'sender')
+					.leftJoinAndSelect('messages.channel', 'channel')
+					.where('channel.channelId = :id', { id: channel.channelId })
+					.andWhere('sender.username NOT IN (:...blocked)', {
+						blocked: blockedUsers,
+					})
+					.getMany();
+			} else {
+				msgs = await this.MessageRepository.createQueryBuilder('messages')
+					.leftJoinAndSelect('messages.user', 'sender')
+					.leftJoinAndSelect('messages.channel', 'channel')
+					.where('channel.channelId = :id', { id: channel.channelId })
+					.getMany();
 			}
 		}
 		return msgs;

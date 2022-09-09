@@ -68,7 +68,7 @@ const RelationItem: React.FC<{
         console.log(`enter in socket.on newDM`);
       const redirect_path = 'chat/'+title;
     });
-    navigate("/chat");
+      navigate("/chat");
     }
   };
 
