@@ -328,7 +328,7 @@ export class ChannelService {
 	 */
 	async deleteChan(user: UserEntity, chanName: string) {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.adminsId.includes(user.userId) || user === null) {
+		if (user === null || channel.adminsId.includes(user.userId)) {
 			await this.channelRepository
 				.createQueryBuilder()
 				.delete()
@@ -529,11 +529,10 @@ export class ChannelService {
 	async quitChan(user: UserEntity, chanName: string): Promise<ChannelEntity> {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
 		if (
-			(channel.DM =
-				false &&
-				channel.members.find(
-					(member: UserEntity) => member.userId === user.userId,
-				))
+			channel.members.find(
+				(member: UserEntity) =>
+					member.userId === user.userId && channel.DM === false,
+			)
 		) {
 			await this.deleteMember(user, channel);
 			await channel.save();

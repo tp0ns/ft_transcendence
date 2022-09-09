@@ -47,3 +47,17 @@
 	text-align: center;
 	border-bottom: 1px solid #363636;
 }
+
+.quit {
+	display: flex;
+	justify-content: center;
+	font-family: "Courier New", Courier, monospace;
+	font-size: large;
+	font-weight: bolder;
+	background-color: red;
+	border-radius: 10px;
+	color: #f4edde;
+	padding-block: 5px;
+	padding-inline: 10px;
+	cursor: pointer;
+}

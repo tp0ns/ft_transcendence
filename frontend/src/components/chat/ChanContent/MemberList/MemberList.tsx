@@ -30,6 +30,10 @@ function MemberList() {
 		newMember.current!.value = "";
 	}
 
+	function quitChannel() {
+		socket.emit("quitChan", ctx?.activeChan?.title);
+	}
+
 	return (
 		<div className={classes.layout}>
 			{ctx?.isAdmin && ctx?.activeChan?.private ? (
@@ -66,6 +70,16 @@ function MemberList() {
 					);
 				})}
 			</div>
+			{!ctx?.activeChan?.DM ? (
+				<div
+					className={classes.quit}
+					onClick={() => {
+						quitChannel();
+					}}
+				>
+					Leave Channel
+				</div>
+			) : null}
 		</div>
 	);
 }
