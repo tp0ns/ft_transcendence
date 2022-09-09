@@ -8,11 +8,12 @@ import { ChannelService } from 'src/chat/channel/channel.service';
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { RelationsService } from 'src/relations/relations.service';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity])],
 	controllers: [UserController],
-	providers: [UserService, ChannelService, MessageService],
+	providers: [UserService, ChannelService, MessageService, RelationsService],
 	exports: [UserService, ChannelService, MessageService],
 })
 export class UserModule {}

@@ -50,6 +50,32 @@ export class ChannelService {
 		return channel;
 	}
 
+	async createNewDM(
+		user: UserEntity,
+		chan: CreateChanDto,
+	): Promise<ChannelEntity> {
+		let channel1: ChannelEntity;
+		let channel2: ChannelEntity;
+		const userToInvite: UserEntity = await this.userService.getUserById(
+			chan.user2,
+		);
+		if (!userToInvite)
+			throw new WsException(
+				'The user you want to invite to DM does not exist.',
+			);
+		channel1 = await this.getChanByName(
+			user.username + '+' + userToInvite.username,
+		);
+		if (channel1) return channel1;
+		else
+			channel2 = await this.getChanByName(
+				userToInvite.username + '+' + user.username,
+			);
+		if (channel2) return channel2;
+		let newChannel: ChannelEntity = await this.saveNewDM(user, chan);
+		return newChannel;
+	}
+
 	/**
 	 *
 	 * Si ce n'est pas un DM, creation d'un nouveau channel
@@ -100,11 +126,9 @@ export class ChannelService {
 	 */
 	async saveNewDM(user: UserEntity, chan: CreateChanDto) {
 		const date = Date.now();
-		let user2: UserEntity = await this.userService.getUserByUsername(
-			chan.user2,
-		);
+		let user2: UserEntity = await this.userService.getUserById(chan.user2);
 		let dm: ChannelEntity = await this.channelRepository.save({
-			title: user.username + '+' + user2.username,
+			title: chan.title,
 			DM: chan.DM,
 			private: true,
 			update: date,
@@ -193,11 +217,11 @@ export class ChannelService {
 	) {
 		if (channel?.owner.userId != user.userId)
 			throw new WsException("You can't modify the channel");
-		else if (protection && !newPassword)
+		else if (!newPassword && protection)
 			throw new WsException(
 				'You need to enter a password if you want to protect this channel',
 			);
-		else if (protection && newPassword) {
+		else if (newPassword && protection) {
 			channel.protected = true;
 			channel.password = await bcrypt.hash(newPassword, 10);
 			channel.userInProtectedChan = null;

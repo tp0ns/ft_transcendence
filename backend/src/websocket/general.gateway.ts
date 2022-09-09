@@ -25,11 +25,12 @@ import { RelationsService } from 'src/relations/relations.service';
 import RelationEntity from 'src/relations/models/relations.entity';
 import UserEntity from 'src/user/models/user.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { globalExceptionFilter } from 'src/globalException.filter';
 import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
-import { MessagesEntity } from 'src/chat/messages/messages.entity';
-import { globalExceptionFilter } from 'src/globalException.filter';
+import { IdDto, UsernameDto } from './dtos/Relations.dto';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -37,6 +38,7 @@ import { globalExceptionFilter } from 'src/globalException.filter';
 		origin: '/',
 	},
 })
+
 export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -110,6 +112,18 @@ export class GeneralGateway
 			client.data.user,
 			channelEntity,
 		);
+		this.server.emit('updatedChannels');
+	}
+
+	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('createDM')
+	async createDM(client: Socket, channelEntity: CreateChanDto) {
+		const DM: ChannelEntity = await this.channelService.createNewDM(
+			client.data.user,
+			channelEntity,
+		);
+		client.emit('newDM', DM.title);
 		this.server.emit('updatedChannels');
 	}
 
@@ -467,34 +481,36 @@ export class GeneralGateway
 	async getRelations(client: Socket) {
 		const relations: RelationEntity[] =
 			await this.relationsService.getAllRelations(client.data.user);
-		this.server.emit('sendRelations', relations);
+		this.server.to(client.id).emit('sendRelations', relations);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('addFriend')
-	async addFriend(client: Socket, username: string) {
-		await this.relationsService.sendFriendRequest(username, client.data.user);
+	async addFriend(client: Socket, username: UsernameDto) {
+		await this.relationsService.sendFriendRequest(username.username, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
-	async blockUser(client: Socket, username: string) {
-		await this.relationsService.blockUser(username, client.data.user);
+	async blockUser(client: Socket, username: UsernameDto) {
+		console.log("client.data.user: ", client.data.user)
+		console.log("username.username: ", username.username)
+		await this.relationsService.blockUser(username.username, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('unblockUser')
-	async unblockUser(client: Socket, relationId: string) {
-		await this.relationsService.unblockUser(relationId, client.data.user);
+	async unblockUser(client: Socket, relationId: IdDto) {
+		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptRequest')
-	async acceptRequest(client: Socket, requestId: string) {
-		await this.relationsService.respondToFriendRequest(requestId, 'accepted');
+	async acceptRequest(client: Socket, requestId: IdDto) {
+		await this.relationsService.respondToFriendRequest(requestId.id, 'accepted');
 		this.server.emit('updatedRelations');
 	}
 }
