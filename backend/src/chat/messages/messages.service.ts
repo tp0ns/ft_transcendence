@@ -23,15 +23,20 @@ export class MessageService {
 	 * ------------------------ ADD NEW MESSAGES  ------------------------- *
 	 */
 
+	/**
+	 *
+	 * @param sender
+	 * @param chan
+	 * @param msg
+	 * @returns
+	 *
+	 * @todo peut etre faire un orderBy
+	 */
 	async addNewMessage(
 		sender: UserEntity,
 		chan: ChannelEntity,
 		msg: string,
 	): Promise<MessagesEntity> {
-		// const message = await this.channelRepository.save({
-		// 	user: sender,
-		// 	message: msg,
-		// })
 		const message: MessagesEntity = await this.MessageRepository.save({
 			channel: chan,
 			user: sender,
@@ -47,33 +52,30 @@ export class MessageService {
 		let channel: ChannelEntity = await this.channelService.getChanByName(
 			chanName,
 		);
-		let messages: MessagesEntity[];
+		let msgs: MessagesEntity[];
 		if (channel) {
 			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
 				return null;
 			let blockedUsers: string[] =
 				await this.relationsService.getBlockedUsersForUser(user);
-			if (blockedUsers) {
-				// messages = this.MessageRepository
+			if (blockedUsers.length > 0) {
+				msgs = await this.MessageRepository.createQueryBuilder('messages')
+				.leftJoinAndSelect('messages.user', 'sender')
+				.leftJoinAndSelect('messages.channel', 'channel')
+				.where('channel.channelId = :id', { id: channel.channelId })
+				.andWhere('sender.username NOT IN (:...blocked)', {
+					blocked: blockedUsers,
+				})
+				.getMany();
 			}
-			messages = await this.MessageRepository.createQueryBuilder('messages')
+			else {			
+			msgs = await this.MessageRepository.createQueryBuilder('messages')
 				.leftJoinAndSelect('messages.user', 'sender')
 				.leftJoinAndSelect('messages.channel', 'channel')
 				.where('channel.channelId = :id', { id: channel.channelId })
 				.getMany();
-			return messages;
+			}
 		}
+		return msgs;
 	}
-
-	// async getChannelMessages(user: UserEntity, chanName: string) : Promise<MessagesEntity[]>
-	// {
-	// 	let channel: ChannelEntity = await this.channelService.getChanByName(chanName);
-
-	// 	if (channel)
-	// 	{
-	// 		if (channel.bannedMembers && channel.bannedId.includes(user.userId))
-	// 			return null;
-	//
-	// 	}
-	// }
 }

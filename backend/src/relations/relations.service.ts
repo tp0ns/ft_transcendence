@@ -196,8 +196,6 @@ export class RelationsService {
 		for (const relation of userBlockedRelations) {
 			usersBlockedByUser.push(relation.receiver.username);
 		}
-		console.log('username of blockedUsers are : ', usersBlockedByUser);
-
-		return;
+		return usersBlockedByUser;
 	}
 }
