@@ -1,7 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
+import { Socket } from 'socket.io';
 import UserEntity from 'src/user/models/user.entity';
-import { Match, Pad, Ball, Player } from './interfaces/game.interface';
+import { Match, Pad, Ball } from './interfaces/game.interface';
+
+const matchMakingSet = new Set<Socket>();
+let match: Match;
 
 @Injectable()
 export class GameService {
@@ -9,7 +13,7 @@ export class GameService {
 	 * set the default position of the elements in the game
 	 * @param match interface of the match
 	 */
-	setDefaultPos() {
+	setDefaultPos(room: string) {
 		const initLeftPad: Pad = {
 			x: 0,
 			y: 150,
@@ -36,6 +40,7 @@ export class GameService {
 			goRight: false,
 			p1Touches: 0,
 			p2Touches: 0,
+			isMoving: false,
 		};
 		let initPlayer: UserEntity; // check if this init is good
 
@@ -52,8 +57,11 @@ export class GameService {
 			p2Touches: 0,
 			p1User: null,
 			p2User: null,
-			isLocal: false,
+			isLocal: true,
+			roomName: room,
+			isEnd: false,
 		};
+		console.log(match.roomName);
 		return match;
 	}
 
@@ -115,28 +123,88 @@ export class GameService {
 			match.ball.x = 250;
 			match.ball.speedy = 0;
 			match.ball.goRight = true;
+			match.ball.isMoving = false;
 		}
 		switch(score) {
 			case 0:
 				break;
 			case 1:
 				match.p2Score++;
-				break;
+				match.ball.goRight = false;
+			break;
 			case 2:
 				match.p1Score++;
+				match.ball.goRight = true;
 				break;
 		}
 	}
 
 		// toggle SinglePlayer : launch the SinglePlayer
 		// and disable keyboard commands
-		async toggleLocalGame(match: Match) {
-			match.isLocal = true;
+		async toggleLocalGame(client: Socket) {
+			const roomName = 'room'+ Math.random();
+			client.join(roomName)
+			client.data.currentMatch = this.setDefaultPos(roomName);
+			client.data.currentMatch.isLocal = true;
+			client.data.currentMatch.p1User = client.data.user;
+			client.data.currentMatch.p2User = client.data.currentMatch.p1User;
+			client.data.currentMatch.player1 = client.data.currentMatch.p1User;
+			client.data.currentMatch.player2 = client.data.currentMatch.p1User;
 		}
 
 	// toggle MatchMaking : launch the matchmaking
 	// and disable keyboard commands
-	async toggleMatchMaking(match: Match) {
-			match.isLocal = false;
+	async toggleMatchMaking(client: Socket) {
+		matchMakingSet.add(client);
+		console.log('set size:', matchMakingSet.size);
+		if (matchMakingSet.size == 2)
+		{
+			const roomName = 'room'+ Math.random();
+			match = this.setDefaultPos(roomName);
+			for (const item of matchMakingSet)
+			{
+				if (match.p1User == null) {
+					match.player1 = item.data.user;
+					match.p1User = match.player1;
+				} else if (
+					match.p2User == null &&
+					match.p1User != item.data.user
+				) {
+					match.player2 = item.data.user;
+					match.p2User = match.player2;
+				}
+				item.join(roomName);
+				match.isLocal = false;
+			}
+			for (const item of matchMakingSet)
+			{
+				item.data.currentMatch = match;
+			}
+			matchMakingSet.clear();
+		}
+	}
+
+	//ends the game
+	async endGame(match: Match, winner: UserEntity) {
+		match.isEnd = true;
+		if (match.isLocal == false) {
+			// -> send the data to the db
+			// trigger the pop-up(?modal) with victory info and home button
+			console.log(winner.username, ' has won.');
+			console.log(match.player2.username, ' has lost.');
+		}
+		else {
+			// trigger the pop-up(?modal) with victory info and home button
+			console.log('We have a winner !');
+		}
+	}
+	//check if the game should end and exec the proper funciton if so
+	async checkEndGame(match: Match) {
+		if (match.p1Score >= 2){
+			this.endGame(match, match.player1);
+		}
+		if (match.p2Score >= 2) {
+			this.endGame(match, match.player2);
+		}
 	}
 }
