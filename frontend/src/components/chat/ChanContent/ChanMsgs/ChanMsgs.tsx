@@ -4,7 +4,6 @@ import ChatContext from "../../../../context/chat-context";
 import ChannelInterface from "../../../../interfaces/Channel.interface";
 import MessageInterface from "../../../../interfaces/Message.interface";
 import { ChatContextType } from "../../../../types/ChatContextType";
-import MemberList from "../MemberList/MemberList";
 import classes from "./ChanMsgs.module.css";
 import ChanSettings from "./ChanSettings/ChanSettings";
 import Message from "./Message/Message";

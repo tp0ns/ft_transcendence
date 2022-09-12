@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { socket } from "../App";
-import NavBar from "../components/Layout/NavBar/NavBar";
 import classes from "./SocialPage.module.css";
 import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
