@@ -113,6 +113,7 @@ export class AuthController {
 	async logout(@Req() request: Request, @Res() res: Response) {
 		// const new_cookie = await this.authService.logout();
 		// res.setHeader('Set-Cookie', new_cookie);
+		this.userService.disconnectClient(request.user);
 		res.clearCookie('Authentication');
 		return res.sendStatus(200);
 	}

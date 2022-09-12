@@ -6,6 +6,7 @@ interface UserProp {
 	image_url: string;
 	profileImage: string;
 	isTwoFAEnabled: boolean;
+	status: string;
 	// sendRelation:
 }
 

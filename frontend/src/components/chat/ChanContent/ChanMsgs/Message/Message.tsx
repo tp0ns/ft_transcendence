@@ -1,6 +1,4 @@
-import jwtDecode, { JwtPayload } from "jwt-decode";
 import { useContext } from "react";
-import { useCookies } from "react-cookie";
 import ChatContext from "../../../../../context/chat-context";
 import MessageInterface from "../../../../../interfaces/Message.interface";
 import classes from "./Message.module.css";

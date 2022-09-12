@@ -17,6 +17,8 @@ import {
 	Relation_Status,
 } from '../relations/models/relations.interface';
 import { RelationEntity } from '../relations/models/relations.entity';
+import { IdDto } from 'src/websocket/dtos/Relations.dto';
+import { UserDto } from './dtos/user.dto';
 import { ChannelService } from 'src/chat/channel/channel.service';
 
 @Injectable()
@@ -49,11 +51,29 @@ export class UserService {
 				schoolId: profile.id,
 				username: profile.username,
 				image_url: profile.image_url,
+				status: 'connected'
 			});
 			this.channelService.newConnection(newUser);
 			return newUser;
 		}
+		else {
+			this.update(user.userId, {status: "connected"})
+		}
 		return user;
+	}
+
+	async connectClient(userReq: Partial<UserEntity>) {
+		const user: UserEntity = userReq as UserEntity;
+		return this.userRepo.update(user.userId, {
+			status: "connected",
+		})
+	}
+
+	async disconnectClient(userReq: Partial<UserEntity>) {
+		const user: UserEntity = userReq as UserEntity;
+		return this.userRepo.update(user.userId, {
+			status: "disconnected",
+		})
 	}
 
 	async setTwoFASecret(secret: string, userId: string) {

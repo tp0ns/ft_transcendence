@@ -41,20 +41,20 @@ const RelationItem: React.FC<{
 		manageStatus();
 	}, [props.relation]);
 
-	// socket.on("updatedRelations", () => {
-	//   console.log("status after update: ", props.relation.status);
-	//   manageStatus();
-	// });
+  const handleBlock = () => {
+    if (props.myId === props.relation.creator?.userId)
+      socket.emit("blockUser", {id: props.relation.receiver?.userId});
+    else {
+      socket.emit("blockUser", {id: props.relation.creator?.userId});
+    }
+  };
 
-	const handleBlock = () => {
-		console.log("myID: ", props.myId);
-		if (props.myId === props.relation.creator?.userId)
-			socket.emit("blockUser", { username: props.relation.receiver?.username });
-		else {
-			console.log("Yale: ", props.relation.creator?.username);
-			socket.emit("blockUser", { username: props.relation.creator?.username });
-		}
-	};
+  const sendMessage = () => {
+    if (props.myId === props.relation.creator?.userId)
+      socket.emit("createDM", props.relation.receiver?.username);
+    else socket.emit("createDM", props.relation.creator?.username);
+    navigate("/chat");
+  };
 
 	const handleRequest = () => {
 		socket.emit("acceptRequest", { id: props.relation.requestId });
@@ -64,55 +64,44 @@ const RelationItem: React.FC<{
 		socket.emit("unblockUser", { id: props.relation.requestId });
 	};
 
-	const sendMessage = () => {
-			socket.emit("createDM", {
-				title:
-					props.relation.creator?.username +
-					"0" +
-					props.relation.receiver?.username,
-				DM: true,
-				user2: props.relation.receiver?.userId,
-			});
-	};
-
-	return (
-		<div
-			className={
-				status === "blocked"
-					? classes.relationItemBlocked
-					: classes.relationItem
-			}
-		>
-			<div className={classes.leftSide}>
-				<img src={toDisplay?.image_url} className={classes.img}></img>
-				<h3>{toDisplay?.username}</h3>
-			</div>
-			<div className={classes.rightSide}>
-				{status === "accepted" ? (
-					<div className={classes.tmp}>
-						<button className={classes.button} onClick={handleBlock}>
-							Block
-						</button>
-						<img
-							onClick={sendMessage}
-							className={classes.logo}
-							src="chat.svg"
-						/>
-					</div>
-				) : null}
-				{status === "blocker" ? (
-					<button className={classes.button} onClick={handleUnblock}>
-						unblock
-					</button>
-				) : null}
-				{status === "requested" ? (
-					<button className={classes.button} onClick={handleRequest}>
-						Accept
-					</button>
-				) : null}
-			</div>
-		</div>
-	);
+  return (
+    <div
+      className={
+        status === "blocked"
+          ? classes.relationItemBlocked
+          : classes.relationItem
+      }
+    >
+      <div className={classes.leftSide}>
+        <img alt="dp" src={toDisplay?.image_url} className={toDisplay?.status === 'connected' ? classes.connected : toDisplay?.status === 'disconnected' ? classes.disconnected : classes.playing}></img>
+        <h3>{toDisplay?.username}</h3>
+      </div>
+      <div className={classes.rightSide}>
+        {status === "accepted" ? (
+          <div className={classes.tmp}>
+            <button className={classes.button} onClick={handleBlock}>
+              Block
+            </button>
+            <img alt="chat"
+              onClick={sendMessage}
+              className={classes.logo}
+              src="chat.svg"
+            />
+          </div>
+        ) : null}
+        {status === "blocker" ? (
+          <button className={classes.button} onClick={handleUnblock}>
+            unblock
+          </button>
+        ) : null}
+        {status === "requested" ? (
+          <button className={classes.button} onClick={handleRequest}>
+            Accept
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
 };
 
 export default RelationItem;
