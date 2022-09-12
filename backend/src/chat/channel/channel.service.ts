@@ -50,6 +50,19 @@ export class ChannelService {
 		return channel;
 	}
 
+	/**
+	 *
+	 * @param user
+	 * @param chan
+	 * @returns
+	 *
+	 * @todo faire un find avec relations plutot que checker le nom
+	 * le user1 doit etre le user ou userToInvite
+	 * et le user2 pareil
+	 *
+	 * -> evite d'avoir des problemes de uniqueName etc...
+	 *
+	 */
 	async createNewDM(
 		user: UserEntity,
 		chan: CreateChanDto,
@@ -63,17 +76,46 @@ export class ChannelService {
 			throw new WsException(
 				'The user you want to invite to DM does not exist.',
 			);
-		channel1 = await this.getChanByName(
-			user.username + '+' + userToInvite.username,
-		);
-		if (channel1) return channel1;
-		else
-			channel2 = await this.getChanByName(
-				userToInvite.username + '+' + user.username,
-			);
-		if (channel2) return channel2;
-		let newChannel: ChannelEntity = await this.saveNewDM(user, chan);
-		return newChannel;
+		// let DM : ChannelEntity = await this.channelRepository
+		// 	.createQueryBuilder('DM')
+		// 	.leftJoinAndSelect('DM.members', 'members')
+		// 	.leftJoinAndSelect('DM.owner', 'owner')
+		// 	.where('DM.DM = true')
+
+		// let DM: ChannelEntity = await this.channelRepository.findOne({
+		// 	relations: [
+		// 		'members',
+		// 		'admins',
+		// 		'owner',
+		// 		'bannedMembers',
+		// 		'mutedMembers',
+		// 		'userInProtectedChan',
+		// 	],
+		// 	where: [
+		// 		{ DM: true },
+		// 		{
+		// 			owner: {
+		// 				userId: user.userId,
+		// 			},
+		// 			members: {
+		// 				userId: userToInvite.userId,
+		// 			},
+		// 		},
+		// 		{
+		// 			owner: {
+		// 				userId: userToInvite.userId,
+		// 			},
+		// 			members: {
+		// 				userId: user.userId,
+		// 			},
+		// 		},
+		// 	],
+		// });
+		// console.log(`DM who exist is : `, DM);
+		// if (!DM) DM = await this.saveNewDM(user, chan);
+		// console.log(`new DM or DM who exist is : `, DM);
+		// return DM;
+		return;
 	}
 
 	/**
@@ -292,7 +334,7 @@ export class ChannelService {
 	 */
 	async deleteChan(user: UserEntity, chanName: string) {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
-		if (channel.adminsId.includes(user.userId)) {
+		if (user === null || channel.adminsId.includes(user.userId)) {
 			await this.channelRepository
 				.createQueryBuilder()
 				.delete()
@@ -391,6 +433,7 @@ export class ChannelService {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await this.deleteMember(newBan, channel);
 			await channel.save();
+			// setTimeout(this.deleteBanMember, 5000, newBanUser, channel);
 		}
 	}
 
@@ -441,6 +484,7 @@ export class ChannelService {
 			deleteBanUser,
 			channel,
 		);
+
 		if (deleteBan) {
 			channel.bannedMembers = channel.bannedMembers.filter((banned) => {
 				return banned.userId !== deleteBan.userId;
@@ -488,6 +532,21 @@ export class ChannelService {
 		channel.members = channel.members.filter((member) => {
 			return member.userId !== userToDelete.userId;
 		});
+	}
+
+	async quitChan(user: UserEntity, chanName: string): Promise<ChannelEntity> {
+		const channel: ChannelEntity = await this.getChanByName(chanName);
+		if (
+			channel.members.find(
+				(member: UserEntity) =>
+					member.userId === user.userId && channel.DM === false,
+			)
+		) {
+			await this.deleteMember(user, channel);
+			await channel.save();
+			if (channel.members.length <= 0) this.deleteChan(null, channel.title);
+		}
+		return channel;
 	}
 
 	/**

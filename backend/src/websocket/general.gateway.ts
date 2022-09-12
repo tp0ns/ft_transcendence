@@ -38,7 +38,6 @@ import { IdDto, UsernameDto } from './dtos/Relations.dto';
 		origin: '/',
 	},
 })
-
 export class GeneralGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -239,16 +238,12 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('quitChan')
-	async quitChan(client: Socket, channel: ChannelEntity) {
-		if (
-			channel.members.find(
-				(member: UserEntity) => member.userId === client.data.user.userId,
-			)
-		) {
-			await this.channelService.deleteMember(client.data.user, channel);
-			client.leave(channel.title);
-			await channel.save();
-		}
+	async quitChan(client: Socket, chanName: string) {
+		const channel: ChannelEntity = await this.channelService.quitChan(
+			client.data.user,
+			chanName,
+		);
+		client.leave(channel.title);
 		this.server.emit('updatedChannels');
 	}
 
@@ -278,13 +273,17 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
-		let chanName: string = payload[1];
+		const chanName: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
 		);
-		this.server.emit('updatedChannels');
-		// client.emit('sendChannelMessages', messages);
+		const messages = await this.messageService.getChannelMessages(
+			client.data.user,
+			chanName,
+		);
+		// this.server.emit('updatedChannels');
+		this.server.to(chanName).emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -487,15 +486,16 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('addFriend')
 	async addFriend(client: Socket, username: UsernameDto) {
-		await this.relationsService.sendFriendRequest(username.username, client.data.user);
+		await this.relationsService.sendFriendRequest(
+			username.username,
+			client.data.user,
+		);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
 	async blockUser(client: Socket, username: UsernameDto) {
-		console.log("client.data.user: ", client.data.user)
-		console.log("username.username: ", username.username)
 		await this.relationsService.blockUser(username.username, client.data.user);
 		this.server.emit('updatedRelations');
 	}
@@ -510,7 +510,10 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptRequest')
 	async acceptRequest(client: Socket, requestId: IdDto) {
-		await this.relationsService.respondToFriendRequest(requestId.id, 'accepted');
+		await this.relationsService.respondToFriendRequest(
+			requestId.id,
+			'accepted',
+		);
 		this.server.emit('updatedRelations');
 	}
 }

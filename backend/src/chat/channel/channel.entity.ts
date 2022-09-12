@@ -29,15 +29,22 @@ export class ChannelEntity extends BaseEntity {
 	})
 	DM: boolean;
 
+	// @ManyToOne(() => UserEntity, {
+	// 	eager: true,
+	// 	cascade: true,
+	// })
+	// @JoinColumn()
+	// user2: UserEntity;
+
 	@Column('text', {
 		default: '',
 		unique: true,
 	})
 	title: string;
 
-	@ManyToOne(() => UserEntity, { 
+	@ManyToOne(() => UserEntity, {
 		eager: true,
-		cascade: true, 
+		cascade: true,
 	})
 	@JoinColumn()
 	owner: UserEntity;
@@ -101,7 +108,7 @@ export class ChannelEntity extends BaseEntity {
 	@Column({
 		nullable: false,
 		default: 0,
-		type: "float",
+		type: 'float',
 	})
 	update: number;
 
