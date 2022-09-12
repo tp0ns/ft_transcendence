@@ -33,7 +33,7 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 		if (params.channelId) {
 			setactiveChan(() => {
 				const newActiveChan = channels.find((channel) => {
-					return channel.title === params.channelId;
+					return channel.channelId === params.channelId;
 				}) as ChannelInterface;
 				if (!newActiveChan) return null;
 				changeIsAdmin(newActiveChan);

@@ -29,7 +29,7 @@ const RelationItem: React.FC<{
 
 	useEffect(() => {
 		socket.on("newDM", (title) => {
-			console.log(`enter in socket.on newDM`);
+			console.log(`enter in socket.on newDM`, title);
 			navigate("/chat/" + title);
 		});
 	}, []);
@@ -65,7 +65,6 @@ const RelationItem: React.FC<{
 	};
 
 	const sendMessage = () => {
-		if (props.myId === props.relation.creator?.userId) {
 			socket.emit("createDM", {
 				title:
 					props.relation.creator?.username +
@@ -74,7 +73,6 @@ const RelationItem: React.FC<{
 				DM: true,
 				user2: props.relation.receiver?.userId,
 			});
-		}
 	};
 
 	return (

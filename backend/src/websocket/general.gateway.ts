@@ -122,7 +122,7 @@ export class GeneralGateway
 			client.data.user,
 			channelEntity,
 		);
-		client.emit('newDM', DM.title);
+		client.emit('newDM', DM.channelId);
 		this.server.emit('updatedChannels');
 	}
 

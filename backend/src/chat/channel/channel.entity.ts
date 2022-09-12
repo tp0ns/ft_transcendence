@@ -1,4 +1,3 @@
-import { isNotEmpty } from 'class-validator';
 import UserEntity from 'src/user/models/user.entity';
 import {
 	BaseEntity,
@@ -29,12 +28,12 @@ export class ChannelEntity extends BaseEntity {
 	})
 	DM: boolean;
 
-	// @ManyToOne(() => UserEntity, {
-	// 	eager: true,
-	// 	cascade: true,
-	// })
-	// @JoinColumn()
-	// user2: UserEntity;
+	@ManyToOne(() => UserEntity, {
+		eager: true,
+		cascade: true,
+	})
+	@JoinColumn()
+	user2: UserEntity;
 
 	@Column('text', {
 		default: '',
@@ -103,13 +102,6 @@ export class ChannelEntity extends BaseEntity {
 		default: false,
 	})
 	protected: boolean;
-
-	@Column({
-		nullable: false,
-		default: 0,
-		type: 'float',
-	})
-	update: number;
 
 	@OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
 	messages: MessagesEntity[];

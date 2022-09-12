@@ -68,8 +68,6 @@ export class ChannelService {
 		user: UserEntity,
 		chan: CreateChanDto,
 	): Promise<ChannelEntity> {
-		let channel1: ChannelEntity;
-		let channel2: ChannelEntity;
 		const userToInvite: UserEntity = await this.userService.getUserById(
 			chan.user2,
 		);
@@ -77,40 +75,30 @@ export class ChannelService {
 			throw new WsException(
 				'The user you want to invite to DM does not exist.',
 			);
-		// let DM: ChannelEntity = await this.channelRepository.findOne({
-		// 	relations: [
-		// 		'members',
-		// 		'admins',
-		// 		'owner',
-		// 		'bannedMembers',
-		// 		'mutedMembers',
-		// 		'userInProtectedChan',
-		// 	],
-		// 	where: [
-		// 		{ DM: true },
-		// 		{
-		// 			owner: {
-		// 				userId: user.userId,
-		// 			},
-		// 			members: {
-		// 				userId: userToInvite.userId,
-		// 			},
-		// 		},
-		// 		{
-		// 			owner: {
-		// 				userId: userToInvite.userId,
-		// 			},
-		// 			members: {
-		// 				userId: user.userId,
-		// 			},
-		// 		},
-		// 	],
-		// });
-		// console.log(`DM who exist is : `, DM);
-		// if (!DM) DM = await this.saveNewDM(user, chan);
-		// console.log(`new DM or DM who exist is : `, DM);
-		// return DM;
-		return;
+		let DM: ChannelEntity = await this.channelRepository.findOne({
+			relations: ['members', 'owner', 'userInProtectedChan'],
+			where: [
+				{ DM: true },
+				{
+					owner: {
+						userId: user.userId,
+					},
+					user2: {
+						userId: userToInvite.userId,
+					},
+				},
+				{
+					owner: {
+						userId: userToInvite.userId,
+					},
+					user2: {
+						userId: user.userId,
+					},
+				},
+			],
+		});
+		if (!DM) DM = await this.saveNewDM(user, chan);
+		return DM;
 	}
 
 	/**
@@ -136,7 +124,6 @@ export class ChannelService {
 			password: newPassword,
 			private: chan.private,
 			protected: chan.protected,
-			update: date,
 			DM: chan.DM,
 		});
 		await this.addMember(user, channel.channelId);
@@ -145,7 +132,7 @@ export class ChannelService {
 			let users: UserEntity[] = await this.userService.getAllUsers();
 			for (const newUser of users) {
 				if (user.userId != newUser.userId)
-					await this.addMember(newUser, channel.title);
+					await this.addMember(newUser, channel.channelId);
 			}
 		}
 		return channel;
@@ -162,17 +149,16 @@ export class ChannelService {
 	 * une fois que ce sera fait dans le front
 	 */
 	async saveNewDM(user: UserEntity, chan: CreateChanDto) {
-		const date = Date.now();
-		let user2: UserEntity = await this.userService.getUserById(chan.user2);
+		let userToAdd: UserEntity = await this.userService.getUserById(chan.user2);
 		let dm: ChannelEntity = await this.channelRepository.save({
 			title: chan.title,
 			DM: chan.DM,
 			private: true,
-			update: date,
 			owner: user,
+			user2: userToAdd,
 		});
-		await this.addMember(user, dm.title);
-		await this.addMember(user2, dm.title);
+		await this.addMember(user, dm.channelId);
+		await this.addMember(userToAdd, dm.channelId);
 		return dm;
 	}
 
@@ -184,7 +170,8 @@ export class ChannelService {
 	 */
 	async newConnection(newUser: UserEntity) {
 		let channels: ChannelEntity[] = await this.getAllPublicChannels();
-		for (let channel of channels) await this.addMember(newUser, channel.title);
+		for (let channel of channels)
+			await this.addMember(newUser, channel.channelId);
 	}
 
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
@@ -213,7 +200,19 @@ export class ChannelService {
 	async modifyChannel(user: UserEntity, modifications: ModifyChanDto) {
 		const channel: ChannelEntity = await this.getChanById(modifications.id);
 		if (channel.DM) return;
-		if (modifications.newPassword || !modifications.protected) {
+		if (modifications.newAdmin)
+			await this.modifyAdmins(user, channel, modifications.newAdmin);
+		else if (modifications.newMember)
+			await this.modifyMembers(user, channel, modifications.newMember);
+		else if (modifications.newBan)
+			await this.addBanMembers(user, channel, modifications.newBan);
+		else if (modifications.newMute)
+			await this.addMuteMembers(user, channel, modifications.newMute);
+		else if (modifications.deleteBan)
+			await this.deleteBanMember(user, channel, modifications.deleteBan);
+		else if (modifications.deleteMute)
+			await this.deleteMuteMember(user, channel, modifications.deleteMute);
+		else if (modifications.newPassword || !modifications.protected) {
 			await this.modifyPassword(
 				user,
 				channel,
@@ -221,18 +220,6 @@ export class ChannelService {
 				modifications.protected,
 			);
 		}
-		if (modifications.newAdmin)
-			await this.modifyAdmins(user, channel, modifications.newAdmin);
-		if (modifications.newMember)
-			await this.modifyMembers(user, channel, modifications.newMember);
-		if (modifications.newBan)
-			await this.addBanMembers(user, channel, modifications.newBan);
-		if (modifications.newMute)
-			await this.addMuteMembers(user, channel, modifications.newMute);
-		if (modifications.deleteBan)
-			await this.deleteBanMember(user, channel, modifications.deleteBan);
-		if (modifications.deleteMute)
-			await this.deleteMuteMember(user, channel, modifications.deleteMute);
 	}
 
 	/**
@@ -250,9 +237,9 @@ export class ChannelService {
 		newPassword: string,
 		protection: boolean,
 	) {
-		if (channel?.owner.userId != user.userId)
+		if (!channel.adminsId.includes(user.userId)) {
 			throw new WsException("You can't modify the channel");
-		else if (!newPassword && protection)
+		} else if (!newPassword && protection)
 			throw new WsException(
 				'You need to enter a password if you want to protect this channel',
 			);
@@ -285,7 +272,7 @@ export class ChannelService {
 		if (channel.adminsId.includes(user.userId)) {
 			let userToAdd: UserEntity = await this.userService.getUserById(newAdmin);
 			if (!channel.adminsId.includes(userToAdd.userId)) {
-				await this.addAdmin(userToAdd, channel.title);
+				await this.addAdmin(userToAdd, channel.channelId);
 			}
 		}
 	}
@@ -313,7 +300,7 @@ export class ChannelService {
 		if (channel?.private && channel.membersId.includes(invitingUser.userId)) {
 			if (channel.membersId.includes(user.userId))
 				throw new WsException('This user is already in this channel');
-			else await this.addMember(user, channel.title);
+			else await this.addMember(user, channel.channelId);
 		}
 	}
 
@@ -428,9 +415,6 @@ export class ChannelService {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await this.deleteMember(newBan, channel);
 			await channel.save();
-			setTimeout(() => {
-				this.deleteBanMember(banningUser, channel, newBanUser);
-			}, 5000);
 		}
 	}
 
@@ -487,7 +471,7 @@ export class ChannelService {
 				return banned.userId !== deleteBan.userId;
 			});
 			await channel.save();
-			await this.addMember(deleteBan, channel.title);
+			await this.addMember(deleteBan, channel.channelId);
 		}
 	}
 
@@ -531,6 +515,12 @@ export class ChannelService {
 		});
 	}
 
+	async deleteAdmin(userToDelete: UserEntity, channel: ChannelEntity) {
+		channel.admins = channel.admins.filter((admin) => {
+			return admin.userId !== userToDelete.userId;
+		});
+	}
+
 	async quitChan(user: UserEntity, chanId: string): Promise<ChannelEntity> {
 		const channel: ChannelEntity = await this.getChanById(chanId);
 		if (
@@ -540,8 +530,10 @@ export class ChannelService {
 			)
 		) {
 			await this.deleteMember(user, channel);
+			if (channel.adminsId.includes(user.userId))
+				this.deleteAdmin(user, channel);
 			await channel.save();
-			if (channel.members.length <= 0) this.deleteChan(null, channel.title);
+			if (channel.members.length <= 0) this.deleteChan(null, channel.channelId);
 		}
 		return channel;
 	}
@@ -554,7 +546,7 @@ export class ChannelService {
 	//  * @brief Pouvoir recuperer tous les channels existants
 	//  *
 	//  */
-	// async getAllChannels(): Promise<ChannelEntity[]> {
+	// async annels(): Promise<ChannelEntity[]> {
 	// 	const channels: ChannelEntity[] = await this.channelRepository
 	// 		.createQueryBuilder('channel')
 	// 		.leftJoinAndSelect('channel.members', 'members')
@@ -592,18 +584,25 @@ export class ChannelService {
 	 * @todo est-ce que j'envoie aussi si le user est mute ou ban ?
 	 */
 	async getMemberChannels(member: UserEntity): Promise<ChannelEntity[]> {
-		const allChannels: ChannelEntity[] = await this.getAllChannels();
-		const channels = allChannels.filter((channel) => {
-			return (
-				channel.members.some((chanmember) => {
-					return chanmember.userId === member.userId;
-				}) ||
-				channel.bannedMembers.some((bannedMember) => {
-					return bannedMember.userId === member.userId;
+		const testChannelsIds = await this.channelRepository
+			.query(`SELECT "channelId" id FROM channel
+			JOIN channel_members_user_entity chmember ON chmember."channelChannelId" = channel."channelId"
+			WHERE chmember."userEntityUserId" = '${member.userId}'`);
+		let channelIds = testChannelsIds.map((channel) => channel.id);
+		if (channelIds.length != 0) {
+			return this.channelRepository
+				.createQueryBuilder('channel')
+				.leftJoinAndSelect('channel.members', 'members')
+				.leftJoinAndSelect('channel.owner', 'owner')
+				.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+				.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+				.leftJoinAndSelect('channel.admins', 'admins')
+				.where('channel.channelId IN (:...channelIds)', {
+					channelIds,
 				})
-			);
-		});
-		return channels;
+				.getMany();
+		}
+		return [];
 	}
 
 	/**
@@ -662,13 +661,6 @@ export class ChannelService {
 		}
 	}
 
-	// const chan : Channel = await this.channelsRepo.findOne({ where: { name: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] });
-	// if (!chan && isValidUUID(channelIdentifier))
-	// 	await this.channelsRepo.findOne({ where: { id: channelIdentifier }, relations: ['messages', 'banned', 'admins', 'muted'] })
-	// if (!chan)
-	// 	throw new HttpException('Channel ' + channelIdentifier + ' not found (id or name)', HttpStatus.NOT_FOUND);
-	// return chan;
-
 	/**
 	 * ------------------------ MESSAGES  ------------------------- *
 	 */
@@ -684,7 +676,6 @@ export class ChannelService {
 	async sendMessage(user: UserEntity, payload: string[]) {
 		const chanId: string = payload[1];
 		const msg: string = payload[0];
-		const date = Date.now();
 		let channel: ChannelEntity = await this.getChanById(chanId);
 		if (
 			channel.mutedId.includes(user.userId) ||
@@ -693,7 +684,6 @@ export class ChannelService {
 		)
 			throw new WsException("You can't send a message");
 		const new_msg = await this.messageService.addNewMessage(user, channel, msg);
-		channel.update = date;
 		await channel.save();
 		return new_msg;
 	}
