@@ -8,7 +8,6 @@ const Backdrop: React.FC<{ onClick: () => any }> = (props) => {
 
 const ModalOverlay: React.FC<{
 	title: string;
-	btnText: string;
 	children: JSX.Element;
 	className?: any;
 	onClick: () => any;
@@ -17,12 +16,10 @@ const ModalOverlay: React.FC<{
 	return (
 		<div className={styling}>
 			<header className={classes.header}>
-				<div className={classes.header_content}>
-					<h2>{props.title}</h2>
-					<button onClick={props.onClick} className={classes.actions}>
-						X
-					</button>
-				</div>
+				<h2>{props.title}</h2>
+				<button onClick={props.onClick} className={classes.actions}>
+					X
+				</button>
 			</header>
 			{props.children}
 		</div>
@@ -31,7 +28,6 @@ const ModalOverlay: React.FC<{
 
 const Modal: React.FC<{
 	title: string;
-	btnText: string;
 	children: JSX.Element;
 	className?: any;
 	onClick: () => any;
@@ -45,7 +41,6 @@ const Modal: React.FC<{
 			{ReactDOM.createPortal(
 				<ModalOverlay
 					title={props.title}
-					btnText={props.btnText}
 					onClick={props.onClick}
 					className={props.className}
 				>

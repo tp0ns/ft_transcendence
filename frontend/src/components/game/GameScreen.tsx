@@ -12,6 +12,7 @@ let ballPosition = {
 	goRight: 0,
 	p1Touches: 0,
 	p2Touches: 0,
+	isMoving: false,
 };
 let leftPadPosition = {
 	x: 0,
@@ -37,7 +38,7 @@ const GameScreen = () => {
 
 	useEffect(() => {
 		const context = canvas.current!.getContext("2d");
-		socket.emit("joinMatch");
+		// socket.emit("joinMatch");
 		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
 			leftPadPosition = leftPos;
 			rightPadPosition = rightPos;
@@ -105,10 +106,13 @@ const GameScreen = () => {
 
 	const toggleMatchMaking = () => {
 		socket.emit("toggleMatchMaking");
+		socket.emit("joinMatch");
+
 	};
 
 	const moveBall = () => {
 		// var p1: number = 0;
+		ballPosition.isMoving = true;
 		if (ballPosition.goRight === 0) {
 			if (
 				ballPosition.y + ballPosition.speedy <= 10 ||
@@ -196,10 +200,10 @@ const GameScreen = () => {
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
 		if (event.key === "Enter") {
+			if (ballPosition.isMoving === true || player1Score === 5 || player2Score === 5) {
+				return ;	
+			}
 			moveBall();
-		}
-		if (event.key === "Space") {
-			gameFunctions("resetBall", 0);
 		}
 		if (event.key === "w") {
 			move("up");

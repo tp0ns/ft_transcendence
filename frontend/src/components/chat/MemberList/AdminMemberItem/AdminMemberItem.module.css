@@ -1,0 +1,53 @@
+.itemLayout {
+	display: grid;
+	grid-template-columns: 20% auto;
+	gap: 10px;
+	padding-inline: 10px;
+	height: 60px;
+	background-color: #fdd05d;
+	color: #3a3636;
+	border: 1px #3a3636 solid;
+	border-radius: 10px;
+}
+
+.itemFlipLayout {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	height: 60px;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: 1px #3a3636 solid;
+	border-radius: 10px;
+}
+
+.button {
+	display: flex;
+	height: 40px;
+	width: 40px;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	cursor: pointer;
+	background-color: #fdd05d;
+	color: #3a3636;
+}
+
+.button img {
+	width: 20px;
+	height: 20px;
+	filter: invert(15%) sepia(6%) saturate(679%) hue-rotate(314deg)
+		brightness(88%) contrast(78%);
+}
+
+.name {
+	align-self: center;
+}
+
+.badge {
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	align-self: center;
+	cursor: pointer;
+}

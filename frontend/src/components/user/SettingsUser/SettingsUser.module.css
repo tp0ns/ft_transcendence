@@ -1,0 +1,53 @@
+.list {
+	margin-inline: 15px;
+	padding-bottom: 5px;
+	height: fit-content;
+	overflow: scroll;
+	/* height: 51vh; */
+	/* overflow: scroll; */
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	/* justify-content: center; */
+	align-items: center;
+}
+
+.form_name label {
+	display: block;
+	text-align: center;
+}
+
+.form_avatar label {
+	display: block;
+	text-align: center;
+}
+
+.form_2fa p {
+	margin-block: 0px;
+	display: block;
+	text-align: center;
+}
+
+.secret {
+	margin-block: 0px;
+	display: block;
+	text-align: center;
+	font-family: "Courier New", Courier, monospace;
+}
+
+.logout {
+	background: red;
+	height: 30px;
+	width: 15%;
+	border: solid 2px white;
+	border-radius: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	font-size: large;
+	color: white;
+	cursor: pointer;
+	overflow: hidden;
+}

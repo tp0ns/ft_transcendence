@@ -1,7 +1,9 @@
 import {
 	ForbiddenException,
+	forwardRef,
 	HttpException,
 	HttpStatus,
+	Inject,
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
@@ -17,11 +19,14 @@ import {
 import { RelationEntity } from '../relations/models/relations.entity';
 import { IdDto } from 'src/websocket/dtos/Relations.dto';
 import { UserDto } from './dtos/user.dto';
+import { ChannelService } from 'src/chat/channel/channel.service';
 
 @Injectable()
 export class UserService {
 	constructor(
 		@InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
+		@Inject(forwardRef(() => ChannelService))
+		private channelService: ChannelService,
 	) {}
 
 	/**
@@ -42,12 +47,14 @@ export class UserService {
 			) {
 				profile.username += Math.floor(1 + Math.random() * 999).toString();
 			}
-			return await this.userRepo.save({
+			let newUser: UserEntity = await this.userRepo.save({
 				schoolId: profile.id,
 				username: profile.username,
 				image_url: profile.image_url,
 				status: 'connected'
 			});
+			this.channelService.newConnection(newUser);
+			return newUser;
 		}
 		else {
 			this.update(user.userId, {status: "connected"})
