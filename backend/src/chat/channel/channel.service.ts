@@ -139,8 +139,8 @@ export class ChannelService {
 			update: date,
 			DM: chan.DM,
 		});
-		await this.addMember(user, channel.title);
-		await this.addAdmin(user, channel.title);
+		await this.addMember(user, channel.channelId);
+		await this.addAdmin(user, channel.channelId);
 		if (!channel.private) {
 			let users: UserEntity[] = await this.userService.getAllUsers();
 			for (const newUser of users) {
