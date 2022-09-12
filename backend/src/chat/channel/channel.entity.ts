@@ -105,13 +105,6 @@ export class ChannelEntity extends BaseEntity {
 	})
 	protected: boolean;
 
-	@Column({
-		nullable: false,
-		default: 0,
-		type: 'float',
-	})
-	update: number;
-
 	@OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
 	messages: MessagesEntity[];
 }

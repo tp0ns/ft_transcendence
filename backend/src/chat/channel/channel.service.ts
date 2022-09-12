@@ -141,7 +141,6 @@ export class ChannelService {
 			password: newPassword,
 			private: chan.private,
 			protected: chan.protected,
-			update: date,
 			DM: chan.DM,
 		});
 		await this.addMember(user, channel.title);
@@ -173,7 +172,6 @@ export class ChannelService {
 			title: chan.title,
 			DM: chan.DM,
 			private: true,
-			update: date,
 			owner: user,
 		});
 		await this.addMember(user, dm.title);
@@ -433,9 +431,9 @@ export class ChannelService {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await this.deleteMember(newBan, channel);
 			await channel.save();
-			setTimeout(() => {
-				this.deleteBanMember(banningUser, channel, newBanUser);
-			}, 5000);
+			// setTimeout(() => {
+			// 	this.deleteBanMember(banningUser, channel, newBanUser);
+			// }, 5000);
 		}
 	}
 
@@ -567,7 +565,7 @@ export class ChannelService {
 	//  * @brief Pouvoir recuperer tous les channels existants
 	//  *
 	//  */
-	// async getAllChannels(): Promise<ChannelEntity[]> {
+	// async annels(): Promise<ChannelEntity[]> {
 	// 	const channels: ChannelEntity[] = await this.channelRepository
 	// 		.createQueryBuilder('channel')
 	// 		.leftJoinAndSelect('channel.members', 'members')
@@ -605,18 +603,22 @@ export class ChannelService {
 	 * @todo est-ce que j'envoie aussi si le user est mute ou ban ?
 	 */
 	async getMemberChannels(member: UserEntity): Promise<ChannelEntity[]> {
-		const allChannels: ChannelEntity[] = await this.getAllChannels();
-		const channels = allChannels.filter((channel) => {
-			return (
-				channel.members.some((chanmember) => {
-					return chanmember.userId === member.userId;
-				}) ||
-				channel.bannedMembers.some((bannedMember) => {
-					return bannedMember.userId === member.userId;
-				})
-			);
-		});
-		return channels;
+		const testChannelsIds = await this.channelRepository
+			.query(`SELECT "channelId" id FROM channel
+			JOIN channel_members_user_entity chmember ON chmember."channelChannelId" = channel."channelId"
+			WHERE chmember."userEntityUserId" = '${member.userId}'`);
+		const testChannels = await this.channelRepository
+			.createQueryBuilder('channel')
+			.leftJoinAndSelect('channel.members', 'members')
+			.leftJoinAndSelect('channel.owner', 'owner')
+			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+			.leftJoinAndSelect('channel.admins', 'admins')
+			.where('channel.channelId IN (:...channelIds)', {
+				channelIds: testChannelsIds.map((channel) => channel.id),
+			})
+			.getMany();
+		return testChannels;
 	}
 
 	/**
@@ -671,7 +673,6 @@ export class ChannelService {
 	async sendMessage(user: UserEntity, payload: string[]) {
 		const chanName: string = payload[1];
 		const msg: string = payload[0];
-		const date = Date.now();
 		let channel: ChannelEntity = await this.getChanByName(chanName);
 		if (
 			channel.mutedId.includes(user.userId) ||
@@ -680,7 +681,6 @@ export class ChannelService {
 		)
 			throw new WsException("You can't send a message");
 		const new_msg = await this.messageService.addNewMessage(user, channel, msg);
-		channel.update = date;
 		await channel.save();
 		return new_msg;
 	}
