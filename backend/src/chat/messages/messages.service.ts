@@ -47,10 +47,10 @@ export class MessageService {
 
 	async getChannelMessages(
 		user: UserEntity,
-		chanName: string,
+		channelId: string,
 	): Promise<MessagesEntity[]> {
-		let channel: ChannelEntity = await this.channelService.getChanByName(
-			chanName,
+		let channel: ChannelEntity = await this.channelService.getChanById(
+			channelId,
 		);
 		let msgs: MessagesEntity[];
 		if (channel) {

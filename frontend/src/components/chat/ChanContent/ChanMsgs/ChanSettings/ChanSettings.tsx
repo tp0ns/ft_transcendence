@@ -21,7 +21,7 @@ const ChanSettings: React.FC<{
 	function handleModifySubmit(event: React.FormEvent) {
 		event.preventDefault();
 		const modifyChan = {
-			title: ctx?.activeChan!.title,
+			id: ctx?.activeChan!.channelId,
 			newPassword: password.current?.value,
 			protected: protection.current!.checked,
 		};
@@ -30,7 +30,7 @@ const ChanSettings: React.FC<{
 	}
 
 	function deleteChannel() {
-		socket.emit("deleteChan", ctx?.activeChan!.title);
+		socket.emit("deleteChan", ctx?.activeChan!.channelId);
 	}
 
 	return (

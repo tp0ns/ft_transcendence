@@ -21,7 +21,7 @@ function ChanContent() {
 		setNeedPw(false);
 		if (ctx.activeChan) {
 			setLoading(true);
-			socket.emit("getChannelMessages", ctx.activeChan?.title);
+			socket.emit("getChannelMessages", ctx.activeChan?.channelId);
 			return;
 		}
 		setLoading(false);
@@ -47,7 +47,7 @@ function ChanContent() {
 	function pwSubmitHandler(event: any) {
 		event.preventDefault();
 		socket.emit("chanWithPassword", {
-			title: ctx.activeChan!.title,
+			id: ctx.activeChan!.channelId,
 			password: inputPw.current!.value,
 		});
 		setLoading(true);

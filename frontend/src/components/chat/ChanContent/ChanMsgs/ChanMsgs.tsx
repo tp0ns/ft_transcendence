@@ -33,7 +33,11 @@ const ChanMsgs: React.FC<{ msgs: MessageInterface[] }> = (props) => {
 
 	function msgSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		socket.emit("msgToChannel", inputMsg.current?.value, ctx.activeChan!.title);
+		socket.emit(
+			"msgToChannel",
+			inputMsg.current?.value,
+			ctx.activeChan!.channelId
+		);
 		inputMsg.current!.value = "";
 	}
 

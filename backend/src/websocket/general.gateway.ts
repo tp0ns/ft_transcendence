@@ -273,16 +273,17 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
+		const chanId: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
 		);
 		const messages = await this.messageService.getChannelMessages(
 			client.data.user,
-			chanName,
+			chanId,
 		);
 		// this.server.emit('updatedChannels');
-		this.server.to(chanName).emit('sendChannelMessages', messages);
+		this.server.to(chanId).emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -332,9 +333,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
 	async getChannelMessages(client: Socket, chanId: string) {
-		let channel: ChannelEntity = await this.channelService.getChanById(
-			chanId,
-		);
+		let channel: ChannelEntity = await this.channelService.getChanById(chanId);
 		const messages: MessagesEntity[] =
 			await this.messageService.getChannelMessages(client.data.user, chanId);
 		if (!messages) return client.emit('userIsBanned');

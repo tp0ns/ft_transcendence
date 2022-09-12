@@ -23,7 +23,7 @@ function MemberList() {
 	function handleNewMember(event: any) {
 		event.preventDefault();
 		const modifyChan = {
-			title: ctx?.activeChan?.title,
+			id: ctx?.activeChan?.channelId,
 			newMember: newMember.current?.value,
 		};
 		socket.emit("modifyChannel", modifyChan);
@@ -31,7 +31,7 @@ function MemberList() {
 	}
 
 	function quitChannel() {
-		socket.emit("quitChan", ctx?.activeChan?.title);
+		socket.emit("quitChan", ctx?.activeChan?.channelId);
 	}
 
 	return (
