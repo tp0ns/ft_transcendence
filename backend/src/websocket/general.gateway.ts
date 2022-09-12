@@ -499,7 +499,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('refuseInvite')
 	async refuseInvite(client: Socket, userInvitingId: string) {
-		await this.gameService.joinInvite(client, userInvitingId);
+		await this.gameService.refuseInvite(client, userInvitingId);
 		this.server.emit('updatedInvitation');
 		console.log('invite refused');
 	}

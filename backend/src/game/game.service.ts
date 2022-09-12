@@ -281,8 +281,7 @@ export class GameService {
 			.leftJoin('invitation.receiver', 'receiver')
 			.where('invitation.creator = :id', { id: userInvitingId})
 			.getOne();
-				console.log('map join:', inviteRoomMap);
-				const invitId: string = invitation.requestId;
+			const invitId: string = invitation.requestId;
 			invitation = await this.invitationRepository.save({
 				requestId: invitId,
 				creator: userInviting,
@@ -293,7 +292,7 @@ export class GameService {
 			.createQueryBuilder()
 			.delete()
 			.from(InvitationEntity)
-			.where('invitation.creator = :id', { id: userInvitingId})
+			.where('creator = :id', { id: userInvitingId})
 			.execute();
 			inviteRoomMap.delete(userInvitingId);
 		}
