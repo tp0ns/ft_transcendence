@@ -158,8 +158,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
-	async deleteChan(client: Socket, chanName: string) {
-		await this.channelService.deleteChan(client.data.user, chanName);
+	async deleteChan(client: Socket, chanId: string) {
+		await this.channelService.deleteChan(client.data.user, chanId);
 		this.server.emit('updatedChannels');
 	}
 
@@ -182,7 +182,7 @@ export class GeneralGateway
 			client.data.user,
 			informations,
 		);
-		if (bool == true) this.getChannelMessages(client, informations.title);
+		if (bool == true) this.getChannelMessages(client, informations.id);
 		else {
 			client.emit('chanNeedPw');
 			throw new WsException('Wrong Password');
@@ -211,7 +211,7 @@ export class GeneralGateway
 		// );
 		// if (check == true)
 		// {
-		client.join(channel.title);
+		client.join(channel.channelId);
 		this.server.emit('joinedRoom');
 		// }
 		// else
@@ -231,19 +231,19 @@ export class GeneralGateway
 				(member: UserEntity) => member.userId === client.data.user.userId,
 			)
 		) {
-			client.leave(channel.title);
+			client.leave(channel.channelId);
 			this.server.emit('leftRoom');
 		}
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('quitChan')
-	async quitChan(client: Socket, chanName: string) {
+	async quitChan(client: Socket, chanId: string) {
 		const channel: ChannelEntity = await this.channelService.quitChan(
 			client.data.user,
-			chanName,
+			chanId,
 		);
-		client.leave(channel.title);
+		client.leave(channel.channelId);
 		this.server.emit('updatedChannels');
 	}
 
@@ -273,7 +273,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
-		const chanName: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
@@ -332,14 +331,15 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
-	async getChannelMessages(client: Socket, chanName: string) {
-		let channel: ChannelEntity = await this.channelService.getChanByName(
-			chanName,
+	async getChannelMessages(client: Socket, chanId: string) {
+		let channel: ChannelEntity = await this.channelService.getChanById(
+			chanId,
 		);
 		const messages: MessagesEntity[] =
-			await this.messageService.getChannelMessages(client.data.user, chanName);
+			await this.messageService.getChannelMessages(client.data.user, chanId);
 		if (!messages) return client.emit('userIsBanned');
 		if (
+			channel &&
 			channel.protected == true &&
 			!channel.usersInId.includes(client.data.user.userId)
 		)
