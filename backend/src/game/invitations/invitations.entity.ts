@@ -13,13 +13,13 @@ export class InvitationEntity {
 	@PrimaryGeneratedColumn('uuid')
 	requestId: string;
 
-	@ManyToOne(() => UserEntity, (user) => user.sentRelations, {
+	@ManyToOne(() => UserEntity, (user) => user.sentInvitations, {
 		eager: true,
 	})
 	@JoinColumn()
 	creator: UserEntity;
 
-	@ManyToOne(() => UserEntity, (user) => user.receivedRelations, {
+	@ManyToOne(() => UserEntity, (user) => user.receivedInvitations, {
 		eager: true,
 	})
 	@JoinColumn()

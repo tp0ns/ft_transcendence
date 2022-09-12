@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { fstat } from 'fs';
 import { Socket } from 'socket.io';
 import UserEntity from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -10,6 +11,7 @@ import InvitationEntity from './invitations/invitations.entity';
 
 const matchMakingSet = new Set<Socket>();
 const inviteSet = new Set<Socket>();
+const	inviteRoomMap = new Map<string, string>(); // <userInviting, roomId>
 let match: Match;
 
 @Injectable()
@@ -230,16 +232,11 @@ export class GameService {
 					receiver: userToInvite,
 					status: 'pending'
 				})
-				//invitation créée, sender et receiver set.
-				//a ce moment, le sender est sur la page jeu
 				const roomName = 'inviteRoom'+ Math.random();
-				match = this.setDefaultPos(roomName);
-				match.player1 = client.data.user;
-				match.p1User = match.player1;
 				client.join(roomName);
-				match.isLocal = false;
-				client.data.currentMatch = match;
+				inviteRoomMap.set(client.data.user.userId, roomName);
 		}
+
 	/**
 	 * the user accepted the invitation
 	 * the user is now joining the game
@@ -247,13 +244,30 @@ export class GameService {
 	 */
 		async joinInvite(client: Socket, userInvitingId: string) {
 			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
-			client.data.user.receivedInvitations //query pour retrouver la bonne invitation
-			// passer l'invitation a 'accepted'
-			// set le match avec player2 et join la room
-			userInviting.currentMatch.player2 = client.data.user;
-			userInviting.currentMatch.p2User = userInviting.currentMatch.player2;
-			client.join(userInviting.currentMatch.roomName);
-			client.data.currentMatch = userInviting.currentMatch;
+			let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+			.select(['invitation.requestId', 'creator'])
+			.leftJoin('invitation.creator', 'creator')
+			.leftJoin('invitation.receiver', 'receiver')
+			.where('invitation.creator = :id', { id: userInvitingId})
+			.getOne();
+			const invitId: string = invitation.requestId;
+			invitation = await this.invitationRepository.save({
+				requestId: invitId,
+				creator: userInviting,
+				receiver: client.data.user,
+				status: 'accepted'
+			})
+			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
+			inviteRoomMap.delete(userInvitingId);
+			const currentMatch: Match = this.setDefaultPos(currentRoomName);
+			currentMatch.player1 = client.data.user;
+			currentMatch.p1User = currentMatch.player1;
+			currentMatch.player2 = userInviting;
+			currentMatch.p2User = currentMatch.player2;
+			currentMatch.isLocal = false;
+			client.join(currentMatch.roomName);
+			client.data.user.currentMatch = currentMatch;
+			userInviting.currentMatch = currentMatch;
 		}
 
 		/**
@@ -261,9 +275,27 @@ export class GameService {
 		 */
 		async	refuseInvite(client: Socket, userInvitingId: string) {
 			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
-			client.data.user.receivedInvitations //query pour retrouver la bonne invitation
-			//passer l'invitation a 'declined' (la suppr?)
-			//emit un event pour dire a l'autre user que l'invit est declined
+			let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+			.select(['invitation.requestId', 'creator'])
+			.leftJoin('invitation.creator', 'creator')
+			.leftJoin('invitation.receiver', 'receiver')
+			.where('invitation.creator = :id', { id: userInvitingId})
+			.getOne();
+				console.log('map join:', inviteRoomMap);
+				const invitId: string = invitation.requestId;
+			invitation = await this.invitationRepository.save({
+				requestId: invitId,
+				creator: userInviting,
+				receiver: client.data.user,
+				status: 'declined'
+			})
+			await this.invitationRepository
+			.createQueryBuilder()
+			.delete()
+			.from(InvitationEntity)
+			.where('invitation.creator = :id', { id: userInvitingId})
+			.execute();
+			inviteRoomMap.delete(userInvitingId);
 		}
 
 		/**

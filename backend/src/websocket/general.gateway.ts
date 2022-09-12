@@ -5,6 +5,7 @@ import {
 	WebSocketServer,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
+	WsException,
 } from '@nestjs/websockets';
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
@@ -22,6 +23,8 @@ import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from 'src/auth/jwt/jwt.constants';
 
 @WebSocketGateway({
 	cors: {
@@ -37,6 +40,7 @@ export class GeneralGateway
 		private relationsService: RelationsService,
 		private messageService: MessageService,
 		private userService: UserService,
+		private jwtService: JwtService
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -53,11 +57,42 @@ export class GeneralGateway
 		this.logger.log(`Server is properly initialized !`);
 	}
 
+	async validateConnection(client: Socket): Promise<UserEntity> {
+		try {
+			// let client: Socket = context.switchToWs().getClient();
+			const sessionCookie: string | string[] = client.handshake.headers.cookie
+				.split(';')
+				.find(
+					(cookie: string) =>
+						cookie.startsWith(' Authentication') ||
+						cookie.startsWith('Authentication'),
+				)
+				.split('=')[1];
+
+			const payload = await this.jwtService.verify(sessionCookie, {
+				secret: jwtConstants.secret,
+			});
+			const user = await this.userService.getUserById(payload.sub);
+			client.data.user = user;
+			if (user) return user;
+			return null;
+		} catch (err) {
+			console.log('Error occured in ws guard : ');
+			console.log(err.message);
+			// throw new WsException(err.message);
+		}
+	}
+
 	/**
 	 * Handles client connection behaviour
 	 */
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
+		const user: UserEntity = await this.validateConnection(client);
+
+		if (user != null) {
+			client.data.user = user;
+		}
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
 	}
@@ -446,12 +481,28 @@ export class GeneralGateway
 	 */
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('invite')
-	async invite(client: Socket, userToInviteId: string) {
+	@SubscribeMessage('sendInvite')
+	async sendInvite(client: Socket, userToInviteId: string) {
 		await this.gameService.sendInvite(client, userToInviteId);
 		this.server.emit('updatedInvitation');
+		console.log('invite sent');
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('acceptInvite')
+	async acceptInvite(client: Socket, userInvitingId: string) {
+		await this.gameService.joinInvite(client, userInvitingId);
+		this.server.emit('updatedInvitation');
+		console.log('invite accepted');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('refuseInvite')
+	async refuseInvite(client: Socket, userInvitingId: string) {
+		await this.gameService.joinInvite(client, userInvitingId);
+		this.server.emit('updatedInvitation');
+		console.log('invite refused');
+	}
 	/*
   ______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
