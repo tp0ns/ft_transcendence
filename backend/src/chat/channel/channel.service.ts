@@ -433,7 +433,9 @@ export class ChannelService {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await this.deleteMember(newBan, channel);
 			await channel.save();
-			// setTimeout(this.deleteBanMember, 5000, newBanUser, channel);
+			setTimeout(() => {
+				this.deleteBanMember(banningUser, channel, newBanUser);
+			}, 5000);
 		}
 	}
 
@@ -534,6 +536,12 @@ export class ChannelService {
 		});
 	}
 
+	async deleteAdmin(userToDelete: UserEntity, channel: ChannelEntity) {
+		channel.admins = channel.admins.filter((admin) => {
+			return admin.userId !== userToDelete.userId;
+		});
+	}
+
 	async quitChan(user: UserEntity, chanName: string): Promise<ChannelEntity> {
 		const channel: ChannelEntity = await this.getChanByName(chanName);
 		if (
@@ -543,6 +551,8 @@ export class ChannelService {
 			)
 		) {
 			await this.deleteMember(user, channel);
+			if (channel.adminsId.includes(user.userId))
+				this.deleteAdmin(user, channel);
 			await channel.save();
 			if (channel.members.length <= 0) this.deleteChan(null, channel.title);
 		}
