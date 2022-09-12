@@ -5,8 +5,15 @@ import {
 	WebSocketServer,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
+	WsException,
 } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import {
+	Logger,
+	UseFilters,
+	UseGuards,
+	UsePipes,
+	ValidationPipe,
+} from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
 import { ChannelService } from '../chat/channel/channel.service';
@@ -18,11 +25,14 @@ import { RelationsService } from 'src/relations/relations.service';
 import RelationEntity from 'src/relations/models/relations.entity';
 import UserEntity from 'src/user/models/user.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { globalExceptionFilter } from 'src/globalException.filter';
 import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
 import { Ball, Match } from '../game/interfaces/game.interface';
-import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { IdDto, UsernameDto } from './dtos/Relations.dto';
 
+@UseFilters(globalExceptionFilter)
 @WebSocketGateway({
 	cors: {
 		origin: '/',
@@ -84,7 +94,6 @@ export class GeneralGateway
 	 * ------------------------ SETTINGS CHANNEL  ------------------------- *
 	 */
 
-
 	/**
 	 * @brief Creation d'un channel
 	 *
@@ -96,13 +105,25 @@ export class GeneralGateway
 	 *
 	 */
 	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('createChan')
-	async CreateChan(client: Socket, channelEntity: CreateChanDto)
-	{
+	async CreateChan(client: Socket, channelEntity: CreateChanDto) {
 		const channel: ChannelEntity = await this.channelService.createNewChan(
 			client.data.user,
 			channelEntity,
 		);
+		this.server.emit('updatedChannels');
+	}
+
+	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
+	@SubscribeMessage('createDM')
+	async createDM(client: Socket, channelEntity: CreateChanDto) {
+		const DM: ChannelEntity = await this.channelService.createNewDM(
+			client.data.user,
+			channelEntity,
+		);
+		client.emit('newDM', DM.channelId);
 		this.server.emit('updatedChannels');
 	}
 
@@ -118,9 +139,9 @@ export class GeneralGateway
 	 *
 	 */
 	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('modifyChannel')
-	async modifyChannel(client: Socket, modifications: ModifyChanDto)
-	{
+	async modifyChannel(client: Socket, modifications: ModifyChanDto) {
 		await this.channelService.modifyChannel(client.data.user, modifications);
 		this.server.emit('updatedChannels');
 	}
@@ -138,9 +159,8 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteChan')
-	async deleteChan(client: Socket, chanName: string)
-	{
-		await this.channelService.deleteChan(client.data.user, chanName);
+	async deleteChan(client: Socket, chanId: string) {
+		await this.channelService.deleteChan(client.data.user, chanId);
 		this.server.emit('updatedChannels');
 	}
 
@@ -156,14 +176,18 @@ export class GeneralGateway
 	 * @todo est ce que je dois verifier si le cryptage des 2 mdp est equivalent?
 	 */
 	@UseGuards(WsGuard)
+	@UsePipes(ValidationPipe)
 	@SubscribeMessage('chanWithPassword')
-	async chatWithPassword(client: Socket, informations: JoinChanDto)
-	{
+	async chanWithPassword(client: Socket, informations: JoinChanDto) {
 		let bool: boolean = await this.channelService.chanWithPassword(
 			client.data.user,
 			informations,
 		);
-		client.emit('chanWithPassword', bool);
+		if (bool == true) this.getChannelMessages(client, informations.id);
+		else {
+			client.emit('chanNeedPw');
+			throw new WsException('Wrong Password');
+		}
 	}
 
 	/**
@@ -181,15 +205,14 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
-	async joinRoom(client: Socket, channel: ChannelEntity)
-	{
+	async joinRoom(client: Socket, channel: ChannelEntity) {
 		// let check: boolean = await this.channelService.getIfUserInChan(
 		// 	client.data.user,
 		// 	channel,
 		// );
 		// if (check == true)
 		// {
-		client.join(channel.title);
+		client.join(channel.channelId);
 		this.server.emit('joinedRoom');
 		// }
 		// else
@@ -203,14 +226,26 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveRoom')
-	async leaveRoom(client: Socket, channel: ChannelEntity)
-	{
-		if ( channel.members.find(
-				(member: UserEntity) => member.userId === client.data.user.userId))
-		{
-			client.leave(channel.title);
+	async leaveRoom(client: Socket, channel: ChannelEntity) {
+		if (
+			channel.members.find(
+				(member: UserEntity) => member.userId === client.data.user.userId,
+			)
+		) {
+			client.leave(channel.channelId);
 			this.server.emit('leftRoom');
 		}
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('quitChan')
+	async quitChan(client: Socket, chanId: string) {
+		const channel: ChannelEntity = await this.channelService.quitChan(
+			client.data.user,
+			chanId,
+		);
+		client.leave(channel.channelId);
+		this.server.emit('updatedChannels');
 	}
 
 	/**
@@ -222,8 +257,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToServer')
-	handleMessage(client: Socket, payload: string[])
-	{
+	handleMessage(client: Socket, payload: string[]) {
 		this.channelService.sendMessage(client.data.user, payload);
 		this.server.emit('msgToClient', payload);
 		return payload;
@@ -235,23 +269,22 @@ export class GeneralGateway
 	 * @param payload
 	 * @param chanName
 	 *
-	 * @todo faire un emit.to
 	 * @todo envoyer au service les 2 arguments decomposes
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
-	async handleMessageToChan(client: Socket, payload: string[])
-	{
+	async handleMessageToChan(client: Socket, payload: string[]) {
+		const chanId: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
 		);
 		const messages = await this.messageService.getChannelMessages(
 			client.data.user,
-			payload[1],
+			chanId,
 		);
-		this.server.to(payload[1]).emit('sendChannelMessages', messages);
-		this.server.emit('updatedChannels');
+		// this.server.emit('updatedChannels');
+		this.server.to(chanId).emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -263,8 +296,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToUser')
-	handleMessagerToClient(client: Socket, payload: string[])
-	{
+	handleMessageToClient(client: Socket, payload: string[]) {
 		this.server
 			.to(payload[1])
 			.emit('directMessage', payload, client.data.user.username);
@@ -280,8 +312,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
-	async getChannels(client: Socket)
-	{
+	async getChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getAllChannels();
 		client.emit('sendChans', channels);
@@ -294,8 +325,7 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
-	async getMemberChannels(client: Socket)
-	{
+	async getMemberChannels(client: Socket) {
 		const channels: ChannelEntity[] =
 			await this.channelService.getMemberChannels(client.data.user);
 		client.emit('sendMemberChans', channels);
@@ -303,22 +333,18 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
-	async getChannelMessages(client: Socket, payload: string)
-	{
+	async getChannelMessages(client: Socket, chanId: string) {
+		let channel: ChannelEntity = await this.channelService.getChanById(chanId);
 		const messages: MessagesEntity[] =
-			await this.messageService.getChannelMessages(client.data.user, payload);
+			await this.messageService.getChannelMessages(client.data.user, chanId);
+		if (!messages) return client.emit('userIsBanned');
+		if (
+			channel &&
+			channel.protected == true &&
+			!channel.usersInId.includes(client.data.user.userId)
+		)
+			return client.emit('chanNeedPw');
 		client.emit('sendChannelMessages', messages);
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getChanByName')
-	async getChanByName(client: Socket, payload: string)
-	{
-		const channel: ChannelEntity = await this.channelService.getChanByName(
-			payload,
-		);
-		// .to(client.data.user.userId) // on devrait renvoyer les infos qu'au socket qui les demande pas aux autres
-		this.server.to(channel.title).emit('sendChannel', channel);
 	}
 
 	/**
@@ -468,34 +494,40 @@ export class GeneralGateway
 	async getRelations(client: Socket) {
 		const relations: RelationEntity[] =
 			await this.relationsService.getAllRelations(client.data.user);
-		this.server.emit('sendRelations', relations);
+		this.server.to(client.id).emit('sendRelations', relations);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('addFriend')
-	async addFriend(client: Socket, username: string) {
-		await this.relationsService.sendFriendRequest(username, client.data.user);
+	async addFriend(client: Socket, username: UsernameDto) {
+		await this.relationsService.sendFriendRequest(
+			username.username,
+			client.data.user,
+		);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
-	async blockUser(client: Socket, username: string) {
-		await this.relationsService.blockUser(username, client.data.user);
+	async blockUser(client: Socket, username: UsernameDto) {
+		await this.relationsService.blockUser(username.username, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('unblockUser')
-	async unblockUser(client: Socket, relationId: string) {
-		await this.relationsService.unblockUser(relationId, client.data.user);
+	async unblockUser(client: Socket, relationId: IdDto) {
+		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptRequest')
-	async acceptRequest(client: Socket, requestId: string) {
-		await this.relationsService.respondToFriendRequest(requestId, 'accepted');
+	async acceptRequest(client: Socket, requestId: IdDto) {
+		await this.relationsService.respondToFriendRequest(
+			requestId.id,
+			'accepted',
+		);
 		this.server.emit('updatedRelations');
 	}
 }

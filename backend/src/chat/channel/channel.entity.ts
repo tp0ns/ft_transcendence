@@ -28,14 +28,21 @@ export class ChannelEntity extends BaseEntity {
 	})
 	DM: boolean;
 
+	@ManyToOne(() => UserEntity, {
+		eager: true,
+		cascade: true,
+	})
+	@JoinColumn()
+	user2: UserEntity;
+
 	@Column('text', {
 		default: '',
 	})
 	title: string;
 
-	@ManyToOne(() => UserEntity, { 
+	@ManyToOne(() => UserEntity, {
 		eager: true,
-		cascade: true, 
+		cascade: true,
 	})
 	@JoinColumn()
 	owner: UserEntity;
@@ -68,6 +75,15 @@ export class ChannelEntity extends BaseEntity {
 		cascade: true,
 	})
 	@JoinTable()
+	userInProtectedChan: UserEntity[];
+
+	@RelationId((channel: ChannelEntity) => channel.userInProtectedChan)
+	usersInId: string[];
+
+	@ManyToMany(() => UserEntity, {
+		cascade: true,
+	})
+	@JoinTable()
 	bannedMembers: UserEntity[];
 
 	@RelationId((channel: ChannelEntity) => channel.bannedMembers)
@@ -86,20 +102,6 @@ export class ChannelEntity extends BaseEntity {
 		default: false,
 	})
 	protected: boolean;
-
-	// @Column({
-	// 	nullable: false,
-	// 	default: 0,
-	// 	type: "float",
-	// })
-	// creation: number;
-
-	@Column({
-		nullable: false,
-		default: 0,
-		type: "float",
-	})
-	update: number;
 
 	@OneToMany(() => MessagesEntity, (MessagesEntity) => MessagesEntity.channel)
 	messages: MessagesEntity[];
