@@ -1,6 +1,5 @@
 import io from 'socket.io-client';
 import { useState, useEffect } from 'react';
-import { InputHTMLAttributes } from 'react';
 import { Cookies } from 'react-cookie';
 
 export default function Debug() {
@@ -32,7 +31,7 @@ export default function Debug() {
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;");
 		return json.replace(
-			/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+			/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+]?\d+)?)/g,
 			function (match: any) {
 				var cls = "number";
 				if (/^"/.test(match)) {
@@ -58,21 +57,21 @@ export default function Debug() {
 			socket.emit(event, args, args2);
 		else if (event && args)
 			socket.emit(event, args);
-		else if (event == "joinRoom")
+		else if (event === "joinRoom")
 			socket.emit('joinRoom', { chanName: "Test normal" });
-		else if (event == "joinRoom1")
+		else if (event === "joinRoom1")
 			socket.emit('joinRoom', { chanName: "Test password" }); // must fail
-		else if (event == "joinRoom2")
+		else if (event === "joinRoom2")
 			socket.emit('joinRoom', { chanName: "Test password", password : "kiki" }); // must fail
-		else if (event == "joinRoom3")
+		else if (event === "joinRoom3")
 			socket.emit('joinRoom', { chanName: "Test password", password : "root" }); // must succeed
-		else if (event == "createRoom")
+		else if (event === "createRoom")
 			socket.emit('createRoom', { chanName: "Test normal" } );
-		else if (event == "createRoom1")
+		else if (event === "createRoom1")
 			socket.emit('createRoom', { chanName : "Test private", private : true});
-		else if (event == "createRoom2")
+		else if (event === "createRoom2")
 			socket.emit('createRoom', { chanName : "Test password", password : "root"});
-		else if (event == "privateMessage")
+		else if (event === "privateMessage")
 			socket.emit('privateMessage', { to: { name: "ccommiss" } , msg : "lol"})
 		else if (event)
 			socket.emit(event);

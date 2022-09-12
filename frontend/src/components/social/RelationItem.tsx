@@ -71,7 +71,7 @@ const RelationItem: React.FC<{
       }
     >
       <div className={classes.leftSide}>
-        <img src={toDisplay?.image_url} className={classes.img}></img>
+        <img alt="dp" src={toDisplay?.image_url} className={toDisplay?.status === 'connected' ? classes.connected : toDisplay?.status === 'disconnected' ? classes.disconnected : classes.playing}></img>
         <h3>{toDisplay?.username}</h3>
       </div>
       <div className={classes.rightSide}>
@@ -80,7 +80,7 @@ const RelationItem: React.FC<{
             <button className={classes.button} onClick={handleBlock}>
               Block
             </button>
-            <img
+            <img alt="chat"
               onClick={sendMessage}
               className={classes.logo}
               src="chat.svg"

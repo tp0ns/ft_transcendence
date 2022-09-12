@@ -27,9 +27,10 @@ const SocialPage = () => {
   }, []);
 
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLTextAreaElement;
     if (event.key === "Enter") {
-      socket.emit("addFriend", {username: event.target.value});
-      event.target.value = "";
+      socket.emit("addFriend", {username: target.value});
+      target.value = "";
     }
   };
 

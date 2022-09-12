@@ -1,8 +1,4 @@
-import { useEffect, useState } from "react";
-import ChannelProp from "../../interfaces/Channel.interface";
-import { socket } from "../../App";
 import classes from "./ChatPage.module.css";
-import React from "react";
 import { ChatContextProvider } from "../../context/chat-context";
 import ChanList from "../../components/chat/ChanList/ChanList";
 import Layout from "../../components/Layout/Layout";

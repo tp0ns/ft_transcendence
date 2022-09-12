@@ -19,7 +19,7 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 			setUser(response);
 		}
 		getUserData();
-	}, []);
+	}, [props.userId]);
 
 	function changeUser(newUser: UserProp) {
 		setUser(newUser);

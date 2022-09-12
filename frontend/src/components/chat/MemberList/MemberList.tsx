@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import ChatContext from "../../../context/chat-context";
 import UserProp from "../../../interfaces/User.interface";
 import AdminMemberItem from "./AdminMemberItem/AdminMemberItem";
