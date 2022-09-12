@@ -15,6 +15,7 @@ import { ChannelService } from 'src/chat/channel/channel.service';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { RelationsService } from 'src/relations/relations.service';
 
 @Module({
 	imports: [
@@ -26,7 +27,7 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 		}),
 		HttpModule,
 	],
-	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy, ChannelService, MessageService],
+	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy, ChannelService, MessageService, RelationsService],
 	controllers: [AuthController],
 })
 export class AuthModule {}

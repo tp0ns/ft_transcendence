@@ -4,3 +4,72 @@
 	height: 100%;
 	gap: 10px;
 }
+
+.spin::before {
+	animation: 1.5s linear infinite spinner;
+	animation-play-state: inherit;
+	border: solid 5px #3a3636;
+	border-bottom-color: #fdd05d;
+	border-radius: 50%;
+	content: "";
+	position: fixed;
+	top: 50%;
+	left: 65%;
+	height: 40px;
+	transform: translate3d(-50%, -50%, 0);
+	width: 40px;
+	will-change: transform;
+}
+
+@keyframes spinner {
+	0% {
+		transform: translate3d(-50%, -50%, 0) rotate(0deg);
+	}
+	100% {
+		transform: translate3d(-50%, -50%, 0) rotate(360deg);
+	}
+}
+
+.banned {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.banned img {
+	max-width: 50px;
+	max-height: 50px;
+}
+
+.banned p {
+	font-family: "Courier New", Courier, monospace;
+	font-size: x-large;
+	font-weight: bolder;
+}
+
+.pw_form {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	justify-content: center;
+	align-items: center;
+}
+
+.pw_form label {
+	font-family: "Courier New", Courier, monospace;
+	font-size: large;
+	font-weight: bolder;
+}
+
+.pw_form input {
+	height: 20px;
+	width: 200px;
+	background: none;
+	border: 2px solid #3a3636;
+	border-radius: 10px;
+	outline: inherit;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	text-align: center;
+}

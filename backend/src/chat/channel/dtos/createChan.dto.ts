@@ -1,8 +1,10 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsAlphanumeric, IsNotEmpty, MaxLength } from 'class-validator';
 import UserEntity from 'src/user/models/user.entity';
 
 export class CreateChanDto {
-	@IsNotEmpty({ message: 'Channel needs a title' })
+	@MaxLength(21)
+	@IsAlphanumeric()
+	@IsNotEmpty()
 	title: string;
 
 	password: string;
@@ -14,5 +16,4 @@ export class CreateChanDto {
 	DM: boolean;
 
 	user2?: string;
-
 }

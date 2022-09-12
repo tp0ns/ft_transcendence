@@ -1,6 +1,6 @@
 .itemLayout {
 	display: grid;
-	grid-template-columns: 20% auto;
+	grid-template-columns: 50px auto;
 	gap: 10px;
 	padding-inline: 10px;
 	height: 60px;
@@ -41,6 +41,8 @@
 }
 
 .name {
+	display: flex;
+	overflow: hidden;
 	align-self: center;
 }
 

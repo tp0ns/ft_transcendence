@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class ModifyChanDto {
 	@IsNotEmpty({ message: 'Channel needs a title' })
-	title: string;
+	id: string;
 
 	newMember?: string;
 

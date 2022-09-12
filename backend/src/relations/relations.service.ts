@@ -1,5 +1,6 @@
 import {
 	ForbiddenException,
+	forwardRef,
 	Inject,
 	Injectable,
 	NotFoundException,
@@ -16,6 +17,7 @@ export class RelationsService {
 	constructor(
 		@InjectRepository(RelationEntity)
 		private RelationRepo: Repository<RelationEntity>,
+		@Inject(forwardRef(() => UserService))
 		private userService: UserService,
 	) {}
 
@@ -184,5 +186,20 @@ export class RelationsService {
 				{ receiver: { userId: user.userId } },
 			],
 		});
+	}
+
+	async getBlockedUsersForUser(user: UserEntity): Promise<string[]> {
+		let usersBlockedByUser: string[] = [];
+		let userBlockedRelations: any[] =
+			await this.RelationRepo.createQueryBuilder('relations')
+				.select(['relations.requestId', 'receiver.username'])
+				.leftJoin('relations.receiver', 'receiver')
+				.where('relations.creator = :id', { id: user.userId })
+				.andWhere('relations.status = :blocked', { blocked: 'blocked' })
+				.getMany();
+		for (const relation of userBlockedRelations) {
+			usersBlockedByUser.push(relation.receiver.username);
+		}
+		return usersBlockedByUser;
 	}
 }

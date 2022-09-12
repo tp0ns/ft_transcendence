@@ -23,7 +23,7 @@ function NavBar() {
 									: classes.unselected
 							}
 						>
-							<img src="pong.svg" alt="A ping pong racket" />
+							<img src="/pong.svg" alt="A ping pong racket" />
 						</Link>
 						<Link
 							to="/user"
@@ -33,7 +33,7 @@ function NavBar() {
 									: classes.unselected
 							}
 						>
-							<img src="user.svg" alt="A user icon" />
+							<img src="/user.svg" alt="A user icon" />
 						</Link>
 						<Link
 							to="/social"
@@ -43,7 +43,7 @@ function NavBar() {
 									: classes.unselected
 							}
 						>
-							<img src="friends.svg" alt="A friends icon" />
+							<img src="/friends.svg" alt="A friends icon" />
 						</Link>
 					</div>
 					{/* Chat */}
@@ -51,12 +51,13 @@ function NavBar() {
 						<Link
 							to="/chat"
 							className={
-								location.pathname === "/chat"
+								location.pathname === "/chat" ||
+								location.pathname.startsWith("/chat/")
 									? classes.selected
 									: classes.unselected
 							}
 						>
-							<img src="chat.svg" alt="A chat icon" />
+							<img src="/chat.svg" alt="A chat icon" />
 						</Link>
 					</div>
 				</div>

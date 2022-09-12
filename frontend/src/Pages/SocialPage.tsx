@@ -6,6 +6,7 @@ import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
 import { useCookies } from "react-cookie";
 import jwtDecode, { JwtPayload } from "jwt-decode";
+import Layout from "../components/Layout/Layout";
 
 const SocialPage = () => {
   const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
@@ -35,8 +36,7 @@ const SocialPage = () => {
   };
 
   return (
-    <React.Fragment>
-      <NavBar />
+    <Layout>
       <div className={classes.parent}>
         <div className={classes.searchBar}>
           <img src="search.svg" alt="searchLogo" className={classes.searchLogo} />
@@ -50,7 +50,7 @@ const SocialPage = () => {
         <h1 className={classes.friendsTitle}>Friends List</h1>
         <RelationsList relations={receivedRelations} myId={clientId} />
       </div>
-    </React.Fragment>
+    </Layout>
   );
 };
 
