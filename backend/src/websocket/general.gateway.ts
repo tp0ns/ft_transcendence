@@ -273,12 +273,17 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
+		const chanName: string = payload[1];
 		const new_msg = await this.channelService.sendMessage(
 			client.data.user,
 			payload,
 		);
-		this.server.emit('updatedChannels');
-		// client.emit('sendChannelMessages', messages);
+		const messages = await this.messageService.getChannelMessages(
+			client.data.user,
+			chanName,
+		);
+		// this.server.emit('updatedChannels');
+		this.server.to(chanName).emit('sendChannelMessages', messages);
 	}
 
 	/**

@@ -76,6 +76,12 @@ export class ChannelService {
 			throw new WsException(
 				'The user you want to invite to DM does not exist.',
 			);
+		// let DM : ChannelEntity = await this.channelRepository
+		// 	.createQueryBuilder('DM')
+		// 	.leftJoinAndSelect('DM.members', 'members')
+		// 	.leftJoinAndSelect('DM.owner', 'owner')
+		// 	.where('DM.DM = true')
+
 		// let DM: ChannelEntity = await this.channelRepository.findOne({
 		// 	relations: [
 		// 		'members',
@@ -427,6 +433,7 @@ export class ChannelService {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
 			await this.deleteMember(newBan, channel);
 			await channel.save();
+			// setTimeout(this.deleteBanMember, 5000, newBanUser, channel);
 		}
 	}
 
@@ -477,6 +484,7 @@ export class ChannelService {
 			deleteBanUser,
 			channel,
 		);
+
 		if (deleteBan) {
 			channel.bannedMembers = channel.bannedMembers.filter((banned) => {
 				return banned.userId !== deleteBan.userId;
