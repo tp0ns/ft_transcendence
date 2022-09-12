@@ -1,16 +1,19 @@
 .layout {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	justify-content: space-between;
+	padding-bottom: 10px;
 }
 
 .search_bar {
+	position: relative;
+	top: 0;
 	display: flex;
 	gap: 5px;
 	height: 26px;
 	align-items: center;
 	justify-content: center;
-	border: 2px solid #363636;
+	border: 2px solid #3a3636;
 	border-radius: 10px;
 }
 
@@ -31,7 +34,7 @@
 }
 
 .list {
-	height: 81vh;
+	height: 78vh;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -45,18 +48,20 @@
 	font-size: large;
 	font-weight: bolder;
 	text-align: center;
-	border-bottom: 1px solid #363636;
+	border-bottom: 1px solid #3a3636;
 }
 
 .quit {
+	position: relative;
+	bottom: 0;
 	display: flex;
 	justify-content: center;
 	font-family: "Courier New", Courier, monospace;
 	font-size: large;
 	font-weight: bolder;
-	background-color: red;
+	background-color: #3a3636;
 	border-radius: 10px;
-	color: #f4edde;
+	color: #fdd05d;
 	padding-block: 5px;
 	padding-inline: 10px;
 	cursor: pointer;
