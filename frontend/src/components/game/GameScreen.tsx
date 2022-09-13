@@ -89,6 +89,10 @@ const GameScreen = () => {
 		// do something here with the canvas
 	}, []);
 
+	socket.on('inviteRefused', (userId: string) => {
+		socket.emit('inviteIsDeclined', userId);
+	});
+
 	const move = (direction: string) => {
 		socket.emit("move", direction);
 	};

@@ -199,6 +199,10 @@ export class GameService {
 
 	//ends the game
 	async endGame(match: Match, winner: UserEntity) {
+		if (match == null) {
+			//end Null Game -> user left or didnt accept invit
+			// -> trigger modal
+		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
 			// -> send the data to the db
@@ -324,9 +328,7 @@ export class GameService {
 			.from(InvitationEntity)
 			.where('creator = :id', { id: userInvitingId})
 			.execute();
-			inviteRoomMap.delete(userInvitingId);
 			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
-			inviteRoomMap.delete(userInvitingId);
 			return(currentRoomName);
 		}
 
@@ -334,10 +336,10 @@ export class GameService {
 		 * tells the emitter that the invitation
 		 * has been declined
 		 */
-		async inviteIsDeclined(client: Socket) {
-			client.data.user.sentInvitations //query pour retrouver la bonne invitation
-			//passer l'invit. a 'declined', la suppr
-			client.leave(client.data.currentMatch.roomName);
-			//end null game
+		async inviteIsDeclined(client: Socket, userInvitedId: string) {
+
+			client.leave(inviteRoomMap.get(client.data.user.userId));
+			inviteRoomMap.delete(client.data.user.userId)
+			this.endGame(client.data.currentMatch, client.data.user)
 		}
 }

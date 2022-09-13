@@ -512,9 +512,16 @@ export class GeneralGateway
 			client,
 			userInvitingId,
 		);
-		this.server.to(currentRoom).emit('updateInvitation');
+		this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
 		console.log('invite refused');
 	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('inviteIsDeclined')
+	async inviteIsDeclined(client: Socket, userInvitedId) {
+		this.gameService.inviteIsDeclined(client, userInvitedId);
+	}
+
 	/*
   ______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
