@@ -481,26 +481,38 @@ export class GeneralGateway
 	 */
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('retrieveInvitations')
+	async retrieveInvitations(client: Socket) {
+		return await this.gameService.getInvitations(client);
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('sendInvite')
 	async sendInvite(client: Socket, userToInviteId: string) {
 		await this.gameService.sendInvite(client, userToInviteId);
-		this.server.emit('updatedInvitation');
+		this.server.emit('updateInvitation');
 		console.log('invite sent');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptInvite')
 	async acceptInvite(client: Socket, userInvitingId: string) {
-		await this.gameService.joinInvite(client, userInvitingId);
-		this.server.emit('updatedInvitation');
+		const currentRoom = await this.gameService.joinInvite(
+			client,
+			userInvitingId,
+		);
+		this.server.to(currentRoom).emit('updateInvitation');
 		console.log('invite accepted');
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('refuseInvite')
 	async refuseInvite(client: Socket, userInvitingId: string) {
-		await this.gameService.refuseInvite(client, userInvitingId);
-		this.server.emit('updatedInvitation');
+		const currentRoom = await this.gameService.refuseInvite(
+			client,
+			userInvitingId,
+		);
+		this.server.to(currentRoom).emit('updateInvitation');
 		console.log('invite refused');
 	}
 	/*

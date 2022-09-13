@@ -74,7 +74,7 @@ export class GameService {
 			roomName: room,
 			isEnd: false,
 		};
-		console.log(match.roomName);
+		// console.log(match.roomName);
 		return match;
 	}
 
@@ -221,16 +221,41 @@ export class GameService {
 		}
 	}
 
+	async	getInvitations(client: Socket) {
+		console.log('client.Id : ', client.data.user.userId);
+		const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
+			where: [
+				{ receiver: { userId: client.data.user.userId } },
+			],
+		});
+		console.log('allInvitations : ', allInvitations);
+		const currentTime = Date.now();
+		for (const invitation of allInvitations) {
+			if (currentTime - invitation.creationDate >= 60000){
+				this.refuseInvite(client, invitation.creator.userId);
+			}
+		}
+		console.log('invit after suppr : ', allInvitations);
+		const invitAfterCheck: InvitationEntity[] = await this.invitationRepository.find({
+			where: [
+				{ receiver: { userId: client.data.user.userId } },
+			],
+		});
+		return invitAfterCheck;
+	}
+
 	/**
 	 * create a room, initialize it and join it.
 	 * @param client the user that sends an invitation
 	 */
 		async	sendInvite(client: Socket, userToInviteId: string) {
+				const date = Date.now();
 				const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
-				const invitation: InvitationEntity = await this.invitationRepository.save( {
+				await this.invitationRepository.save( {
 					creator: client.data.user,
 					receiver: userToInvite,
-					status: 'pending'
+					status: 'pending',
+					creationDate: date,
 				})
 				const roomName = 'inviteRoom'+ Math.random();
 				client.join(roomName);
@@ -245,12 +270,16 @@ export class GameService {
 		async joinInvite(client: Socket, userInvitingId: string) {
 			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
 			let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
-			.select(['invitation.requestId', 'creator'])
-			.leftJoin('invitation.creator', 'creator')
-			.leftJoin('invitation.receiver', 'receiver')
+			.select(['invitation.requestId', 'creator', 'invitation.creationDate'])
+			.leftJoinAndSelect('invitation.creator', 'creator')
+			.leftJoinAndSelect('invitation.receiver', 'receiver')
 			.where('invitation.creator = :id', { id: userInvitingId})
 			.getOne();
+			console.log('invitation:', invitation);
 			const invitId: string = invitation.requestId;
+			console.log('invit. date :', invitation.creationDate);
+			console.log('actual date :', Date.now());
+			console.log('soustraction :', Date.now() - invitation.creationDate);
 			invitation = await this.invitationRepository.save({
 				requestId: invitId,
 				creator: userInviting,
@@ -268,6 +297,7 @@ export class GameService {
 			client.join(currentMatch.roomName);
 			client.data.user.currentMatch = currentMatch;
 			userInviting.currentMatch = currentMatch;
+			return (currentRoomName);
 		}
 
 		/**
@@ -295,6 +325,9 @@ export class GameService {
 			.where('creator = :id', { id: userInvitingId})
 			.execute();
 			inviteRoomMap.delete(userInvitingId);
+			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
+			inviteRoomMap.delete(userInvitingId);
+			return(currentRoomName);
 		}
 
 		/**
