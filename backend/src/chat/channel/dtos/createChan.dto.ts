@@ -3,7 +3,6 @@ import UserEntity from 'src/user/models/user.entity';
 
 export class CreateChanDto {
 	@MaxLength(21)
-	@IsAlphanumeric()
 	@IsNotEmpty()
 	title: string;
 
