@@ -25,12 +25,14 @@ import { RelationsService } from 'src/relations/relations.service';
 import RelationEntity from 'src/relations/models/relations.entity';
 import UserEntity from 'src/user/models/user.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
-import { MessagesEntity } from 'src/chat/messages/messages.entity';
-import { globalExceptionFilter } from 'src/globalException.filter';
+import { IdDto, UsernameDto } from './dtos/Relations.dto';
+import { jwtConstants } from 'src/auth/jwt/jwt.constants';
+import { JwtService } from '@nestjs/jwt';
 import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { UserService } from 'src/user/user.service';
-import { Ball, Match } from '../game/interfaces/game.interface';
-import { IdDto, UsernameDto } from './dtos/Relations.dto';
+import { Ball } from '../game/interfaces/game.interface';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { globalExceptionFilter } from 'src/globalException.filter';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -47,6 +49,7 @@ export class GeneralGateway
 		private relationsService: RelationsService,
 		private messageService: MessageService,
 		private userService: UserService,
+		private readonly jwtService: JwtService,
 	) {}
 
 	@WebSocketServer() server: Server;
@@ -63,14 +66,46 @@ export class GeneralGateway
 		this.logger.log(`Server is properly initialized !`);
 	}
 
-	/**
-	 * Handles client connection behaviour
-	 */
-	@UseGuards(WsGuard)
-	async handleConnection(client: Socket) {
+	async validateConnection(client: Socket): Promise<UserEntity> {
+		try {
+				// let client: Socket = context.switchToWs().getClient();
+				const sessionCookie: string | string[] = client.handshake.headers.cookie
+						.split(';')
+						.find(
+								(cookie: string) =>
+										cookie.startsWith(' Authentication') ||
+										cookie.startsWith('Authentication'),
+						)
+						.split('=')[1];
+
+				const payload = await this.jwtService.verify(sessionCookie, {
+						secret: jwtConstants.secret,
+				});
+				const user = await this.userService.getUserById(payload.sub);
+				client.data.user = user;
+				if (user) return user;
+				return null;
+		} catch (err) {
+				console.log('Error occured in ws guard : ');
+				console.log(err.message);
+				// throw new WsException(err.message);
+		}
+}
+
+/**
+ * Handles client connection behaviour
+ */
+@UseGuards(WsGuard)
+async handleConnection(client: Socket) {
+		const user: UserEntity = await this.validateConnection(client);
+
+		if (user != null) {
+				client.data.user = user;
+				this.userService.connectClient(client.data.user)
+		}
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
-	}
+}
 
 	/**
 	 * Handles client disconnection behaviour
@@ -78,6 +113,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
+		if (client.data.user)
+			this.userService.disconnectClient(client.data.user);
 	}
 
 	/**
@@ -519,8 +556,8 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('blockUser')
-	async blockUser(client: Socket, username: UsernameDto) {
-		await this.relationsService.blockUser(username.username, client.data.user);
+	async blockUser(client: Socket, userId: IdDto) {
+		await this.relationsService.blockUser(userId.id, client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
@@ -541,3 +578,7 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 }
+function jwtDecode<T>(Authentication: any) {
+	throw new Error('Function not implemented.');
+}
+

@@ -74,6 +74,10 @@ export class RelationsService {
 		const receiver: UserEntity = await this.userService.getUserByUsername(
 			receiverUsername,
 		);
+		if (!receiver)
+		throw new ForbiddenException(
+			'This user does not exist',
+		);
 		if (await this.hasRequestBeenSentOrReceived(creator, receiver))
 			throw new ForbiddenException(
 				'A friend request has already been sent or received!',
@@ -113,14 +117,14 @@ export class RelationsService {
 	}
 
 	async blockUser(
-		blockedUsername: string,
+		blockedUserId: string,
 		blockerReq: Partial<UserEntity>,
 	): Promise<Relation> {
 		const blocker: UserEntity = blockerReq as UserEntity;
-		const blocked: UserEntity = await this.userService.getUserByUsername(
-			blockedUsername,
+		const blocked: UserEntity = await this.userService.getUserById(
+			blockedUserId
 		);
-		if (blocker.username === blockedUsername)
+		if (blocker.userId === blockedUserId)
 			throw new ForbiddenException('It is not possible to block yourself!');
 
 		const relation: Relation = await this.findRelationByUserId(
@@ -138,13 +142,13 @@ export class RelationsService {
 			await this.RelationRepo.save(relation);
 			return relation;
 		}
-		// let blockedRequest: Relation = {
-		// 	creator: blocker,
-		// 	receiver: blocked,
-		// 	status: 'blocked',
-		// };
-		// console.log
-		// return await this.RelationRepo.save(blockedRequest);
+		let blockedRelation: Relation = {
+			creator: blocker,
+			receiver: blocked,
+			status: 'blocked',
+		};
+		await this.RelationRepo.save(blockedRelation);
+		return blockedRelation;
 	}
 
 	async unblockUser(

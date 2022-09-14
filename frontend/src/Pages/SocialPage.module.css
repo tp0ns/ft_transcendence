@@ -48,7 +48,7 @@
 }
 
 .relationItem {
-	box-sizing: border-box;
+  /* box-sizing: border-box; */
 
 	/* Auto layout */
 
@@ -82,10 +82,25 @@
 	background-color: #3a3636;
 }
 
-.img {
+.connected {
 	width: 50px;
 	height: 50px;
 	border-radius: 50px;
+	border: 5px solid green;
+}
+
+.disconnected {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+	border: 5px solid red;
+}
+
+.playing {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+	border: 5px solid orange;
 }
 
 .leftSide {

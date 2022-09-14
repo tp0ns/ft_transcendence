@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { socket } from "../App";
-import NavBar from "../components/NavBar/NavBar";
 import classes from "./SocialPage.module.css";
 import RelationsProp from "../interfaces/Relations.interface";
 import RelationsList from "../components/social/RelationsList";
@@ -28,9 +27,10 @@ const SocialPage = () => {
   }, []);
 
   const addFriend = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLTextAreaElement;
     if (event.key === "Enter") {
-      socket.emit("addFriend", {username: event.target.value});
-      event.target.value = "";
+      socket.emit("addFriend", {username: target.value});
+      target.value = "";
     }
   };
 
