@@ -100,10 +100,11 @@ export class GeneralGateway
 
 		if (user != null) {
 			client.data.user = user;
-			this.userService.connectClient(client.data.user)
+			this.userService.connectClient(client.data.user);
 		}
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
+		this.server.emit('updatedRelations');
 	}
 
 	/**
@@ -112,8 +113,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user)
-			this.userService.disconnectClient(client.data.user);
+		if (client.data.user) this.userService.disconnectClient(client.data.user);
+		this.server.emit('updatedRelations');
 	}
 
 	/**
@@ -152,8 +153,8 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Creation d'un DM 
-	 * 
+	 * @brief Creation d'un DM
+	 *
 	 * @param client l'utilisateur qui souhaite envoye un DM
 	 * @param channelEntity les informations necessaires a la
 	 *  creation d'un DM (user2, DM = true)
@@ -238,7 +239,7 @@ export class GeneralGateway
 
 	/**
 	 * @brief Rejoindre la room
-	 * 
+	 *
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
@@ -247,7 +248,10 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
 	async joinRoom(client: Socket, channel: ChannelEntity) {
-		let bool: boolean = await this.channelService.joinRoom(client.data.user, channel);
+		let bool: boolean = await this.channelService.joinRoom(
+			client.data.user,
+			channel,
+		);
 		if (bool == true) {
 			client.join(channel.channelId);
 			this.server.emit('joinedRoom');
@@ -256,7 +260,7 @@ export class GeneralGateway
 
 	/**
 	 * @brief Quitter la room
-	 * 
+	 *
 	 * @param client client qui veut leave le chan
 	 * @param channelName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 */
@@ -274,10 +278,10 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Quitter le channel 
-	 * 
+	 * @brief Quitter le channel
+	 *
 	 * @param client client qui souhaite quitter le channel
-	 * @param chanId l'id du channel 
+	 * @param chanId l'id du channel
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('quitChan')
@@ -347,7 +351,7 @@ export class GeneralGateway
 
 	/**
 	 * @brief Recuperer tous les channels
-	 * 
+	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
@@ -360,7 +364,7 @@ export class GeneralGateway
 	/**
 	 * @brief Recuperer que les channels dont le user fait partie
 	 * -> autant publiques que privees
-	 * 
+	 *
 	 * @param client le user en question
 	 */
 	@UseGuards(WsGuard)
@@ -373,7 +377,7 @@ export class GeneralGateway
 
 	/**
 	 * @brief Recuperer les messages d'un channel
-	 * 
+	 *
 	 * @param client le user qui souhaite recuperer les messages
 	 * @param chanId pouvoir identifier les messages de quel channel
 	 */
@@ -587,4 +591,3 @@ export class GeneralGateway
 function jwtDecode<T>(Authentication: any) {
 	throw new Error('Function not implemented.');
 }
-
