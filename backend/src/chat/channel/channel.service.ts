@@ -82,22 +82,15 @@ export class ChannelService {
 		let DM: ChannelEntity = await this.channelRepository.findOne({
 			relations: ['members', 'owner', 'userInProtectedChan'],
 			where: [
-				{ DM: true },
 				{
-					owner: {
-						userId: user.userId,
-					},
-					user2: {
-						userId: userToInvite.userId,
-					},
+					DM: true,
+					owner: { userId: user.userId },
+					user2: { userId: userToInvite.userId },
 				},
 				{
-					owner: {
-						userId: userToInvite.userId,
-					},
-					user2: {
-						userId: user.userId,
-					},
+					DM: true,
+					owner: { userId: userToInvite.userId },
+					user2: { userId: user.userId },
 				},
 			],
 		});
