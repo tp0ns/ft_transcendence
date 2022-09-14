@@ -6,26 +6,26 @@ import UserProp from "../../interfaces/User.interface";
 import classes from "../../Pages/SocialPage.module.css";
 
 const RelationItem: React.FC<{
-	relation: RelationsProp;
-	myId: string;
+  relation: RelationsProp;
+  myId: string;
 }> = (props) => {
-	const [toDisplay, setToDisplay] = useState<UserProp>();
-	const [status, setStatus] = useState<string | null>(null);
-	const navigate = useNavigate();
+  const [toDisplay, setToDisplay] = useState<UserProp>();
+  const [status, setStatus] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-	const manageStatus = () => {
-		if (props.relation.status === "blocked") {
-			if (props.myId === props.relation.creator?.userId) {
-				setStatus("blocker");
-			} else setStatus("blocked");
-		} else if (props.relation.status === "pending") {
-			if (props.myId === props.relation.creator?.userId) {
-				setStatus("requester");
-			} else setStatus("requested");
-		} else if (props.relation.status === "accepted") {
-			setStatus("accepted");
-		}
-	};
+  const manageStatus = () => {
+    if (props.relation.status === "blocked") {
+      if (props.myId === props.relation.creator?.userId) {
+        setStatus("blocker");
+      } else setStatus("blocked");
+    } else if (props.relation.status === "pending") {
+      if (props.myId === props.relation.creator?.userId) {
+        setStatus("requester");
+      } else setStatus("requested");
+    } else if (props.relation.status === "accepted") {
+      setStatus("accepted");
+    }
+  };
 
 	useEffect(() => {
 		socket.on("newDM", (id) => {
@@ -33,18 +33,20 @@ const RelationItem: React.FC<{
 		});
 	}, []);
 
-	useEffect(() => {
-		if (props.relation.creator?.userId === props.myId)
-			setToDisplay(props.relation.receiver);
-		else setToDisplay(props.relation.creator);
-		manageStatus();
-	}, [props.relation]);
+  useEffect(() => {
+    if (props.relation.creator?.userId === props.myId)
+      setToDisplay(props.relation.receiver);
+    else setToDisplay(props.relation.creator);
+    manageStatus();
+    socket.emit("isBlocked", { id: toDisplay?.userId });
+    socket.on("isBlockedRes", (data) => (console.log(data)));
+  }, [props.relation]);
 
   const handleBlock = () => {
     if (props.myId === props.relation.creator?.userId)
-      socket.emit("blockUser", {id: props.relation.receiver?.userId});
+      socket.emit("blockUser", { id: props.relation.receiver?.userId });
     else {
-      socket.emit("blockUser", {id: props.relation.creator?.userId});
+      socket.emit("blockUser", { id: props.relation.creator?.userId });
     }
   };
 
@@ -55,13 +57,13 @@ const RelationItem: React.FC<{
     navigate("/chat");
   };
 
-	const handleRequest = () => {
-		socket.emit("acceptRequest", { id: props.relation.requestId });
-	};
+  const handleRequest = () => {
+    socket.emit("acceptRequest", { id: props.relation.requestId });
+  };
 
-	const handleUnblock = () => {
-		socket.emit("unblockUser", { id: props.relation.requestId });
-	};
+  const handleUnblock = () => {
+    socket.emit("unblockUser", { id: props.relation.requestId });
+  };
 
 	const sendMessage = () => {
 		console.log(`enter in sendMessage in front`)

@@ -41,8 +41,7 @@ import { globalExceptionFilter } from 'src/globalException.filter';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -50,7 +49,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) {}
+	) { }
 
 	@WebSocketServer() server: Server;
 
@@ -530,7 +529,7 @@ export class GeneralGateway
 		await this.gameService.toggleMatchMaking(client);
 	}
 	/*
-  ______ _____  _____ ______ _   _ _____   _____
+	______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
  | |__  | |__) | | | | |__  |  \| | |  | | (___
  |  __| |  _  /  | | |  __| | . ` | |  | |\___ \
@@ -570,6 +569,13 @@ export class GeneralGateway
 	async unblockUser(client: Socket, relationId: IdDto) {
 		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('isBlocked')
+	async isBlocked(client: Socket, userId: IdDto) {
+		const isBlocked = await this.relationsService.isBlocked(userId.id, client.data.user);
+		this.server.to(client.id).emit('isBlockedRes', isBlocked);
 	}
 
 	@UseGuards(WsGuard)
