@@ -33,51 +33,42 @@ const RelationItem: React.FC<{
 		});
 	}, []);
 
-  useEffect(() => {
-    if (props.relation.creator?.userId === props.myId)
-      setToDisplay(props.relation.receiver);
-    else setToDisplay(props.relation.creator);
-    manageStatus();
-    socket.emit("isBlocked", { id: toDisplay?.userId });
-    socket.on("isBlockedRes", (data) => (console.log(data)));
-  }, [props.relation]);
+	useEffect(() => {
+		if (props.relation.creator?.userId === props.myId)
+			setToDisplay(props.relation.receiver);
+		else setToDisplay(props.relation.creator);
+		manageStatus();
+	}, [props.relation]);
 
-  const handleBlock = () => {
-    if (props.myId === props.relation.creator?.userId)
-      socket.emit("blockUser", { id: props.relation.receiver?.userId });
-    else {
-      socket.emit("blockUser", { id: props.relation.creator?.userId });
-    }
-  };
+	const handleBlock = () => {
+		if (props.myId === props.relation.creator?.userId)
+			socket.emit("blockUser", { id: props.relation.receiver?.userId });
+		else {
+			socket.emit("blockUser", { id: props.relation.creator?.userId });
+		}
+	};
 
-  const sendMessage = () => {
-    if (props.myId === props.relation.creator?.userId)
-      socket.emit("createDM", props.relation.receiver?.username);
-    else socket.emit("createDM", props.relation.creator?.username);
-    navigate("/chat");
-  };
+	const handleRequest = () => {
+		socket.emit("acceptRequest", { id: props.relation.requestId });
+	};
 
-  const handleRequest = () => {
-    socket.emit("acceptRequest", { id: props.relation.requestId });
-  };
-
-  const handleUnblock = () => {
-    socket.emit("unblockUser", { id: props.relation.requestId });
-  };
+	const handleUnblock = () => {
+		socket.emit("unblockUser", { id: props.relation.requestId });
+	};
 
 	const sendMessage = () => {
-		console.log(`enter in sendMessage in front`)
-			socket.emit("createDM", {
-				title:
-					props.relation.creator?.username +
-					"0" +
-					props.relation.receiver?.username,
-				DM: true,
-				user2: props.relation.receiver?.userId,
-				protected: false,
-				private: false,
-				password: null,
-			});
+		console.log(`enter in sendMessage in front`);
+		socket.emit("createDM", {
+			title:
+				props.relation.creator?.username +
+				"0" +
+				props.relation.receiver?.username,
+			DM: true,
+			user2: props.relation.receiver?.userId,
+			protected: false,
+			private: false,
+			password: null,
+		});
 	};
 
 	return (
@@ -89,31 +80,52 @@ const RelationItem: React.FC<{
 			}
 		>
 			<div className={classes.leftSide}>
-				<img src={toDisplay?.image_url} className={classes.img}></img>
+				<img
+					alt="dp"
+					src={
+						toDisplay?.profileImage
+							? toDisplay.profileImage
+							: toDisplay?.image_url
+					}
+					className={
+						toDisplay?.status === "connected"
+							? classes.connected
+							: toDisplay?.status === "disconnected"
+							? classes.disconnected
+							: classes.playing
+					}
+				></img>
 				<h3>{toDisplay?.username}</h3>
 			</div>
 			<div className={classes.rightSide}>
 				{status === "accepted" ? (
 					<div className={classes.tmp}>
-						<button className={classes.button} onClick={handleBlock}>
-							Block
-						</button>
-						<img
-							onClick={sendMessage}
-							className={classes.logo}
-							src="chat.svg"
-						/>
+						<div className={classes.button} onClick={handleBlock}>
+							<img alt="block" className={classes.logo} src="/ban.svg" />
+						</div>
+						<div className={classes.button}>
+							<img
+								alt="chat"
+								onClick={sendMessage}
+								className={classes.logo}
+								src="/chat.svg"
+							/>
+						</div>
 					</div>
 				) : null}
 				{status === "blocker" ? (
-					<button className={classes.button} onClick={handleUnblock}>
-						unblock
-					</button>
+					<div className={classes.button} onClick={handleUnblock}>
+						<img alt="unblock" className={classes.logo} src="/unban.svg" />
+					</div>
 				) : null}
 				{status === "requested" ? (
-					<button className={classes.button} onClick={handleRequest}>
-						Accept
-					</button>
+					<div className={classes.button} onClick={handleRequest}>
+						<img
+							alt="accept friend invite"
+							className={classes.logo}
+							src="/accept.svg"
+						/>
+					</div>
 				) : null}
 			</div>
 		</div>

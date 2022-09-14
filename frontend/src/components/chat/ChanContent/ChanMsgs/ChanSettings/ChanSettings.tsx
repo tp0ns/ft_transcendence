@@ -39,10 +39,11 @@ const ChanSettings: React.FC<{
 			onClick={props.onClick}
 			className={classes.modal_layout}
 		>
-			<div className={classes.layout}>
+			<div className={classes.layout_chat_settings}>
 				<form onSubmit={handleModifySubmit} className={classes.settings}>
 					<label htmlFor="protection">Protect with password</label>
 					<input
+						className={classes.check}
 						type="checkbox"
 						id="protection"
 						ref={protection}
@@ -58,17 +59,17 @@ const ChanSettings: React.FC<{
 							<input type="password" id="pw" ref={password} />
 						</React.Fragment>
 					) : null}
-					<button>Save changes</button>
+					<button className={classes.save}>Save changes</button>
 				</form>
 				{ctx?.clientId === ctx?.activeChan?.owner.userId ? (
-					<div
+					<button
 						onClick={() => {
 							deleteChannel();
 						}}
 						className={classes.delete_chan}
 					>
 						Delete Channel
-					</div>
+					</button>
 				) : null}
 			</div>
 		</Modal>

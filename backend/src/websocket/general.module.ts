@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RelationEntity } from 'src/relations/models/relations.entity';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
-import { ChannelController } from '../chat/channel/channel.controller';
 import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ChannelService } from '../chat/channel/channel.service';
 import { GeneralGateway } from './general.gateway';
@@ -33,6 +32,5 @@ import InvitationEntity from 'src/game/invitations/invitations.entity';
 		MessageService,
 		GameService,
 	],
-	controllers: [ChannelController],
 })
 export class GeneralModule {}
