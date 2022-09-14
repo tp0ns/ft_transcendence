@@ -7,5 +7,33 @@
 }
 
 .form input {
+	height: 20px;
+	background: none;
+	border: 2px solid #3a3636;
+	border-radius: 10px;
+	outline: inherit;
+	font-family: "Courier New", Courier, monospace;
+	font-weight: bolder;
+	width: 176px;
+}
+
+.form input {
 	margin-bottom: 10px;
+}
+
+.form button {
+	display: block;
+	font-family: "Courier New", Courier, monospace;
+	font-size: large;
+	font-weight: bolder;
+	border-radius: 10px;
+	align-self: center;
+	padding-block: 5px;
+	padding-inline: 10px;
+	margin-bottom: 10px;
+	width: 176px;
+	background-color: #3a3636;
+	color: #fdd05d;
+	border: 2px solid #3a3636;
+	cursor: pointer;
 }

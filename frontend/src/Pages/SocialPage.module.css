@@ -48,7 +48,7 @@
 }
 
 .relationItem {
-  /* box-sizing: border-box; */
+	/* box-sizing: border-box; */
 
 	/* Auto layout */
 
@@ -87,6 +87,7 @@
 	height: 50px;
 	border-radius: 50px;
 	border: 5px solid green;
+	margin-block: 5px;
 }
 
 .disconnected {
@@ -94,6 +95,7 @@
 	height: 50px;
 	border-radius: 50px;
 	border: 5px solid red;
+	margin-block: 5px;
 }
 
 .playing {
@@ -101,6 +103,7 @@
 	height: 50px;
 	border-radius: 50px;
 	border: 5px solid orange;
+	margin-block: 5px;
 }
 
 .leftSide {
@@ -128,13 +131,18 @@
 }
 
 .button {
-	font-family: blippoblack;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
 	border: 2px solid #3a3636;
-	border-radius: 5px;
+	border-radius: 50%;
 	background-color: transparent;
 }
 
 .logo {
-	width: 20px;
-	height: 20px;
+	width: 26px;
+	height: 26px;
+	align-self: center;
 }
