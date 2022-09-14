@@ -41,8 +41,7 @@ import { globalExceptionFilter } from 'src/globalException.filter';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -50,7 +49,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) {}
+	) { }
 
 	@WebSocketServer() server: Server;
 
@@ -68,44 +67,44 @@ export class GeneralGateway
 
 	async validateConnection(client: Socket): Promise<UserEntity> {
 		try {
-				// let client: Socket = context.switchToWs().getClient();
-				const sessionCookie: string | string[] = client.handshake.headers.cookie
-						.split(';')
-						.find(
-								(cookie: string) =>
-										cookie.startsWith(' Authentication') ||
-										cookie.startsWith('Authentication'),
-						)
-						.split('=')[1];
+			// let client: Socket = context.switchToWs().getClient();
+			const sessionCookie: string | string[] = client.handshake.headers.cookie
+				.split(';')
+				.find(
+					(cookie: string) =>
+						cookie.startsWith(' Authentication') ||
+						cookie.startsWith('Authentication'),
+				)
+				.split('=')[1];
 
-				const payload = await this.jwtService.verify(sessionCookie, {
-						secret: jwtConstants.secret,
-				});
-				const user = await this.userService.getUserById(payload.sub);
-				client.data.user = user;
-				if (user) return user;
-				return null;
+			const payload = await this.jwtService.verify(sessionCookie, {
+				secret: jwtConstants.secret,
+			});
+			const user = await this.userService.getUserById(payload.sub);
+			client.data.user = user;
+			if (user) return user;
+			return null;
 		} catch (err) {
-				console.log('Error occured in ws guard : ');
-				console.log(err.message);
-				// throw new WsException(err.message);
+			console.log('Error occured in ws guard : ');
+			console.log(err.message);
+			// throw new WsException(err.message);
 		}
-}
+	}
 
-/**
- * Handles client connection behaviour
- */
-@UseGuards(WsGuard)
-async handleConnection(client: Socket) {
+	/**
+	 * Handles client connection behaviour
+	 */
+	@UseGuards(WsGuard)
+	async handleConnection(client: Socket) {
 		const user: UserEntity = await this.validateConnection(client);
 
 		if (user != null) {
-				client.data.user = user;
-				this.userService.connectClient(client.data.user)
+			client.data.user = user;
+			this.userService.connectClient(client.data.user)
 		}
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
-}
+	}
 
 	/**
 	 * Handles client disconnection behaviour
@@ -526,7 +525,7 @@ async handleConnection(client: Socket) {
 		await this.gameService.toggleMatchMaking(client);
 	}
 	/*
-  ______ _____  _____ ______ _   _ _____   _____
+	______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
  | |__  | |__) | | | | |__  |  \| | |  | | (___
  |  __| |  _  /  | | |  __| | . ` | |  | |\___ \
@@ -566,6 +565,13 @@ async handleConnection(client: Socket) {
 	async unblockUser(client: Socket, relationId: IdDto) {
 		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('isBlocked')
+	async isBlocked(client: Socket, userId: IdDto) {
+		const isBlocked = await this.relationsService.isBlocked(userId.id, client.data.user);
+		this.server.to(client.id).emit('isBlockedRes', isBlocked);
 	}
 
 	@UseGuards(WsGuard)
