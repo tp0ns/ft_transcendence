@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { fstat } from 'fs';
 import { Socket } from 'socket.io';
@@ -255,6 +255,19 @@ export class GameService {
 	 * @param client the user that sends an invitation
 	 */
 		async	sendInvite(client: Socket, userToInviteId: string) {
+				//recuperer sentInvitations et check si c'est == null
+				// sinon, on empeche la creation d'invite
+				const sentInvitations: InvitationEntity[] = await this.invitationRepository.find({
+					where: [
+						{ creator: { userId: client.data.user.userId } },
+					],
+				});
+				if (sentInvitations.length > 0) {
+					// -> throw erreur
+					throw new ForbiddenException(
+					"You can't send more than one invitation.",
+					);
+				}
 				const date = Date.now();
 				const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
 				await this.invitationRepository.save( {
