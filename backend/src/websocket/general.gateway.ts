@@ -25,6 +25,7 @@ import { Ball, Match } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/jwt/jwt.constants';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
 
 @WebSocketGateway({
 	cors: {
@@ -483,7 +484,9 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async retrieveInvitations(client: Socket) {
-		return await this.gameService.getInvitations(client);
+		const properInvit: InvitationEntity[] =
+			await this.gameService.getInvitations(client);
+		client.emit('sendBackInvite', properInvit);
 	}
 
 	@UseGuards(WsGuard)
@@ -512,6 +515,7 @@ export class GeneralGateway
 			client,
 			userInvitingId,
 		);
+		this.server.emit('updateInvitation');
 		this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
 		console.log('invite refused');
 	}

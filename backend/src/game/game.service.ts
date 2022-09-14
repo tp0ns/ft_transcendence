@@ -198,7 +198,7 @@ export class GameService {
 	}
 
 	//ends the game
-	async endGame(match: Match, winner: UserEntity) {
+	async endGame(match: Match, winner: UserEntity , loser: UserEntity) {
 		if (match == null) {
 			//end Null Game -> user left or didnt accept invit
 			// -> trigger modal
@@ -206,9 +206,11 @@ export class GameService {
 		match.isEnd = true;
 		if (match.isLocal == false) {
 			// -> send the data to the db
+			// donc envoyer le match dans la liste de match de chaque user
 			// trigger the pop-up(?modal) with victory info and home button
+			// this.server.to(match.roomName).emit('victoryOf', winner)
 			console.log(winner.username, ' has won.');
-			console.log(match.player2.username, ' has lost.');
+			console.log(loser.username, ' has lost.');
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -217,11 +219,11 @@ export class GameService {
 	}
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(match: Match) {
-		if (match.p1Score >= 2){
-			this.endGame(match, match.player1);
+		if (match.p1Score >= 5){
+			this.endGame(match, match.player1, match.player2);
 		}
-		if (match.p2Score >= 2) {
-			this.endGame(match, match.player2);
+		if (match.p2Score >= 5) {
+			this.endGame(match, match.player2, match.player1);
 		}
 	}
 
@@ -279,11 +281,7 @@ export class GameService {
 			.leftJoinAndSelect('invitation.receiver', 'receiver')
 			.where('invitation.creator = :id', { id: userInvitingId})
 			.getOne();
-			console.log('invitation:', invitation);
 			const invitId: string = invitation.requestId;
-			console.log('invit. date :', invitation.creationDate);
-			console.log('actual date :', Date.now());
-			console.log('soustraction :', Date.now() - invitation.creationDate);
 			invitation = await this.invitationRepository.save({
 				requestId: invitId,
 				creator: userInviting,
