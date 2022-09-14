@@ -32,7 +32,7 @@ export class ChannelService {
 	/**
 	 * ------------------------ CREATE CHANNEL  ------------------------- *
 	 * 
-	 * - createNewChan(user, chan) : <./>:<51>
+	 * - createNewChan(user, chan)
 	 * - createNewDM(user, chan)
 	 * - saveNewChan(user, chan)
 	 * - saveNewDM(user, chan)
