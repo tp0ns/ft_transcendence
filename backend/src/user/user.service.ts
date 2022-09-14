@@ -27,7 +27,7 @@ export class UserService {
 		@InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
 		@Inject(forwardRef(() => ChannelService))
 		private channelService: ChannelService,
-	) {}
+	) { }
 
 	/**
 	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il
@@ -57,7 +57,7 @@ export class UserService {
 			return newUser;
 		}
 		else {
-			this.update(user.userId, {status: "connected"})
+			this.update(user.userId, { status: "connected" })
 		}
 		return user;
 	}
@@ -89,6 +89,8 @@ export class UserService {
 	}
 
 	async getUserById(id: string) {
+		if (!id)
+			return;
 		const user = await this.userRepo.findOne({ where: { userId: id } });
 		if (!user) {
 			throw new NotFoundException('user not found');
