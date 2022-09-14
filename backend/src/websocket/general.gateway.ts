@@ -221,7 +221,11 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('chanWithPassword')
+	async chanWithPassword(client: Socket, informations: JoinChanDto) {
+		let bool: boolean = await this.channelService.chanWithPassword(
+			client.data.user,
 			informations,
+		);
 		if (bool == true) this.getChannelMessages(client, informations.id);
 		else {
 			client.emit('chanNeedPw');
@@ -524,56 +528,6 @@ export class GeneralGateway
 	async toggleMatchMaking(client: Socket) {
 		await this.gameService.toggleMatchMaking(client);
 	}
-
-	/**
-	 * 				INVITATIONS
-	 */
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('retrieveInvitations')
-	async retrieveInvitations(client: Socket) {
-		const properInvit: InvitationEntity[] =
-			await this.gameService.getInvitations(client);
-		client.emit('sendBackInvite', properInvit);
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('sendInvite')
-	async sendInvite(client: Socket, userToInviteId: string) {
-		await this.gameService.sendInvite(client, userToInviteId);
-		this.server.emit('updateInvitation');
-		console.log('invite sent');
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('acceptInvite')
-	async acceptInvite(client: Socket, userInvitingId: string) {
-		const currentRoom = await this.gameService.joinInvite(
-			client,
-			userInvitingId,
-		);
-		this.server.to(currentRoom).emit('updateInvitation');
-		console.log('invite accepted');
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('refuseInvite')
-	async refuseInvite(client: Socket, userInvitingId: string) {
-		const currentRoom = await this.gameService.refuseInvite(
-			client,
-			userInvitingId,
-		);
-		this.server.emit('updateInvitation');
-		this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
-		console.log('invite refused');
-	}
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('inviteIsDeclined')
-	async inviteIsDeclined(client: Socket, userInvitedId) {
-		this.gameService.inviteIsDeclined(client, userInvitedId);
-	}
-
 	/*
 	______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
