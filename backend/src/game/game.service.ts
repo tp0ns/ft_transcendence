@@ -207,12 +207,8 @@ export class GameService {
 		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
-			// -> send the data to the db
-			// donc envoyer le match dans la liste de match de chaque user
-			// trigger the pop-up(?modal) with victory info and home button
-			// this.server.to(match.roomName).emit('victoryOf', winner)
-			console.log(winner.username, ' has won.');
-			console.log(loser.username, ' has lost.');
+			winner.victories++;
+			loser.defeats++;
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -223,9 +219,11 @@ export class GameService {
 	async checkEndGame(client: Socket, match: Match) {
 		if (match.p1Score >= 5){
 			this.endGame(client, match, match.player1, match.player2);
+			return match.player1;
 		}
 		if (match.p2Score >= 5) {
 			this.endGame(client, match, match.player2, match.player1);
+			return match.player2;
 		}
 	}
 

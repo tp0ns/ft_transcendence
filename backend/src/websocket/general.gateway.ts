@@ -493,7 +493,8 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		await this.gameService.checkEndGame(client, client.data.currentMatch);
+		const winner: UserEntity = await this.gameService.checkEndGame(client, client.data.currentMatch);
+		this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
 	}
 
 	// get the position of the ball and emit it

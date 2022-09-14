@@ -76,6 +76,15 @@ export class UserEntity {
 	@Column({default: "disconnected"})
 	status: User_Status;
 
+	@Column({
+		nullable: true,
+	})
+	victories: number;
+
+	@Column({
+		nullable: true,
+	})
+	defeats: number;
 }
 
 export default UserEntity;
