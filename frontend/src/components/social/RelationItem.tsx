@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { classicNameResolver, isPropertySignature } from "typescript";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { socket } from "../../App";
 import RelationsProp from "../../interfaces/Relations.interface";
 import UserProp from "../../interfaces/User.interface";
@@ -28,32 +27,27 @@ const RelationItem: React.FC<{
     }
   };
 
+	useEffect(() => {
+		socket.on("newDM", (id) => {
+			navigate("/chat/" + id);
+		});
+	}, []);
+
   useEffect(() => {
     if (props.relation.creator?.userId === props.myId)
       setToDisplay(props.relation.receiver);
     else setToDisplay(props.relation.creator);
     manageStatus();
-  }, []);
-
-  // socket.on("updatedRelations", () => {
-  //   console.log("status after update: ", props.relation.status);
-  //   manageStatus();
-  // });
+    socket.emit("isBlocked", { id: toDisplay?.userId });
+    socket.on("isBlockedRes", (data) => (console.log(data)));
+  }, [props.relation]);
 
   const handleBlock = () => {
-    setStatus("blocker");
     if (props.myId === props.relation.creator?.userId)
-      socket.emit("blockUser", props.relation.receiver?.username);
-    else socket.emit("blockUser", props.relation.creator?.username);
-  };
-
-  const handleRequest = () => {
-    socket.emit("acceptRequest", props.relation.requestId);
-  };
-
-  const handleUnblock = () => {
-    setStatus("accepted");
-    socket.emit("unblockUser", props.relation.requestId);
+      socket.emit("blockUser", { id: props.relation.receiver?.userId });
+    else {
+      socket.emit("blockUser", { id: props.relation.creator?.userId });
+    }
   };
 
   const sendMessage = () => {
@@ -63,44 +57,67 @@ const RelationItem: React.FC<{
     navigate("/chat");
   };
 
-  return (
-    <div
-      className={
-        status === "blocked"
-          ? classes.relationItemBlocked
-          : classes.relationItem
-      }
-    >
-      <div className={classes.leftSide}>
-        <img src={toDisplay?.image_url} className={classes.img}></img>
-        <h3>{toDisplay?.username}</h3>
-      </div>
-      <div className={classes.rightSide}>
-        {status === "accepted" ? (
-          <div className={classes.tmp}>
-            <button className={classes.button} onClick={handleBlock}>
-              Block
-            </button>
-            <img
-              onClick={sendMessage}
-              className={classes.logo}
-              src="chat.svg"
-            />
-          </div>
-        ) : null}
-        {status === "blocker" ? (
-          <button className={classes.button} onClick={handleUnblock}>
-            unblock
-          </button>
-        ) : null}
-        {status === "requested" ? (
-          <button className={classes.button} onClick={handleRequest}>
-            Accept
-          </button>
-        ) : null}
-      </div>
-    </div>
-  );
+  const handleRequest = () => {
+    socket.emit("acceptRequest", { id: props.relation.requestId });
+  };
+
+  const handleUnblock = () => {
+    socket.emit("unblockUser", { id: props.relation.requestId });
+  };
+
+	const sendMessage = () => {
+		console.log(`enter in sendMessage in front`)
+			socket.emit("createDM", {
+				title:
+					props.relation.creator?.username +
+					"0" +
+					props.relation.receiver?.username,
+				DM: true,
+				user2: props.relation.receiver?.userId,
+				protected: false,
+				private: false,
+				password: null,
+			});
+	};
+
+	return (
+		<div
+			className={
+				status === "blocked"
+					? classes.relationItemBlocked
+					: classes.relationItem
+			}
+		>
+			<div className={classes.leftSide}>
+				<img src={toDisplay?.image_url} className={classes.img}></img>
+				<h3>{toDisplay?.username}</h3>
+			</div>
+			<div className={classes.rightSide}>
+				{status === "accepted" ? (
+					<div className={classes.tmp}>
+						<button className={classes.button} onClick={handleBlock}>
+							Block
+						</button>
+						<img
+							onClick={sendMessage}
+							className={classes.logo}
+							src="chat.svg"
+						/>
+					</div>
+				) : null}
+				{status === "blocker" ? (
+					<button className={classes.button} onClick={handleUnblock}>
+						unblock
+					</button>
+				) : null}
+				{status === "requested" ? (
+					<button className={classes.button} onClick={handleRequest}>
+						Accept
+					</button>
+				) : null}
+			</div>
+		</div>
+	);
 };
 
 export default RelationItem;

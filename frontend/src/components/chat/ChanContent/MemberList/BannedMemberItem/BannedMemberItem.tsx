@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { socket } from "../../../../App";
-import ChatContext from "../../../../context/chat-context";
-import UserProp from "../../../../interfaces/User.interface";
+import { socket } from "../../../../../App";
+import ChatContext from "../../../../../context/chat-context";
+import UserProp from "../../../../../interfaces/User.interface";
 import classes from "./BannedMemberItem.module.css";
 
 const BannedMemberItem: React.FC<{ member: UserProp }> = (props) => {
@@ -9,8 +9,8 @@ const BannedMemberItem: React.FC<{ member: UserProp }> = (props) => {
 
 	function unban() {
 		const modifyChan = {
-			title: ctx?.activeChan?.title,
-			deleteBan: props.member.username,
+			id: ctx?.activeChan?.channelId,
+			deleteBan: props.member.userId,
 		};
 		socket.emit("modifyChannel", modifyChan);
 	}
@@ -34,7 +34,7 @@ const BannedMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						unban();
 					}}
 				>
-					<img src="unban.svg" alt="unban" />
+					<img src="/unban.svg" alt="unban" />
 				</div>
 			) : null}
 		</div>

@@ -13,6 +13,7 @@ import { ChannelService } from 'src/chat/channel/channel.service';
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { RelationsService } from 'src/relations/relations.service';
 
 @Module({
 	imports: [
@@ -23,6 +24,6 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 		}),
 	],
 	controllers: [TwoFAController, UserController],
-	providers: [TwoFAService, UserService, ConfigService, JwtService, ChannelService, MessageService],
+	providers: [TwoFAService, UserService, ConfigService, JwtService, ChannelService, MessageService, RelationsService],
 })
 export class TwoFAModule {}

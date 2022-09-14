@@ -8,15 +8,6 @@ import { ChannelService } from './channel.service';
 export class ChannelController {
 	constructor (private ChannelService: ChannelService) {}
 
-
-	@Post('/create')
-	@HttpCode(200)
-	@UsePipes(ValidationPipe)
-	@UseGuards(WsGuard)
-	async createChan(user: UserEntity, @Body() channel: ChannelEntity) {
-		return await this.ChannelService.createNewChan(user, channel)
-	}
-
 	/**
 	 * Create a new channel
 	 * The requesting user will own the channel.

@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 import { RelationEntity } from '../../relations/models/relations.entity';
 
+type User_Status = 'connected' | 'disconnected' | 'playing';
+
 @Entity()
 export class UserEntity {
 	@PrimaryGeneratedColumn('uuid')
@@ -70,6 +72,10 @@ export class UserEntity {
 
 	@OneToMany(() => MessagesEntity, (message) => message.user)
 	messages: MessagesEntity[];
+
+	@Column({default: "disconnected"})
+	status: User_Status;
+
 }
 
 export default UserEntity;

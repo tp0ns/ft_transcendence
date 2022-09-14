@@ -1,10 +1,10 @@
 import classes from "./AdminMemberItem.module.css";
-import UserProp from "../../../../interfaces/User.interface";
+import UserProp from "../../../../../interfaces/User.interface";
 import { useContext, useState } from "react";
-import ChatContext from "../../../../context/chat-context";
-import { socket } from "../../../../App";
-import Modal from "../../../../ui/Modal/Modal";
-import UserContent from "../../../user/UserContent/UserContent";
+import ChatContext from "../../../../../context/chat-context";
+import { socket } from "../../../../../App";
+import Modal from "../../../../../ui/Modal/Modal";
+import UserContent from "../../../../user/UserContent/UserContent";
 
 const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const [itemSide, setItemSide] = useState<boolean>(false);
@@ -25,13 +25,13 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 		let modifyChan;
 		if (isMuted()) {
 			modifyChan = {
-				title: ctx?.activeChan?.title,
-				deleteMute: props.member.username,
+				id: ctx?.activeChan?.channelId,
+				deleteMute: props.member.userId,
 			};
 		} else {
 			modifyChan = {
-				title: ctx?.activeChan?.title,
-				newMute: props.member.username,
+				id: ctx?.activeChan?.channelId,
+				newMute: props.member.userId,
 			};
 		}
 		socket.emit("modifyChannel", modifyChan);
@@ -39,16 +39,16 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 
 	function makeAdmin() {
 		const modifyChan = {
-			title: ctx?.activeChan?.title,
-			newAdmin: props.member.username,
+			id: ctx?.activeChan?.channelId,
+			newAdmin: props.member.userId,
 		};
 		socket.emit("modifyChannel", modifyChan);
 	}
 
 	function ban() {
 		const modifyChan = {
-			title: ctx?.activeChan?.title,
-			newBan: props.member.username,
+			id: ctx?.activeChan?.channelId,
+			newBan: props.member.userId,
 		};
 		socket.emit("modifyChannel", modifyChan);
 	}
@@ -79,10 +79,10 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						changeUserModal();
 					}}
 				>
-					<img src="user.svg" alt="user" />
+					<img src="/user.svg" alt="user" />
 				</div>
 				<div className={classes.button}>
-					<img src="pong.svg" alt="game" />
+					<img src="/pong.svg" alt="game" />
 				</div>
 				<div
 					className={classes.button}
@@ -91,8 +91,8 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 					}}
 				>
 					<img
-						src={isMuted() ? "unmute.svg" : "mute.svg"}
-						alt={isMuted() ? "unmute" : "mute"}
+						src={isMuted() ? "/unmute.svg" : "/mute.svg"}
+						alt={isMuted() ? "/unmute" : "/mute"}
 					/>
 				</div>
 				<div
@@ -101,7 +101,7 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						makeAdmin();
 					}}
 				>
-					<img src="crown.svg" alt="make admin" />
+					<img src="/crown.svg" alt="make admin" />
 				</div>
 				<div
 					className={classes.button}
@@ -109,7 +109,7 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 						ban();
 					}}
 				>
-					<img src="ban.svg" alt="ban" />
+					<img src="/ban.svg" alt="ban" />
 				</div>
 			</div>
 		);

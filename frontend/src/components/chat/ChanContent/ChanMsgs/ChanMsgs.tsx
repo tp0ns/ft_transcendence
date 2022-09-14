@@ -8,23 +8,15 @@ import classes from "./ChanMsgs.module.css";
 import ChanSettings from "./ChanSettings/ChanSettings";
 import Message from "./Message/Message";
 
-function ChanMsgs() {
+const ChanMsgs: React.FC<{ msgs: MessageInterface[] }> = (props) => {
 	const ctx = useContext(ChatContext) as ChatContextType;
-	const [msgs, setMsgs] = useState<MessageInterface[]>([]);
 	const bottomScroll = useRef<any>(null);
 	const [settings, setSettings] = useState<boolean>(false);
 	const inputMsg = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		socket.emit("getChannelMessages", ctx.activeChan?.title);
-		socket.on("sendChannelMessages", (messages) => {
-			setMsgs(messages);
-		});
-	}, [ctx.activeChan]);
-
-	useEffect(() => {
 		bottomScroll.current?.scrollIntoView({ behavior: "smooth" });
-	}, [msgs]);
+	}, [props.msgs]);
 
 	function settingsClickHandler() {
 		setSettings((prev) => {
@@ -32,19 +24,29 @@ function ChanMsgs() {
 		});
 	}
 
+	function friendName(): string {
+		return ctx.activeChan!.members.filter((member) => {
+			return ctx.clientId !== member.userId;
+		})[0].username;
+	}
+
 	function msgSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		socket.emit("msgToChannel", inputMsg.current?.value, ctx.activeChan!.title);
+		socket.emit(
+			"msgToChannel",
+			inputMsg.current?.value,
+			ctx.activeChan!.channelId
+		);
 		inputMsg.current!.value = "";
 	}
 
 	return (
 		<div className={classes.layout}>
 			<div className={classes.title}>
-				<div>{ctx.activeChan!.title}</div>
+				<div>{ctx.activeChan?.DM ? friendName() : ctx.activeChan!.title}</div>
 				{ctx.isAdmin ? (
 					<div onClick={settingsClickHandler} className={classes.settings}>
-						<img src="settings-chat.svg" alt="settings" />
+						<img src="/settings-chat.svg" alt="settings" />
 					</div>
 				) : null}
 				{settings ? (
@@ -56,7 +58,7 @@ function ChanMsgs() {
 			</div>
 			<div className={classes.msgs}>
 				<div ref={bottomScroll} />
-				{msgs
+				{props.msgs
 					.slice()
 					.reverse()
 					.map((msg) => {
@@ -69,6 +71,6 @@ function ChanMsgs() {
 			</form>
 		</div>
 	);
-}
+};
 
 export default ChanMsgs;
