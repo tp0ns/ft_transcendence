@@ -50,6 +50,7 @@ export class ChannelEntity extends BaseEntity {
 	@Column('text', {
 		default: null,
 		nullable: true,
+		select: false,
 	})
 	password: string;
 

@@ -17,6 +17,7 @@ import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
 import { WsException } from '@nestjs/websockets';
 import { validate as isValidUUID } from 'uuid';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {
@@ -197,7 +198,7 @@ export class ChannelService {
 	 * @returns true si le mot de passe est bon / false sinon 
 	 */
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
-		let channel: ChannelEntity = await this.getChanById(informations.id);
+		let channel: ChannelEntity = await this.getChanByIdWithPassword(informations.id);
 		const checkPassword: boolean = await bcrypt.compare(
 			informations.password,
 			channel.password,
@@ -234,7 +235,8 @@ export class ChannelService {
 			await this.deleteBanMember(user, channel, modifications.deleteBan);
 		else if (modifications.deleteMute)
 			await this.deleteMuteMember(user, channel, modifications.deleteMute);
-		else if (modifications.newPassword || !modifications.protected) {
+		else //if (modifications.newPassword || !modifications.protected) 
+		{
 			await this.modifyPassword(
 				user,
 				channel,
@@ -261,7 +263,7 @@ export class ChannelService {
 	) {
 		if (!channel.adminsId.includes(user.userId)) {
 			throw new WsException("You can't modify the channel");
-		} else if (!newPassword && protection)
+		} else if (protection && !newPassword)
 			throw new WsException(
 				'You need to enter a password if you want to protect this channel',
 			);
@@ -615,7 +617,6 @@ export class ChannelService {
 	 * - getAllChannels()
 	 * - getMemberChannels(member)
 	 * - getAllPublicChannels()
-	 * - getChanByName(chanName)
 	 * - getChanById(chanId)
 	 */
 
@@ -686,46 +687,48 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Recuperer un channel par son nom 
-	 * 
-	 */
-	async getChanByName(chanName: string): Promise<ChannelEntity> {
-		const channel: ChannelEntity = await this.channelRepository.findOne({
-			where: { title: chanName },
-			relations: [
-				'members',
-				'admins',
-				'owner',
-				'bannedMembers',
-				'mutedMembers',
-				'userInProtectedChan',
-			],
-		});
-		if (!channel)
-			throw new WsException('channel not found');
-		return channel;
-	}
-
-	/**
 	 * @brief Recuperer un channel avec son id 
 	 * 
 	 */
 	async getChanById(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
-			const channel: ChannelEntity = await this.channelRepository.findOne({
-				where: { channelId: chanId },
-				relations: [
-					'members',
-					'admins',
-					'owner',
-					'bannedMembers',
-					'mutedMembers',
-					'userInProtectedChan',
-				],
-			});
-			if (!channel) throw new WsException('channel not found');
+			let channel: ChannelEntity = await this.channelRepository
+			.createQueryBuilder('channel')
+			.leftJoinAndSelect('channel.members', 'members')
+			.leftJoinAndSelect('channel.owner', 'owner')
+			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+			.leftJoinAndSelect('channel.admins', 'admins')
+			.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
+			.where('channel.channelId = :id', {id: chanId})
+			.getOne();
 			return channel;
 		}
+		throw new WsException('channel not found');
+	}
+
+	/**
+	 * @brief Recuperer un channel avec son id et son password 
+	 * -> Permet de ne pas envoyer le password dans les recuperations
+	 * des channels de base
+	 * 
+	 */
+	async getChanByIdWithPassword(chanId: string): Promise<ChannelEntity> {
+		if (isValidUUID(chanId)) {
+			let channel: ChannelEntity = await this.channelRepository
+			.createQueryBuilder('channel')
+			.addSelect('channel.password',)
+			.leftJoinAndSelect('channel.members', 'members')
+			.leftJoinAndSelect('channel.owner', 'owner')
+			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+			.leftJoinAndSelect('channel.admins', 'admins')
+			.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
+			.where('channel.channelId = :id', {id: chanId})
+			.getOne();
+			return channel;
+		}
+		throw new WsException('channel not found');
 	}
 
 	/**
