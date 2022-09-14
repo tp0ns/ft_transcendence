@@ -255,8 +255,6 @@ export class GameService {
 	 * @param client the user that sends an invitation
 	 */
 		async	sendInvite(client: Socket, userToInviteId: string) {
-				//recuperer sentInvitations et check si c'est == null
-				// sinon, on empeche la creation d'invite
 				const sentInvitations: InvitationEntity[] = await this.invitationRepository.find({
 					where: [
 						{ creator: { userId: client.data.user.userId } },
@@ -301,6 +299,18 @@ export class GameService {
 				receiver: client.data.user,
 				status: 'accepted'
 			})
+			const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
+				where: [
+					{ receiver: { userId: client.data.user.userId } },
+				],
+			});
+			for (const inviteIter of allInvitations) {
+				if (inviteIter != invitation){
+					this.refuseInvite(client, inviteIter.creator.userId);
+				}
+			}
+			// get all invitations received, refuse all that
+			// aren't invitation
 			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
 			inviteRoomMap.delete(userInvitingId);
 			const currentMatch: Match = this.setDefaultPos(currentRoomName);
