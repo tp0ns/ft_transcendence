@@ -68,44 +68,45 @@ export class GeneralGateway
 
 	async validateConnection(client: Socket): Promise<UserEntity> {
 		try {
-				// let client: Socket = context.switchToWs().getClient();
-				const sessionCookie: string | string[] = client.handshake.headers.cookie
-						.split(';')
-						.find(
-								(cookie: string) =>
-										cookie.startsWith(' Authentication') ||
-										cookie.startsWith('Authentication'),
-						)
-						.split('=')[1];
+			// let client: Socket = context.switchToWs().getClient();
+			const sessionCookie: string | string[] = client.handshake.headers.cookie
+				.split(';')
+				.find(
+					(cookie: string) =>
+						cookie.startsWith(' Authentication') ||
+						cookie.startsWith('Authentication'),
+				)
+				.split('=')[1];
 
-				const payload = await this.jwtService.verify(sessionCookie, {
-						secret: jwtConstants.secret,
-				});
-				const user = await this.userService.getUserById(payload.sub);
-				client.data.user = user;
-				if (user) return user;
-				return null;
+			const payload = await this.jwtService.verify(sessionCookie, {
+				secret: jwtConstants.secret,
+			});
+			const user = await this.userService.getUserById(payload.sub);
+			client.data.user = user;
+			if (user) return user;
+			return null;
 		} catch (err) {
-				console.log('Error occured in ws guard : ');
-				console.log(err.message);
-				// throw new WsException(err.message);
+			console.log('Error occured in ws guard : ');
+			console.log(err.message);
+			// throw new WsException(err.message);
 		}
-}
+	}
 
-/**
- * Handles client connection behaviour
- */
-@UseGuards(WsGuard)
-async handleConnection(client: Socket) {
+	/**
+	 * Handles client connection behaviour
+	 */
+	@UseGuards(WsGuard)
+	async handleConnection(client: Socket) {
 		const user: UserEntity = await this.validateConnection(client);
 
 		if (user != null) {
-				client.data.user = user;
-				this.userService.connectClient(client.data.user)
+			client.data.user = user;
+			this.userService.connectClient(client.data.user);
 		}
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
-}
+		this.server.emit('updatedRelations');
+	}
 
 	/**
 	 * Handles client disconnection behaviour
@@ -113,8 +114,8 @@ async handleConnection(client: Socket) {
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user)
-			this.userService.disconnectClient(client.data.user);
+		if (client.data.user) this.userService.disconnectClient(client.data.user);
+		this.server.emit('updatedRelations');
 	}
 
 	/**
@@ -153,8 +154,8 @@ async handleConnection(client: Socket) {
 	}
 
 	/**
-	 * @brief Creation d'un DM 
-	 * 
+	 * @brief Creation d'un DM
+	 *
 	 * @param client l'utilisateur qui souhaite envoye un DM
 	 * @param channelEntity les informations necessaires a la
 	 *  creation d'un DM (user2, DM = true)
@@ -239,7 +240,7 @@ async handleConnection(client: Socket) {
 
 	/**
 	 * @brief Rejoindre la room
-	 * 
+	 *
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
@@ -248,7 +249,10 @@ async handleConnection(client: Socket) {
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
 	async joinRoom(client: Socket, channel: ChannelEntity) {
-		let bool: boolean = await this.channelService.joinRoom(client.data.user, channel);
+		let bool: boolean = await this.channelService.joinRoom(
+			client.data.user,
+			channel,
+		);
 		if (bool == true) {
 			client.join(channel.channelId);
 			this.server.emit('joinedRoom');
@@ -257,7 +261,7 @@ async handleConnection(client: Socket) {
 
 	/**
 	 * @brief Quitter la room
-	 * 
+	 *
 	 * @param client client qui veut leave le chan
 	 * @param channelName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 */
@@ -275,10 +279,10 @@ async handleConnection(client: Socket) {
 	}
 
 	/**
-	 * @brief Quitter le channel 
-	 * 
+	 * @brief Quitter le channel
+	 *
 	 * @param client client qui souhaite quitter le channel
-	 * @param chanId l'id du channel 
+	 * @param chanId l'id du channel
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('quitChan')
@@ -348,7 +352,7 @@ async handleConnection(client: Socket) {
 
 	/**
 	 * @brief Recuperer tous les channels
-	 * 
+	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
@@ -361,7 +365,7 @@ async handleConnection(client: Socket) {
 	/**
 	 * @brief Recuperer que les channels dont le user fait partie
 	 * -> autant publiques que privees
-	 * 
+	 *
 	 * @param client le user en question
 	 */
 	@UseGuards(WsGuard)
@@ -374,7 +378,7 @@ async handleConnection(client: Socket) {
 
 	/**
 	 * @brief Recuperer les messages d'un channel
-	 * 
+	 *
 	 * @param client le user qui souhaite recuperer les messages
 	 * @param chanId pouvoir identifier les messages de quel channel
 	 */
@@ -581,4 +585,3 @@ async handleConnection(client: Socket) {
 function jwtDecode<T>(Authentication: any) {
 	throw new Error('Function not implemented.');
 }
-
