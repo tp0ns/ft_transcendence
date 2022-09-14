@@ -1,8 +1,4 @@
-.modal_layout {
-	height: 35vh;
-}
-
-.layout {
+.layout_chat_settings {
 	display: flex;
 	flex-direction: column;
 }
@@ -15,32 +11,46 @@
 	font-size: x-large;
 }
 
-.settings input {
-	margin-bottom: 10px;
+.settings .check {
+	width: auto;
+	margin: 3px;
 }
 
-.settings button {
+.settings input {
+	margin: 3px;
+	margin-bottom: 10px;
+	height: 20px;
+	background: none;
+	border: 2px solid #3a3636;
+	border-radius: 10px;
+	outline: inherit;
 	font-family: "Courier New", Courier, monospace;
 	font-weight: bolder;
+	width: 176px;
+}
+
+.layout_chat_settings button {
+	display: block;
+	font-family: "Courier New", Courier, monospace;
+	font-size: large;
+	font-weight: bolder;
+	border-radius: 10px;
+	align-self: center;
+	padding-block: 5px;
+	padding-inline: 10px;
+	margin-bottom: 10px;
+	width: 176px;
+}
+
+.save {
+	margin-top: 10px;
 	background-color: #3a3636;
 	color: #fdd05d;
 	border: 2px solid #3a3636;
-	border-radius: 10px;
-	width: fit-content;
-	align-self: center;
 }
 
 .delete_chan {
-	display: block;
-	justify-self: center;
-	align-self: center;
-	text-align: center;
 	background-color: red;
-	border-radius: 10px;
+	border: 2px solid red;
 	color: #f4edde;
-	margin-top: 15px;
-	padding-block: 5px;
-	padding-inline: 10px;
-	cursor: pointer;
-	width: 120px;
 }
