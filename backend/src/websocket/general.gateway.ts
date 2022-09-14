@@ -152,6 +152,13 @@ async handleConnection(client: Socket) {
 		this.server.emit('updatedChannels');
 	}
 
+	/**
+	 * @brief Creation d'un DM 
+	 * 
+	 * @param client l'utilisateur qui souhaite envoye un DM
+	 * @param channelEntity les informations necessaires a la
+	 *  creation d'un DM (user2, DM = true)
+	 */
 	@UseGuards(WsGuard)
 	@UsePipes(ValidationPipe)
 	@SubscribeMessage('createDM')
@@ -210,7 +217,6 @@ async handleConnection(client: Socket) {
 	 * @return false : le user n'a pas rentrer le bon mdp
 	 * @return true : le user a rentrer le bon mdp
 	 *
-	 * @todo est ce que je dois verifier si le cryptage des 2 mdp est equivalent?
 	 */
 	@UseGuards(WsGuard)
 	@UsePipes(ValidationPipe)
@@ -232,32 +238,26 @@ async handleConnection(client: Socket) {
 	 */
 
 	/**
-	 *
+	 * @brief Rejoindre la room
+	 * 
 	 * @param client client qui veut join le chan
 	 * @param chanName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 *
-	 * @todo mettre l'erreur dans le service
-	 * @todo faire en sorte de recuperer tous les messages du channel
 	 *
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
 	async joinRoom(client: Socket, channel: ChannelEntity) {
-		// let check: boolean = await this.channelService.getIfUserInChan(
-		// 	client.data.user,
-		// 	channel,
-		// );
-		// if (check == true)
-		// {
-		client.join(channel.channelId);
-		this.server.emit('joinedRoom');
-		// }
-		// else
-		// console.log(`You need to be a member of the channel`);
+		let bool: boolean = await this.channelService.joinRoom(client.data.user, channel);
+		if (bool == true) {
+			client.join(channel.channelId);
+			this.server.emit('joinedRoom');
+		}
 	}
 
 	/**
-	 *
+	 * @brief Quitter la room
+	 * 
 	 * @param client client qui veut leave le chan
 	 * @param channelName le nom du channel pour pouvoir le retrouver ou bien le cree
 	 */
@@ -274,6 +274,12 @@ async handleConnection(client: Socket) {
 		}
 	}
 
+	/**
+	 * @brief Quitter le channel 
+	 * 
+	 * @param client client qui souhaite quitter le channel
+	 * @param chanId l'id du channel 
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('quitChan')
 	async quitChan(client: Socket, chanId: string) {
@@ -306,7 +312,6 @@ async handleConnection(client: Socket) {
 	 * @param payload
 	 * @param chanName
 	 *
-	 * @todo envoyer au service les 2 arguments decomposes
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToChannel')
@@ -320,7 +325,6 @@ async handleConnection(client: Socket) {
 			client.data.user,
 			chanId,
 		);
-		// this.server.emit('updatedChannels');
 		this.server.to(chanId).emit('sendChannelMessages', messages);
 	}
 
@@ -329,7 +333,6 @@ async handleConnection(client: Socket) {
 	 * @param client
 	 * @param payload
 	 *
-	 * @todo est ce qu'on doit join une room ou on enverra a chaque fois les messages au client ?
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('msgToUser')
@@ -344,8 +347,8 @@ async handleConnection(client: Socket) {
 	 */
 
 	/**
-	 * Pour recuperer tous les channels existant
-	 * @param client
+	 * @brief Recuperer tous les channels
+	 * 
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAllChannels')
@@ -356,9 +359,10 @@ async handleConnection(client: Socket) {
 	}
 
 	/**
-	 * Pour ne recuperer que les channels dont le user fait partie
+	 * @brief Recuperer que les channels dont le user fait partie
 	 * -> autant publiques que privees
-	 * @param client
+	 * 
+	 * @param client le user en question
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMemberChannels')
@@ -368,6 +372,12 @@ async handleConnection(client: Socket) {
 		client.emit('sendMemberChans', channels);
 	}
 
+	/**
+	 * @brief Recuperer les messages d'un channel
+	 * 
+	 * @param client le user qui souhaite recuperer les messages
+	 * @param chanId pouvoir identifier les messages de quel channel
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getChannelMessages')
 	async getChannelMessages(client: Socket, chanId: string) {
