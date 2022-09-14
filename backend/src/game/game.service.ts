@@ -338,6 +338,6 @@ export class GameService {
 
 			client.leave(inviteRoomMap.get(client.data.user.userId));
 			inviteRoomMap.delete(client.data.user.userId)
-			this.endGame(client.data.currentMatch, client.data.user)
+			this.endGame(client.data.currentMatch, client.data.user, client.data.user)
 		}
 }
