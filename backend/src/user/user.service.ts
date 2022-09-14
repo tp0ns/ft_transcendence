@@ -121,6 +121,14 @@ export class UserService {
 		while (attrs.username === user.username) {
 			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
 		}
+		if (this.getUserByUsername(attrs.username))
+			throw new ForbiddenException("username already taken");
+		console.log("attrs.profileImage.split(\".\")[-1]: ", attrs.profileImage.split(".").at(-1))
+		if (attrs.profileImage.split(".").at(-1) != "png") {
+			console.log("yalaa");
+			throw new ForbiddenException("File needs to be .png type");
+		}
+
 		Object.assign(user, attrs);
 		return this.userRepo.save(user);
 	}
