@@ -198,10 +198,12 @@ export class GameService {
 	}
 
 	//ends the game
-	async endGame(match: Match, winner: UserEntity , loser: UserEntity) {
-		if (match == null) {
-			//end Null Game -> user left or didnt accept invit
-			// -> trigger modal
+	async endGame(client: Socket, match: Match, winner: UserEntity , loser: UserEntity) {
+		if (match == null) { // opponent refused the invitation
+			client.leave(winner.currentMatch.roomName);
+			throw new ForbiddenException(
+				"Your opponent gave up the game.",
+			);
 		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
@@ -218,12 +220,12 @@ export class GameService {
 		}
 	}
 	//check if the game should end and exec the proper funciton if so
-	async checkEndGame(match: Match) {
+	async checkEndGame(client: Socket, match: Match) {
 		if (match.p1Score >= 5){
-			this.endGame(match, match.player1, match.player2);
+			this.endGame(client, match, match.player1, match.player2);
 		}
 		if (match.p2Score >= 5) {
-			this.endGame(match, match.player2, match.player1);
+			this.endGame(client, match, match.player2, match.player1);
 		}
 	}
 

@@ -493,7 +493,7 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		await this.gameService.checkEndGame(client.data.currentMatch);
+		await this.gameService.checkEndGame(client, client.data.currentMatch);
 	}
 
 	// get the position of the ball and emit it
