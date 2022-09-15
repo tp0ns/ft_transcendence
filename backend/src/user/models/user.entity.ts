@@ -1,3 +1,4 @@
+import { MaxLength } from 'class-validator';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { Match } from 'src/game/interfaces/game.interface';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
@@ -24,6 +25,7 @@ export class UserEntity {
 	})
 	schoolId: number;
 
+	@MaxLength(10)
 	@Column({
 		type: 'varchar',
 	})

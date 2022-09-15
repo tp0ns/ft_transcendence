@@ -494,7 +494,8 @@ export class GeneralGateway
 			);
 		//end of the game
 		const winner: UserEntity = await this.gameService.checkEndGame(client, client.data.currentMatch);
-		this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
+		if (winner)
+			this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
 	}
 
 	// get the position of the ball and emit it
@@ -644,6 +645,18 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 }
+
 function jwtDecode<T>(Authentication: any) {
 	throw new Error('Function not implemented.');
 }
+
+/**
+  _   _ ____  _____ ____  
+ | | | / ___|| ____|  _ \ 
+ | | | \___ \|  _| | |_) |
+ | |_| |___) | |___|  _ < 
+  \___/|____/|_____|_| \_\
+ */
+
+
+						 

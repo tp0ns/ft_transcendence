@@ -1,4 +1,5 @@
 import {
+	ForbiddenException,
 	forwardRef,
 	HttpException,
 	HttpStatus,
@@ -114,6 +115,8 @@ export class ChannelService {
 		const date = Date.now();
 		let channel: ChannelEntity;
 		if (chan.DM) return this.saveNewDM(user, chan);
+		if (chan.title === 'DM')
+			throw new ForbiddenException("You can't create a channel named 'DM'");
 		const newPassword =
 			chan.password != '' ? bcrypt.hashSync(chan.password, 10) : null;
 		channel = await this.channelRepository.save({
