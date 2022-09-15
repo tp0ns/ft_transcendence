@@ -6,6 +6,7 @@ import { socket } from "../../../App";
 import UserProp from "../../../interfaces/User.interface";
 import Modal from "../../../ui/Modal/Modal";
 import SettingsUser from "../SettingsUser/SettingsUser";
+import AchievementList from "../StatList/AchievementList";
 import classes from "./UserContent.module.css";
 
 const UserContent: React.FC<{ userId: string }> = (props) => {
@@ -17,9 +18,17 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		// socket.emit("isBlocked", { id: props.userId });
+		// socket.on("updatedRelations", () => {
+		// 	socket.emit("isBlocked", { id: props.userId });
+		// });
 		socket.on("newDM", (id) => {
 			navigate("/chat/" + id);
 		});
+		// socket.on("isBlockedRes", (res) => {
+		// 	console.log("isBlockedRes");
+		// 	setIsBlocked(res);
+		// });
 	}, []);
 
 	useEffect(() => {
@@ -57,6 +66,10 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 		console.log("entered in sendGaneInvite");
 	}
 
+	function unblockUser() {
+		console.log("Entered in unblockUser");
+	}
+
 	function blockUser() {
 		console.log("Entered in blockUser");
 	}
@@ -65,7 +78,7 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 		socket.emit("createDM", {
 			title: "DM",
 			DM: true,
-			user2: user?.userId,
+			user2: props.userId,
 			protected: false,
 			private: false,
 			password: null,
@@ -108,18 +121,6 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 					<div
 						className={classes.button_div}
 						onClick={() => {
-							blockUser();
-						}}
-					>
-						<img
-							src="/ban.svg"
-							alt="Block user"
-							className={classes.button_img}
-						/>
-					</div>
-					<div
-						className={classes.button_div}
-						onClick={() => {
 							sendMessage();
 						}}
 					>
@@ -131,8 +132,41 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 					</div>
 				</div>
 			) : null}
+			<div className={classes.infos}>
+				<AchievementList userId={props.userId} />
+				<div className={classes.try}>try</div>
+				{/* <MatchList userId={props.userId} /> */}
+			</div>
 		</div>
 	);
 };
 
 export default UserContent;
+
+// {isBlocked ? (
+// 	<div
+// 		className={classes.button_div}
+// 		onClick={() => {
+// 			unblockUser();
+// 		}}
+// 	>
+// 		<img
+// 			src="/unban.svg"
+// 			alt="Block user"
+// 			className={classes.button_img}
+// 		/>
+// 	</div>
+// ) : (
+// 	<div
+// 		className={classes.button_div}
+// 		onClick={() => {
+// 			blockUser();
+// 		}}
+// 	>
+// 		<img
+// 			src="/ban.svg"
+// 			alt="Block user"
+// 			className={classes.button_img}
+// 		/>
+// 	</div>
+// )}

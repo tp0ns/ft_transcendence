@@ -73,3 +73,14 @@
 		brightness(86%) contrast(90%);
 	cursor: inherit;
 }
+
+.infos {
+	display: flex;
+	justify-content: space-around;
+	margin-block: 10px;
+}
+
+.try {
+	width: 50%;
+	background-color: purple;
+}
