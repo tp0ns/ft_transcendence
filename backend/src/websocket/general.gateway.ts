@@ -528,6 +528,34 @@ export class GeneralGateway
 	async toggleMatchMaking(client: Socket) {
 		await this.gameService.toggleMatchMaking(client);
 	}
+
+	/**
+	 * 				INVITATIONS
+	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('sendInvite')
+	async sendInvite(client: Socket, userToInviteId: string) {
+		await this.gameService.sendInvite(client, userToInviteId);
+		this.server.emit('updatedInvitation');
+		console.log('invite sent');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('acceptInvite')
+	async acceptInvite(client: Socket, userInvitingId: string) {
+		await this.gameService.joinInvite(client, userInvitingId);
+		this.server.emit('updatedInvitation');
+		console.log('invite accepted');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('refuseInvite')
+	async refuseInvite(client: Socket, userInvitingId: string) {
+		await this.gameService.refuseInvite(client, userInvitingId);
+		this.server.emit('updatedInvitation');
+		console.log('invite refused');
+	}
 	/*
 	______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|

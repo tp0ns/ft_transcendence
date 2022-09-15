@@ -1,5 +1,6 @@
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { Match } from 'src/game/interfaces/game.interface';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
 import {
 	Column,
 	Entity,
@@ -50,6 +51,18 @@ export class UserEntity {
 		type: 'json',
 	})
 	public currentMatch: Match | null;
+
+	@OneToMany(
+		() => InvitationEntity,
+		(InvitationEntity) => InvitationEntity.creator,
+	)
+	sentInvitations: InvitationEntity[];
+
+	@OneToMany(
+		() => InvitationEntity,
+		(InvitationEntity) => InvitationEntity.receiver,
+	)
+	receivedInvitations: InvitationEntity[];
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];

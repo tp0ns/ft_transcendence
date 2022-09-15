@@ -1,14 +1,27 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { fstat } from 'fs';
 import { Socket } from 'socket.io';
 import UserEntity from 'src/user/models/user.entity';
+import { UserService } from 'src/user/user.service';
+import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
+import InvitationEntity from './invitations/invitations.entity';
 
 const matchMakingSet = new Set<Socket>();
+const inviteSet = new Set<Socket>();
+const	inviteRoomMap = new Map<string, string>(); // <userInviting, roomId>
 let match: Match;
 
 @Injectable()
 export class GameService {
+	constructor(
+
+		@InjectRepository(InvitationEntity)
+		private invitationRepository: Repository<InvitationEntity>,
+		@Inject(forwardRef(() => UserService)) private userService: UserService,
+	) {}
 	/**
 	 * set the default position of the elements in the game
 	 * @param match interface of the match
@@ -207,4 +220,91 @@ export class GameService {
 			this.endGame(match, match.player2);
 		}
 	}
+
+	/**
+	 * create a room, initialize it and join it.
+	 * @param client the user that sends an invitation
+	 */
+		async	sendInvite(client: Socket, userToInviteId: string) {
+				const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
+				const invitation: InvitationEntity = await this.invitationRepository.save( {
+					creator: client.data.user,
+					receiver: userToInvite,
+					status: 'pending'
+				})
+				const roomName = 'inviteRoom'+ Math.random();
+				client.join(roomName);
+				inviteRoomMap.set(client.data.user.userId, roomName);
+		}
+
+	/**
+	 * the user accepted the invitation
+	 * the user is now joining the game
+	 * @param client the user accepting the invitation
+	 */
+		async joinInvite(client: Socket, userInvitingId: string) {
+			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
+			let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+			.select(['invitation.requestId', 'creator'])
+			.leftJoin('invitation.creator', 'creator')
+			.leftJoin('invitation.receiver', 'receiver')
+			.where('invitation.creator = :id', { id: userInvitingId})
+			.getOne();
+			const invitId: string = invitation.requestId;
+			invitation = await this.invitationRepository.save({
+				requestId: invitId,
+				creator: userInviting,
+				receiver: client.data.user,
+				status: 'accepted'
+			})
+			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
+			inviteRoomMap.delete(userInvitingId);
+			const currentMatch: Match = this.setDefaultPos(currentRoomName);
+			currentMatch.player1 = client.data.user;
+			currentMatch.p1User = currentMatch.player1;
+			currentMatch.player2 = userInviting;
+			currentMatch.p2User = currentMatch.player2;
+			currentMatch.isLocal = false;
+			client.join(currentMatch.roomName);
+			client.data.user.currentMatch = currentMatch;
+			userInviting.currentMatch = currentMatch;
+		}
+
+		/**
+		 * cancels the invitation
+		 */
+		async	refuseInvite(client: Socket, userInvitingId: string) {
+			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
+			let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+			.select(['invitation.requestId', 'creator'])
+			.leftJoin('invitation.creator', 'creator')
+			.leftJoin('invitation.receiver', 'receiver')
+			.where('invitation.creator = :id', { id: userInvitingId})
+			.getOne();
+			const invitId: string = invitation.requestId;
+			invitation = await this.invitationRepository.save({
+				requestId: invitId,
+				creator: userInviting,
+				receiver: client.data.user,
+				status: 'declined'
+			})
+			await this.invitationRepository
+			.createQueryBuilder()
+			.delete()
+			.from(InvitationEntity)
+			.where('creator = :id', { id: userInvitingId})
+			.execute();
+			inviteRoomMap.delete(userInvitingId);
+		}
+
+		/**
+		 * tells the emitter that the invitation
+		 * has been declined
+		 */
+		async inviteIsDeclined(client: Socket) {
+			client.data.user.sentInvitations //query pour retrouver la bonne invitation
+			//passer l'invit. a 'declined', la suppr
+			client.leave(client.data.currentMatch.roomName);
+			//end null game
+		}
 }
