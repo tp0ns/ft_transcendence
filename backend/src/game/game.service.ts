@@ -197,6 +197,23 @@ export class GameService {
 		}
 	}
 
+	/**
+	 * @brief Permet de creer une entite achievements lie a chaque user connecte
+	 *
+	 * @param newUser le nouvel utilisateur qui se connecte
+	 */
+	 async newConnection(newUser: UserEntity) {
+		
+	}
+
+	async setAchievements(user: UserEntity)
+	{
+		//si le score du joueur est === 1 
+		//creer une nouvelle entite d'achievements 
+		//qui stocke en premiere column le userId 
+		// 
+	}
+
 	//ends the game
 	async endGame(client: Socket, match: Match, winner: UserEntity , loser: UserEntity) {
 		if (match == null) { // opponent refused the invitation
@@ -209,6 +226,8 @@ export class GameService {
 		if (match.isLocal == false) {
 			winner.victories++;
 			loser.defeats++;
+			this.setAchievements(winner);
+			this.setAchievements(loser);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button

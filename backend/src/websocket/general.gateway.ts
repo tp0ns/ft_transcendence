@@ -644,19 +644,31 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
+
+	/**
+	  _   _ ____  _____ ____  
+	 | | | / ___|| ____|  _ \ 
+	 | | | \___ \|  _| | |_) |
+	 | |_| |___) | |___|  _ < 
+	  \___/|____/|_____|_| \_\
+	 */
+	
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('triggerModifyChannel')
+	// async getUpdatedUser(client: Socket)
+	// {
+	// 	this.server.emit('updatedChangnel');
+	// }
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getStatistics')
+	async getStatictics(client: Socket, userId: string ) {
+		const userToFind: UserEntity = await this.userService.getUserById(userId);
+		client.emit(`sendStatistics`, userToFind);
+	}
 }
 
 function jwtDecode<T>(Authentication: any) {
 	throw new Error('Function not implemented.');
 }
-
-/**
-  _   _ ____  _____ ____  
- | | | / ___|| ____|  _ \ 
- | | | \___ \|  _| | |_) |
- | |_| |___) | |___|  _ < 
-  \___/|____/|_____|_| \_\
- */
-
-
-						 
