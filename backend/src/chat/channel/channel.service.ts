@@ -18,7 +18,6 @@ import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
 import { WsException } from '@nestjs/websockets';
 import { validate as isValidUUID } from 'uuid';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {

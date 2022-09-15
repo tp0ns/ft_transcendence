@@ -34,6 +34,7 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -663,9 +664,18 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
-	async getStatictics(client: Socket, userId: string ) {
-		const userToFind: UserEntity = await this.userService.getUserById(userId);
-		client.emit(`sendStatistics`, userToFind);
+	async getStatistics(client: Socket, userId: string ) {
+		const user: UserEntity = await this.userService.getUserById(userId);
+		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		client.emit(`sendStatistics`, user.victories, user.defeats, ratio);
+	}
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getAchievements')
+	async getAchievements(client: Socket, userId: string ) {
+		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		client.emit(`sendAchievements`, userAchievements);
 	}
 }
 
