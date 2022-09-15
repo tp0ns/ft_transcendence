@@ -34,6 +34,7 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -326,7 +327,7 @@ export class GeneralGateway
 			client.data.user,
 			payload,
 		);
-		const messages = await this.messageService.getChannelMessages(
+		const messages = await this.getChannelMessages(
 			client.data.user,
 			chanId,
 		);
@@ -646,13 +647,13 @@ export class GeneralGateway
 	}
 
 	/**
-	  _   _ ____  _____ ____  
-	 | | | / ___|| ____|  _ \ 
+	  _   _ ____  _____ ____
+	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
-	 | |_| |___) | |___|  _ < 
+	 | |_| |___) | |___|  _ <
 	  \___/|____/|_____|_| \_\
 	 */
-	
+
 
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('triggerModifyChannel')
@@ -663,9 +664,22 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
-	async getStatictics(client: Socket, userId: string ) {
-		const userToFind: UserEntity = await this.userService.getUserById(userId);
-		client.emit(`sendStatistics`, userToFind);
+	async getStatistics(client: Socket, userId: string ) {
+		const user: UserEntity = await this.userService.getUserById(userId);
+		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		client.emit(`sendStatistics`, {
+			victory: user.victories,
+			defeat: user.defeats,
+			ratio: ratio
+		});
+	}
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getAchievements')
+	async getAchievements(client: Socket, userId: string ) {
+		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		client.emit(`sendAchievements`, userAchievements);
 	}
 }
 

@@ -58,6 +58,7 @@ export class MessageService {
 				return null;
 			let blockedUsers: string[] =
 				await this.relationsService.getBlockedUsersForUser(user);
+			console.log(`blockedUsers: `, blockedUsers);
 			if (blockedUsers.length > 0) {
 				msgs = await this.MessageRepository.createQueryBuilder('messages')
 					.leftJoinAndSelect('messages.user', 'sender')
@@ -66,6 +67,7 @@ export class MessageService {
 					.andWhere('sender.username NOT IN (:...blocked)', {
 						blocked: blockedUsers,
 					})
+
 					.getMany();
 			} else {
 				msgs = await this.MessageRepository.createQueryBuilder('messages')
