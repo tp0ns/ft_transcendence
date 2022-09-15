@@ -157,12 +157,12 @@ export class GameService {
 		async toggleLocalGame(client: Socket) {
 			const roomName = 'room'+ Math.random();
 			client.join(roomName)
-			client.data.currentMatch = this.setDefaultPos(roomName);
-			client.data.currentMatch.isLocal = true;
-			client.data.currentMatch.p1User = client.data.user;
-			client.data.currentMatch.p2User = client.data.currentMatch.p1User;
-			client.data.currentMatch.player1 = client.data.currentMatch.p1User;
-			client.data.currentMatch.player2 = client.data.currentMatch.p1User;
+			client.data.user.currentMatch = this.setDefaultPos(roomName);
+			client.data.user.currentMatch.isLocal = true;
+			client.data.user.currentMatch.p1User = client.data.user;
+			client.data.user.currentMatch.p2User = client.data.user.currentMatch.p1User;
+			client.data.user.currentMatch.player1 = client.data.user.currentMatch.p1User;
+			client.data.user.currentMatch.player2 = client.data.user.currentMatch.p1User;
 		}
 
 	// toggle MatchMaking : launch the matchmaking
@@ -218,13 +218,20 @@ export class GameService {
 			// trigger the pop-up(?modal) with victory info and home button
 			console.log('We have a winner !');
 		}
+		console.log('winner match', winner.currentMatch);
+		console.log('loser match', loser.currentMatch);
+		console.log('client match', client.data.currentMatch);
+		winner.currentMatch = null;
+		loser.currentMatch = null;
+		console.log('AFTER NULL winner match', winner.currentMatch);
+		console.log('loser match', loser.currentMatch);
 	}
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(client: Socket, match: Match) {
-		if (match.p1Score >= 5){
+		if (match.p1Score >= 2){
 			this.endGame(client, match, match.player1, match.player2);
 		}
-		if (match.p2Score >= 5) {
+		if (match.p2Score >= 2) {
 			this.endGame(client, match, match.player2, match.player1);
 		}
 	}
