@@ -90,15 +90,14 @@ const HomeScreen: React.FC<{
     // do something here with the canvas
   }, []);
 
-  const handleLocalGame = () => {
-    props.handleGame("inGame");
-    socket.emit("toggleLocalGame");
+  const handleLocalGame = (event: any) => {
+    event?.preventDefault()
+    props.handleGame("localGame");
   }
 
-  const handleMatchMaking = () => {
-    props.handleGame("inGame");
-    socket.emit("toggleMatchMaking");
-    socket.emit("joinMatch");
+  const handleMatchMaking = (event: any) => {
+    event?.preventDefault()
+    props.handleGame("matchGame");
   }
 
   return (

@@ -519,6 +519,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
+		console.log("entered toggleLocalGame")
 		await this.gameService.toggleLocalGame(client);
 	}
 

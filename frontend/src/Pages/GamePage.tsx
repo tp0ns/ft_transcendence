@@ -6,18 +6,19 @@ import Layout from "../components/Layout/Layout";
 const GamePage = () => {
 	const [gameState, setGameState] = useState<string>("noGame");
 
-	const handleGame = (state: string) => {
+	const handleGameType = (state: string) => {
 		setGameState(state);
+
 	}
 
 
 	return (
 		<Layout>
-			<React.Fragment>
-				{gameState === "noGame" ? <HomeScreen handleGame={handleGame} /> : null}
-				{gameState === "inGame" ? <GameScreen /> : null}
+			<div>
+				{gameState === "noGame" ? <HomeScreen handleGame={handleGameType} /> : null}
+				{gameState === ("localGame" || "matchGame") ? <GameScreen gameType={gameState} /> : null}
 				{/* {gameState === "endGame" ? <EndScreen /> : null} */}
-			</React.Fragment>
+			</div>
 		</Layout>
 	);
 };
