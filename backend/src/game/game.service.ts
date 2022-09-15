@@ -157,12 +157,12 @@ export class GameService {
 		async toggleLocalGame(client: Socket) {
 			const roomName = 'room'+ Math.random();
 			client.join(roomName)
-			client.data.user.currentMatch = this.setDefaultPos(roomName);
-			client.data.user.currentMatch.isLocal = true;
-			client.data.user.currentMatch.p1User = client.data.user;
-			client.data.user.currentMatch.p2User = client.data.user.currentMatch.p1User;
-			client.data.user.currentMatch.player1 = client.data.user.currentMatch.p1User;
-			client.data.user.currentMatch.player2 = client.data.user.currentMatch.p1User;
+			client.data.currentMatch = this.setDefaultPos(roomName);
+			client.data.currentMatch.isLocal = true;
+			client.data.currentMatch.p1User = client.data.user;
+			client.data.currentMatch.p2User = client.data.currentMatch.p1User;
+			client.data.currentMatch.player1 = client.data.currentMatch.p1User;
+			client.data.currentMatch.player2 = client.data.currentMatch.p1User;
 		}
 
 	// toggle MatchMaking : launch the matchmaking
@@ -172,6 +172,23 @@ export class GameService {
 		console.log('set size:', matchMakingSet.size);
 		if (matchMakingSet.size == 2)
 		{
+			let user1: UserEntity;
+			let user2: UserEntity;
+			for (const item of matchMakingSet)
+			{
+				if (user1 == null){
+				console.log('user1');
+				user1 = item.data.user;
+				}
+				else{
+				console.log('user2');
+				user2 = item.data.user;
+				}
+			}
+			if (user1.userId == user2.userId){
+				matchMakingSet.clear();
+				return false;
+			}
 			const roomName = 'room'+ Math.random();
 			match = this.setDefaultPos(roomName);
 			for (const item of matchMakingSet)
@@ -192,9 +209,11 @@ export class GameService {
 			for (const item of matchMakingSet)
 			{
 				item.data.currentMatch = match;
+				item.data.user.currentMatch = match;
 			}
 			matchMakingSet.clear();
 		}
+		return true;
 	}
 
 	//ends the game
