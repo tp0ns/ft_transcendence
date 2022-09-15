@@ -14,17 +14,24 @@
 	padding-bottom: 0.2%;
 	display: flex;
 	justify-content: flex-start;
+	padding-inline: 5px;
 	/* adjustment */
 	/* new */
 }
 
 .input {
 	/* opacity: 0%; */
-	background-color: rgba(0, 0, 0, 0);
+	background-color: transparent;
+	flex-grow: 1;
+	width: auto;
 	border: none;
 	outline: none;
 	font-family: blippoblack;
 	align-self: center;
+}
+
+.input::placeholder {
+	color: #3a36367f;
 }
 
 .searchLogo {
@@ -139,10 +146,18 @@
 	border: 2px solid #3a3636;
 	border-radius: 50%;
 	background-color: transparent;
+	cursor: pointer;
 }
 
 .logo {
 	width: 26px;
 	height: 26px;
 	align-self: center;
+	filter: invert(21%) sepia(5%) saturate(495%) hue-rotate(318deg)
+		brightness(86%) contrast(90%);
+	cursor: inherit;
+}
+
+.username {
+	cursor: default;
 }
