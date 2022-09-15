@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'passport-42';
 import { ChannelService } from 'src/chat/channel/channel.service';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class UserService {
@@ -113,13 +114,8 @@ export class UserService {
 		}
 		// if (this.getUserByUsername(attrs.username))
 		// 	throw new ForbiddenException("username already taken");
-		console.log("attrs.profileImage.split(\".\")[-1]: ", attrs.profileImage.split(".").at(-1))
-		if (attrs.profileImage.split(".").at(-1) != "png") {
-			console.log("yalaa");
-			throw new ForbiddenException("File needs to be .png type");
-			console.log("yalaa2");
-		}
-
+		if (attrs.profileImage.split(".").at(-1) != "png")
+			throw new WsException('File needs to be .png type');
 		Object.assign(user, attrs);
 		return this.userRepo.save(user);
 	}
