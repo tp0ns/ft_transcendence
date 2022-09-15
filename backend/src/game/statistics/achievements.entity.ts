@@ -1,15 +1,13 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryColumn, Unique } from "typeorm";
 
 @Entity('achievements')
 export class AchievementsEntity extends BaseEntity {
 
-	@PrimaryColumn()
-	userId: string;
-
-	@Column({
-		default: false,
+	
+	@PrimaryColumn({
+		unique: true,
 	})
-	name: string;
+	userId: string;
 
 	@Column({
 		default: false,
