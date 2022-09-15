@@ -33,6 +33,7 @@ import { UserService } from 'src/user/user.service';
 import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -41,7 +42,8 @@ import { globalExceptionFilter } from 'src/globalException.filter';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -49,7 +51,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) { }
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -491,7 +493,9 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		await this.gameService.checkEndGame(client.data.currentMatch);
+		const winner: UserEntity = await this.gameService.checkEndGame(client, client.data.currentMatch);
+		if (winner)
+			this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
 	}
 
 	// get the position of the ball and emit it
@@ -528,6 +532,56 @@ export class GeneralGateway
 	async toggleMatchMaking(client: Socket) {
 		await this.gameService.toggleMatchMaking(client);
 	}
+
+	/**
+	 * 				INVITATIONS
+	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('retrieveInvitations')
+	async retrieveInvitations(client: Socket) {
+		const properInvit: InvitationEntity[] =
+			await this.gameService.getInvitations(client);
+		client.emit('sendBackInvite', properInvit);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('sendInvite')
+	async sendInvite(client: Socket, userToInviteId: string) {
+		await this.gameService.sendInvite(client, userToInviteId);
+		this.server.emit('updateInvitation');
+		console.log('invite sent');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('acceptInvite')
+	async acceptInvite(client: Socket, userInvitingId: string) {
+		const currentRoom = await this.gameService.joinInvite(
+			client,
+			userInvitingId,
+		);
+		this.server.to(currentRoom).emit('updateInvitation');
+		console.log('invite accepted');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('refuseInvite')
+	async refuseInvite(client: Socket, userInvitingId: string) {
+		const currentRoom = await this.gameService.refuseInvite(
+			client,
+			userInvitingId,
+		);
+		this.server.emit('updateInvitation');
+		this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
+		console.log('invite refused');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('inviteIsDeclined')
+	async inviteIsDeclined(client: Socket, userInvitedId) {
+		this.gameService.inviteIsDeclined(client, userInvitedId);
+	}
+
 	/*
 	______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
@@ -574,7 +628,10 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('isBlocked')
 	async isBlocked(client: Socket, userId: IdDto) {
-		const isBlocked = await this.relationsService.isBlocked(userId.id, client.data.user);
+		const isBlocked = await this.relationsService.isBlocked(
+			userId.id,
+			client.data.user,
+		);
 		this.server.to(client.id).emit('isBlockedRes', isBlocked);
 	}
 
@@ -587,7 +644,31 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
+
+	/**
+	  _   _ ____  _____ ____  
+	 | | | / ___|| ____|  _ \ 
+	 | | | \___ \|  _| | |_) |
+	 | |_| |___) | |___|  _ < 
+	  \___/|____/|_____|_| \_\
+	 */
+	
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('triggerModifyChannel')
+	// async getUpdatedUser(client: Socket)
+	// {
+	// 	this.server.emit('updatedChangnel');
+	// }
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getStatistics')
+	async getStatictics(client: Socket, userId: string ) {
+		const userToFind: UserEntity = await this.userService.getUserById(userId);
+		client.emit(`sendStatistics`, userToFind);
+	}
 }
+
 function jwtDecode<T>(Authentication: any) {
 	throw new Error('Function not implemented.');
 }

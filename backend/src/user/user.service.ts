@@ -54,6 +54,7 @@ export class UserService {
 				status: 'connected'
 			});
 			this.channelService.newConnection(newUser);
+			// this.userService.newConnection(newUser);
 			return newUser;
 		}
 		else {
@@ -127,4 +128,9 @@ export class UserService {
 	// async	createUser(newUser: CreateUserDto) {
 	// 	return await this.userRepo.save(newUser);
 	// }
+
+
 }
+
+
+
