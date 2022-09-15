@@ -327,7 +327,7 @@ export class GeneralGateway
 			client.data.user,
 			payload,
 		);
-		const messages = await this.messageService.getChannelMessages(
+		const messages = await this.getChannelMessages(
 			client.data.user,
 			chanId,
 		);
@@ -667,7 +667,11 @@ export class GeneralGateway
 	async getStatistics(client: Socket, userId: string ) {
 		const user: UserEntity = await this.userService.getUserById(userId);
 		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
-		client.emit(`sendStatistics`, user.victories, user.defeats, ratio);
+		client.emit(`sendStatistics`, {
+			victory: user.victories, 
+			defeat: user.defeats,
+			ratio: ratio
+		});
 	}
 
 
