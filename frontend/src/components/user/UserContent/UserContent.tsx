@@ -86,14 +86,16 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 	}
 
 	return (
-		<div>
+		<div className={classes.layout}>
 			{clientId === user?.userId ? (
-				<img
-					src="/gear.svg"
-					alt="Option button"
-					onClick={clickHandler}
-					className={classes.settings}
-				/>
+				<div>
+					<img
+						src="/gear.svg"
+						alt="Option button"
+						onClick={clickHandler}
+						className={classes.settings}
+					/>
+				</div>
 			) : null}
 			{settingsLayout(settings)}
 			<div className={classes.resume}>

@@ -20,29 +20,80 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 			setStatistics(stats);
 		});
 		socket.on("sendAchievements", (achieve) => {
+			console.log(achieve);
 			setAchievements(achieve);
 		});
 	}, []);
 
 	return (
 		<div className={classes.success_layout}>
-			<h1 className={classes.stats_title}>Statistics</h1>
+			<h1 className={classes.success_title}>Statistics</h1>
 			<div className={classes.stats}>
-				<div className={classes.stat}>
-					<h2>{statistics?.victory}</h2>
-					<p>Victory</p>
+				<div>
+					<h2 className={classes.stat_number}>{statistics?.victory}</h2>
+					<p className={classes.stat_desc}>Victory</p>
 				</div>
-				<div className={classes.stat}>
-					<h2>{statistics?.defeat}</h2>
-					<p>Defeat</p>
+				<div>
+					<h2 className={classes.stat_number}>{statistics?.defeat}</h2>
+					<p className={classes.stat_desc}>Defeat</p>
 				</div>
-				<div className={classes.stat}>
-					<h2>{statistics?.ratio}</h2>
-					<p>Winrate</p>
+				<div>
+					<h2 className={classes.stat_number}>{statistics?.ratio + "%"}</h2>
+					<p className={classes.stat_desc}>Winrate</p>
 				</div>
 			</div>
-			<div className={classes.achieve}>
-				<h1>Achievements</h1>
+			<h1 className={classes.success_title}>Achievements</h1>
+			<div className={classes.achievements}>
+				{achievements?.Victoryx3 ? null : (
+					<div>
+						<img
+							src="/victoryx3.svg"
+							alt="3 time victorious"
+							className={classes.achieve_badge}
+						/>
+						<p className={classes.achieve_desc}>3 Wins</p>
+					</div>
+				)}
+				{achievements?.Victoryx5 ? null : (
+					<div>
+						<img
+							src="/victoryx5.svg"
+							alt="5 time victorious"
+							className={classes.achieve_badge}
+						/>
+						<p className={classes.achieve_desc}>5 Wins</p>
+					</div>
+				)}
+				{achievements?.Victoryx10 ? null : (
+					<div>
+						<img
+							src="/victoryx10.svg"
+							alt="10 time victorious"
+							className={classes.achieve_badge}
+						/>
+						<p className={classes.achieve_desc}>10 Wins</p>
+					</div>
+				)}
+				{achievements?.FirstMatch ? null : (
+					<div>
+						<img
+							src="/firstMatch.svg"
+							alt="Complete your first match"
+							className={classes.achieve_badge}
+						/>
+						<p className={classes.achieve_desc}>First Match</p>
+					</div>
+				)}
+				{achievements?.Defeatx3 ? null : (
+					<div>
+						<img
+							src="/defeatx3.svg"
+							alt="Lost 3 times"
+							className={classes.achieve_badge}
+						/>
+						<p className={classes.achieve_desc}>3 Looses</p>
+					</div>
+				)}
 			</div>
 		</div>
 	);

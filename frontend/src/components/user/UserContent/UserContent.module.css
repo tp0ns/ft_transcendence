@@ -17,8 +17,9 @@
 }
 
 .settings {
-	position: fixed;
+	position: absolute;
 	z-index: auto;
+	display: inline;
 	width: 40px;
 	height: 40px;
 	filter: invert(15%) sepia(6%) saturate(679%) hue-rotate(314deg)
@@ -82,5 +83,4 @@
 
 .try {
 	width: 50%;
-	background-color: purple;
 }

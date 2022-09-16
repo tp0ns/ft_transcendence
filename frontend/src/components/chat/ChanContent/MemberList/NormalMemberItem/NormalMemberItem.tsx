@@ -24,11 +24,6 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	if (ctx?.clientId === props.member.userId) {
 		return (
 			<div className={classes.itemLayout}>
-				{userModal ? (
-					<Modal title={props.member.username} onClick={changeUserModal}>
-						<UserContent userId={props.member.userId} />
-					</Modal>
-				) : null}
 				<img
 					src={
 						props.member?.profileImage
@@ -51,7 +46,9 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 			>
 				{userModal ? (
 					<Modal title={props.member.username} onClick={changeUserModal}>
-						<UserContent userId={props.member.userId} />
+						<div className={classes.modal_userpage}>
+							<UserContent userId={props.member.userId} />
+						</div>
 					</Modal>
 				) : null}
 				<div
@@ -74,11 +71,6 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				changeItemSide(true);
 			}}
 		>
-			{userModal ? (
-				<Modal title={props.member.username} onClick={changeUserModal}>
-					<UserContent userId={props.member.userId} />
-				</Modal>
-			) : null}
 			<img
 				src={
 					props.member?.profileImage
