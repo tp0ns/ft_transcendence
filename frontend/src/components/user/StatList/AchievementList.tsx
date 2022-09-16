@@ -44,7 +44,7 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 			</div>
 			<h1 className={classes.success_title}>Achievements</h1>
 			<div className={classes.achievements}>
-				{achievements?.Victoryx3 ? null : (
+				{achievements?.Victoryx3 ? (
 					<div>
 						<img
 							src="/victoryx3.svg"
@@ -53,8 +53,8 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						/>
 						<p className={classes.achieve_desc}>3 Wins</p>
 					</div>
-				)}
-				{achievements?.Victoryx5 ? null : (
+				) : null}
+				{achievements?.Victoryx5 ? (
 					<div>
 						<img
 							src="/victoryx5.svg"
@@ -63,8 +63,8 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						/>
 						<p className={classes.achieve_desc}>5 Wins</p>
 					</div>
-				)}
-				{achievements?.Victoryx10 ? null : (
+				) : null}
+				{achievements?.Victoryx10 ? (
 					<div>
 						<img
 							src="/victoryx10.svg"
@@ -73,8 +73,8 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						/>
 						<p className={classes.achieve_desc}>10 Wins</p>
 					</div>
-				)}
-				{achievements?.FirstMatch ? null : (
+				) : null}
+				{achievements?.FirstMatch ? (
 					<div>
 						<img
 							src="/firstMatch.svg"
@@ -83,8 +83,8 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						/>
 						<p className={classes.achieve_desc}>First Match</p>
 					</div>
-				)}
-				{achievements?.Defeatx3 ? null : (
+				) : null}
+				{achievements?.Defeatx3 ? (
 					<div>
 						<img
 							src="/defeatx3.svg"
@@ -93,15 +93,17 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						/>
 						<p className={classes.achieve_desc}>3 Looses</p>
 					</div>
-				)}
-				<div>
-					<img
-						src="/builder.svg"
-						alt="Helped to build this website"
-						className={classes.achieve_badge}
-					/>
-					<p className={classes.achieve_desc}>Builder</p>
-				</div>
+				) : null}
+				{/* {achievements?.builder ? (
+					<div>
+						<img
+							src="/builder.svg"
+							alt="Helped to build this website"
+							className={classes.achieve_badge}
+						/>
+						<p className={classes.achieve_desc}>Builder</p>
+					</div>
+				) : null} */}
 			</div>
 		</div>
 	);
