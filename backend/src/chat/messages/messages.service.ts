@@ -58,7 +58,6 @@ export class MessageService {
 				return null;
 			let blockedUsers: string[] =
 				await this.relationsService.getBlockedUsersForUser(user);
-			console.log(`blockedUsers: `, blockedUsers, `for `, user.username);
 			if (blockedUsers.length > 0) {
 				msgs = await this.MessageRepository.createQueryBuilder('messages')
 					.leftJoinAndSelect('messages.user', 'sender')

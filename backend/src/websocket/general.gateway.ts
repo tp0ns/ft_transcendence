@@ -324,11 +324,10 @@ export class GeneralGateway
 	async handleMessageToChan(client: Socket, payload: string[]) {
 		const chanId: string = payload[1];
 		await this.channelService.sendMessage(client.data.user, payload);
-		// const messages = await this.messageService.getChannelMessages(
-		// 	client.data.user,
-		// 	chanId,
-		// );
-		// this.server.to(chanId).emit('sendChannelMessages', messages);
+		const socket_list: any[] = await this.server.in(chanId).fetchSockets();
+		socket_list.map(async (client) => {
+			this.getChannelMessages(client, chanId);
+		});
 		this.server.to(chanId).emit('updatedMessage');
 	}
 
