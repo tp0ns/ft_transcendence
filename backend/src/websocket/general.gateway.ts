@@ -327,12 +327,11 @@ export class GeneralGateway
 			client.data.user,
 			payload,
 		);
-
-		const messages = await this.getChannelMessages(
-			client,
-			chanId,
-		);
-		// this.server.to(chanId).emit('sendChannelMessages', messages);
+		// const messages = await this.getChannelMessages(
+		// 	client,
+		// 	chanId,
+		// );
+		this.server.to(chanId).emit('sendChannelMessages');
 	}
 
 	/**
