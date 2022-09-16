@@ -3,7 +3,7 @@ import { ForbiddenException, forwardRef, Inject, Injectable } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { fstat } from 'fs';
 import { Socket } from 'socket.io';
-import UserEntity from 'src/user/models/user.entity';
+import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
@@ -18,6 +18,8 @@ let match: Match;
 export class GameService {
 	constructor(
 
+		@InjectRepository(UserEntity)
+		private userRepo: Repository<UserEntity>,
 		@InjectRepository(InvitationEntity)
 		private invitationRepository: Repository<InvitationEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
@@ -177,12 +179,10 @@ export class GameService {
 			for (const item of matchMakingSet)
 			{
 				if (user1 == null){
-				console.log('user1');
-				user1 = item.data.user;
+					user1 = item.data.user;
 				}
 				else{
-				console.log('user2');
-				user2 = item.data.user;
+					user2 = item.data.user;
 				}
 			}
 			if (user1.userId == user2.userId){
@@ -211,6 +211,8 @@ export class GameService {
 				item.data.currentMatch = match;
 				item.data.user.currentMatch = match;
 			}
+			// this.userRepo.save(user1);
+			// this.userRepo.save(user2);
 			matchMakingSet.clear();
 		}
 		return true;
@@ -386,9 +388,17 @@ export class GameService {
 		 * has been declined
 		 */
 		async inviteIsDeclined(client: Socket, userInvitedId: string) {
-
 			client.leave(inviteRoomMap.get(client.data.user.userId));
 			inviteRoomMap.delete(client.data.user.userId)
 			this.endGame(client, client.data.currentMatch, client.data.user, client.data.user)
+		}
+
+		/**
+		 * try to spectate the chosen user
+		 */
+		async spectate(client: Socket, userIdToSpec: string){
+			// find user
+			// check if userToSpec.currentMatch != null
+			// client.join(userToSpec.currentMatch.roomName);
 		}
 }
