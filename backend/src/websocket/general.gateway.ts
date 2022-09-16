@@ -8,6 +8,7 @@ import {
 	WsException,
 } from '@nestjs/websockets';
 import {
+	ForbiddenException,
 	Logger,
 	UseFilters,
 	UseGuards,
@@ -531,7 +532,12 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleMatchMaking')
 	async toggleMatchMaking(client: Socket) {
-		await this.gameService.toggleMatchMaking(client);
+		if ((await this.gameService.toggleMatchMaking(client)) == false) {
+			client.emit('goBackHome');
+			throw new ForbiddenException(
+				"You're playing with yourself ! Use local game or get some friends.",
+			);
+		}
 	}
 
 	/**
@@ -580,8 +586,18 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('inviteIsDeclined')
 	async inviteIsDeclined(client: Socket, userInvitedId) {
-		this.gameService.inviteIsDeclined(client, userInvitedId);
+		await this.gameService.inviteIsDeclined(client, userInvitedId);
 	}
+
+	/**
+	 *		SPECTATE
+	 */
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('spectate')
+	// async spectate(client: Socket, userIdToSpec: string) {
+	// 	await this.gameService.spectate(client, userIdToSpec);
+	// }
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
