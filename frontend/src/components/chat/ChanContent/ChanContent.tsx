@@ -12,7 +12,7 @@ function ChanContent() {
 	const ctx = useContext(ChatContext) as ChatContextType;
 	const inputPw = useRef<HTMLInputElement>(null);
 	const [msgs, setMsgs] = useState<MessageInterface[]>([]);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [loading, setLoading] = useState<boolean>(false);
 	const [isBanned, setIsBanned] = useState<boolean>(false);
 	const [needPw, setNeedPw] = useState<boolean>(false);
 
@@ -29,6 +29,7 @@ function ChanContent() {
 
 	useEffect(() => {
 		socket.on("updatedMessage", () => {
+			setLoading(false);
 			socket.emit("getChannelMessages", ctx.activeChan!.channelId);
 		});
 		socket.on("sendChannelMessages", (messages) => {
