@@ -252,10 +252,6 @@ const GameScreen: React.FC<{
 					ref={canvas}
 					className={classes.canvas}
 				/>
-				<p>
-					<button onClick={handleStart}>Start</button>
-					<button onClick={handleReset}>Reset Ball</button>
-				</p>
 			</div>
 		</div>
 	);

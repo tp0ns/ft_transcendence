@@ -47,8 +47,11 @@ const HomeScreen: React.FC<{
 
   return (
     <div className={classes.preGame}>
-      <button onClick={handleLocalGame}>Local Game</button>
-      <button onClick={handleMatchMaking}>Match Making</button>
+      <h1>Ready to play?</h1>
+      <div className={classes.Buttons}>
+        <button onClick={handleLocalGame}>Local Game</button>
+        <button onClick={handleMatchMaking}>Match Making</button>
+      </div>
     </div>
   );
 };
