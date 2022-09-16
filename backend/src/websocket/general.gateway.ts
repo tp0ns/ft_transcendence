@@ -492,7 +492,41 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		await this.gameService.checkEndGame(client, client.data.currentMatch);
+		const end = await this.gameService.checkEndGame(
+			client,
+			client.data.currentMatch,
+		);
+		if (end != 0) {
+			const user1: UserEntity = await this.userService.getUserById(
+				client.data.currentMatch.player1,
+			);
+			const user2: UserEntity = await this.userService.getUserById(
+				client.data.currentMatch.player2,
+			);
+			if (end == 1) {
+				if (
+					(await this.gameService.endGame(
+						client,
+						client.data.currentMatch,
+						user1,
+						user2,
+					)) == true
+				) {
+					this.server.emit('endGame');
+				}
+			} else if (end == 2) {
+				if (
+					await this.gameService.endGame(
+						client,
+						client.data.currentMatch,
+						user2,
+						user1,
+					)
+				) {
+					this.server.emit('endGame');
+				}
+			}
+		}
 	}
 
 	// get the position of the ball and emit it

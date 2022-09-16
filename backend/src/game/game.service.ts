@@ -220,6 +220,10 @@ export class GameService {
 	//ends the game
 	async endGame(client: Socket, match: Match, winner: UserEntity , loser: UserEntity) {
 		if (match == null) { // opponent refused the invitation
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			this.userRepo.save(winner);
+			this.userRepo.save(loser);
 			client.leave(winner.currentMatch.roomName);
 			throw new ForbiddenException(
 				"Your opponent gave up the game.",
@@ -236,28 +240,33 @@ export class GameService {
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			this.userRepo.save(winner);
+			this.userRepo.save(loser);
 			console.log('We have a winner !');
+			return (false);
 		}
-		console.log('winner match', winner.currentMatch);
-		console.log('loser match', loser.currentMatch);
-		console.log('client match', client.data.currentMatch);
 		winner.currentMatch = null;
 		loser.currentMatch = null;
 		this.userRepo.save(winner);
 		this.userRepo.save(loser);
-		console.log('AFTER NULL winner match', winner.currentMatch);
-		console.log('loser match', loser.currentMatch);
+		return true;
 	}
+
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(client: Socket, match: Match) {
 		const user1: UserEntity = await this.userService.getUserById(match.player1);
 		const user2: UserEntity = await this.userService.getUserById(match.player2);
 		if (match.p1Score >= 2){
 			this.endGame(client, match, user1, user2);
+			return (1);
 		}
 		if (match.p2Score >= 2) {
 			this.endGame(client, match, user2, user1);
+			return (2);
 		}
+		return (0);
 	}
 
 	async	getInvitations(client: Socket) {
