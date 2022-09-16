@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { fstat } from 'fs';
 import { Socket } from 'socket.io';
@@ -8,6 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
+import { AchievementsEntity } from './statistics/achievements.entity';
 
 const matchMakingSet = new Set<Socket>();
 const inviteSet = new Set<Socket>();
@@ -20,6 +21,10 @@ export class GameService {
 
 		@InjectRepository(InvitationEntity)
 		private invitationRepository: Repository<InvitationEntity>,
+		@InjectRepository(AchievementsEntity)
+		private AchievementsRepository: Repository<AchievementsEntity>,
+		@InjectRepository(UserEntity)
+		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
 	) {}
 	/**
@@ -74,7 +79,7 @@ export class GameService {
 			roomName: room,
 			isEnd: false,
 		};
-		console.log(match.roomName);
+		// console.log(match.roomName);
 		return match;
 	}
 
@@ -197,14 +202,55 @@ export class GameService {
 		}
 	}
 
+	/**
+	 * @brief Permet de creer une entite achievements lie a chaque user connecte
+	 *
+	 * @param newUser le nouvel utilisateur qui se connecte
+	 */
+	 async newConnection(newUser: UserEntity) {
+		let userAchievements: AchievementsEntity = await this.AchievementsRepository.save({
+			userId: newUser.userId,
+		})
+	}
+
+	async getUserAchievements(userId: string)
+	{
+		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: userId } });
+		return userAchievements;
+	}
+
+	async setAchievements(user: UserEntity)
+	{
+		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: user.userId } });
+		if (user.victories === 1 && user.defeats === null || user.defeats === 1 && user.victories === null)
+			userAchievements.FirstMatch = true;
+		else if (user.victories === 3)
+			userAchievements.Victoryx3 = true;
+		else if (user.victories === 5)
+			userAchievements.Victoryx5 = true;
+		else if (user.victories === 10)
+			userAchievements.Victoryx10 = true;
+		else if (user.defeats === 3)
+			userAchievements.Defeatx3 = true;
+		await userAchievements.save();
+	}
+
 	//ends the game
-	async endGame(match: Match, winner: UserEntity) {
+	async endGame(client: Socket, match: Match, winner: UserEntity , loser: UserEntity) {
+		if (match == null) { // opponent refused the invitation
+			client.leave(winner.currentMatch.roomName);
+			throw new ForbiddenException(
+				"Your opponent gave up the game.",
+			);
+		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
-			// -> send the data to the db
-			// trigger the pop-up(?modal) with victory info and home button
-			console.log(winner.username, ' has won.');
-			console.log(match.player2.username, ' has lost.');
+			winner.victories++;
+			loser.defeats++;
+			this.userRepository.save(winner);
+			this.userRepository.save(loser);
+			this.setAchievements(winner);
+			this.setAchievements(loser);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -212,13 +258,38 @@ export class GameService {
 		}
 	}
 	//check if the game should end and exec the proper funciton if so
-	async checkEndGame(match: Match) {
+	async checkEndGame(client: Socket, match: Match) {
 		if (match.p1Score >= 2){
-			this.endGame(match, match.player1);
+			this.endGame(client, match, match.player1, match.player2);
+			return match.player1;
 		}
 		if (match.p2Score >= 2) {
-			this.endGame(match, match.player2);
+			this.endGame(client, match, match.player2, match.player1);
+			return match.player2;
 		}
+	}
+
+	async	getInvitations(client: Socket) {
+		console.log('client.Id : ', client.data.user.userId);
+		const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
+			where: [
+				{ receiver: { userId: client.data.user.userId } },
+			],
+		});
+		console.log('allInvitations : ', allInvitations);
+		const currentTime = Date.now();
+		for (const invitation of allInvitations) {
+			if (currentTime - invitation.creationDate >= 60000){
+				this.refuseInvite(client, invitation.creator.userId);
+			}
+		}
+		console.log('invit after suppr : ', allInvitations);
+		const invitAfterCheck: InvitationEntity[] = await this.invitationRepository.find({
+			where: [
+				{ receiver: { userId: client.data.user.userId } },
+			],
+		});
+		return invitAfterCheck;
 	}
 
 	/**
@@ -226,11 +297,24 @@ export class GameService {
 	 * @param client the user that sends an invitation
 	 */
 		async	sendInvite(client: Socket, userToInviteId: string) {
+				const sentInvitations: InvitationEntity[] = await this.invitationRepository.find({
+					where: [
+						{ creator: { userId: client.data.user.userId } },
+					],
+				});
+				if (sentInvitations.length > 0) {
+					// -> throw erreur
+					throw new ForbiddenException(
+					"You can't send more than one invitation.",
+					);
+				}
+				const date = Date.now();
 				const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
-				const invitation: InvitationEntity = await this.invitationRepository.save( {
+				await this.invitationRepository.save( {
 					creator: client.data.user,
 					receiver: userToInvite,
-					status: 'pending'
+					status: 'pending',
+					creationDate: date,
 				})
 				const roomName = 'inviteRoom'+ Math.random();
 				client.join(roomName);
@@ -245,9 +329,9 @@ export class GameService {
 		async joinInvite(client: Socket, userInvitingId: string) {
 			const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
 			let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
-			.select(['invitation.requestId', 'creator'])
-			.leftJoin('invitation.creator', 'creator')
-			.leftJoin('invitation.receiver', 'receiver')
+			.select(['invitation.requestId', 'creator', 'invitation.creationDate'])
+			.leftJoinAndSelect('invitation.creator', 'creator')
+			.leftJoinAndSelect('invitation.receiver', 'receiver')
 			.where('invitation.creator = :id', { id: userInvitingId})
 			.getOne();
 			const invitId: string = invitation.requestId;
@@ -257,6 +341,18 @@ export class GameService {
 				receiver: client.data.user,
 				status: 'accepted'
 			})
+			const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
+				where: [
+					{ receiver: { userId: client.data.user.userId } },
+				],
+			});
+			for (const inviteIter of allInvitations) {
+				if (inviteIter != invitation){
+					this.refuseInvite(client, inviteIter.creator.userId);
+				}
+			}
+			// get all invitations received, refuse all that
+			// aren't invitation
 			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
 			inviteRoomMap.delete(userInvitingId);
 			const currentMatch: Match = this.setDefaultPos(currentRoomName);
@@ -268,6 +364,7 @@ export class GameService {
 			client.join(currentMatch.roomName);
 			client.data.user.currentMatch = currentMatch;
 			userInviting.currentMatch = currentMatch;
+			return (currentRoomName);
 		}
 
 		/**
@@ -294,17 +391,18 @@ export class GameService {
 			.from(InvitationEntity)
 			.where('creator = :id', { id: userInvitingId})
 			.execute();
-			inviteRoomMap.delete(userInvitingId);
+			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
+			return(currentRoomName);
 		}
 
 		/**
 		 * tells the emitter that the invitation
 		 * has been declined
 		 */
-		async inviteIsDeclined(client: Socket) {
-			client.data.user.sentInvitations //query pour retrouver la bonne invitation
-			//passer l'invit. a 'declined', la suppr
-			client.leave(client.data.currentMatch.roomName);
-			//end null game
+		async inviteIsDeclined(client: Socket, userInvitedId: string) {
+
+			client.leave(inviteRoomMap.get(client.data.user.userId));
+			inviteRoomMap.delete(client.data.user.userId)
+			this.endGame(client, client.data.currentMatch, client.data.user, client.data.user)
 		}
 }

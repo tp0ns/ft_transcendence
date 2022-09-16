@@ -27,6 +27,13 @@ export class InvitationEntity {
 
 	@Column()
 	status: Relation_Status;
+
+	@Column({
+		nullable: false,
+		default: 0,
+		type: 'float',
+	})
+	creationDate: number;
 }
 
 export default InvitationEntity;

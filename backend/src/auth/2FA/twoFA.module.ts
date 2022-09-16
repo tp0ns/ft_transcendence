@@ -14,16 +14,19 @@ import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { RelationsService } from 'src/relations/relations.service';
+import { GameService } from 'src/game/game.service';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity]),
+		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity, InvitationEntity, AchievementsEntity]),
 		JwtModule.register({
 			secret: process.env.JWT_SECRET,
 			signOptions: { expiresIn: process.env.SIGN_CD },
 		}),
 	],
 	controllers: [TwoFAController, UserController],
-	providers: [TwoFAService, UserService, ConfigService, JwtService, ChannelService, MessageService, RelationsService],
+	providers: [TwoFAService, UserService, ConfigService, JwtService, ChannelService, MessageService, RelationsService, GameService],
 })
 export class TwoFAModule {}

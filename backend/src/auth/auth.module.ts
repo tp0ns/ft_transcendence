@@ -16,18 +16,21 @@ import { MessageService } from 'src/chat/messages/messages.service';
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { RelationsService } from 'src/relations/relations.service';
+import { GameService } from 'src/game/game.service';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 
 @Module({
 	imports: [
 		PassportModule.register(SchoolStrategy),
-		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity]),
+		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity, InvitationEntity, AchievementsEntity]),
 		JwtModule.register({
 			secret: jwtConstants.secret,
 			signOptions: { expiresIn: jwtConstants.expire },
 		}),
 		HttpModule,
 	],
-	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy, ChannelService, MessageService, RelationsService],
+	providers: [SchoolStrategy, AuthService, UserService, JwtStrategy, ChannelService, MessageService, RelationsService, GameService],
 	controllers: [AuthController],
 })
 export class AuthModule {}
