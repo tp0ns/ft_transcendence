@@ -202,7 +202,7 @@ export class RelationsService {
 		});
 	}
 
-	async getBlockedUsersForUser(user: UserEntity): Promise<string[]> {
+	async getBlockedUsersByUser(user: UserEntity): Promise<string[]> {
 		let usersBlockedByUser: string[] = [];
 		let userBlockedRelations: any[] =
 			await this.RelationRepo.createQueryBuilder('relations')
@@ -216,4 +216,16 @@ export class RelationsService {
 		}
 		return usersBlockedByUser;
 	}
+
+	// async getUsersWhoBlockedMe(user: UserEntity): Promise<string[]> {
+	// 	let usersWhoBlockedMe: string[] = [];
+	// 	let userBlockedRelations: any[] = 
+	// 		await this.RelationRepo.createQueryBuilder('relations')
+	// 			.select(['relations.requestId', 'creator.userId'])
+	// 			.leftJoin('relations.creator', 'creator')
+	// 			.where('relations.receiver = :id ', {id: user.userId})
+	// 			.andWhere('relations.status = :blocked', {blocked: 'blocked'})
+	// 			.getMany();
+			
+	// }
 }

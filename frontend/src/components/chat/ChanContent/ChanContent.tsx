@@ -28,10 +28,6 @@ function ChanContent() {
 	}, [ctx.activeChan]);
 
 	useEffect(() => {
-		socket.on("updatedMessage", () => {
-			setLoading(false);
-			socket.emit("getChannelMessages", ctx.activeChan!.channelId);
-		});
 		socket.on("sendChannelMessages", (messages) => {
 			setLoading(false);
 			setNeedPw(false);

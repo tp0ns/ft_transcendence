@@ -56,16 +56,17 @@ export class MessageService {
 		if (channel) {
 			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
 				return null;
-			let blockedUsers: string[] =
-				await this.relationsService.getBlockedUsersForUser(user);
-			console.log(`blockedUsers: `, blockedUsers, `for `, user.username);
-			if (blockedUsers.length > 0) {
+			let blockedUsersByUser: string[] =
+				await this.relationsService.getBlockedUsersByUser(user);
+			// let usersWhoBlockedMe: string[] = 
+				// await this.relationsService.getUsersWhoBlockedMe(user);
+			if (blockedUsersByUser.length > 0) {
 				msgs = await this.MessageRepository.createQueryBuilder('messages')
 					.leftJoinAndSelect('messages.user', 'sender')
 					.leftJoinAndSelect('messages.channel', 'channel')
 					.where('channel.channelId = :id', { id: channel.channelId })
 					.andWhere('sender.userId NOT IN (:...blocked)', {
-						blocked: blockedUsers,
+						blocked: blockedUsersByUser,
 					})
 					.getMany();
 			} else {
