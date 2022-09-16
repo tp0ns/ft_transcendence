@@ -8,6 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
+import { AchievementsEntity } from './statistics/achievements.entity';
 
 const matchMakingSet = new Set<Socket>();
 const inviteSet = new Set<Socket>();
@@ -22,6 +23,10 @@ export class GameService {
 		private userRepo: Repository<UserEntity>,
 		@InjectRepository(InvitationEntity)
 		private invitationRepository: Repository<InvitationEntity>,
+		@InjectRepository(AchievementsEntity)
+		private AchievementsRepository: Repository<AchievementsEntity>,
+		@InjectRepository(UserEntity)
+		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
 	) {}
 	/**
@@ -217,6 +222,39 @@ export class GameService {
 		return true;
 	}
 
+	/**
+	 * @brief Permet de creer une entite achievements lie a chaque user connecte
+	 *
+	 * @param newUser le nouvel utilisateur qui se connecte
+	 */
+	 async newConnection(newUser: UserEntity) {
+		let userAchievements: AchievementsEntity = await this.AchievementsRepository.save({
+			userId: newUser.userId,
+		})
+	}
+
+	async getUserAchievements(userId: string)
+	{
+		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: userId } });
+		return userAchievements;
+	}
+
+	async setAchievements(user: UserEntity)
+	{
+		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: user.userId } });
+		if (user.victories === 1 && user.defeats === null || user.defeats === 1 && user.victories === null)
+			userAchievements.FirstMatch = true;
+		else if (user.victories === 3)
+			userAchievements.Victoryx3 = true;
+		else if (user.victories === 5)
+			userAchievements.Victoryx5 = true;
+		else if (user.victories === 10)
+			userAchievements.Victoryx10 = true;
+		else if (user.defeats === 3)
+			userAchievements.Defeatx3 = true;
+		await userAchievements.save();
+	}
+
 	//ends the game
 	async endGame(client: Socket, match: Match, winner: UserEntity , loser: UserEntity) {
 		if (match == null) { // opponent refused the invitation
@@ -231,12 +269,12 @@ export class GameService {
 		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
-			// -> send the data to the db
-			// donc envoyer le match dans la liste de match de chaque user
-			// trigger the pop-up(?modal) with victory info and home button
-			// this.server.to(match.roomName).emit('victoryOf', winner)
-			console.log(winner.username, ' has won.');
-			console.log(loser.username, ' has lost.');
+			winner.victories++;
+			loser.defeats++;
+			this.userRepository.save(winner);
+			this.userRepository.save(loser);
+			this.setAchievements(winner);
+			this.setAchievements(loser);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button

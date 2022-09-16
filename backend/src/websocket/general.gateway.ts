@@ -35,6 +35,7 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -43,8 +44,7 @@ import InvitationEntity from 'src/game/invitations/invitations.entity';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -52,7 +52,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) {}
+	) { }
 
 	@WebSocketServer() server: Server;
 
@@ -327,7 +327,7 @@ export class GeneralGateway
 			client.data.user,
 			payload,
 		);
-		const messages = await this.messageService.getChannelMessages(
+		const messages = await this.getChannelMessages(
 			client.data.user,
 			chanId,
 		);
@@ -512,6 +512,9 @@ export class GeneralGateway
 						user2,
 					)) == true
 				) {
+					this.server
+						.to(client.data.currentMatch.roomName)
+						.emit('victoryOf', user1);
 					this.server.emit('endGame');
 				}
 			} else if (end == 2) {
@@ -523,6 +526,9 @@ export class GeneralGateway
 						user1,
 					)
 				) {
+					this.server
+						.to(client.data.currentMatch.roomName)
+						.emit('victoryOf', user2);
 					this.server.emit('endGame');
 				}
 			}
@@ -554,6 +560,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
+		console.log('entered toggleLocalGame');
 		await this.gameService.toggleLocalGame(client);
 	}
 
@@ -568,7 +575,7 @@ export class GeneralGateway
 			);
 		}
 		if (client.data.currentMatch != null) {
-			client.emit('gameStarted');
+			this.server.to(client.data.currentMatch.roomName).emit('gameStarted');
 		}
 	}
 
@@ -693,7 +700,44 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
+
+	/**
+		_   _ ____  _____ ____
+	 | | | / ___|| ____|  _ \
+	 | | | \___ \|  _| | |_) |
+	 | |_| |___) | |___|  _ <
+		\___/|____/|_____|_| \_\
+	 */
+
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('triggerModifyChannel')
+	// async getUpdatedUser(client: Socket)
+	// {
+	// 	this.server.emit('updatedChangnel');
+	// }
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getStatistics')
+	async getStatistics(client: Socket, userId: string) {
+		const user: UserEntity = await this.userService.getUserById(userId);
+		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		client.emit(`sendStatistics`, {
+			victory: user.victories,
+			defeat: user.defeats,
+			ratio: ratio
+		});
+	}
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getAchievements')
+	async getAchievements(client: Socket, userId: string) {
+		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		client.emit(`sendAchievements`, userAchievements);
+	}
 }
+
 function jwtDecode<T>(Authentication: any) {
 	throw new Error('Function not implemented.');
 }
