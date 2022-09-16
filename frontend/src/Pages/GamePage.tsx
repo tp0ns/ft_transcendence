@@ -1,35 +1,38 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { socket } from "../App";
+import EndScreen from "../components/game/EndScreen";
 import GameScreen from "../components/game/GameScreen";
-import classes from "../components/game/GameScreen.module.css";
+import HomeScreen from "../components/game/HomeScreen";
 import Layout from "../components/Layout/Layout";
 
 const GamePage = () => {
-  const [localGame, setLocalGame] = useState<boolean>(false);
-  const [matchMaking, setMatchMaking] = useState<boolean>(false);
+	const [gameState, setGameState] = useState<string>("noGame");
+	const [winner, setWinner] = useState<string>("");
 
-  const toggleLocalGame = () => {
-    setLocalGame(true);
-    socket.emit("toggleLocalGame");
-  };
+	const handleGameType = (state: string) => {
+		console.log("state: ", state);
+		setGameState(state);
+	}
 
-  const toggleMatchMaking = () => {
-    setMatchMaking(true);
-    socket.emit("toggleMatchMaking");
-  };
+	socket.on('victoryOf', (winnerSock) => {
+		console.log("entered Victory of: ", winnerSock)
+		if (gameState === "matchGame")
+			setWinner(winnerSock.username);
+		else if (gameState === "localGame")
+			setWinner("");
+		setGameState("endGame");
+	});
 
-  return (
-    <Layout>
-      {localGame || matchMaking ? (
-        <GameScreen />
-      ) : (
-        <div className={classes.preGame}>
-          <button onClick={toggleLocalGame}>Local Game</button>
-          <button onClick={toggleMatchMaking}>Match Making</button>
-        </div>
-      )}
-    </Layout>
-  );
+
+	return (
+		<Layout>
+			<div>
+				{gameState === "noGame" ? <HomeScreen handleGame={handleGameType} /> : null}
+				{gameState === "matchGame" || gameState === "localGame" ? <GameScreen gameType={gameState} /> : null}
+				{gameState === "endGame" ? <EndScreen winner={winner} handleGame={handleGameType} /> : null}
+			</div>
+		</Layout>
+	);
 };
 
 export default GamePage;

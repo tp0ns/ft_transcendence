@@ -8,11 +8,17 @@
 
 .preGame {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 30px;
+  border: 2px solid #3a3636;
+  /* display: block; */
+  margin: auto;
+  border-radius: 20px;
+  width: 640px;
+  height: 480px;
 }
 
 .preGame button {
@@ -22,4 +28,13 @@
   border: 2px solid #3a3636;
   border-radius: 5px;
   background-color: transparent;
+}
+
+.Buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 30px;
 }

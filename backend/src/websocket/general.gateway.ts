@@ -8,6 +8,7 @@ import {
 	WsException,
 } from '@nestjs/websockets';
 import {
+	ForbiddenException,
 	Logger,
 	UseFilters,
 	UseGuards,
@@ -43,8 +44,7 @@ import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -52,7 +52,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) {}
+	) { }
 
 	@WebSocketServer() server: Server;
 
@@ -524,6 +524,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
+		console.log("entered toggleLocalGame")
 		await this.gameService.toggleLocalGame(client);
 	}
 
@@ -531,7 +532,15 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleMatchMaking')
 	async toggleMatchMaking(client: Socket) {
-		await this.gameService.toggleMatchMaking(client);
+		if ((await this.gameService.toggleMatchMaking(client)) == false) {
+			client.emit('goBackHome');
+			throw new ForbiddenException(
+				"You're playing with yourself ! Use local game or get some friends.",
+			);
+		}
+		if (client.data.currentMatch != null) {
+			this.server.to(client.data.currentMatch.roomName).emit('gameStarted');
+		}
 	}
 
 	/**
@@ -580,8 +589,18 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('inviteIsDeclined')
 	async inviteIsDeclined(client: Socket, userInvitedId) {
-		this.gameService.inviteIsDeclined(client, userInvitedId);
+		await this.gameService.inviteIsDeclined(client, userInvitedId);
 	}
+
+	/**
+	 *		SPECTATE
+	 */
+
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('spectate')
+	// async spectate(client: Socket, userIdToSpec: string) {
+	// 	await this.gameService.spectate(client, userIdToSpec);
+	// }
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -647,13 +666,13 @@ export class GeneralGateway
 	}
 
 	/**
-	  _   _ ____  _____ ____  
+		_   _ ____  _____ ____  
 	 | | | / ___|| ____|  _ \ 
 	 | | | \___ \|  _| | |_) |
 	 | |_| |___) | |___|  _ < 
-	  \___/|____/|_____|_| \_\
+		\___/|____/|_____|_| \_\
 	 */
-	
+
 
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('triggerModifyChannel')
@@ -664,11 +683,11 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
-	async getStatistics(client: Socket, userId: string ) {
+	async getStatistics(client: Socket, userId: string) {
 		const user: UserEntity = await this.userService.getUserById(userId);
 		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
 		client.emit(`sendStatistics`, {
-			victory: user.victories, 
+			victory: user.victories,
 			defeat: user.defeats,
 			ratio: ratio
 		});
@@ -677,7 +696,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAchievements')
-	async getAchievements(client: Socket, userId: string ) {
+	async getAchievements(client: Socket, userId: string) {
 		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
 		client.emit(`sendAchievements`, userAchievements);
 	}
