@@ -327,11 +327,12 @@ export class GeneralGateway
 			client.data.user,
 			payload,
 		);
+
 		const messages = await this.getChannelMessages(
-			client.data.user,
+			client,
 			chanId,
 		);
-		this.server.to(chanId).emit('sendChannelMessages', messages);
+		// this.server.to(chanId).emit('sendChannelMessages', messages);
 	}
 
 	/**
@@ -665,20 +666,24 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
 	async getStatistics(client: Socket, userId: string ) {
-		const user: UserEntity = await this.userService.getUserById(userId);
+		let user: UserEntity;
+		if (userId != 'me')
+			user = await this.userService.getUserById(userId);
+		else 
+			user = await this.userService.getUserById(client.data.user.userId);
 		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
-		client.emit(`sendStatistics`, {
-			victory: user.victories, 
-			defeat: user.defeats,
-			ratio: ratio
-		});
+		client.emit(`sendStatistics`, user.victories, user.defeats, ratio);
 	}
 
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAchievements')
 	async getAchievements(client: Socket, userId: string ) {
-		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		let userAchievements: AchievementsEntity;
+		if (userId != 'me')
+			userAchievements = await this.gameService.getUserAchievements(userId);
+		else 
+			userAchievements = await this.gameService.getUserAchievements(client.data.user.userId);
 		client.emit(`sendAchievements`, userAchievements);
 	}
 }
