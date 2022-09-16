@@ -449,14 +449,12 @@ export class GeneralGateway
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
 		if (client.data.currentMatch) {
-			if (client.data.user.userId == client.data.currentMatch.player1.userId)
+			if (client.data.user.userId == client.data.currentMatch.player1)
 				await this.gameService.moveMouseLeft(
 					mousePosy,
 					client.data.currentMatch,
 				);
-			else if (
-				client.data.user.userId == client.data.currentMatch.player2.userId
-			)
+			else if (client.data.user.userId == client.data.currentMatch.player2)
 				await this.gameService.moveMouseRight(
 					mousePosy,
 					client.data.currentMatch,
@@ -535,6 +533,9 @@ export class GeneralGateway
 				"You're playing with yourself ! Use local game or get some friends.",
 			);
 		}
+		if (client.data.currentMatch != null) {
+			client.emit('gameStarted');
+		}
 	}
 
 	/**
@@ -590,11 +591,11 @@ export class GeneralGateway
 	 *		SPECTATE
 	 */
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('spectate')
-	// async spectate(client: Socket, userIdToSpec: string) {
-	// 	await this.gameService.spectate(client, userIdToSpec);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('spectate')
+	async spectate(client: Socket, userIdToSpec: string) {
+		await this.gameService.spectate(client, userIdToSpec);
+	}
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
