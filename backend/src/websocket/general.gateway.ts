@@ -323,15 +323,13 @@ export class GeneralGateway
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
 		const chanId: string = payload[1];
-		const new_msg = await this.channelService.sendMessage(
-			client.data.user,
-			payload,
-		);
-		// const messages = await this.getChannelMessages(
-		// 	client,
+		await this.channelService.sendMessage(client.data.user, payload);
+		// const messages = await this.messageService.getChannelMessages(
+		// 	client.data.user,
 		// 	chanId,
 		// );
-		this.server.to(chanId).emit('sendChannelMessages');
+		// this.server.to(chanId).emit('sendChannelMessages', messages);
+		this.server.to(chanId).emit('updatedMessage');
 	}
 
 	/**
@@ -494,9 +492,14 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		const winner: UserEntity = await this.gameService.checkEndGame(client, client.data.currentMatch);
+		const winner: UserEntity = await this.gameService.checkEndGame(
+			client,
+			client.data.currentMatch,
+		);
 		if (winner)
-			this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
+			this.server
+				.to(client.data.currentMatch.roomName)
+				.emit('victoryOf', winner);
 	}
 
 	// get the position of the ball and emit it
@@ -654,7 +657,6 @@ export class GeneralGateway
 	  \___/|____/|_____|_| \_\
 	 */
 
-
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('triggerModifyChannel')
 	// async getUpdatedUser(client: Socket)
@@ -664,29 +666,29 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
-	async getStatistics(client: Socket, userId: string ) {
+	async getStatistics(client: Socket, userId: string) {
 		let user: UserEntity;
-		if (userId != 'me')
-			user = await this.userService.getUserById(userId);
-		else
-			user = await this.userService.getUserById(client.data.user.userId);
-		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		const ratio: number =
+			(user.victories / (user.victories + user.defeats)) * 100;
 		client.emit(`sendStatistics`, {
 			victory: user.victories,
 			defeat: user.defeats,
-			ratio: ratio
+			ratio: ratio,
 		});
 	}
 
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAchievements')
-	async getAchievements(client: Socket, userId: string ) {
+	async getAchievements(client: Socket, userId: string) {
 		let userAchievements: AchievementsEntity;
 		if (userId != 'me')
 			userAchievements = await this.gameService.getUserAchievements(userId);
 		else
-			userAchievements = await this.gameService.getUserAchievements(client.data.user.userId);
+			userAchievements = await this.gameService.getUserAchievements(
+				client.data.user.userId,
+			);
 		client.emit(`sendAchievements`, userAchievements);
 	}
 }

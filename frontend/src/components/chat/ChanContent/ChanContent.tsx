@@ -21,13 +21,16 @@ function ChanContent() {
 		setNeedPw(false);
 		if (ctx.activeChan) {
 			setLoading(true);
-			socket.emit("getChannelMessages", ctx.activeChan?.channelId);
+			socket.emit("getChannelMessages", ctx.activeChan!.channelId);
 			return;
 		}
 		setLoading(false);
 	}, [ctx.activeChan]);
 
 	useEffect(() => {
+		socket.on("updatedMessage", () => {
+			socket.emit("getChannelMessages", ctx.activeChan!.channelId);
+		});
 		socket.on("sendChannelMessages", (messages) => {
 			setLoading(false);
 			setNeedPw(false);
