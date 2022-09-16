@@ -647,13 +647,13 @@ export class GeneralGateway
 	}
 
 	/**
-	  _   _ ____  _____ ____  
-	 | | | / ___|| ____|  _ \ 
+	  _   _ ____  _____ ____
+	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
-	 | |_| |___) | |___|  _ < 
+	 | |_| |___) | |___|  _ <
 	  \___/|____/|_____|_| \_\
 	 */
-	
+
 
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('triggerModifyChannel')
@@ -668,10 +668,14 @@ export class GeneralGateway
 		let user: UserEntity;
 		if (userId != 'me')
 			user = await this.userService.getUserById(userId);
-		else 
+		else
 			user = await this.userService.getUserById(client.data.user.userId);
 		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
-		client.emit(`sendStatistics`, user.victories, user.defeats, ratio);
+		client.emit(`sendStatistics`, {
+			victory: user.victories,
+			defeat: user.defeats,
+			ratio: ratio
+		});
 	}
 
 
@@ -681,7 +685,7 @@ export class GeneralGateway
 		let userAchievements: AchievementsEntity;
 		if (userId != 'me')
 			userAchievements = await this.gameService.getUserAchievements(userId);
-		else 
+		else
 			userAchievements = await this.gameService.getUserAchievements(client.data.user.userId);
 		client.emit(`sendAchievements`, userAchievements);
 	}

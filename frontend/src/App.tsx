@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { io } from "socket.io-client";
 import Auth from "./components/Auth";
@@ -11,9 +10,10 @@ import TwoFAPAge from "./Pages/Login/TwoFAPage/TwoFAPage";
 import UserPage from "./Pages/UserPage/UserPage";
 import { ErrorContextProvider } from "./context/error-context";
 
-export const socket = io("http://localhost/");
-export const socketId = socket.on('connect', () => {
-	return socket.id})
+export const socket = io("/");
+export const socketId = socket.on("connect", () => {
+	return socket.id;
+});
 
 function App() {
 	return (

@@ -3,7 +3,7 @@ import { BaseEntity, Column, Entity, PrimaryColumn, Unique } from "typeorm";
 @Entity('achievements')
 export class AchievementsEntity extends BaseEntity {
 
-	
+
 	@PrimaryColumn({
 		unique: true,
 	})
