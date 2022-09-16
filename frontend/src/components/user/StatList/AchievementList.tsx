@@ -78,7 +78,7 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 					<div>
 						<img
 							src="/firstMatch.svg"
-							alt="Complete your first match"
+							alt="Completed his first match"
 							className={classes.achieve_badge}
 						/>
 						<p className={classes.achieve_desc}>First Match</p>
@@ -94,6 +94,14 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						<p className={classes.achieve_desc}>3 Looses</p>
 					</div>
 				)}
+				<div>
+					<img
+						src="/builder.svg"
+						alt="Helped to build this website"
+						className={classes.achieve_badge}
+					/>
+					<p className={classes.achieve_desc}>Builder</p>
+				</div>
 			</div>
 		</div>
 	);
