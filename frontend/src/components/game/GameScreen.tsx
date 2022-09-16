@@ -91,8 +91,9 @@ const GameScreen: React.FC<{
 		// do something here with the canvas
 		if (props.gameType === "localGame")
 			toggleLocalGame();
-		else if (props.gameType === "matchGame")
+		else if (props.gameType === "matchGame") {
 			toggleMatchMaking();
+		}
 		// do something here with the canvas
 	}, []);
 
@@ -114,14 +115,14 @@ const GameScreen: React.FC<{
 	};
 
 	const toggleLocalGame = () => {
-		console.log("yala1")
 		socket.emit("toggleLocalGame");
-		console.log("yala2")
 	};
 
 	const toggleMatchMaking = () => {
 		socket.emit("toggleMatchMaking");
+		console.log("PROUT");
 		socket.emit("joinMatch");
+		console.log("PROUT FIN");
 
 	};
 
@@ -227,14 +228,6 @@ const GameScreen: React.FC<{
 
 			move("down");
 		}
-	};
-
-	const handleStart = () => {
-		moveBall();
-	};
-
-	const handleReset = () => {
-		gameFunctions("resetBall", 0);
 	};
 
 	return (

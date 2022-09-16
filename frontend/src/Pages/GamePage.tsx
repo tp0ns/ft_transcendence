@@ -10,6 +10,7 @@ const GamePage = () => {
 	const [winner, setWinner] = useState<string>("");
 
 	const handleGameType = (state: string) => {
+		console.log("state: ", state);
 		setGameState(state);
 	}
 
@@ -27,7 +28,7 @@ const GamePage = () => {
 		<Layout>
 			<div>
 				{gameState === "noGame" ? <HomeScreen handleGame={handleGameType} /> : null}
-				{gameState === ("localGame" || "matchGame") ? <GameScreen gameType={gameState} /> : null}
+				{gameState === "matchGame" || gameState === "localGame" ? <GameScreen gameType={gameState} /> : null}
 				{gameState === "endGame" ? <EndScreen winner={winner} handleGame={handleGameType} /> : null}
 			</div>
 		</Layout>
