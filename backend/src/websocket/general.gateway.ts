@@ -538,6 +538,9 @@ export class GeneralGateway
 				"You're playing with yourself ! Use local game or get some friends.",
 			);
 		}
+		if (client.data.currentMatch != null) {
+			this.server.to(client.data.currentMatch.roomName).emit('gameStarted');
+		}
 	}
 
 	/**

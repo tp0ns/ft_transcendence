@@ -38,6 +38,7 @@ const GameScreen: React.FC<{
 }> = (props) => {
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const [lockEnter, setLockEnter] = useState<boolean>(false);
+	const [waiting, setWaiting] = useState<boolean>(false);
 
 	useEffect(() => {
 		const context = canvas.current!.getContext("2d");
@@ -97,6 +98,11 @@ const GameScreen: React.FC<{
 		// do something here with the canvas
 	}, []);
 
+	socket.on("gameStarted", () => {
+		console.log("entered game started")
+		setWaiting(false)
+	})
+
 	socket.on('inviteRefused', (userId: string) => {
 		socket.emit('inviteIsDeclined', userId);
 	});
@@ -119,10 +125,10 @@ const GameScreen: React.FC<{
 	};
 
 	const toggleMatchMaking = () => {
+		if (!waiting)
+			setWaiting(true);
 		socket.emit("toggleMatchMaking");
-		console.log("PROUT");
 		socket.emit("joinMatch");
-		console.log("PROUT FIN");
 
 	};
 
@@ -246,6 +252,7 @@ const GameScreen: React.FC<{
 					className={classes.canvas}
 				/>
 			</div>
+			{waiting ? <h1>Waiting for opponent...</h1> : null}
 		</div>
 	);
 };
