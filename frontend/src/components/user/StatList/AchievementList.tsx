@@ -15,7 +15,10 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 		// 	socket.emit("getStatistics", props.userId);
 		// 	socket.emit("getAchievements", props.userId);
 		// });
-		socket.on("sendStatistics", (stats) => setStatistics(stats));
+		socket.on("sendStatistics", (stats) => {
+			console.log(stats);
+			setStatistics(stats);
+		});
 		socket.on("sendAchievements", (achieve) => {
 			setAchievements(achieve);
 		});
@@ -23,8 +26,24 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 
 	return (
 		<div className={classes.success_layout}>
-			<div className={classes.stats}></div>
-			<div className={classes.achieve}></div>
+			<h1 className={classes.stats_title}>Statistics</h1>
+			<div className={classes.stats}>
+				<div className={classes.stat}>
+					<h2>{statistics?.victory}</h2>
+					<p>Victory</p>
+				</div>
+				<div className={classes.stat}>
+					<h2>{statistics?.defeat}</h2>
+					<p>Defeat</p>
+				</div>
+				<div className={classes.stat}>
+					<h2>{statistics?.ratio}</h2>
+					<p>Winrate</p>
+				</div>
+			</div>
+			<div className={classes.achieve}>
+				<h1>Achievements</h1>
+			</div>
 		</div>
 	);
 };

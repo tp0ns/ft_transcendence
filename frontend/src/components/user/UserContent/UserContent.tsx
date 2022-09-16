@@ -134,7 +134,7 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 			) : null}
 			<div className={classes.infos}>
 				<AchievementList userId={props.userId} />
-				<div className={classes.try}>try</div>
+				<div className={classes.try}>MatchList</div>
 				{/* <MatchList userId={props.userId} /> */}
 			</div>
 		</div>
