@@ -1,3 +1,4 @@
+import { IsNotEmpty, isNotEmpty } from 'class-validator';
 import UserEntity from 'src/user/models/user.entity';
 import {
 	BaseEntity,

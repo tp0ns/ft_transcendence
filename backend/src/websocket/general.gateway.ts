@@ -669,8 +669,9 @@ export class GeneralGateway
 		let user: UserEntity;
 		if (userId != 'me') user = await this.userService.getUserById(userId);
 		else user = await this.userService.getUserById(client.data.user.userId);
-		const ratio: number =
+		let ratio: number = 
 			(user.victories / (user.victories + user.defeats)) * 100;
+		if (ratio === null) ratio = 0;
 		client.emit(`sendStatistics`, {
 			victory: user.victories,
 			defeat: user.defeats,

@@ -116,6 +116,10 @@ export class ChannelService {
 		if (chan.DM) return this.saveNewDM(user, chan);
 		if (chan.title === 'DM')
 			throw new ForbiddenException("You can't create a channel named 'DM'");
+		if (chan.protected && !chan.password)
+		throw new ForbiddenException(
+			'You need to enter a password if you want to protect this channel',
+		);
 		const newPassword =
 			chan.password != '' ? bcrypt.hashSync(chan.password, 10) : null;
 		channel = await this.channelRepository.save({
@@ -259,7 +263,7 @@ export class ChannelService {
 		if (!channel.adminsId.includes(user.userId)) {
 			throw new WsException("You can't modify the channel");
 		} else if (protection && !newPassword)
-			throw new WsException(
+			throw new ForbiddenException(
 				'You need to enter a password if you want to protect this channel',
 			);
 		else if (newPassword && protection) {
