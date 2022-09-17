@@ -271,15 +271,12 @@ export class GameService {
 		if (match.isLocal == false) {
 			winner.victories++;
 			loser.defeats++;
-			this.userRepository.save(winner);
-			this.userRepository.save(loser);
 			this.setAchievements(winner);
 			this.setAchievements(loser);
 			client.leave(winner.currentMatch.roomName);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
-			client.leave(winner.currentMatch.roomName);
 			winner.currentMatch = null;
 			loser.currentMatch = null;
 			this.userRepo.save(winner);
