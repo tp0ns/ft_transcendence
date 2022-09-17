@@ -275,9 +275,11 @@ export class GameService {
 			this.userRepository.save(loser);
 			this.setAchievements(winner);
 			this.setAchievements(loser);
+			client.leave(winner.currentMatch.roomName);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
+			client.leave(winner.currentMatch.roomName);
 			winner.currentMatch = null;
 			loser.currentMatch = null;
 			this.userRepo.save(winner);
@@ -339,7 +341,6 @@ export class GameService {
 					],
 				});
 				if (sentInvitations.length > 0) {
-					// -> throw erreur
 					throw new ForbiddenException(
 					"You can't send more than one invitation.",
 					);
@@ -400,6 +401,8 @@ export class GameService {
 			client.join(currentMatch.roomName);
 			client.data.user.currentMatch = currentMatch;
 			userInviting.currentMatch = currentMatch;
+			this.userRepo.save(client.data.user);
+			this.userRepo.save(userInviting);
 			return (currentRoomName);
 		}
 

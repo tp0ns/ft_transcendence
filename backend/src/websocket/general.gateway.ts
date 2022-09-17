@@ -580,7 +580,6 @@ export class GeneralGateway
 	/**
 	 * 				INVITATIONS
 	 */
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async retrieveInvitations(client: Socket) {
@@ -643,7 +642,7 @@ export class GeneralGateway
 			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
 		) {
 			client.emit('sendCurrentMatch');
-		}
+		 }
 	}
 
 	/*
