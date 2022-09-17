@@ -11,10 +11,10 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 	useEffect(() => {
 		socket.emit("getStatistics", props.userId);
 		socket.emit("getAchievements", props.userId);
-		// socket.on("endGame", () => {
-		// 	socket.emit("getStatistics", props.userId);
-		// 	socket.emit("getAchievements", props.userId);
-		// });
+		socket.on("endGame", () => {
+			socket.emit("getStatistics", props.userId);
+			socket.emit("getAchievements", props.userId);
+		});
 		socket.on("sendStatistics", (stats) => {
 			console.log(stats);
 			setStatistics(stats);
