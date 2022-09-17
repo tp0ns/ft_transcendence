@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { socket } from "../../../App";
 import MatchHistoryInterface from "../../../interfaces/MatchHistory.interface";
+import MatchItem from "./MatchItem/MatchItem";
 import classes from "./MatchList.module.css";
 
 const MatchList: React.FC<{ userId: string }> = (props) => {
@@ -31,10 +32,11 @@ const MatchList: React.FC<{ userId: string }> = (props) => {
 		<div className={classes.matches_layout}>
 			{current ? <div className={classes.spectate}>Watch</div> : null}
 			<h1 className={classes.matches_title}>Match History</h1>
-			{history?.length === 0 ? <div>You have no channels yet</div> : null}
+			{history?.length === 0 ? (
+				<p className={classes.nomatch}>No games yet</p>
+			) : null}
 			{history?.map((match) => {
-				return <div>{match.winnerUsername}</div>;
-				// return <MatchItem key={match.id} chan={match} />;
+				return <MatchItem key={match.id} match={match} />;
 			})}
 		</div>
 	);

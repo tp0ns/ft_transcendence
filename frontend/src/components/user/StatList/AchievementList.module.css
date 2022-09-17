@@ -2,8 +2,8 @@
 	width: 50%;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-around;
 	gap: 10px;
+	margin-inline: 10px;
 	margin-bottom: 10px;
 }
 
