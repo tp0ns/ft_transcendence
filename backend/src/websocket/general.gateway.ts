@@ -35,7 +35,7 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
