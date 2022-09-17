@@ -94,7 +94,7 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 						<p className={classes.achieve_desc}>3 Looses</p>
 					</div>
 				) : null}
-				{/* {achievements?.builder ? (
+				{/* {achievements?.Builder ? (
 					<div>
 						<img
 							src="/builder.svg"
