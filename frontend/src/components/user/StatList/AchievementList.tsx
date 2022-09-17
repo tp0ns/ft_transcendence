@@ -15,6 +15,9 @@ const AchievementList: React.FC<{ userId: string }> = (props) => {
 			socket.emit("getStatistics", props.userId);
 			socket.emit("getAchievements", props.userId);
 		});
+	}, [props.userId]);
+
+	useEffect(() => {
 		socket.on("sendStatistics", (stats) => {
 			console.log(stats);
 			setStatistics(stats);

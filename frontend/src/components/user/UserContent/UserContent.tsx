@@ -13,24 +13,15 @@ import classes from "./UserContent.module.css";
 const UserContent: React.FC<{ userId: string }> = (props) => {
 	const [user, setUser] = useState<UserProp>();
 	const [settings, setSettings] = useState<boolean>(false);
-	const [isBlocked, setIsBlocked] = useState<boolean>(false);
 	const [cookies] = useCookies();
 	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		// socket.emit("isBlocked", { id: props.userId });
-		// socket.on("updatedRelations", () => {
-		// 	socket.emit("isBlocked", { id: props.userId });
-		// });
 		socket.on("newDM", (id) => {
 			navigate("/chat/" + id);
 		});
-		// socket.on("isBlockedRes", (res) => {
-		// 	console.log("isBlockedRes");
-		// 	setIsBlocked(res);
-		// });
-	}, []);
+	}, [navigate]);
 
 	useEffect(() => {
 		async function getUserData() {
@@ -65,14 +56,6 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 
 	function sendGameInvite() {
 		console.log("entered in sendGaneInvite");
-	}
-
-	function unblockUser() {
-		console.log("Entered in unblockUser");
-	}
-
-	function blockUser() {
-		console.log("Entered in blockUser");
 	}
 
 	function sendMessage() {
@@ -144,31 +127,3 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 };
 
 export default UserContent;
-
-// {isBlocked ? (
-// 	<div
-// 		className={classes.button_div}
-// 		onClick={() => {
-// 			unblockUser();
-// 		}}
-// 	>
-// 		<img
-// 			src="/unban.svg"
-// 			alt="Block user"
-// 			className={classes.button_img}
-// 		/>
-// 	</div>
-// ) : (
-// 	<div
-// 		className={classes.button_div}
-// 		onClick={() => {
-// 			blockUser();
-// 		}}
-// 	>
-// 		<img
-// 			src="/ban.svg"
-// 			alt="Block user"
-// 			className={classes.button_img}
-// 		/>
-// 	</div>
-// )}

@@ -10,6 +10,8 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 ) => {
 	const [error, setError] = useState<string | null>(null);
 
+	//list of events for invites in gateway l 585
+
 	useEffect(() => {
 		socket.on("errorEvent", (message) => {
 			setError(message);
