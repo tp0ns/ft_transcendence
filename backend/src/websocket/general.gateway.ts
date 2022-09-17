@@ -715,6 +715,16 @@ export class GeneralGateway
 	// }
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('getMatchHistory')
+	async getMatchHistory(client: Socket, userId: string)
+	{
+		let user: UserEntity;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		client.emit(`sendMatchHistory`, user.MatchHistory);
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
 	async getStatistics(client: Socket, userId: string) {
 		let user: UserEntity;
