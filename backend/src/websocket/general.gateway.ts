@@ -120,6 +120,13 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('playing')
+	handlePlaying(client: Socket) {
+		if (client.data.user) this.userService.playingClient(client.data.user);
+		this.server.emit('updatedRelations');
+	}
+
 	/**
 	 *   _____ _    _       _______
 	 *  / ____| |  | |   /\|__   __|

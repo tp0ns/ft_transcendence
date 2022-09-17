@@ -1,3 +1,4 @@
+import { socket } from "../../App";
 import classes from "./GameScreen.module.css";
 
 const HomeScreen: React.FC<{
@@ -5,10 +6,12 @@ const HomeScreen: React.FC<{
 }> = (props) => {
 
   const handleLocalGame = () => {
+    socket.emit("playing")
     props.handleGame("localGame");
   }
 
   const handleMatchMaking = () => {
+    socket.emit("playing")
     props.handleGame("matchGame");
   }
 
