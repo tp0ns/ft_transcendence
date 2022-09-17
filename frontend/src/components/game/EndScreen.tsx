@@ -8,7 +8,8 @@ const EndScreen: React.FC<{
 
   const handleBackHome = (event: any) => {
     window.location.reload();
-    props.handleGame("noGame");
+    // socket.disconnect()
+    // props.handleGame("noGame");
   }
 
   return (

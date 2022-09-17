@@ -10,6 +10,8 @@ const GamePage = () => {
 	const [winner, setWinner] = useState<string>("");
 
 	const handleGameType = (state: string) => {
+		// if (state === "noGame")
+		// 	socket.connect();
 		console.log("state: ", state);
 		setGameState(state);
 	}
