@@ -3,7 +3,7 @@ import { ForbiddenException, forwardRef, Inject, Injectable } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { fstat } from 'fs';
 import { Socket } from 'socket.io';
-import UserEntity from 'src/user/models/user.entity';
+import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
@@ -19,6 +19,8 @@ let match: Match;
 export class GameService {
 	constructor(
 
+		@InjectRepository(UserEntity)
+		private userRepo: Repository<UserEntity>,
 		@InjectRepository(InvitationEntity)
 		private invitationRepository: Repository<InvitationEntity>,
 		@InjectRepository(AchievementsEntity)
@@ -177,6 +179,21 @@ export class GameService {
 		console.log('set size:', matchMakingSet.size);
 		if (matchMakingSet.size == 2)
 		{
+			let user1: UserEntity;
+			let user2: UserEntity;
+			for (const item of matchMakingSet)
+			{
+				if (user1 == null){
+					user1 = item.data.user;
+				}
+				else{
+					user2 = item.data.user;
+				}
+			}
+			if (user1.userId == user2.userId){
+				matchMakingSet.clear();
+				return false;
+			}
 			const roomName = 'room'+ Math.random();
 			match = this.setDefaultPos(roomName);
 			for (const item of matchMakingSet)
@@ -197,9 +214,13 @@ export class GameService {
 			for (const item of matchMakingSet)
 			{
 				item.data.currentMatch = match;
+				item.data.user.currentMatch = match;
 			}
+			// this.userRepo.save(user1);
+			// this.userRepo.save(user2);
 			matchMakingSet.clear();
 		}
+		return true;
 	}
 
 	/**
@@ -256,6 +277,13 @@ export class GameService {
 			// trigger the pop-up(?modal) with victory info and home button
 			console.log('We have a winner !');
 		}
+		console.log('winner match', winner.currentMatch);
+		console.log('loser match', loser.currentMatch);
+		console.log('client match', client.data.currentMatch);
+		winner.currentMatch = null;
+		loser.currentMatch = null;
+		console.log('AFTER NULL winner match', winner.currentMatch);
+		console.log('loser match', loser.currentMatch);
 	}
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(client: Socket, match: Match) {
@@ -400,9 +428,17 @@ export class GameService {
 		 * has been declined
 		 */
 		async inviteIsDeclined(client: Socket, userInvitedId: string) {
-
 			client.leave(inviteRoomMap.get(client.data.user.userId));
 			inviteRoomMap.delete(client.data.user.userId)
 			this.endGame(client, client.data.currentMatch, client.data.user, client.data.user)
+		}
+
+		/**
+		 * try to spectate the chosen user
+		 */
+		async spectate(client: Socket, userIdToSpec: string){
+			// find user
+			// check if userToSpec.currentMatch != null
+			// client.join(userToSpec.currentMatch.roomName);
 		}
 }

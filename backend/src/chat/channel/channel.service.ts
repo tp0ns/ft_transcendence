@@ -27,7 +27,7 @@ export class ChannelService {
 		@Inject(forwardRef(() => MessageService))
 		private messageService: MessageService,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-	) {}
+	) { }
 
 	/**
 	 * ------------------------ CREATE CHANNEL  ------------------------- *
@@ -39,16 +39,16 @@ export class ChannelService {
 	 *
 	 */
 
-		/**
-	 * @brief Setup d'un nouveau channel :
-	 * - ajout d'un mot de passe si chan protege
-	 * - verification du unique name
-	 * - ajout de l'owner (le createur)
-	 *
-	 * @param user le user createur du channel
-	 * @param chan toutes les informations permettant la creation du channel
-	 *
-	 */
+	/**
+ * @brief Setup d'un nouveau channel :
+ * - ajout d'un mot de passe si chan protege
+ * - verification du unique name
+ * - ajout de l'owner (le createur)
+ *
+ * @param user le user createur du channel
+ * @param chan toutes les informations permettant la creation du channel
+ *
+ */
 	async createNewChan(
 		user: UserEntity,
 		chan: CreateChanDto,
@@ -164,17 +164,17 @@ export class ChannelService {
 		return dm;
 	}
 
-/**
-	 * ------------------------ MODIFY CHANNEL  ------------------------- *
-	 *
-	 * -  newConnection(newUser)
-	 * - chanWithPassword(user, informations)
-	 * - modifyChannel(user, modifications)
-	 *       + modifyPassword(user, channel, newPassword, protection)
-	 *       + deleteChan(user, chanId)
-	 * - joinRoom(user, channel)
-	 * - quitChan(user, chanId)
-	 */
+	/**
+		 * ------------------------ MODIFY CHANNEL  ------------------------- *
+		 *
+		 * -  newConnection(newUser)
+		 * - chanWithPassword(user, informations)
+		 * - modifyChannel(user, modifications)
+		 *       + modifyPassword(user, channel, newPassword, protection)
+		 *       + deleteChan(user, chanId)
+		 * - joinRoom(user, channel)
+		 * - quitChan(user, chanId)
+		 */
 
 
 	/**
@@ -323,15 +323,14 @@ export class ChannelService {
 		return null;
 	}
 
-		/**
-	 * @brief Determiner si le user est bien membre
-	 *
-	 * @param user le user qui veut join la room
-	 * @param channel le channel qui permet de join la room
-	 * @returns
-	 */
-	async joinRoom(user: UserEntity, channel: ChannelEntity)
-	{
+	/**
+ * @brief Determiner si le user est bien membre
+ *
+ * @param user le user qui veut join la room
+ * @param channel le channel qui permet de join la room
+ * @returns
+ */
+	async joinRoom(user: UserEntity, channel: ChannelEntity) {
 		if (channel.membersId.includes(user.userId))
 			return true;
 		else
@@ -391,7 +390,7 @@ export class ChannelService {
 	 *
 	 *
 	 */
-	 async modifyAdmins(
+	async modifyAdmins(
 		user: UserEntity,
 		channel: ChannelEntity,
 		newAdmin: string,
@@ -692,15 +691,15 @@ export class ChannelService {
 	async getChanById(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
 			let channel: ChannelEntity = await this.channelRepository
-			.createQueryBuilder('channel')
-			.leftJoinAndSelect('channel.members', 'members')
-			.leftJoinAndSelect('channel.owner', 'owner')
-			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
-			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
-			.leftJoinAndSelect('channel.admins', 'admins')
-			.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
-			.where('channel.channelId = :id', {id: chanId})
-			.getOne();
+				.createQueryBuilder('channel')
+				.leftJoinAndSelect('channel.members', 'members')
+				.leftJoinAndSelect('channel.owner', 'owner')
+				.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+				.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+				.leftJoinAndSelect('channel.admins', 'admins')
+				.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
+				.where('channel.channelId = :id', { id: chanId })
+				.getOne();
 			return channel;
 		}
 		throw new WsException('channel not found');
@@ -715,16 +714,16 @@ export class ChannelService {
 	async getChanByIdWithPassword(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
 			let channel: ChannelEntity = await this.channelRepository
-			.createQueryBuilder('channel')
-			.addSelect('channel.password',)
-			.leftJoinAndSelect('channel.members', 'members')
-			.leftJoinAndSelect('channel.owner', 'owner')
-			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
-			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
-			.leftJoinAndSelect('channel.admins', 'admins')
-			.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
-			.where('channel.channelId = :id', {id: chanId})
-			.getOne();
+				.createQueryBuilder('channel')
+				.addSelect('channel.password',)
+				.leftJoinAndSelect('channel.members', 'members')
+				.leftJoinAndSelect('channel.owner', 'owner')
+				.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+				.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+				.leftJoinAndSelect('channel.admins', 'admins')
+				.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
+				.where('channel.channelId = :id', { id: chanId })
+				.getOne();
 			return channel;
 		}
 		throw new WsException('channel not found');
