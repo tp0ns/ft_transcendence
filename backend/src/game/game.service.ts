@@ -444,17 +444,32 @@ export class GameService {
 		/**
 		 * try to spectate the chosen user
 		 */
-		async spectate(client: Socket, userIdToSpec: string){
+		 async spectate(client: Socket, userIdToSpec: string){
 			// find user
 			const userToSpec: UserEntity = await this.userService.getUserById(userIdToSpec);
 			// check if userToSpec.currentMatch != null
-			if (userToSpec.currentMatch != null && (userToSpec.currentMatch.p1Score < 5 && userToSpec.currentMatch.p2Score < 5)){
+			if (userToSpec.currentMatch != null && userToSpec.currentMatch.isEnd == false){
 				client.join(userToSpec.currentMatch.roomName);
 			}
 			else {
 				throw new ForbiddenException(
 					"You can't spectate this match.",
 					);
+			}
+		}
+
+		/**
+		 * try to know if the user is in a game
+		 */
+		async getCurrentMatch(client: Socket, userIdToSpec: string){
+			// find user
+			const userToSpec: UserEntity = await this.userService.getUserById(userIdToSpec);
+			// check if userToSpec.currentMatch != null
+			if (userToSpec.currentMatch != null && userToSpec.currentMatch.isEnd == false){
+				return true;
+			}
+			else {
+				return false;
 			}
 		}
 }

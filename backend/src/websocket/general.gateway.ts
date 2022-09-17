@@ -44,7 +44,8 @@ import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -52,7 +53,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) { }
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -327,10 +328,7 @@ export class GeneralGateway
 			client.data.user,
 			payload,
 		);
-		const messages = await this.getChannelMessages(
-			client.data.user,
-			chanId,
-		);
+		const messages = await this.getChannelMessages(client.data.user, chanId);
 		this.server.to(chanId).emit('sendChannelMessages', messages);
 	}
 
@@ -638,6 +636,16 @@ export class GeneralGateway
 		await this.gameService.spectate(client, userIdToSpec);
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getCurrentMatch')
+	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		if (
+			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
+		) {
+			client.emit('sendCurrentMatch');
+		}
+	}
+
 	/*
 	______ _____  _____ ______ _   _ _____   _____
  |  ____|  __ \|_   _|  ____| \ | |  __ \ / ____|
@@ -709,7 +717,6 @@ export class GeneralGateway
 		\___/|____/|_____|_| \_\
 	 */
 
-
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('triggerModifyChannel')
 	// async getUpdatedUser(client: Socket)
@@ -721,19 +728,20 @@ export class GeneralGateway
 	@SubscribeMessage('getStatistics')
 	async getStatistics(client: Socket, userId: string) {
 		const user: UserEntity = await this.userService.getUserById(userId);
-		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		const ratio: number =
+			(user.victories / (user.victories + user.defeats)) * 100;
 		client.emit(`sendStatistics`, {
 			victory: user.victories,
 			defeat: user.defeats,
-			ratio: ratio
+			ratio: ratio,
 		});
 	}
-
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAchievements')
 	async getAchievements(client: Socket, userId: string) {
-		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		const userAchievements: AchievementsEntity =
+			await this.gameService.getUserAchievements(userId);
 		client.emit(`sendAchievements`, userAchievements);
 	}
 }
