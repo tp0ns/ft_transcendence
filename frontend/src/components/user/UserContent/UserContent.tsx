@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { socket } from "../../../App";
 import UserProp from "../../../interfaces/User.interface";
 import Modal from "../../../ui/Modal/Modal";
+import MatchList from "../MatchList/MatchList";
 import SettingsUser from "../SettingsUser/SettingsUser";
 import AchievementList from "../StatList/AchievementList";
 import classes from "./UserContent.module.css";
@@ -136,8 +137,7 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 			) : null}
 			<div className={classes.infos}>
 				<AchievementList userId={props.userId} />
-				<div className={classes.try}>MatchList</div>
-				{/* <MatchList userId={props.userId} /> */}
+				<MatchList userId={props.userId} />
 			</div>
 		</div>
 	);
