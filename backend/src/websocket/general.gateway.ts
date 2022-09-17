@@ -35,7 +35,7 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -700,11 +700,11 @@ export class GeneralGateway
 	}
 
 	/**
-		_   _ ____  _____ ____
+	  _   _ ____  _____ ____
 	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
 	 | |_| |___) | |___|  _ <
-		\___/|____/|_____|_| \_\
+	  \___/|____/|_____|_| \_\
 	 */
 
 	// @UseGuards(WsGuard)
@@ -713,6 +713,16 @@ export class GeneralGateway
 	// {
 	// 	this.server.emit('updatedChangnel');
 	// }
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMatchHistory')
+	async getMatchHistory(client: Socket, userId: string)
+	{
+		let user: UserEntity;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		client.emit(`sendMatchHistory`, user.MatchHistory);
+	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')

@@ -8,7 +8,8 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
-import { AchievementsEntity } from './statistics/achievements.entity';
+import { AchievementsEntity } from './achievements/achievements.entity';
+import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 
 const matchMakingSet = new Set<Socket>();
 const inviteSet = new Set<Socket>();
@@ -25,6 +26,8 @@ export class GameService {
 		private invitationRepository: Repository<InvitationEntity>,
 		@InjectRepository(AchievementsEntity)
 		private AchievementsRepository: Repository<AchievementsEntity>,
+		@InjectRepository(MatchHistoryEntity)
+		private MatchHistoryRepository: Repository<MatchHistoryEntity>,
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
@@ -224,27 +227,42 @@ export class GameService {
 
 	/**
 	 * @brief Permet de creer une entite achievements lie a chaque user connecte
-	 *
+	 * - si l'utilisateur est @tp0ns , @clbouche , @elaachac , @vbaron 
+	 * -> set du builderAchievement a true
 	 * @param newUser le nouvel utilisateur qui se connecte
 	 */
 	 async newConnection(newUser: UserEntity) {
-		let userAchievements: AchievementsEntity = await this.AchievementsRepository.save({
+		let builderAchievement: boolean;
+		if (newUser.schoolId === 56170 || newUser.schoolId === 63187 || newUser.schoolId === 60438)// || newUser.schoolId === vincentSchoolId)
+			builderAchievement = true;
+		await this.AchievementsRepository.save({
 			userId: newUser.userId,
+			Builder: builderAchievement,
 		})
 	}
 
+	/**
+	 * 
+	 * @brief Recuperer les achievements d'un utilisateur
+	 * 
+	 */
 	async getUserAchievements(userId: string)
 	{
 		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: userId } });
 		return userAchievements;
 	}
 
+	/**
+	 * Permet de set les achivements d'un joueur
+	 * - premiere entree dans la fonction: firstMatch 
+	 * - calcul selon le nombre de victoires ou de defaites
+	 * du user pour les autres achievements
+	 */
 	async setAchievements(user: UserEntity)
 	{
 		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: user.userId } });
-		if (user.victories === 1 && user.defeats === null || user.defeats === 1 && user.victories === null)
-			userAchievements.FirstMatch = true;
-		else if (user.victories === 3)
+		userAchievements.FirstMatch = true;
+		if (user.victories === 3)
 			userAchievements.Victoryx3 = true;
 		else if (user.victories === 5)
 			userAchievements.Victoryx5 = true;
@@ -275,6 +293,16 @@ export class GameService {
 			this.userRepository.save(loser);
 			this.setAchievements(winner);
 			this.setAchievements(loser);
+			let newMatchHistory: MatchHistoryEntity = await this.MatchHistoryRepository.save({
+				winnerUsername: winner.username,
+				winnerScore: match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
+				loserUsername: loser.username,
+				loserScore: match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+			})
+			winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
+			await this.MatchHistoryRepository.save(winner.MatchHistory);
+			loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+			await this.MatchHistoryRepository.save(loser.MatchHistory);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -283,6 +311,7 @@ export class GameService {
 			this.userRepo.save(winner);
 			this.userRepo.save(loser);
 			console.log('We have a winner !');
+
 			return (false);
 		}
 		winner.currentMatch = null;

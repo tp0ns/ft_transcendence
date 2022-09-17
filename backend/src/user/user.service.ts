@@ -95,9 +95,15 @@ export class UserService {
 	}
 
 	async getUserById(id: string) {
+
+		// findOne({
+		// 	relations: ['creator', 'receiver'],
+		// 	where:
 		if (!id)
 			return;
-		const user = await this.userRepo.findOne({ where: { userId: id } });
+		const user = await this.userRepo.findOne({ 
+			relations: ['MatchHistory'],
+			where: { userId: id } });
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
