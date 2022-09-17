@@ -62,15 +62,14 @@ export class GameService {
 			p2Touches: 0,
 			isMoving: false,
 		};
-		let initPlayer: UserEntity; // check if this init is good
 
 		//init match using all the other class initialized
 		const match: Match = {
 			leftPad: initLeftPad,
 			rightPad: initRightPad,
 			ball: initBall,
-			player1: initPlayer,
-			player2: initPlayer,
+			player1: null,
+			player2: null,
 			p1Score: 0,
 			p2Score: 0,
 			p1Touches: 0,
@@ -166,7 +165,7 @@ export class GameService {
 			client.join(roomName)
 			client.data.currentMatch = this.setDefaultPos(roomName);
 			client.data.currentMatch.isLocal = true;
-			client.data.currentMatch.p1User = client.data.user;
+			client.data.currentMatch.p1User = client.data.user.userId;
 			client.data.currentMatch.p2User = client.data.currentMatch.p1User;
 			client.data.currentMatch.player1 = client.data.currentMatch.p1User;
 			client.data.currentMatch.player2 = client.data.currentMatch.p1User;
@@ -199,13 +198,13 @@ export class GameService {
 			for (const item of matchMakingSet)
 			{
 				if (match.p1User == null) {
-					match.player1 = item.data.user;
+					match.player1 = item.data.user.userId;
 					match.p1User = match.player1;
 				} else if (
 					match.p2User == null &&
-					match.p1User != item.data.user
+					match.p1User != item.data.user.userId
 				) {
-					match.player2 = item.data.user;
+					match.player2 = item.data.user.userId;
 					match.p2User = match.player2;
 				}
 				item.join(roomName);
@@ -216,8 +215,8 @@ export class GameService {
 				item.data.currentMatch = match;
 				item.data.user.currentMatch = match;
 			}
-			// this.userRepo.save(user1);
-			// this.userRepo.save(user2);
+			this.userRepo.save(user1);
+			this.userRepo.save(user2);
 			matchMakingSet.clear();
 		}
 		return true;
@@ -259,6 +258,10 @@ export class GameService {
 	//ends the game
 	async endGame(client: Socket, match: Match, winner: UserEntity , loser: UserEntity) {
 		if (match == null) { // opponent refused the invitation
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			this.userRepo.save(winner);
+			this.userRepo.save(loser);
 			client.leave(winner.currentMatch.roomName);
 			throw new ForbiddenException(
 				"Your opponent gave up the game.",
@@ -275,36 +278,41 @@ export class GameService {
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			this.userRepo.save(winner);
+			this.userRepo.save(loser);
 			console.log('We have a winner !');
+			return (false);
 		}
-		console.log('winner match', winner.currentMatch);
-		console.log('loser match', loser.currentMatch);
-		console.log('client match', client.data.currentMatch);
 		winner.currentMatch = null;
 		loser.currentMatch = null;
-		console.log('AFTER NULL winner match', winner.currentMatch);
-		console.log('loser match', loser.currentMatch);
+		this.userRepo.save(winner);
+		this.userRepo.save(loser);
+		return true;
 	}
+
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(client: Socket, match: Match) {
+		const user1: UserEntity = await this.userService.getUserById(match.player1);
+		const user2: UserEntity = await this.userService.getUserById(match.player2);
 		if (match.p1Score >= 2){
-			this.endGame(client, match, match.player1, match.player2);
-			return match.player1;
+			this.endGame(client, match, user1, user2);
+			return (1);
 		}
 		if (match.p2Score >= 2) {
-			this.endGame(client, match, match.player2, match.player1);
-			return match.player2;
+			this.endGame(client, match, user2, user1);
+			return (2);
 		}
+		return (0);
 	}
 
 	async	getInvitations(client: Socket) {
-		console.log('client.Id : ', client.data.user.userId);
 		const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
 			where: [
 				{ receiver: { userId: client.data.user.userId } },
 			],
 		});
-		console.log('allInvitations : ', allInvitations);
 		const currentTime = Date.now();
 		for (const invitation of allInvitations) {
 			if (currentTime - invitation.creationDate >= 60000){
@@ -384,9 +392,9 @@ export class GameService {
 			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
 			inviteRoomMap.delete(userInvitingId);
 			const currentMatch: Match = this.setDefaultPos(currentRoomName);
-			currentMatch.player1 = client.data.user;
+			currentMatch.player1 = client.data.user.userId;
 			currentMatch.p1User = currentMatch.player1;
-			currentMatch.player2 = userInviting;
+			currentMatch.player2 = userInviting.userId;
 			currentMatch.p2User = currentMatch.player2;
 			currentMatch.isLocal = false;
 			client.join(currentMatch.roomName);
@@ -438,7 +446,15 @@ export class GameService {
 		 */
 		async spectate(client: Socket, userIdToSpec: string){
 			// find user
+			const userToSpec: UserEntity = await this.userService.getUserById(userIdToSpec);
 			// check if userToSpec.currentMatch != null
-			// client.join(userToSpec.currentMatch.roomName);
+			if (userToSpec.currentMatch != null && (userToSpec.currentMatch.p1Score < 5 && userToSpec.currentMatch.p2Score < 5)){
+				client.join(userToSpec.currentMatch.roomName);
+			}
+			else {
+				throw new ForbiddenException(
+					"You can't spectate this match.",
+					);
+			}
 		}
 }
