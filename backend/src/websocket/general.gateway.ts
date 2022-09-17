@@ -449,14 +449,12 @@ export class GeneralGateway
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
 		if (client.data.currentMatch) {
-			if (client.data.user.userId == client.data.currentMatch.player1.userId)
+			if (client.data.user.userId == client.data.currentMatch.player1)
 				await this.gameService.moveMouseLeft(
 					mousePosy,
 					client.data.currentMatch,
 				);
-			else if (
-				client.data.user.userId == client.data.currentMatch.player2.userId
-			)
+			else if (client.data.user.userId == client.data.currentMatch.player2)
 				await this.gameService.moveMouseRight(
 					mousePosy,
 					client.data.currentMatch,
@@ -494,9 +492,47 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		const winner: UserEntity = await this.gameService.checkEndGame(client, client.data.currentMatch);
-		if (winner)
-			this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
+		const end = await this.gameService.checkEndGame(
+			client,
+			client.data.currentMatch,
+		);
+		if (end != 0) {
+			const user1: UserEntity = await this.userService.getUserById(
+				client.data.currentMatch.player1,
+			);
+			const user2: UserEntity = await this.userService.getUserById(
+				client.data.currentMatch.player2,
+			);
+			if (end == 1) {
+				if (
+					(await this.gameService.endGame(
+						client,
+						client.data.currentMatch,
+						user1,
+						user2,
+					)) == true
+				) {
+					this.server
+						.to(client.data.currentMatch.roomName)
+						.emit('victoryOf', user1);
+					this.server.emit('endGame');
+				}
+			} else if (end == 2) {
+				if (
+					await this.gameService.endGame(
+						client,
+						client.data.currentMatch,
+						user2,
+						user1,
+					)
+				) {
+					this.server
+						.to(client.data.currentMatch.roomName)
+						.emit('victoryOf', user2);
+					this.server.emit('endGame');
+				}
+			}
+		}
 	}
 
 	// get the position of the ball and emit it
@@ -524,7 +560,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
-		console.log("entered toggleLocalGame")
+		console.log('entered toggleLocalGame');
 		await this.gameService.toggleLocalGame(client);
 	}
 
@@ -596,11 +632,11 @@ export class GeneralGateway
 	 *		SPECTATE
 	 */
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('spectate')
-	// async spectate(client: Socket, userIdToSpec: string) {
-	// 	await this.gameService.spectate(client, userIdToSpec);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('spectate')
+	async spectate(client: Socket, userIdToSpec: string) {
+		await this.gameService.spectate(client, userIdToSpec);
+	}
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -666,10 +702,10 @@ export class GeneralGateway
 	}
 
 	/**
-		_   _ ____  _____ ____  
-	 | | | / ___|| ____|  _ \ 
+		_   _ ____  _____ ____
+	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
-	 | |_| |___) | |___|  _ < 
+	 | |_| |___) | |___|  _ <
 		\___/|____/|_____|_| \_\
 	 */
 
