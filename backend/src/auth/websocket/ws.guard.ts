@@ -27,7 +27,6 @@ export class WsGuard implements CanActivate {
 				secret: jwtConstants.secret,
 			});
 			const user = await this.userService.getUserById(payload.sub);
-
 			client.data.user = user;
 			if (user) return await true;
 			return await false;

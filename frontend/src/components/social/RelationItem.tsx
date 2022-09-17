@@ -6,26 +6,26 @@ import UserProp from "../../interfaces/User.interface";
 import classes from "../../Pages/SocialPage.module.css";
 
 const RelationItem: React.FC<{
-  relation: RelationsProp;
-  myId: string;
+	relation: RelationsProp;
+	myId: string;
 }> = (props) => {
-  const [toDisplay, setToDisplay] = useState<UserProp>();
-  const [status, setStatus] = useState<string | null>(null);
-  const navigate = useNavigate();
+	const [toDisplay, setToDisplay] = useState<UserProp>();
+	const [status, setStatus] = useState<string | null>(null);
+	const navigate = useNavigate();
 
-  const manageStatus = () => {
-    if (props.relation.status === "blocked") {
-      if (props.myId === props.relation.creator?.userId) {
-        setStatus("blocker");
-      } else setStatus("blocked");
-    } else if (props.relation.status === "pending") {
-      if (props.myId === props.relation.creator?.userId) {
-        setStatus("requester");
-      } else setStatus("requested");
-    } else if (props.relation.status === "accepted") {
-      setStatus("accepted");
-    }
-  };
+	const manageStatus = () => {
+		if (props.relation.status === "blocked") {
+			if (props.myId === props.relation.creator?.userId) {
+				setStatus("blocker");
+			} else setStatus("blocked");
+		} else if (props.relation.status === "pending") {
+			if (props.myId === props.relation.creator?.userId) {
+				setStatus("requester");
+			} else setStatus("requested");
+		} else if (props.relation.status === "accepted") {
+			setStatus("accepted");
+		}
+	};
 
 	useEffect(() => {
 		socket.on("newDM", (id) => {
@@ -59,10 +59,7 @@ const RelationItem: React.FC<{
 	const sendMessage = () => {
 		console.log(`enter in sendMessage in front`);
 		socket.emit("createDM", {
-			title:
-				props.relation.creator?.username +
-				"0" +
-				props.relation.receiver?.username,
+			title: 'DM',
 			DM: true,
 			user2: props.relation.receiver?.userId,
 			protected: false,
@@ -95,7 +92,7 @@ const RelationItem: React.FC<{
 							: classes.playing
 					}
 				></img>
-				<h3>{toDisplay?.username}</h3>
+				<h3 className={classes.username}>{toDisplay?.username}</h3>
 			</div>
 			<div className={classes.rightSide}>
 				{status === "accepted" ? (

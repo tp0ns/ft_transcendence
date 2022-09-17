@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'passport-42';
 import { ChannelService } from 'src/chat/channel/channel.service';
 import { WsException } from '@nestjs/websockets';
+import { GameService } from 'src/game/game.service';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,8 @@ export class UserService {
 		@InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
 		@Inject(forwardRef(() => ChannelService))
 		private channelService: ChannelService,
+		@Inject(forwardRef(() => GameService))
+		private GameService: GameService,
 	) { }
 
 	/**
@@ -42,9 +45,12 @@ export class UserService {
 				schoolId: profile.id,
 				username: profile.username,
 				image_url: profile.image_url,
-				status: 'connected'
+				status: 'connected',
+				victories: 0,
+				defeats: 0,
 			});
 			this.channelService.newConnection(newUser);
+			this.GameService.newConnection(newUser);
 			return newUser;
 		}
 		else {
@@ -122,4 +128,9 @@ export class UserService {
 	// async	createUser(newUser: CreateUserDto) {
 	// 	return await this.userRepo.save(newUser);
 	// }
+
+
 }
+
+
+

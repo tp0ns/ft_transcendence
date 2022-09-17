@@ -1,5 +1,7 @@
+import { MaxLength } from 'class-validator';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { Match } from 'src/game/interfaces/game.interface';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
 import {
 	Column,
 	Entity,
@@ -23,6 +25,7 @@ export class UserEntity {
 	})
 	schoolId: number;
 
+	@MaxLength(10)
 	@Column({
 		type: 'varchar',
 	})
@@ -51,6 +54,18 @@ export class UserEntity {
 	})
 	public currentMatch: Match | null;
 
+	@OneToMany(
+		() => InvitationEntity,
+		(InvitationEntity) => InvitationEntity.creator,
+	)
+	sentInvitations: InvitationEntity[];
+
+	@OneToMany(
+		() => InvitationEntity,
+		(InvitationEntity) => InvitationEntity.receiver,
+	)
+	receivedInvitations: InvitationEntity[];
+
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];
 
@@ -63,6 +78,15 @@ export class UserEntity {
 	@Column({default: "disconnected"})
 	status: User_Status;
 
+	@Column({
+		nullable: true,
+	})
+	victories: number;
+
+	@Column({
+		nullable: true,
+	})
+	defeats: number;
 }
 
 export default UserEntity;

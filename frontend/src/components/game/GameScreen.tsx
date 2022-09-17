@@ -1,6 +1,6 @@
 import classes from "./GameScreen.module.css";
 import { socket } from "../../App";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 let ballPosition = {
 	x: 0,
@@ -30,11 +30,15 @@ let rightPadPosition = {
 	speed: 20,
 };
 
-let player1Score : number = 0;
-let player2Score : number = 0;
+let player1Score: number = 0;
+let player2Score: number = 0;
 
-const GameScreen = () => {
+const GameScreen: React.FC<{
+	gameType: string
+}> = (props) => {
 	const canvas = useRef<HTMLCanvasElement>(null);
+	const [lockEnter, setLockEnter] = useState<boolean>(false);
+	const [waiting, setWaiting] = useState<boolean>(false);
 
 	useEffect(() => {
 		const context = canvas.current!.getContext("2d");
@@ -86,7 +90,22 @@ const GameScreen = () => {
 		});
 
 		// do something here with the canvas
+		if (props.gameType === "localGame")
+			toggleLocalGame();
+		else if (props.gameType === "matchGame") {
+			toggleMatchMaking();
+		}
+		// do something here with the canvas
 	}, []);
+
+	socket.on("gameStarted", () => {
+		console.log("entered game started")
+		setWaiting(false)
+	})
+
+	socket.on('inviteRefused', (userId: string) => {
+		socket.emit('inviteIsDeclined', userId);
+	});
 
 	const move = (direction: string) => {
 		socket.emit("move", direction);
@@ -97,6 +116,7 @@ const GameScreen = () => {
 	};
 
 	const mouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+		event.preventDefault();
 		socket.emit("mouseMove", event.clientY);
 	};
 
@@ -105,6 +125,8 @@ const GameScreen = () => {
 	};
 
 	const toggleMatchMaking = () => {
+		if (!waiting)
+			setWaiting(true);
 		socket.emit("toggleMatchMaking");
 		socket.emit("joinMatch");
 
@@ -159,14 +181,7 @@ const GameScreen = () => {
 			if (ballPosition.x - ballPosition.speedx <= 10) {
 				// collision with left wall. 10 = point of contact in px
 				ballPosition.x = 10;
-				//end of the round - need to add score management
-				// collision with right wall -> point to left
-				
-				// let numberScore: number = +player1Score;
-				// numberScore++;
-				// player1Score = numberScore.toString();
-				
-				// p1 += 1;
+				//end of the round
 				gameFunctions("resetBall", 1);
 				return;
 			} else {
@@ -198,10 +213,16 @@ const GameScreen = () => {
 		socket.emit("ballMovement", ballPosition)//, p1)//, player2Score);
 	};
 
+	useEffect(() => {
+		console.log("Lock enter in useEffect; ", lockEnter);
+		if (lockEnter) moveBall();
+	}, [lockEnter]);
+
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
+		event.preventDefault();
 		if (event.key === "Enter") {
 			if (ballPosition.isMoving === true || player1Score === 5 || player2Score === 5) {
-				return ;	
+				return;
 			}
 			moveBall();
 		}
@@ -210,44 +231,28 @@ const GameScreen = () => {
 		}
 
 		if (event.key === "s") {
-			
+
 			move("down");
 		}
 	};
 
-	const handleStart = () => {
-		moveBall();
-	};
-
-	const handleReset = () => {
-		gameFunctions("resetBall", 0);
-	};
-
-	const handleLocalGame = () => {
-		toggleLocalGame();
-	}
-
-	const handleMatchMaking = () => {
-		toggleMatchMaking();
-	}
-
 	return (
 		<div>
-			<canvas
-				tabIndex={0}
-				onMouseMove={mouseMove}
-				onKeyDown={handleKeyDown}
-				width="640"
-				height="480"
-				ref={canvas}
-				className={classes.canvas}
-			/>
-			<p>
-				<button onClick={handleStart}>Start</button>
-				<button onClick={handleReset}>Reset Ball</button>
-				<button onClick={handleLocalGame}>Local Game</button>
-				<button onClick={handleMatchMaking}>Match Making</button>
-			</p>
+			<div>
+				<div className={classes.profile1}>
+					<img src={classes.img} />
+				</div>
+				<canvas
+					tabIndex={0}
+					onMouseMove={mouseMove}
+					onKeyDown={handleKeyDown}
+					width="640"
+					height="480"
+					ref={canvas}
+					className={classes.canvas}
+				/>
+			</div>
+			{waiting ? <h1>Waiting for opponent...</h1> : null}
 		</div>
 	);
 };

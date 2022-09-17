@@ -1,4 +1,5 @@
 import {
+	ForbiddenException,
 	forwardRef,
 	HttpException,
 	HttpStatus,
@@ -17,7 +18,6 @@ import { ModifyChanDto } from './dtos/modifyChan.dto';
 import { JoinChanDto } from './dtos/joinChan.dto';
 import { WsException } from '@nestjs/websockets';
 import { validate as isValidUUID } from 'uuid';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChannelService {
@@ -27,7 +27,7 @@ export class ChannelService {
 		@Inject(forwardRef(() => MessageService))
 		private messageService: MessageService,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-	) {}
+	) { }
 
 	/**
 	 * ------------------------ CREATE CHANNEL  ------------------------- *
@@ -36,19 +36,19 @@ export class ChannelService {
 	 * - createNewDM(user, chan)
 	 * - saveNewChan(user, chan)
 	 * - saveNewDM(user, chan)
-	 * 
-	 */
-	 
-		/**
-	 * @brief Setup d'un nouveau channel :
-	 * - ajout d'un mot de passe si chan protege
-	 * - verification du unique name
-	 * - ajout de l'owner (le createur)
-	 *
-	 * @param user le user createur du channel
-	 * @param chan toutes les informations permettant la creation du channel
 	 *
 	 */
+
+	/**
+ * @brief Setup d'un nouveau channel :
+ * - ajout d'un mot de passe si chan protege
+ * - verification du unique name
+ * - ajout de l'owner (le createur)
+ *
+ * @param user le user createur du channel
+ * @param chan toutes les informations permettant la creation du channel
+ *
+ */
 	async createNewChan(
 		user: UserEntity,
 		chan: CreateChanDto,
@@ -59,13 +59,13 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Setup d'un DM : 
-	 * - verifier s'il n'existe pas deja 
+	 * @brief Setup d'un DM :
+	 * - verifier s'il n'existe pas deja
 	 * - creation d'un DM entre 2 users sinon
-	 * 
+	 *
 	 * @param user le user qui envoie l'invitation
 	 * @param chan les informations du DM
-	 * @returns ou le DM qui existe deja ou celui 
+	 * @returns ou le DM qui existe deja ou celui
 	 * qui vient d'etre cree
 	 *
 	 */
@@ -114,6 +114,8 @@ export class ChannelService {
 		const date = Date.now();
 		let channel: ChannelEntity;
 		if (chan.DM) return this.saveNewDM(user, chan);
+		if (chan.title === 'DM')
+			throw new ForbiddenException("You can't create a channel named 'DM'");
 		const newPassword =
 			chan.password != '' ? bcrypt.hashSync(chan.password, 10) : null;
 		channel = await this.channelRepository.save({
@@ -158,17 +160,17 @@ export class ChannelService {
 		return dm;
 	}
 
-/**
-	 * ------------------------ MODIFY CHANNEL  ------------------------- *
-	 * 
-	 * -  newConnection(newUser)
-	 * - chanWithPassword(user, informations)
-	 * - modifyChannel(user, modifications)
-	 *       + modifyPassword(user, channel, newPassword, protection)
-	 *       + deleteChan(user, chanId)
-	 * - joinRoom(user, channel)
-	 * - quitChan(user, chanId)
-	 */
+	/**
+		 * ------------------------ MODIFY CHANNEL  ------------------------- *
+		 *
+		 * -  newConnection(newUser)
+		 * - chanWithPassword(user, informations)
+		 * - modifyChannel(user, modifications)
+		 *       + modifyPassword(user, channel, newPassword, protection)
+		 *       + deleteChan(user, chanId)
+		 * - joinRoom(user, channel)
+		 * - quitChan(user, chanId)
+		 */
 
 
 	/**
@@ -185,10 +187,10 @@ export class ChannelService {
 
 	/**
 	 * @brief Verifie la validite du password entrer par l'utilisateur
-	 * 
-	 * @param user l'utilisateur qui souhaite entrer dans un channel protege 
-	 * @param informations le titre du channel + la tentative de mot de passe 
-	 * @returns true si le mot de passe est bon / false sinon 
+	 *
+	 * @param user l'utilisateur qui souhaite entrer dans un channel protege
+	 * @param informations le titre du channel + la tentative de mot de passe
+	 * @returns true si le mot de passe est bon / false sinon
 	 */
 	async chanWithPassword(user: UserEntity, informations: JoinChanDto) {
 		let channel: ChannelEntity = await this.getChanByIdWithPassword(informations.id);
@@ -293,8 +295,8 @@ export class ChannelService {
 
 	/**
 	 * @brief verifier que les conditions a la modification sont remplies
-	 * 
-	 * @param modifyingUser le user qui souhaite modifier le channel 
+	 *
+	 * @param modifyingUser le user qui souhaite modifier le channel
 	 * @param newModifiedUser le user qui va etre modifie
 	 * @param channel le channel concerne par la modification
 	 *
@@ -317,24 +319,23 @@ export class ChannelService {
 		return null;
 	}
 
-		/**
-	 * @brief Determiner si le user est bien membre 
-	 * 
-	 * @param user le user qui veut join la room
-	 * @param channel le channel qui permet de join la room 
-	 * @returns 
-	 */
-	async joinRoom(user: UserEntity, channel: ChannelEntity)
-	{
+	/**
+ * @brief Determiner si le user est bien membre
+ *
+ * @param user le user qui veut join la room
+ * @param channel le channel qui permet de join la room
+ * @returns
+ */
+	async joinRoom(user: UserEntity, channel: ChannelEntity) {
 		if (channel.membersId.includes(user.userId))
 			return true;
-		else 
+		else
 			throw new WsException('You need to be a member to join the room')
 	}
 
 	/**
 	 * @brief Permet de quitter un channel
-	 * 
+	 *
 	 * @param user l'utilisateur qui souhaite quitter le channel
 	 * @param chanId l'identifiant du channel
 	 */
@@ -360,7 +361,7 @@ export class ChannelService {
 
 	/**
 	 * ------------------------ MODIFY MEMBERS LIST  ------------------------- *
-	 * 
+	 *
 	 * - modifyAdmins(user, channel, newAdmin)
 	 * - modifyMembers(invitingUser, channel, newMember)
 	 * - addMember(user, chanId)
@@ -385,7 +386,7 @@ export class ChannelService {
 	 *
 	 *
 	 */
-	 async modifyAdmins(
+	async modifyAdmins(
 		user: UserEntity,
 		channel: ChannelEntity,
 		newAdmin: string,
@@ -447,7 +448,7 @@ export class ChannelService {
 	/**
 	 * @brief permet d'identifier les personnes qui ont entres le bon mdp
 	 * -> sont supprimes de la liste si le mdp est modifie
-	 * 
+	 *
 	 * @param user le user qui a entrer le bon mdp
 	 * @param channel le channel protege
 	 */
@@ -594,7 +595,7 @@ export class ChannelService {
 
 	/**
 	 * @brief Suppression d'un user de la liste des admins du channel
-	 * 
+	 *
 	 * @param userToDelete le user a supprimer
 	 * @param channel le channel concernee
 	 */
@@ -606,7 +607,7 @@ export class ChannelService {
 
 	/**
 	 * ------------------------ GETTERS  ------------------------- *
-	 * 
+	 *
 	 * - getAllChannels()
 	 * - getMemberChannels(member)
 	 * - getAllPublicChannels()
@@ -686,15 +687,15 @@ export class ChannelService {
 	async getChanById(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
 			let channel: ChannelEntity = await this.channelRepository
-			.createQueryBuilder('channel')
-			.leftJoinAndSelect('channel.members', 'members')
-			.leftJoinAndSelect('channel.owner', 'owner')
-			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
-			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
-			.leftJoinAndSelect('channel.admins', 'admins')
-			.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
-			.where('channel.channelId = :id', {id: chanId})
-			.getOne();
+				.createQueryBuilder('channel')
+				.leftJoinAndSelect('channel.members', 'members')
+				.leftJoinAndSelect('channel.owner', 'owner')
+				.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+				.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+				.leftJoinAndSelect('channel.admins', 'admins')
+				.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
+				.where('channel.channelId = :id', { id: chanId })
+				.getOne();
 			return channel;
 		}
 		throw new WsException('channel not found');
@@ -709,16 +710,16 @@ export class ChannelService {
 	async getChanByIdWithPassword(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
 			let channel: ChannelEntity = await this.channelRepository
-			.createQueryBuilder('channel')
-			.addSelect('channel.password',)
-			.leftJoinAndSelect('channel.members', 'members')
-			.leftJoinAndSelect('channel.owner', 'owner')
-			.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
-			.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
-			.leftJoinAndSelect('channel.admins', 'admins')
-			.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
-			.where('channel.channelId = :id', {id: chanId})
-			.getOne();
+				.createQueryBuilder('channel')
+				.addSelect('channel.password',)
+				.leftJoinAndSelect('channel.members', 'members')
+				.leftJoinAndSelect('channel.owner', 'owner')
+				.leftJoinAndSelect('channel.bannedMembers', 'bannedMembers')
+				.leftJoinAndSelect('channel.mutedMembers', 'mutedMembers')
+				.leftJoinAndSelect('channel.admins', 'admins')
+				.leftJoinAndSelect('channel.userInProtectedChan', 'userInProtectedChan')
+				.where('channel.channelId = :id', { id: chanId })
+				.getOne();
 			return channel;
 		}
 		throw new WsException('channel not found');
@@ -726,7 +727,7 @@ export class ChannelService {
 
 	/**
 	 * ------------------------ MESSAGES  ------------------------- *
-	 * 
+	 *
 	 * - sendMessage(user, payload)
 	 */
 
