@@ -33,4 +33,9 @@ export class AchievementsEntity extends BaseEntity {
 		default: false,
 	})
 	FirstMatch: boolean;
+
+	@Column({
+		default: false,
+	})
+	Builder: boolean;
 }

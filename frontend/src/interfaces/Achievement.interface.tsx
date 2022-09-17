@@ -12,6 +12,8 @@ interface AchievementsInterface {
 	Defeatx3: boolean;
 
 	FirstMatch: boolean;
+
+	Builder: boolean;
 }
 
 export default AchievementsInterface;

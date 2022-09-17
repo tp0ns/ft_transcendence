@@ -228,8 +228,12 @@ export class GameService {
 	 * @param newUser le nouvel utilisateur qui se connecte
 	 */
 	 async newConnection(newUser: UserEntity) {
-		let userAchievements: AchievementsEntity = await this.AchievementsRepository.save({
+		let builderAchievement: boolean;
+		if (newUser.schoolId === 56170 || newUser.schoolId === 63187)// || newUser.schoolId === 123 || newUser.schoolId === 456)
+			builderAchievement = true;
+		await this.AchievementsRepository.save({
 			userId: newUser.userId,
+			Builder: builderAchievement,
 		})
 	}
 
@@ -242,9 +246,8 @@ export class GameService {
 	async setAchievements(user: UserEntity)
 	{
 		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: user.userId } });
-		if (user.victories === 1 && user.defeats === null || user.defeats === 1 && user.victories === null)
-			userAchievements.FirstMatch = true;
-		else if (user.victories === 3)
+		userAchievements.FirstMatch = true;
+		if (user.victories === 3)
 			userAchievements.Victoryx3 = true;
 		else if (user.victories === 5)
 			userAchievements.Victoryx5 = true;

@@ -1,0 +1,13 @@
+.matches_layout {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.matches_title {
+	align-self: center;
+	margin-bottom: 10px;
+}

@@ -44,7 +44,8 @@ import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -52,7 +53,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) { }
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -725,7 +726,7 @@ export class GeneralGateway
 		client.emit(`sendStatistics`, {
 			victory: user.victories,
 			defeat: user.defeats,
-			ratio: ratio,
+			ratio: Math.round(ratio),
 		});
 	}
 

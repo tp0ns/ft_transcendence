@@ -70,7 +70,9 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 			>
 				{userModal ? (
 					<Modal title={props.member.username} onClick={changeUserModal}>
-						<UserContent userId={props.member.userId} />
+						<div className={classes.modal_userpage}>
+							<UserContent userId={props.member.userId} />
+						</div>
 					</Modal>
 				) : null}
 				<div
@@ -120,11 +122,6 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				changeItemSide(true);
 			}}
 		>
-			{userModal ? (
-				<Modal title={props.member.username} onClick={changeUserModal}>
-					<UserContent userId={props.member.userId} />
-				</Modal>
-			) : null}
 			<img
 				src={
 					props.member?.profileImage
