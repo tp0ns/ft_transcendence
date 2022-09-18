@@ -117,7 +117,17 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user) this.userService.disconnectClient(client.data.user);
+		if (client.data.user) {
+			this.gameService.handleGameDisconnect(client);
+			this.userService.disconnectClient(client.data.user);
+		}
+		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('playing')
+	handlePlaying(client: Socket) {
+		if (client.data.user) this.userService.playingClient(client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
@@ -510,11 +520,11 @@ export class GeneralGateway
 						user2,
 					)) == true
 				) {
-					this.server
-						.to(client.data.currentMatch.roomName)
-						.emit('victoryOf', user1);
 					this.server.emit('endGame');
 				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user1);
 			} else if (end == 2) {
 				if (
 					await this.gameService.endGame(
@@ -524,11 +534,12 @@ export class GeneralGateway
 						user1,
 					)
 				) {
-					this.server
-						.to(client.data.currentMatch.roomName)
-						.emit('victoryOf', user2);
+					console.log('room:', client.data.currentMatch.roomName);
 					this.server.emit('endGame');
 				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user2);
 			}
 		}
 	}
@@ -580,7 +591,6 @@ export class GeneralGateway
 	/**
 	 * 				INVITATIONS
 	 */
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async retrieveInvitations(client: Socket) {
@@ -634,6 +644,16 @@ export class GeneralGateway
 	@SubscribeMessage('spectate')
 	async spectate(client: Socket, userIdToSpec: string) {
 		await this.gameService.spectate(client, userIdToSpec);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getCurrentMatch')
+	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		if (
+			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
+		) {
+			client.emit('sendCurrentMatch', true);
+		} else client.emit('sendCurrentMatch', false);
 	}
 
 	/*
