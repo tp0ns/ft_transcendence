@@ -117,7 +117,10 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user) this.userService.disconnectClient(client.data.user);
+		if (client.data.user) {
+			this.gameService.handleGameDisconnect(client);
+			this.userService.disconnectClient(client.data.user);
+		}
 		this.server.emit('updatedRelations');
 	}
 
@@ -501,6 +504,7 @@ export class GeneralGateway
 			client,
 			client.data.currentMatch,
 		);
+		console.log('end :', end);
 		if (end != 0) {
 			const user1: UserEntity = await this.userService.getUserById(
 				client.data.currentMatch.player1,
@@ -517,11 +521,11 @@ export class GeneralGateway
 						user2,
 					)) == true
 				) {
-					this.server
-						.to(client.data.currentMatch.roomName)
-						.emit('victoryOf', user1);
 					this.server.emit('endGame');
 				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user1);
 			} else if (end == 2) {
 				if (
 					await this.gameService.endGame(
@@ -531,11 +535,12 @@ export class GeneralGateway
 						user1,
 					)
 				) {
-					this.server
-						.to(client.data.currentMatch.roomName)
-						.emit('victoryOf', user2);
+					console.log('room:', client.data.currentMatch.roomName);
 					this.server.emit('endGame');
 				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user2);
 			}
 		}
 	}
@@ -649,7 +654,7 @@ export class GeneralGateway
 			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
 		) {
 			client.emit('sendCurrentMatch');
-		 }
+		}
 	}
 
 	/*

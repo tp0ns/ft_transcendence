@@ -273,7 +273,6 @@ export class GameService {
 			loser.defeats++;
 			this.setAchievements(winner);
 			this.setAchievements(loser);
-			client.leave(winner.currentMatch.roomName);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -472,4 +471,16 @@ export class GameService {
 				return false;
 			}
 		}
+
+		/**
+		 * HANDLE DISCONNECTION
+		 *(from game, matchmaking, after sending an invitation)
+		 */
+
+		 async handleGameDisconnect(client: Socket){
+			// in game
+			// in matchmaking
+			// delete sent invitation
+			// refuse received invitations
+		 }
 }
