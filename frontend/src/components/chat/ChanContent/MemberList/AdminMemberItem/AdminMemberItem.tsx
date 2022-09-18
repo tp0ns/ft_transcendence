@@ -15,6 +15,10 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 		setItemSide(value);
 	}
 
+	function sendGameInvite() {
+		socket.emit("sendInvite", props.member.userId);
+	}
+
 	function isMuted() {
 		return ctx?.activeChan?.mutedMembers.some((mutedMember) => {
 			return props.member.userId === mutedMember.userId;
@@ -83,7 +87,12 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				>
 					<img src="/user.svg" alt="user" />
 				</div>
-				<div className={classes.button}>
+				<div
+					className={classes.button}
+					onClick={() => {
+						sendGameInvite();
+					}}
+				>
 					<img src="/pong.svg" alt="game" />
 				</div>
 				<div
@@ -122,6 +131,13 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				changeItemSide(true);
 			}}
 		>
+			{userModal ? (
+				<Modal title={props.member.username} onClick={changeUserModal}>
+					<div className={classes.modal_userpage}>
+						<UserContent userId={props.member.userId} />
+					</div>
+				</Modal>
+			) : null}
 			<img
 				src={
 					props.member?.profileImage

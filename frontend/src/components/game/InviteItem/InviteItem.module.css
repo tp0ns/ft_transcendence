@@ -1,0 +1,36 @@
+.item_layout {
+	height: 50px;
+	width: 220px;
+	border: 2px solid #3a3636;
+	border-radius: 20px;
+	background-color: #fdd05d;
+	display: flex;
+	align-items: center;
+	padding-inline: 10px;
+}
+
+.username {
+	color: #3a3636;
+	font-size: large;
+	width: auto;
+	margin-left: 10px;
+	margin-right: auto;
+	cursor: default;
+}
+
+.button {
+	width: 30px;
+	height: 30px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: 2px solid #3a3636;
+	border-radius: 50%;
+	margin-inline: 5px;
+	cursor: pointer;
+}
+
+.logo {
+	max-width: 20px;
+	max-height: 20px;
+}
