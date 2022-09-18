@@ -622,6 +622,7 @@ export class GeneralGateway
 	async sendInvite(client: Socket, userToInviteId: string) {
 		await this.gameService.sendInvite(client, userToInviteId);
 		this.server.emit('updateInvitation');
+		client.emit('pendingInvitation');
 		console.log('invite sent');
 	}
 
@@ -672,6 +673,16 @@ export class GeneralGateway
 		) {
 			client.emit('sendCurrentMatch', true);
 		} else client.emit('sendCurrentMatch', false);
+	}
+
+	/**
+	 * User State in game
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('isInGame')
+	async isInGame(client: Socket) {
+		const ret: boolean = await this.gameService.isInGame(client);
+		client.emit('isDisplayGame', ret);
 	}
 
 	/*
@@ -736,7 +747,6 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
-
 	/**
 		_   _ ____  _____ ____
 	 | | | / ___|| ____|  _ \

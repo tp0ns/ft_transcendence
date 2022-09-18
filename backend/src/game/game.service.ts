@@ -477,8 +477,15 @@ export class GameService {
 			// find user
 			const userToSpec: UserEntity = await this.userService.getUserById(userIdToSpec);
 			// check if userToSpec.currentMatch != null
+			if (client.data.user.currentMatch != null){
+				throw new ForbiddenException(
+					"You are already in a match.",
+					);
+			}
 			if (userToSpec.currentMatch != null && userToSpec.currentMatch.isEnd == false){
+				client.data.user.currentMatch = userToSpec.currentMatch;
 				client.join(userToSpec.currentMatch.roomName);
+				await this.userRepo.save(client.data.user);
 			}
 			else {
 				throw new ForbiddenException(
@@ -516,7 +523,7 @@ export class GameService {
 					client.data.user.currentMatch.p2Score = 5;
 					client.data.user.currentMatch.p1Score = 0;
 				}
-				else{
+				else {
 					winnerId = client.data.user.currentMatch.player1;
 					client.data.user.currentMatch.p1Score = 5;
 					client.data.user.currentMatch.p2Score = 0;
@@ -552,5 +559,17 @@ export class GameService {
 					this.refuseInvite(client, inviteIter.creator.userId);
 			}
 			return winnerId;
+		 }
+
+		 async isInGame(client: Socket) {
+			const sentInvitations: InvitationEntity[] = await this.invitationRepository.find({
+				where: [
+					{ creator: { userId: client.data.user.userId } },
+				],
+			});
+				if (client.data.user.currentMatch != null || sentInvitations != null)
+					return true;
+				else
+					return false;
 		 }
 }
