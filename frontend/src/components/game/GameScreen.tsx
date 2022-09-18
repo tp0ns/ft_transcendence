@@ -47,12 +47,12 @@ const GameScreen: React.FC<{
 
 	const translateToCanvas = (leftPadPosition: any, rightPadPosition: any, ballPosition: any) => {
 		console.log("- TRANSLATE TO CANVAS -\nwindowSize.innerWidth: ", windowSize.innerWidth, "windowSize.innerHeight: ", windowSize.innerHeight)
-		leftPadPosition.x = Math.round(leftPadPosition.x * windowSize.innerWidth / baseWidth);
+		leftPadPosition.x = 0;
 		leftPadPosition.y = Math.round(leftPadPosition.y * windowSize.innerHeight / baseHeight);
 		// leftPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// leftPadPosition.h = (100 / 480) * windowSize.innerHeight;
 
-		rightPadPosition.x = Math.round(rightPadPosition.x * windowSize.innerWidth / baseWidth);
+		rightPadPosition.x = Math.round(windowSize.innerWidth - 20);
 		rightPadPosition.y = Math.round(rightPadPosition.y * windowSize.innerHeight / baseHeight);
 		// rightPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// rightPadPosition.h = (100 / 480) * windowSize.innerHeight;
@@ -66,6 +66,7 @@ const GameScreen: React.FC<{
 
 		function handleWindowResize() {
 			setWindowSize(getWindowSize());
+			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
 		}
 
 		window.addEventListener('resize', handleWindowResize);
@@ -78,7 +79,7 @@ const GameScreen: React.FC<{
 			ballPosition = ballPos;
 			player1Score = p1Score;
 			player2Score = p2Score;
-			translateToCanvas(leftPadPosition, rightPadPosition, ballPos);
+			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
 			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
 
 			//  draw the ball
@@ -115,8 +116,9 @@ const GameScreen: React.FC<{
 			//draw the score:
 			context!.font = "80px blippoblack";
 			context!.fillStyle = "#3a36367c";
-			context!.fillText(player1Score.toString(), Math.round(windowSize.innerWidth / 2 - 0.1 * windowSize.innerWidth), Math.round(windowSize.innerHeight * 0.2));
-			context!.fillText(player2Score.toString(), Math.round(windowSize.innerWidth / 2 + 0.1 * windowSize.innerWidth), Math.round(windowSize.innerHeight * 0.2));
+			console.log()
+			context!.fillText(player1Score.toString(), Math.round(windowSize.innerWidth / 2 - 65), Math.round(windowSize.innerHeight * 0.2));
+			context!.fillText(player2Score.toString(), Math.round(windowSize.innerWidth / 2 + 20), Math.round(windowSize.innerHeight * 0.2));
 		});
 
 		// do something here with the canvas
