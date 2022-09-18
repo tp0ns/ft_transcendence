@@ -1,3 +1,4 @@
+import { socket } from "../../App";
 import classes from "./GameScreen.module.css";
 
 const EndScreen: React.FC<{
