@@ -343,6 +343,11 @@ export class GameService {
 				}
 				const date = Date.now();
 				const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
+				if (userToInvite.currentMatch != null) {
+					throw new ForbiddenException(
+					"This user is already in game.",
+					);
+				}
 				await this.invitationRepository.save( {
 					creator: client.data.user,
 					receiver: userToInvite,
@@ -429,6 +434,29 @@ export class GameService {
 			const currentRoomName: string = inviteRoomMap.get(userInvitingId);
 			return(currentRoomName);
 		}
+		// async	refuseSentInvite(client: Socket, userInviting: UserEntity) {
+		// 	let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+		// 	.select(['invitation.requestId', 'creator'])
+		// 	.leftJoin('invitation.creator', 'creator')
+		// 	.leftJoin('invitation.receiver', 'receiver')
+		// 	.where('invitation.creator = :id', { id: userInviting.userId})
+		// 	.getOne();
+		// 	const invitId: string = invitation.requestId;
+		// 	invitation = await this.invitationRepository.save({
+		// 		requestId: invitId,
+		// 		creator: userInviting,
+		// 		receiver: client.data.user,
+		// 		status: 'declined'
+		// 	})
+		// 	await this.invitationRepository
+		// 	.createQueryBuilder()
+		// 	.delete()
+		// 	.from(InvitationEntity)
+		// 	.where('creator = :id', { id: userInvitingId})
+		// 	.execute();
+		// 	const currentRoomName: string = inviteRoomMap.get(userInvitingId);
+		// 	return(currentRoomName);
+		// }
 
 		/**
 		 * tells the emitter that the invitation
@@ -479,8 +507,36 @@ export class GameService {
 
 		 async handleGameDisconnect(client: Socket){
 			// in game
+			if (client.data.user.currentMatch != null && client.data.user.currentMatch.isEnd == false) {
+				// endGame -> emit victoryOf etc
+			}
 			// in matchmaking
+			if (matchMakingSet.size != 0) {
+				for (const item of matchMakingSet)
+				{
+					if (item == client) {
+						matchMakingSet.clear();
+						break ;
+					}
+				}
+			}
 			// delete sent invitation
+			const sentInvitation: InvitationEntity[] = await this.invitationRepository.find({
+				where: [
+					{ creator: { userId: client.data.user.userId } },
+				],
+			});
+			for (const inviteIter of sentInvitation) {
+					this.refuseInvite(client, inviteIter.creator.userId);
+			}
 			// refuse received invitations
+			const allReceivedInvitations: InvitationEntity[] = await this.invitationRepository.find({
+				where: [
+					{ receiver: { userId: client.data.user.userId } },
+				],
+			});
+			for (const inviteIter of allReceivedInvitations) {
+					this.refuseInvite(client, inviteIter.creator.userId);
+			}
 		 }
 }

@@ -504,7 +504,6 @@ export class GeneralGateway
 			client,
 			client.data.currentMatch,
 		);
-		console.log('end :', end);
 		if (end != 0) {
 			const user1: UserEntity = await this.userService.getUserById(
 				client.data.currentMatch.player1,
@@ -653,8 +652,8 @@ export class GeneralGateway
 		if (
 			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
 		) {
-			client.emit('sendCurrentMatch');
-		}
+			client.emit('sendCurrentMatch', true);
+		} else client.emit('sendCurrentMatch', false);
 	}
 
 	/*
