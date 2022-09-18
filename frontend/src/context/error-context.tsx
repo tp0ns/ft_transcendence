@@ -29,6 +29,15 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 
 	useEffect(() => {
 		const identifier = setTimeout(() => {
+			socket.emit("retrieveInvitations");
+		}, 10000);
+		return () => {
+			clearTimeout(identifier);
+		};
+	}, [invites]);
+
+	useEffect(() => {
+		const identifier = setTimeout(() => {
 			setError(null);
 		}, 2500);
 		return () => {
