@@ -526,7 +526,7 @@ export class GeneralGateway
 				this.server
 					.to(client.data.currentMatch.roomName)
 					.emit('victoryOf', user1);
-			} else if (end == 2) {
+			} else if (end == 2) {				
 				if (
 					await this.gameService.endGame(
 						client,
@@ -535,7 +535,7 @@ export class GeneralGateway
 						user1,
 					)
 				) {
-					console.log('room:', client.data.currentMatch.roomName);
+					// console.log('room:', client.data.currentMatch.roomName);
 					this.server.emit('endGame');
 				}
 				this.server

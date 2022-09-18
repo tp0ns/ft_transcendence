@@ -299,12 +299,11 @@ export class GameService {
 		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
-			// console.count(`enter here`);
-			winner.victories++;
-			loser.defeats++;
-			await this.setAchievements(winner);
-			await this.setAchievements(loser);
-			await this.setMatchHistory(winner, loser, match);
+				winner.victories++;
+				loser.defeats++;
+				await this.setAchievements(winner);
+				await this.setAchievements(loser);
+				await this.setMatchHistory(winner, loser, match);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -318,8 +317,8 @@ export class GameService {
 		}
 		winner.currentMatch = null;
 		loser.currentMatch = null;
-		this.userRepo.save(winner);
-		this.userRepo.save(loser);
+		await this.userRepo.save(winner);
+		await this.userRepo.save(loser);
 		return true;
 	}
 
@@ -327,14 +326,10 @@ export class GameService {
 	async checkEndGame(client: Socket, match: Match) {
 		const user1: UserEntity = await this.userService.getUserById(match.player1);
 		const user2: UserEntity = await this.userService.getUserById(match.player2);
-		if (match.p1Score >= 2){
-			this.endGame(client, match, user1, user2);
+		if (match.p1Score >= 2)
 			return (1);
-		}
-		if (match.p2Score >= 2) {
-			this.endGame(client, match, user2, user1);
+		else if (match.p2Score >= 2)
 			return (2);
-		}
 		return (0);
 	}
 
