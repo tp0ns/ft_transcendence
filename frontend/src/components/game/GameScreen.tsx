@@ -45,6 +45,7 @@ const GameScreen: React.FC<{
 	const [windowSize, setWindowSize] = useState(getWindowSize());
 
 
+	// function to define position and sizes to actual window
 	const translateToCanvas = (leftPadPosition: any, rightPadPosition: any, ballPosition: any) => {
 		console.log("- TRANSLATE TO CANVAS -\nwindowSize.innerWidth: ", windowSize.innerWidth, "windowSize.innerHeight: ", windowSize.innerHeight)
 		leftPadPosition.x = 0;
@@ -79,6 +80,7 @@ const GameScreen: React.FC<{
 			ballPosition = ballPos;
 			player1Score = p1Score;
 			player2Score = p2Score;
+			// Adapt size to window at new position sent from backend
 			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
 			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
 
@@ -131,8 +133,13 @@ const GameScreen: React.FC<{
 
 		return () => {
 			window.removeEventListener('resize', handleWindowResize);
+			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
 		};
 	}, []);
+
+	useEffect(() => () => {
+		translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
+	}, [windowSize])
 
 	function getWindowSize() {
 		let { innerWidth, innerHeight } = window;
