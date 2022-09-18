@@ -252,6 +252,18 @@ export class GameService {
 		return userAchievements;
 	}
 
+	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match)
+	{
+		let newMatchHistory: MatchHistoryEntity = await this.MatchHistoryRepository.save({
+			winnerUsername: winner.username,
+			winnerScore: match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
+			loserUsername: loser.username,
+			loserScore: match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+		})
+		winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
+		loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+	}
+
 	/**
 	 * Permet de set les achivements d'un joueur
 	 * - premiere entree dans la fonction: firstMatch 
@@ -287,20 +299,12 @@ export class GameService {
 		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
+			// console.count(`enter here`);
 			winner.victories++;
 			loser.defeats++;
-			this.setAchievements(winner);
-			this.setAchievements(loser);
-			let newMatchHistory: MatchHistoryEntity = await this.MatchHistoryRepository.save({
-				winnerUsername: winner.username,
-				winnerScore: match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
-				loserUsername: loser.username,
-				loserScore: match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
-			})
-			winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
-			await this.MatchHistoryRepository.save(winner.MatchHistory);
-			loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
-			await this.MatchHistoryRepository.save(loser.MatchHistory);
+			await this.setAchievements(winner);
+			await this.setAchievements(loser);
+			await this.setMatchHistory(winner, loser, match);
 		}
 		else {
 			// trigger the pop-up(?modal) with victory info and home button
@@ -346,7 +350,7 @@ export class GameService {
 				this.refuseInvite(client, invitation.creator.userId);
 			}
 		}
-		console.log('invit after suppr : ', allInvitations);
+		// console.log('invit after suppr : ', allInvitations);
 		const invitAfterCheck: InvitationEntity[] = await this.invitationRepository.find({
 			where: [
 				{ receiver: { userId: client.data.user.userId } },

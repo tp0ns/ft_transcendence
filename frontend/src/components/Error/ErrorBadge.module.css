@@ -1,12 +1,8 @@
 .layout {
-	position: absolute;
-	z-index: 30000;
-	top: 70px;
-	right: 5px;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	max-width: 300px;
+	width: 220px;
 	overflow-wrap: break-word;
 	background-color: rgb(145, 39, 39);
 	color: #f4edde;

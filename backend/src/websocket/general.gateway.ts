@@ -36,6 +36,7 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -649,6 +650,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getCurrentMatch')
 	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
 		if (
 			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
 		) {
@@ -727,21 +729,13 @@ export class GeneralGateway
 	  \___/|____/|_____|_| \_\
 	 */
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('triggerModifyChannel')
-	// async getUpdatedUser(client: Socket)
-	// {
-	// 	this.server.emit('updatedChangnel');
-	// }
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMatchHistory')
-	async getMatchHistory(client: Socket, userId: string)
-	{
+	async getMatchHistory(client: Socket, userId: string) {
 		let user: UserEntity;
 		if (userId != 'me') user = await this.userService.getUserById(userId);
 		else user = await this.userService.getUserById(client.data.user.userId);
-		client.emit(`sendMatchHistory`, user.MatchHistory);
+		client.emit(`sendMatchHistory`, user.MatchHistory.slice(-4));
 	}
 
 	@UseGuards(WsGuard)

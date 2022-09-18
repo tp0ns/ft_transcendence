@@ -4,6 +4,7 @@ import Modal from "../../../../../ui/Modal/Modal";
 import UserContent from "../../../../user/UserContent/UserContent";
 import { useContext, useState } from "react";
 import ChatContext from "../../../../../context/chat-context";
+import { socket } from "../../../../../App";
 
 const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const [itemSide, setItemSide] = useState<boolean>(false);
@@ -12,6 +13,10 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 
 	function changeItemSide(value: boolean) {
 		setItemSide(value);
+	}
+
+	function sendGameInvite() {
+		socket.emit("sendInvite", props.member.userId);
 	}
 
 	function changeUserModal() {
@@ -59,7 +64,12 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				>
 					<img src="/user.svg" alt="user" />
 				</div>
-				<div className={classes.button}>
+				<div
+					className={classes.button}
+					onClick={() => {
+						sendGameInvite();
+					}}
+				>
 					<img src="/pong.svg" alt="game" />
 				</div>
 			</div>
@@ -71,6 +81,13 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 				changeItemSide(true);
 			}}
 		>
+			{userModal ? (
+				<Modal title={props.member.username} onClick={changeUserModal}>
+					<div className={classes.modal_userpage}>
+						<UserContent userId={props.member.userId} />
+					</div>
+				</Modal>
+			) : null}
 			<img
 				src={
 					props.member?.profileImage
