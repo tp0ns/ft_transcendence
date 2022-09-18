@@ -28,10 +28,24 @@ const MatchList: React.FC<{ userId: string }> = (props) => {
 		});
 	}, []);
 
+	function spectate() {
+		socket.emit("spectate", props.userId);
+	}
+
 	return (
 		<div className={classes.matches_layout}>
 			<h1 className={classes.matches_title}>Match History</h1>
-			{current ? <div className={classes.spectate}>Watch Match</div> : null}
+			{current ? (
+				<div
+					className={classes.spectate}
+					onClick={() => {
+						spectate();
+					}}
+				>
+					<img src="/spectate.svg" alt="spectate" className={classes.logo} />
+					Spectate Match
+				</div>
+			) : null}
 			{history?.length === 0 ? (
 				<p className={classes.nomatch}>No games yet</p>
 			) : null}
