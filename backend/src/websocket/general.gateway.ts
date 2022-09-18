@@ -649,6 +649,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getCurrentMatch')
 	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
 		if (
 			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
 		) {
@@ -736,8 +737,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMatchHistory')
-	async getMatchHistory(client: Socket, userId: string)
-	{
+	async getMatchHistory(client: Socket, userId: string) {
 		let user: UserEntity;
 		if (userId != 'me') user = await this.userService.getUserById(userId);
 		else user = await this.userService.getUserById(client.data.user.userId);
