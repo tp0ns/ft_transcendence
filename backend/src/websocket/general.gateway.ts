@@ -115,12 +115,30 @@ export class GeneralGateway
 	 * Handles client disconnection behaviour
 	 */
 	@UseGuards(WsGuard)
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.handleGameDisconnect(client);
-			this.userService.disconnectClient(client.data.user);
+			const winnerId: string = await this.gameService.handleGameDisconnect(
+				client,
+			);
+			if (winnerId != null) {
+				const winner = await this.userService.getUserById(winnerId);
+				winner.victories++;
+				client.data.user.defeats++;
+				await this.gameService.setAchievements(winner);
+				await this.gameService.setAchievements(client.data.user);
+				// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
+				this.server
+					.to(client.data.user.currentMatch.roomName)
+					.emit('victoryOf', winner);
+				this.server
+					.to(client.data.user.currentMatch.roomName)
+					.emit('errorEvent', 'Your opponnent has disconnected.');
+				this.server.emit('endGame');
+			}
+			this.server.emit('updateInvitation');
 		}
+		this.userService.disconnectClient(client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
@@ -604,6 +622,7 @@ export class GeneralGateway
 	async sendInvite(client: Socket, userToInviteId: string) {
 		await this.gameService.sendInvite(client, userToInviteId);
 		this.server.emit('updateInvitation');
+		client.emit('pendingInvitation');
 		console.log('invite sent');
 	}
 
@@ -655,6 +674,16 @@ export class GeneralGateway
 		) {
 			client.emit('sendCurrentMatch', true);
 		} else client.emit('sendCurrentMatch', false);
+	}
+
+	/**
+	 * User State in game
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('isInGame')
+	async isInGame(client: Socket) {
+		const ret: boolean = await this.gameService.isInGame(client);
+		client.emit('isDisplayGame', ret);
 	}
 
 	/*
@@ -719,7 +748,6 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
-
 	/**
 	  _   _ ____  _____ ____
 	 | | | / ___|| ____|  _ \
