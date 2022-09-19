@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('matchHistory')
 export class MatchHistoryEntity extends BaseEntity {
@@ -6,23 +6,15 @@ export class MatchHistoryEntity extends BaseEntity {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
 
-	@Column({
-		nullable: true,
-	})
+	@Column()
 	winnerUsername: string;
 
-	@Column({
-		nullable: true,
-	})
+	@Column()
 	winnerScore: number;	
 	
-	@Column({
-		nullable: true,
-	})
+	@Column()
 	loserUsername: string;
 
-	@Column({
-		nullable: true,
-	})
+	@Column()
 	loserScore: number;
 }

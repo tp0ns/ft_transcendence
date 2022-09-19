@@ -36,6 +36,7 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -115,10 +116,28 @@ export class GeneralGateway
 	 * Handles client disconnection behaviour
 	 */
 	@UseGuards(WsGuard)
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.handleGameDisconnect(client);
+			const winnerId: string = await this.gameService.handleGameDisconnect(
+				client,
+			);
+			if (winnerId != null) {
+				const winner = await this.userService.getUserById(winnerId);
+				winner.victories++;
+				client.data.user.defeats++;
+				await this.gameService.setAchievements(winner);
+				await this.gameService.setAchievements(client.data.user);
+				// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
+				this.server
+					.to(client.data.user.currentMatch.roomName)
+					.emit('victoryOf', winner);
+				this.server
+					.to(client.data.user.currentMatch.roomName)
+					.emit('errorEvent', 'Your opponnent has disconnected.');
+				this.server.emit('endGame');
+			}
+			this.server.emit('updateInvitation');
 			this.userService.disconnectClient(client.data.user);
 		}
 		this.server.emit('updatedRelations');
@@ -534,7 +553,7 @@ export class GeneralGateway
 						user1,
 					)
 				) {
-					console.log('room:', client.data.currentMatch.roomName);
+					// console.log('room:', client.data.currentMatch.roomName);
 					this.server.emit('endGame');
 				}
 				this.server
@@ -604,6 +623,7 @@ export class GeneralGateway
 	async sendInvite(client: Socket, userToInviteId: string) {
 		await this.gameService.sendInvite(client, userToInviteId);
 		this.server.emit('updateInvitation');
+		client.emit('pendingInvitation');
 		console.log('invite sent');
 	}
 
@@ -655,6 +675,16 @@ export class GeneralGateway
 		) {
 			client.emit('sendCurrentMatch', true);
 		} else client.emit('sendCurrentMatch', false);
+	}
+
+	/**
+	 * User State in game
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('isInGame')
+	async isInGame(client: Socket) {
+		const ret: boolean = await this.gameService.isInGame(client);
+		client.emit('isDisplayGame', ret);
 	}
 
 	/*
@@ -719,7 +749,6 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
-
 	/**
 	  _   _ ____  _____ ____
 	 | | | / ___|| ____|  _ \
@@ -728,20 +757,13 @@ export class GeneralGateway
 	  \___/|____/|_____|_| \_\
 	 */
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('triggerModifyChannel')
-	// async getUpdatedUser(client: Socket)
-	// {
-	// 	this.server.emit('updatedChangnel');
-	// }
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getMatchHistory')
 	async getMatchHistory(client: Socket, userId: string) {
 		let user: UserEntity;
 		if (userId != 'me') user = await this.userService.getUserById(userId);
 		else user = await this.userService.getUserById(client.data.user.userId);
-		client.emit(`sendMatchHistory`, user.MatchHistory);
+		client.emit(`sendMatchHistory`, user.MatchHistory.slice(-4));
 	}
 
 	@UseGuards(WsGuard)
