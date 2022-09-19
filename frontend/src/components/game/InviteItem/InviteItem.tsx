@@ -1,10 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { socket } from "../../../App";
 import MatchInviteInterface from "../../../interfaces/MatchInvite.interface";
 import classes from "./InviteItem.module.css";
 
 const InviteItem: React.FC<{ invite: MatchInviteInterface }> = (props) => {
+	const navigate = useNavigate();
+
 	function acceptInvite() {
 		socket.emit("acceptInvite", props.invite.creator.userId);
+		navigate("/");
 	}
 
 	function declineInvite() {

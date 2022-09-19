@@ -5,10 +5,12 @@ import UserContent from "../../../../user/UserContent/UserContent";
 import { useContext, useState } from "react";
 import ChatContext from "../../../../../context/chat-context";
 import { socket } from "../../../../../App";
+import { useNavigate } from "react-router-dom";
 
 const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const [itemSide, setItemSide] = useState<boolean>(false);
 	const [userModal, setUserModal] = useState<boolean>(false);
+	const navigate = useNavigate();
 	const ctx = useContext(ChatContext);
 
 	function changeItemSide(value: boolean) {
@@ -17,6 +19,7 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 
 	function sendGameInvite() {
 		socket.emit("sendInvite", props.member.userId);
+		navigate("/");
 	}
 
 	function changeUserModal() {

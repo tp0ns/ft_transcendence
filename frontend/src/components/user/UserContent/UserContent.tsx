@@ -56,6 +56,7 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 
 	function sendGameInvite() {
 		socket.emit("sendInvite", props.userId);
+		navigate("/");
 	}
 
 	function sendMessage() {
