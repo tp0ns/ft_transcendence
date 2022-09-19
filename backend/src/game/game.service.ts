@@ -205,8 +205,8 @@ export class GameService {
 				item.data.currentMatch = match;
 				item.data.user.currentMatch = match;
 			}
-			this.userRepo.save(user1);
-			this.userRepo.save(user2);
+			await this.userRepo.save(user1);
+			await this.userRepo.save(user2);
 			matchMakingSet.clear();
 		}
 		return true;
@@ -274,8 +274,8 @@ export class GameService {
 			// opponent refused the invitation
 			winner.currentMatch = null;
 			loser.currentMatch = null;
-			this.userRepo.save(winner);
-			this.userRepo.save(loser);
+			await this.userRepo.save(winner);
+			await this.userRepo.save(loser);
 			client.leave(winner.currentMatch.roomName);
 			throw new ForbiddenException('Your opponent gave up the game.');
 		}
@@ -283,8 +283,8 @@ export class GameService {
 		if (match.isLocal == false) {
 			winner.victories++;
 			loser.defeats++;
-			this.setAchievements(winner);
-			this.setAchievements(loser);
+			await this.setAchievements(winner);
+			await this.setAchievements(loser);
 			let newMatchHistory: MatchHistoryEntity =
 				await this.MatchHistoryRepository.save({
 					winnerUsername: winner.username,
@@ -302,16 +302,16 @@ export class GameService {
 			// trigger the pop-up(?modal) with victory info and home button
 			winner.currentMatch = null;
 			loser.currentMatch = null;
-			this.userRepo.save(winner);
-			this.userRepo.save(loser);
+			await this.userRepo.save(winner);
+			await this.userRepo.save(loser);
 			console.log('We have a winner !');
 
 			return false;
 		}
 		winner.currentMatch = null;
 		loser.currentMatch = null;
-		this.userRepo.save(winner);
-		this.userRepo.save(loser);
+		await this.userRepo.save(winner);
+		await this.userRepo.save(loser);
 		return true;
 	}
 
@@ -424,8 +424,8 @@ export class GameService {
 		client.join(currentMatch.roomName);
 		client.data.user.currentMatch = currentMatch;
 		userInviting.currentMatch = currentMatch;
-		this.userRepo.save(client.data.user);
-		this.userRepo.save(userInviting);
+		await this.userRepo.save(client.data.user);
+		await this.userRepo.save(userInviting);
 		return currentRoomName;
 	}
 
