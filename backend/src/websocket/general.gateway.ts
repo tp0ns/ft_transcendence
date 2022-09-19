@@ -663,6 +663,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
 	async spectate(client: Socket, userIdToSpec: string) {
+		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
 		await this.gameService.spectate(client, userIdToSpec);
 	}
 
