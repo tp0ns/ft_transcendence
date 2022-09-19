@@ -244,6 +244,20 @@ export class GameService {
 		return userAchievements;
 	}
 
+	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match) {
+		let newMatchHistory: MatchHistoryEntity =
+			await this.MatchHistoryRepository.save({
+				winnerUsername: winner.username,
+				winnerScore:
+					match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
+				loserUsername: loser.username,
+				loserScore:
+					match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+			});
+		winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
+		loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+	}
+
 	/**
 	 * Permet de set les achivements d'un joueur
 	 * - premiere entree dans la fonction: firstMatch
@@ -285,19 +299,7 @@ export class GameService {
 			loser.defeats++;
 			await this.setAchievements(winner);
 			await this.setAchievements(loser);
-			let newMatchHistory: MatchHistoryEntity =
-				await this.MatchHistoryRepository.save({
-					winnerUsername: winner.username,
-					winnerScore:
-						match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
-					loserUsername: loser.username,
-					loserScore:
-						match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
-				});
-			winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
-			await this.MatchHistoryRepository.save(winner.MatchHistory);
-			loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
-			await this.MatchHistoryRepository.save(loser.MatchHistory);
+			await this.setMatchHistory(winner, loser, match);
 		} else {
 			// trigger the pop-up(?modal) with victory info and home button
 			winner.currentMatch = null;
@@ -319,14 +321,8 @@ export class GameService {
 	async checkEndGame(client: Socket, match: Match) {
 		const user1: UserEntity = await this.userService.getUserById(match.player1);
 		const user2: UserEntity = await this.userService.getUserById(match.player2);
-		if (match.p1Score >= 2) {
-			await this.endGame(client, match, user1, user2);
-			return 1;
-		}
-		if (match.p2Score >= 2) {
-			await this.endGame(client, match, user2, user1);
-			return 2;
-		}
+		if (match.p1Score >= 2) return 1;
+		else if (match.p2Score >= 2) return 2;
 		return 0;
 	}
 

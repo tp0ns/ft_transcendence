@@ -30,7 +30,7 @@ export class UserService {
 		private channelService: ChannelService,
 		@Inject(forwardRef(() => GameService))
 		private GameService: GameService,
-	) { }
+	) {}
 
 	/**
 	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il
@@ -61,9 +61,8 @@ export class UserService {
 			this.channelService.newConnection(newUser);
 			this.GameService.newConnection(newUser);
 			return newUser;
-		}
-		else {
-			this.update(user.userId, { status: "connected" })
+		} else {
+			this.update(user.userId, { status: 'connected' });
 		}
 		return user;
 	}
@@ -71,22 +70,22 @@ export class UserService {
 	async connectClient(userReq: Partial<UserEntity>) {
 		const user: UserEntity = userReq as UserEntity;
 		return this.userRepo.update(user.userId, {
-			status: "connected",
-		})
+			status: 'connected',
+		});
 	}
 
 	async disconnectClient(userReq: Partial<UserEntity>) {
 		const user: UserEntity = userReq as UserEntity;
-		return this.userRepo.update(user.userId, {
-			status: "disconnected",
-		})
+		return await this.userRepo.update(user.userId, {
+			status: 'disconnected',
+		});
 	}
 
 	async playingClient(userReq: Partial<UserEntity>) {
 		const user: UserEntity = userReq as UserEntity;
 		return this.userRepo.update(user.userId, {
-			status: "playing",
-		})
+			status: 'playing',
+		});
 	}
 
 	async setTwoFASecret(secret: string, userId: string) {
@@ -102,15 +101,14 @@ export class UserService {
 	}
 
 	async getUserById(id: string) {
-
 		// findOne({
 		// 	relations: ['creator', 'receiver'],
 		// 	where:
-		if (!id)
-			return;
-		const user = await this.userRepo.findOne({ 
+		if (!id) return;
+		const user = await this.userRepo.findOne({
 			relations: ['MatchHistory'],
-			where: { userId: id } });
+			where: { userId: id },
+		});
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
@@ -146,9 +144,4 @@ export class UserService {
 	// async	createUser(newUser: CreateUserDto) {
 	// 	return await this.userRepo.save(newUser);
 	// }
-
-
 }
-
-
-
