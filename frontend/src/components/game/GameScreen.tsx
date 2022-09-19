@@ -135,7 +135,7 @@ const GameScreen: React.FC<{
 			window.removeEventListener('resize', handleWindowResize);
 			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
 		};
-	}, []);
+	}, [windowSize]);
 
 	useEffect(() => () => {
 		translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
