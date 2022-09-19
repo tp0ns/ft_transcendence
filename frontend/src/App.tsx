@@ -13,7 +13,6 @@ import { ErrorContextProvider } from "./context/error-context";
 
 export const socket = io("http://localhost/");
 export const socketId = socket.on('connect', () => {
-	console.log("GAGA!!")
 	return socket.id
 })
 

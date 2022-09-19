@@ -451,6 +451,21 @@ export class GeneralGateway
 			);
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('redrawCanvas')
+	async redrawCanvas(client: Socket) {
+		this.server
+			.to(client.data.currentMatch.roomName)
+			.emit(
+				'setPosition',
+				client.data.currentMatch.leftPad,
+				client.data.currentMatch.rightPad,
+				client.data.currentMatch.ball,
+				client.data.currentMatch.p1Score,
+				client.data.currentMatch.p2Score,
+			);
+	}
+
 	// Move event, allow the user to move its pad with mouse
 	@UseGuards(WsGuard)
 	@SubscribeMessage('mouseMove')
