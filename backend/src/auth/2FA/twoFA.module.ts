@@ -16,11 +16,12 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { RelationsService } from 'src/relations/relations.service';
 import { GameService } from 'src/game/game.service';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity, InvitationEntity, AchievementsEntity]),
+		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity, InvitationEntity, AchievementsEntity, MatchHistoryEntity]),
 		JwtModule.register({
 			secret: process.env.JWT_SECRET,
 			signOptions: { expiresIn: process.env.SIGN_CD },

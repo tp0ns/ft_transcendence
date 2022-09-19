@@ -1,9 +1,13 @@
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+import { socket } from "../../../App";
 import UserProp from "../../../interfaces/User.interface";
 import Modal from "../../../ui/Modal/Modal";
+import MatchList from "../MatchList/MatchList";
 import SettingsUser from "../SettingsUser/SettingsUser";
+import AchievementList from "../StatList/AchievementList";
 import classes from "./UserContent.module.css";
 
 const UserContent: React.FC<{ userId: string }> = (props) => {
@@ -11,6 +15,13 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 	const [settings, setSettings] = useState<boolean>(false);
 	const [cookies] = useCookies();
 	const clientId = jwtDecode<JwtPayload>(cookies.Authentication).sub;
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		socket.on("newDM", (id) => {
+			navigate("/chat/" + id);
+		});
+	}, [navigate]);
 
 	useEffect(() => {
 		async function getUserData() {
@@ -43,15 +54,33 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 		setSettings((prev) => !prev);
 	}
 
+	function sendGameInvite() {
+		socket.emit("sendInvite", props.userId);
+		navigate("/");
+	}
+
+	function sendMessage() {
+		socket.emit("createDM", {
+			title: "DM",
+			DM: true,
+			user2: props.userId,
+			protected: false,
+			private: false,
+			password: null,
+		});
+	}
+
 	return (
-		<div>
+		<div className={classes.layout}>
 			{clientId === user?.userId ? (
-				<img
-					src="/gear.svg"
-					alt="Option button"
-					onClick={clickHandler}
-					className={classes.settings}
-				/>
+				<div>
+					<img
+						src="/gear.svg"
+						alt="Option button"
+						onClick={clickHandler}
+						className={classes.settings}
+					/>
+				</div>
 			) : null}
 			{settingsLayout(settings)}
 			<div className={classes.resume}>
@@ -61,6 +90,38 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 					className={classes.badge}
 				/>
 				<div className={classes.username}>{user?.username}</div>
+			</div>
+			{clientId !== user?.userId ? (
+				<div className={classes.interact}>
+					<div
+						className={classes.button_div}
+						onClick={() => {
+							sendGameInvite();
+						}}
+					>
+						<img
+							src="/pong.svg"
+							alt="Send game invite to user"
+							className={classes.button_img}
+						/>
+					</div>
+					<div
+						className={classes.button_div}
+						onClick={() => {
+							sendMessage();
+						}}
+					>
+						<img
+							src="/chat.svg"
+							alt="Send personnal message"
+							className={classes.button_img}
+						/>
+					</div>
+				</div>
+			) : null}
+			<div className={classes.infos}>
+				<AchievementList userId={props.userId} />
+				<MatchList userId={props.userId} />
 			</div>
 		</div>
 	);

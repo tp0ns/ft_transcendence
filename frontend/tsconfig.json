@@ -18,5 +18,5 @@
 		"jsx": "react-jsx",
 		"isolatedModules": false,
 	},
-	"include": ["src", "../backend/src/game/invitations"]
+	"include": ["src"]
 }

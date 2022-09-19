@@ -18,12 +18,13 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { RelationsService } from 'src/relations/relations.service';
 import { GameService } from 'src/game/game.service';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 
 @Module({
 	imports: [
 		PassportModule.register(SchoolStrategy),
-		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity, InvitationEntity, AchievementsEntity]),
+		TypeOrmModule.forFeature([UserEntity, RelationEntity, ChannelEntity, MessagesEntity, InvitationEntity, AchievementsEntity, MatchHistoryEntity]),
 		JwtModule.register({
 			secret: jwtConstants.secret,
 			signOptions: { expiresIn: jwtConstants.expire },

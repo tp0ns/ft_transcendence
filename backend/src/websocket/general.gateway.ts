@@ -35,7 +35,7 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -44,7 +44,8 @@ import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -52,7 +53,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) { }
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -116,7 +117,17 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user) this.userService.disconnectClient(client.data.user);
+		if (client.data.user) {
+			this.gameService.handleGameDisconnect(client);
+			this.userService.disconnectClient(client.data.user);
+		}
+		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('playing')
+	handlePlaying(client: Socket) {
+		if (client.data.user) this.userService.playingClient(client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
@@ -323,15 +334,12 @@ export class GeneralGateway
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
 		const chanId: string = payload[1];
-		const new_msg = await this.channelService.sendMessage(
-			client.data.user,
-			payload,
-		);
-		const messages = await this.getChannelMessages(
-			client.data.user,
-			chanId,
-		);
-		this.server.to(chanId).emit('sendChannelMessages', messages);
+		await this.channelService.sendMessage(client.data.user, payload);
+		const socket_list: any[] = await this.server.in(chanId).fetchSockets();
+		socket_list.map(async (client) => {
+			this.getChannelMessages(client, chanId);
+		});
+		this.server.to(chanId).emit('updatedMessage');
 	}
 
 	/**
@@ -512,11 +520,11 @@ export class GeneralGateway
 						user2,
 					)) == true
 				) {
-					this.server
-						.to(client.data.currentMatch.roomName)
-						.emit('victoryOf', user1);
 					this.server.emit('endGame');
 				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user1);
 			} else if (end == 2) {
 				if (
 					await this.gameService.endGame(
@@ -526,11 +534,12 @@ export class GeneralGateway
 						user1,
 					)
 				) {
-					this.server
-						.to(client.data.currentMatch.roomName)
-						.emit('victoryOf', user2);
+					console.log('room:', client.data.currentMatch.roomName);
 					this.server.emit('endGame');
 				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user2);
 			}
 		}
 	}
@@ -582,7 +591,6 @@ export class GeneralGateway
 	/**
 	 * 				INVITATIONS
 	 */
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async retrieveInvitations(client: Socket) {
@@ -636,6 +644,17 @@ export class GeneralGateway
 	@SubscribeMessage('spectate')
 	async spectate(client: Socket, userIdToSpec: string) {
 		await this.gameService.spectate(client, userIdToSpec);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getCurrentMatch')
+	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
+		if (
+			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
+		) {
+			client.emit('sendCurrentMatch', true);
+		} else client.emit('sendCurrentMatch', false);
 	}
 
 	/*
@@ -702,13 +721,12 @@ export class GeneralGateway
 	}
 
 	/**
-		_   _ ____  _____ ____
+	  _   _ ____  _____ ____
 	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
 	 | |_| |___) | |___|  _ <
-		\___/|____/|_____|_| \_\
+	  \___/|____/|_____|_| \_\
 	 */
-
 
 	// @UseGuards(WsGuard)
 	// @SubscribeMessage('triggerModifyChannel')
@@ -718,22 +736,40 @@ export class GeneralGateway
 	// }
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('getMatchHistory')
+	async getMatchHistory(client: Socket, userId: string) {
+		let user: UserEntity;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		client.emit(`sendMatchHistory`, user.MatchHistory);
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
 	async getStatistics(client: Socket, userId: string) {
-		const user: UserEntity = await this.userService.getUserById(userId);
-		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		let user: UserEntity;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		let ratio: number =
+			(user.victories / (user.victories + user.defeats)) * 100;
+		if (!ratio) ratio = 0;
 		client.emit(`sendStatistics`, {
 			victory: user.victories,
 			defeat: user.defeats,
-			ratio: ratio
+			ratio: Math.round(ratio),
 		});
 	}
-
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAchievements')
 	async getAchievements(client: Socket, userId: string) {
-		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		let userAchievements: AchievementsEntity;
+		if (userId != 'me')
+			userAchievements = await this.gameService.getUserAchievements(userId);
+		else
+			userAchievements = await this.gameService.getUserAchievements(
+				client.data.user.userId,
+			);
 		client.emit(`sendAchievements`, userAchievements);
 	}
 }
