@@ -42,12 +42,12 @@ const GameScreen: React.FC<{
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const [lockEnter, setLockEnter] = useState<boolean>(false);
 	const [waiting, setWaiting] = useState<boolean>(false);
-	const [windowSize, setWindowSize] = useState(getWindowSize());
+	const [windowSizeState, setWindowSize] = useState(getWindowSize());
 
 
 	// function to define position and sizes to actual window
-	const translateToCanvas = (leftPadPosition: any, rightPadPosition: any, ballPosition: any) => {
-		console.log("window size in translate: ", windowSize)
+	const translateToCanvas = (leftPadPosition: any, rightPadPosition: any, ballPosition: any, windowSize: any) => {
+		// console.log("window size in translate: ", windowSize)
 		// console.log("- TRANSLATE TO CANVAS -\nwindowSize.innerWidth: ", windowSize.innerWidth, "windowSize.innerHeight: ", windowSize.innerHeight)
 		leftPadPosition.x = 0;
 		leftPadPosition.y = Math.round(leftPadPosition.y * windowSize.innerHeight / baseHeight);
@@ -68,21 +68,25 @@ const GameScreen: React.FC<{
 
 		const context = canvas.current!.getContext("2d");
 		// socket.emit("joinMatch");
-		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
-			console.log("window size in entering socket.on: ", windowSize)
+		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score, windowSizeArg) => {
+			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
+			let windowSize = windowSizeState;
+			console.log("windowSize arg: ", windowSizeArg)
+			// if (windowSizeArg)
+			// 	windowSize = windowSizeArg
 			leftPadPosition = leftPos;
 			rightPadPosition = rightPos;
 			ballPosition = ballPos;
 			player1Score = p1Score;
 			player2Score = p2Score;
 			// Adapt size to window at new position sent from backend
-			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
+			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition, windowSize);
 			console.log("- After socket.on() -\n\n")
 			console.log("canvas size: ", windowSize);
 			console.log("leftPadPosition: ", leftPadPosition);
 			console.log("rightPadPosition: ", rightPadPosition);
 			console.log("-------------------------\n\n")
-			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
+
 
 			//  draw the ball
 			// context!.arc(5, 5, 5, 0, 2 * Math.PI);
@@ -131,12 +135,6 @@ const GameScreen: React.FC<{
 		}
 		// do something here with the canvas
 
-		console.log("- WINDOW INITIAL SIZE -\n\n")
-		console.log("canvas size: ", windowSize);
-		console.log("leftPadPosition: ", leftPadPosition);
-		console.log("rightPadPosition: ", rightPadPosition);
-		console.log("-------------------------\n\n")
-
 		function handleWindowResize() {
 			setWindowSize(getWindowSize());
 		}
@@ -145,16 +143,16 @@ const GameScreen: React.FC<{
 		return () => {
 			window.removeEventListener('resize', handleWindowResize);
 		};
-	}, []);
+	}, [windowSizeState]);
 
-	useEffect(() => () => {
-		console.log("- Before redraw -\n\n")
-		console.log("canvas size: ", windowSize);
-		console.log("leftPadPosition: ", leftPadPosition);
-		console.log("rightPadPosition: ", rightPadPosition);
-		console.log("-------------------------\n\n")
-		socket.emit('redrawCanvas');
-	}, [windowSize])
+	// useEffect(() => () => {
+	// 	console.log("- Before redraw -\n\n")
+	// 	console.log("canvas size: ", windowSizeState);
+	// 	console.log("leftPadPosition: ", leftPadPosition);
+	// 	console.log("rightPadPosition: ", rightPadPosition);
+	// 	console.log("-------------------------\n\n")
+	// 	socket.emit('redrawCanvas', windowSizeState);
+	// }, [windowSizeState])
 
 	function getWindowSize() {
 		let { innerWidth, innerHeight } = window;
@@ -182,6 +180,7 @@ const GameScreen: React.FC<{
 
 	const mouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
 		event.preventDefault();
+		console.log("windowSizeState mouse move: ", windowSizeState)
 		socket.emit("mouseMove", event.clientY);
 	};
 
@@ -310,8 +309,8 @@ const GameScreen: React.FC<{
 					tabIndex={0}
 					onMouseMove={mouseMove}
 					onKeyDown={handleKeyDown}
-					width={windowSize.innerWidth}
-					height={windowSize.innerHeight}
+					width={windowSizeState.innerWidth}
+					height={windowSizeState.innerHeight}
 					ref={canvas}
 					className={classes.canvas}
 				/>

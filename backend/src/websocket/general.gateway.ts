@@ -453,7 +453,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('redrawCanvas')
-	async redrawCanvas(client: Socket) {
+	async redrawCanvas(client: Socket, windowSize: any) {
 		this.server
 			.to(client.data.currentMatch.roomName)
 			.emit(
@@ -463,6 +463,7 @@ export class GeneralGateway
 				client.data.currentMatch.ball,
 				client.data.currentMatch.p1Score,
 				client.data.currentMatch.p2Score,
+				windowSize
 			);
 	}
 
