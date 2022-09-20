@@ -1,0 +1,50 @@
+.success_layout {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-inline: 10px;
+	margin-bottom: 10px;
+}
+
+.success_title {
+	align-self: center;
+	margin-bottom: 10px;
+}
+
+.stats {
+	width: 100%;
+	align-self: center;
+	display: flex;
+	justify-content: space-around;
+	flex-wrap: wrap;
+}
+
+.stat_number {
+	text-align: center;
+	font-size: 40px;
+	margin-block: 5px;
+}
+
+.stat_desc {
+	margin-block: 5px;
+	text-align: center;
+}
+
+.achievements {
+	width: 100%;
+	align-self: center;
+	display: flex;
+	justify-content: space-around;
+	flex-wrap: wrap;
+}
+
+.achieve_badge {
+	max-width: 80px;
+	max-height: 80px;
+}
+
+.achieve_desc {
+	margin-block: 5px;
+	text-align: center;
+}

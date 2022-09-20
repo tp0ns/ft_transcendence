@@ -1,5 +1,3 @@
-import UserEntity from 'src/user/models/user.entity';
-
 export class Pad {
 	x: number;
 	y: number;
@@ -27,16 +25,16 @@ export class Match {
 	rightPad: Pad;
 	leftPad: Pad;
 	ball: Ball;
-	player1: UserEntity;
-	player2: UserEntity;
+	player1: string;
+	player2: string;
 	// stats
 	p1Score: number;
 	p2Score: number;
 	p1Touches: number;
 	p2Touches: number;
 	//end stats
-	p1User: UserEntity;
-	p2User: UserEntity;
+	p1User: string;
+	p2User: string;
 	isLocal: boolean;
 	//name of the associated room for sockets
 	roomName: string;

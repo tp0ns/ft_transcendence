@@ -2,6 +2,7 @@ import { MaxLength } from 'class-validator';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { Match } from 'src/game/interfaces/game.interface';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 import {
 	Column,
 	Entity,
@@ -87,6 +88,13 @@ export class UserEntity {
 		nullable: true,
 	})
 	defeats: number;
+
+	@ManyToMany(() => MatchHistoryEntity, {
+		cascade: true,
+	})
+	@JoinTable()
+	MatchHistory: MatchHistoryEntity[];
+
 }
 
 export default UserEntity;

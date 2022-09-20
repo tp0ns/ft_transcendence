@@ -1,5 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { ForbiddenException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+	ForbiddenException,
+	forwardRef,
+	Inject,
+	Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { fstat } from 'fs';
 import { Socket } from 'socket.io';
@@ -8,7 +13,8 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Match, Pad, Ball } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
-import { AchievementsEntity } from './statistics/achievements.entity';
+import { AchievementsEntity } from './achievements/achievements.entity';
+import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 
 const matchMakingSet = new Set<Socket>();
 const inviteSet = new Set<Socket>();
@@ -18,13 +24,14 @@ let match: Match;
 @Injectable()
 export class GameService {
 	constructor(
-
 		@InjectRepository(UserEntity)
 		private userRepo: Repository<UserEntity>,
 		@InjectRepository(InvitationEntity)
 		private invitationRepository: Repository<InvitationEntity>,
 		@InjectRepository(AchievementsEntity)
 		private AchievementsRepository: Repository<AchievementsEntity>,
+		@InjectRepository(MatchHistoryEntity)
+		private MatchHistoryRepository: Repository<MatchHistoryEntity>,
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
@@ -62,15 +69,14 @@ export class GameService {
 			p2Touches: 0,
 			isMoving: false,
 		};
-		let initPlayer: UserEntity; // check if this init is good
 
 		//init match using all the other class initialized
 		const match: Match = {
 			leftPad: initLeftPad,
 			rightPad: initRightPad,
 			ball: initBall,
-			player1: initPlayer,
-			player2: initPlayer,
+			player1: null,
+			player2: null,
 			p1Score: 0,
 			p2Score: 0,
 			p1Touches: 0,
@@ -92,16 +98,12 @@ export class GameService {
 				case 'up':
 					if (match.rightPad.y - match.rightPad.speed <= 100) {
 						match.rightPad.y = 100;
-					}
-					else
-						match.rightPad.y -= match.rightPad.speed;
+					} else match.rightPad.y -= match.rightPad.speed;
 					break;
 				case 'down':
 					if (match.rightPad.y + match.rightPad.speed >= 480) {
 						match.rightPad.y = 480;
-					}
-					else
-						match.rightPad.y += match.rightPad.speed;
+					} else match.rightPad.y += match.rightPad.speed;
 					break;
 			}
 		}
@@ -111,12 +113,9 @@ export class GameService {
 	async moveMouseLeft(mousePosy: number, match: Match) {
 		if (mousePosy <= 100) {
 			match.leftPad.y = 100;
-		}
-		else if (mousePosy >= 480) {
+		} else if (mousePosy >= 480) {
 			match.leftPad.y = 480;
-		}
-		else
-			match.leftPad.y = mousePosy;
+		} else match.leftPad.y = mousePosy;
 	}
 
 	// set new position according to mouse (for right pad only)
@@ -124,19 +123,16 @@ export class GameService {
 		if (match.isLocal == false) {
 			if (mousePosy <= 100) {
 				match.rightPad.y = 100;
-			}
-			else if (mousePosy >= 480) {
+			} else if (mousePosy >= 480) {
 				match.rightPad.y = 480;
-			}
-			else
-				match.rightPad.y = mousePosy;
+			} else match.rightPad.y = mousePosy;
 		}
 	}
 
 	// gameFunction : Switch with all functions related to the match
 	async gameFunction(func: string, score: number, match: Match) {
 		switch (func) {
-			case "resetBall":
+			case 'resetBall':
 				match.ball.y = 250;
 				match.ball.x = 250;
 				match.ball.speedy = 0;
@@ -161,10 +157,10 @@ export class GameService {
 	// and disable keyboard commands
 	async toggleLocalGame(client: Socket) {
 		const roomName = 'room' + Math.random();
-		client.join(roomName)
+		client.join(roomName);
 		client.data.currentMatch = this.setDefaultPos(roomName);
 		client.data.currentMatch.isLocal = true;
-		client.data.currentMatch.p1User = client.data.user;
+		client.data.currentMatch.p1User = client.data.user.userId;
 		client.data.currentMatch.p2User = client.data.currentMatch.p1User;
 		client.data.currentMatch.player1 = client.data.currentMatch.p1User;
 		client.data.currentMatch.player2 = client.data.currentMatch.p1User;
@@ -181,8 +177,7 @@ export class GameService {
 			for (const item of matchMakingSet) {
 				if (user1 == null) {
 					user1 = item.data.user;
-				}
-				else {
+				} else {
 					user2 = item.data.user;
 				}
 			}
@@ -194,13 +189,13 @@ export class GameService {
 			match = this.setDefaultPos(roomName);
 			for (const item of matchMakingSet) {
 				if (match.p1User == null) {
-					match.player1 = item.data.user;
+					match.player1 = item.data.user.userId;
 					match.p1User = match.player1;
 				} else if (
 					match.p2User == null &&
-					match.p1User != item.data.user
+					match.p1User != item.data.user.userId
 				) {
-					match.player2 = item.data.user;
+					match.player2 = item.data.user.userId;
 					match.p2User = match.player2;
 				}
 				item.join(roomName);
@@ -210,8 +205,8 @@ export class GameService {
 				item.data.currentMatch = match;
 				item.data.user.currentMatch = match;
 			}
-			// this.userRepo.save(user1);
-			// this.userRepo.save(user2);
+			await this.userRepo.save(user1);
+			await this.userRepo.save(user2);
 			matchMakingSet.clear();
 		}
 		return true;
@@ -219,96 +214,134 @@ export class GameService {
 
 	/**
 	 * @brief Permet de creer une entite achievements lie a chaque user connecte
-	 *
+	 * - si l'utilisateur est @tp0ns , @clbouche , @elaachac , @vbaron
+	 * -> set du builderAchievement a true
 	 * @param newUser le nouvel utilisateur qui se connecte
 	 */
 	async newConnection(newUser: UserEntity) {
-		let userAchievements: AchievementsEntity = await this.AchievementsRepository.save({
+		let builderAchievement: boolean;
+		if (
+			newUser.schoolId === 56170 ||
+			newUser.schoolId === 63187 ||
+			newUser.schoolId === 60438
+		)
+			// || newUser.schoolId === vincentSchoolId)
+			builderAchievement = true;
+		await this.AchievementsRepository.save({
 			userId: newUser.userId,
-		})
+			Builder: builderAchievement,
+		});
 	}
 
+	/**
+	 *
+	 * @brief Recuperer les achievements d'un utilisateur
+	 *
+	 */
 	async getUserAchievements(userId: string) {
-		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: userId } });
+		const userAchievements: AchievementsEntity =
+			await this.AchievementsRepository.findOne({ where: { userId: userId } });
 		return userAchievements;
 	}
 
+	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match) {
+		let newMatchHistory: MatchHistoryEntity =
+			await this.MatchHistoryRepository.save({
+				winnerUsername: winner.username,
+				winnerScore:
+					match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
+				loserUsername: loser.username,
+				loserScore:
+					match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+			});
+		winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
+		loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+	}
+
+	/**
+	 * Permet de set les achivements d'un joueur
+	 * - premiere entree dans la fonction: firstMatch
+	 * - calcul selon le nombre de victoires ou de defaites
+	 * du user pour les autres achievements
+	 */
 	async setAchievements(user: UserEntity) {
-		const userAchievements: AchievementsEntity = await this.AchievementsRepository.findOne({ where: { userId: user.userId } });
-		if (user.victories === 1 && user.defeats === null || user.defeats === 1 && user.victories === null)
-			userAchievements.FirstMatch = true;
-		else if (user.victories === 3)
-			userAchievements.Victoryx3 = true;
-		else if (user.victories === 5)
-			userAchievements.Victoryx5 = true;
-		else if (user.victories === 10)
-			userAchievements.Victoryx10 = true;
-		else if (user.defeats === 3)
-			userAchievements.Defeatx3 = true;
+		const userAchievements: AchievementsEntity =
+			await this.AchievementsRepository.findOne({
+				where: { userId: user.userId },
+			});
+		userAchievements.FirstMatch = true;
+		if (user.victories === 3) userAchievements.Victoryx3 = true;
+		else if (user.victories === 5) userAchievements.Victoryx5 = true;
+		else if (user.victories === 10) userAchievements.Victoryx10 = true;
+		else if (user.defeats === 3) userAchievements.Defeatx3 = true;
 		await userAchievements.save();
 	}
 
 	//ends the game
-	async endGame(client: Socket, match: Match, winner: UserEntity, loser: UserEntity) {
-		if (match == null) { // opponent refused the invitation
+	async endGame(
+		client: Socket,
+		match: Match,
+		winner: UserEntity,
+		loser: UserEntity,
+	) {
+		if (match == null) {
+			// opponent refused the invitation
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			await this.userRepo.save(winner);
+			await this.userRepo.save(loser);
 			client.leave(winner.currentMatch.roomName);
-			throw new ForbiddenException(
-				"Your opponent gave up the game.",
-			);
+			throw new ForbiddenException('Your opponent gave up the game.');
 		}
 		match.isEnd = true;
 		if (match.isLocal == false) {
 			winner.victories++;
 			loser.defeats++;
-			this.userRepository.save(winner);
-			this.userRepository.save(loser);
-			this.setAchievements(winner);
-			this.setAchievements(loser);
-		}
-		else {
+			await this.setAchievements(winner);
+			await this.setAchievements(loser);
+			await this.setMatchHistory(winner, loser, match);
+		} else {
 			// trigger the pop-up(?modal) with victory info and home button
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			await this.userRepo.save(winner);
+			await this.userRepo.save(loser);
 			console.log('We have a winner !');
+
+			return false;
 		}
-		console.log('winner match', winner.currentMatch);
-		console.log('loser match', loser.currentMatch);
-		console.log('client match', client.data.currentMatch);
 		winner.currentMatch = null;
 		loser.currentMatch = null;
-		console.log('AFTER NULL winner match', winner.currentMatch);
-		console.log('loser match', loser.currentMatch);
+		await this.userRepo.save(winner);
+		await this.userRepo.save(loser);
+		return true;
 	}
+
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(client: Socket, match: Match) {
-		if (match.p1Score >= 2) {
-			this.endGame(client, match, match.player1, match.player2);
-			return match.player1;
-		}
-		if (match.p2Score >= 2) {
-			this.endGame(client, match, match.player2, match.player1);
-			return match.player2;
-		}
+		const user1: UserEntity = await this.userService.getUserById(match.player1);
+		const user2: UserEntity = await this.userService.getUserById(match.player2);
+		if (match.p1Score >= 2) return 1;
+		else if (match.p2Score >= 2) return 2;
+		return 0;
 	}
 
 	async getInvitations(client: Socket) {
-		console.log('client.Id : ', client.data.user.userId);
-		const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
-			where: [
-				{ receiver: { userId: client.data.user.userId } },
-			],
-		});
-		console.log('allInvitations : ', allInvitations);
+		const allInvitations: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ receiver: { userId: client.data.user.userId } }],
+			});
 		const currentTime = Date.now();
 		for (const invitation of allInvitations) {
 			if (currentTime - invitation.creationDate >= 60000) {
 				this.refuseInvite(client, invitation.creator.userId);
 			}
 		}
-		console.log('invit after suppr : ', allInvitations);
-		const invitAfterCheck: InvitationEntity[] = await this.invitationRepository.find({
-			where: [
-				{ receiver: { userId: client.data.user.userId } },
-			],
-		});
+		// console.log('invit after suppr : ', allInvitations);
+		const invitAfterCheck: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ receiver: { userId: client.data.user.userId } }],
+			});
 		return invitAfterCheck;
 	}
 
@@ -317,25 +350,26 @@ export class GameService {
 	 * @param client the user that sends an invitation
 	 */
 	async sendInvite(client: Socket, userToInviteId: string) {
-		const sentInvitations: InvitationEntity[] = await this.invitationRepository.find({
-			where: [
-				{ creator: { userId: client.data.user.userId } },
-			],
-		});
+		const sentInvitations: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ creator: { userId: client.data.user.userId } }],
+			});
 		if (sentInvitations.length > 0) {
-			// -> throw erreur
-			throw new ForbiddenException(
-				"You can't send more than one invitation.",
-			);
+			throw new ForbiddenException("You can't send more than one invitation.");
 		}
 		const date = Date.now();
-		const userToInvite: UserEntity = await this.userService.getUserById(userToInviteId);
+		const userToInvite: UserEntity = await this.userService.getUserById(
+			userToInviteId,
+		);
+		if (userToInvite.currentMatch != null) {
+			throw new ForbiddenException('This user is already in game.');
+		}
 		await this.invitationRepository.save({
 			creator: client.data.user,
 			receiver: userToInvite,
 			status: 'pending',
 			creationDate: date,
-		})
+		});
 		const roomName = 'inviteRoom' + Math.random();
 		client.join(roomName);
 		inviteRoomMap.set(client.data.user.userId, roomName);
@@ -347,8 +381,11 @@ export class GameService {
 	 * @param client the user accepting the invitation
 	 */
 	async joinInvite(client: Socket, userInvitingId: string) {
-		const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
-		let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+		const userInviting: UserEntity = await this.userService.getUserById(
+			userInvitingId,
+		);
+		let invitation: InvitationEntity = await this.invitationRepository
+			.createQueryBuilder('invitation')
 			.select(['invitation.requestId', 'creator', 'invitation.creationDate'])
 			.leftJoinAndSelect('invitation.creator', 'creator')
 			.leftJoinAndSelect('invitation.receiver', 'receiver')
@@ -359,13 +396,12 @@ export class GameService {
 			requestId: invitId,
 			creator: userInviting,
 			receiver: client.data.user,
-			status: 'accepted'
-		})
-		const allInvitations: InvitationEntity[] = await this.invitationRepository.find({
-			where: [
-				{ receiver: { userId: client.data.user.userId } },
-			],
+			status: 'accepted',
 		});
+		const allInvitations: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ receiver: { userId: client.data.user.userId } }],
+			});
 		for (const inviteIter of allInvitations) {
 			if (inviteIter != invitation) {
 				this.refuseInvite(client, inviteIter.creator.userId);
@@ -376,23 +412,28 @@ export class GameService {
 		const currentRoomName: string = inviteRoomMap.get(userInvitingId);
 		inviteRoomMap.delete(userInvitingId);
 		const currentMatch: Match = this.setDefaultPos(currentRoomName);
-		currentMatch.player1 = client.data.user;
+		currentMatch.player1 = client.data.user.userId;
 		currentMatch.p1User = currentMatch.player1;
-		currentMatch.player2 = userInviting;
+		currentMatch.player2 = userInviting.userId;
 		currentMatch.p2User = currentMatch.player2;
 		currentMatch.isLocal = false;
 		client.join(currentMatch.roomName);
 		client.data.user.currentMatch = currentMatch;
 		userInviting.currentMatch = currentMatch;
-		return (currentRoomName);
+		await this.userRepo.save(client.data.user);
+		await this.userRepo.save(userInviting);
+		return currentRoomName;
 	}
 
 	/**
 	 * cancels the invitation
 	 */
 	async refuseInvite(client: Socket, userInvitingId: string) {
-		const userInviting: UserEntity = await this.userService.getUserById(userInvitingId);
-		let invitation: InvitationEntity = await this.invitationRepository.createQueryBuilder('invitation')
+		const userInviting: UserEntity = await this.userService.getUserById(
+			userInvitingId,
+		);
+		let invitation: InvitationEntity = await this.invitationRepository
+			.createQueryBuilder('invitation')
 			.select(['invitation.requestId', 'creator'])
 			.leftJoin('invitation.creator', 'creator')
 			.leftJoin('invitation.receiver', 'receiver')
@@ -403,8 +444,8 @@ export class GameService {
 			requestId: invitId,
 			creator: userInviting,
 			receiver: client.data.user,
-			status: 'declined'
-		})
+			status: 'declined',
+		});
 		await this.invitationRepository
 			.createQueryBuilder()
 			.delete()
@@ -412,7 +453,33 @@ export class GameService {
 			.where('creator = :id', { id: userInvitingId })
 			.execute();
 		const currentRoomName: string = inviteRoomMap.get(userInvitingId);
-		return (currentRoomName);
+		return currentRoomName;
+	}
+
+	async refuseSentInvite(client: Socket, userInviting: UserEntity) {
+		let invitation: InvitationEntity = await this.invitationRepository
+			.createQueryBuilder('invitation')
+			.select(['invitation.requestId', 'creator'])
+			.leftJoin('invitation.creator', 'creator')
+			.leftJoin('invitation.receiver', 'receiver')
+			.where('invitation.creator = :id', { id: userInviting.userId })
+			.getOne();
+		const invitId: string = invitation.requestId;
+		const receiv: UserEntity = invitation.receiver;
+		invitation = await this.invitationRepository.save({
+			requestId: invitId,
+			creator: userInviting,
+			receiver: receiv,
+			status: 'declined',
+		});
+		await this.invitationRepository
+			.createQueryBuilder()
+			.delete()
+			.from(InvitationEntity)
+			.where('creator = :id', { id: userInviting.userId })
+			.execute();
+		const currentRoomName: string = inviteRoomMap.get(userInviting.userId);
+		return currentRoomName;
 	}
 
 	/**
@@ -421,8 +488,13 @@ export class GameService {
 	 */
 	async inviteIsDeclined(client: Socket, userInvitedId: string) {
 		client.leave(inviteRoomMap.get(client.data.user.userId));
-		inviteRoomMap.delete(client.data.user.userId)
-		this.endGame(client, client.data.currentMatch, client.data.user, client.data.user)
+		inviteRoomMap.delete(client.data.user.userId);
+		this.endGame(
+			client,
+			client.data.currentMatch,
+			client.data.user,
+			client.data.user,
+		);
 	}
 
 	/**
@@ -430,7 +502,102 @@ export class GameService {
 	 */
 	async spectate(client: Socket, userIdToSpec: string) {
 		// find user
+		const userToSpec: UserEntity = await this.userService.getUserById(
+			userIdToSpec,
+		);
 		// check if userToSpec.currentMatch != null
-		// client.join(userToSpec.currentMatch.roomName);
+		if (client.data.user.currentMatch != null) {
+			throw new ForbiddenException('You are already in a match.');
+		}
+		if (
+			userToSpec.currentMatch != null &&
+			userToSpec.currentMatch.isEnd == false
+		) {
+			client.data.user.currentMatch = userToSpec.currentMatch;
+			client.join(userToSpec.currentMatch.roomName);
+			await this.userRepo.save(client.data.user);
+		} else {
+			throw new ForbiddenException("You can't spectate this match.");
+		}
+	}
+
+	/**
+	 * try to know if the user is in a game
+	 */
+	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		// find user
+		const userToSpec: UserEntity = await this.userService.getUserById(
+			userIdToSpec,
+		);
+		// check if userToSpec.currentMatch != null
+		if (
+			userToSpec.currentMatch != null &&
+			userToSpec.currentMatch.isEnd == false
+		) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * HANDLE DISCONNECTION
+	 *(from game, matchmaking, after sending an invitation)
+	 */
+
+	async handleGameDisconnect(client: Socket): Promise<string> {
+		// in game
+		let winnerId: string = null;
+		if (
+			client.data.user.currentMatch != null &&
+			client.data.user.currentMatch.isEnd == false
+		) {
+			if (client.data.user.currentMatch.p1User == client.data.user.userId) {
+				winnerId = client.data.user.currentMatch.player2;
+				client.data.user.currentMatch.p2Score = 5;
+				client.data.user.currentMatch.p1Score = 0;
+			} else {
+				winnerId = client.data.user.currentMatch.player1;
+				client.data.user.currentMatch.p1Score = 5;
+				client.data.user.currentMatch.p2Score = 0;
+			}
+			await this.userRepo.save(client.data.user);
+		}
+		// in matchmaking
+		if (matchMakingSet.size != 0) {
+			for (const item of matchMakingSet) {
+				if (item == client) {
+					matchMakingSet.clear();
+					break;
+				}
+			}
+		}
+		// delete sent invitation
+		const sentInvitation: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ creator: { userId: client.data.user.userId } }],
+			});
+		for (const inviteIter of sentInvitation) {
+			this.refuseInvite(client, inviteIter.creator.userId);
+		}
+		// refuse received invitations
+		const allReceivedInvitations: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ receiver: { userId: client.data.user.userId } }],
+			});
+		for (const inviteIter of allReceivedInvitations) {
+			this.refuseInvite(client, inviteIter.creator.userId);
+		}
+		return winnerId;
+	}
+
+	async isInGame(client: Socket) {
+		const sentInvitations: InvitationEntity[] =
+			await this.invitationRepository.find({
+				where: [{ creator: { userId: client.data.user.userId } }],
+			});
+		if (client.data.user.currentMatch != null || sentInvitations != null)
+			return true;
+		else return false;
 	}
 }

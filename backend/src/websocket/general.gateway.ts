@@ -35,7 +35,8 @@ import { Ball } from '../game/interfaces/game.interface';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/statistics/achievements.entity';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -114,9 +115,30 @@ export class GeneralGateway
 	 * Handles client disconnection behaviour
 	 */
 	@UseGuards(WsGuard)
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user) this.userService.disconnectClient(client.data.user);
+		if (client.data.user) {
+			const winnerId: string = await this.gameService.handleGameDisconnect(
+				client,
+			);
+			if (winnerId != null) {
+				const winner = await this.userService.getUserById(winnerId);
+				winner.victories++;
+				client.data.user.defeats++;
+				await this.gameService.setAchievements(winner);
+				await this.gameService.setAchievements(client.data.user);
+				// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
+				this.server
+					.to(client.data.user.currentMatch.roomName)
+					.emit('victoryOf', winner);
+				this.server
+					.to(client.data.user.currentMatch.roomName)
+					.emit('errorEvent', 'Your opponnent has disconnected.');
+				this.server.emit('endGame');
+			}
+			this.server.emit('updateInvitation');
+			this.userService.disconnectClient(client.data.user);
+		}
 		this.server.emit('updatedRelations');
 	}
 
@@ -330,15 +352,12 @@ export class GeneralGateway
 	@SubscribeMessage('msgToChannel')
 	async handleMessageToChan(client: Socket, payload: string[]) {
 		const chanId: string = payload[1];
-		const new_msg = await this.channelService.sendMessage(
-			client.data.user,
-			payload,
-		);
-		const messages = await this.getChannelMessages(
-			client.data.user,
-			chanId,
-		);
-		this.server.to(chanId).emit('sendChannelMessages', messages);
+		await this.channelService.sendMessage(client.data.user, payload);
+		const socket_list: any[] = await this.server.in(chanId).fetchSockets();
+		socket_list.map(async (client) => {
+			this.getChannelMessages(client, chanId);
+		});
+		this.server.to(chanId).emit('updatedMessage');
 	}
 
 	/**
@@ -471,14 +490,12 @@ export class GeneralGateway
 	@SubscribeMessage('mouseMove')
 	async mouseMove(client: Socket, mousePosy: number) {
 		if (client.data.currentMatch) {
-			if (client.data.user.userId == client.data.currentMatch.player1.userId)
+			if (client.data.user.userId == client.data.currentMatch.player1)
 				await this.gameService.moveMouseLeft(
 					mousePosy,
 					client.data.currentMatch,
 				);
-			else if (
-				client.data.user.userId == client.data.currentMatch.player2.userId
-			)
+			else if (client.data.user.userId == client.data.currentMatch.player2)
 				await this.gameService.moveMouseRight(
 					mousePosy,
 					client.data.currentMatch,
@@ -516,9 +533,48 @@ export class GeneralGateway
 				client.data.currentMatch.p2Score,
 			);
 		//end of the game
-		const winner: UserEntity = await this.gameService.checkEndGame(client, client.data.currentMatch);
-		if (winner)
-			this.server.to(client.data.currentMatch.roomName).emit('victoryOf', winner);
+		const end = await this.gameService.checkEndGame(
+			client,
+			client.data.currentMatch,
+		);
+		if (end != 0) {
+			const user1: UserEntity = await this.userService.getUserById(
+				client.data.currentMatch.player1,
+			);
+			const user2: UserEntity = await this.userService.getUserById(
+				client.data.currentMatch.player2,
+			);
+			if (end == 1) {
+				if (
+					(await this.gameService.endGame(
+						client,
+						client.data.currentMatch,
+						user1,
+						user2,
+					)) == true
+				) {
+					this.server.emit('endGame');
+				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user1);
+			} else if (end == 2) {
+				if (
+					await this.gameService.endGame(
+						client,
+						client.data.currentMatch,
+						user2,
+						user1,
+					)
+				) {
+					// console.log('room:', client.data.currentMatch.roomName);
+					this.server.emit('endGame');
+				}
+				this.server
+					.to(client.data.currentMatch.roomName)
+					.emit('victoryOf', user2);
+			}
+		}
 	}
 
 	// get the position of the ball and emit it
@@ -573,7 +629,6 @@ export class GeneralGateway
 	/**
 	 * 				INVITATIONS
 	 */
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async retrieveInvitations(client: Socket) {
@@ -587,6 +642,7 @@ export class GeneralGateway
 	async sendInvite(client: Socket, userToInviteId: string) {
 		await this.gameService.sendInvite(client, userToInviteId);
 		this.server.emit('updateInvitation');
+		client.emit('pendingInvitation');
 		console.log('invite sent');
 	}
 
@@ -623,11 +679,32 @@ export class GeneralGateway
 	 *		SPECTATE
 	 */
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('spectate')
-	// async spectate(client: Socket, userIdToSpec: string) {
-	// 	await this.gameService.spectate(client, userIdToSpec);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('spectate')
+	async spectate(client: Socket, userIdToSpec: string) {
+		await this.gameService.spectate(client, userIdToSpec);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getCurrentMatch')
+	async getCurrentMatch(client: Socket, userIdToSpec: string) {
+		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
+		if (
+			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
+		) {
+			client.emit('sendCurrentMatch', true);
+		} else client.emit('sendCurrentMatch', false);
+	}
+
+	/**
+	 * User State in game
+	 */
+	@UseGuards(WsGuard)
+	@SubscribeMessage('isInGame')
+	async isInGame(client: Socket) {
+		const ret: boolean = await this.gameService.isInGame(client);
+		client.emit('isDisplayGame', ret);
+	}
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -691,40 +768,49 @@ export class GeneralGateway
 		);
 		this.server.emit('updatedRelations');
 	}
-
 	/**
-		_   _ ____  _____ ____  
-	 | | | / ___|| ____|  _ \ 
+		_   _ ____  _____ ____
+	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
-	 | |_| |___) | |___|  _ < 
+	 | |_| |___) | |___|  _ <
 		\___/|____/|_____|_| \_\
 	 */
 
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('triggerModifyChannel')
-	// async getUpdatedUser(client: Socket)
-	// {
-	// 	this.server.emit('updatedChangnel');
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMatchHistory')
+	async getMatchHistory(client: Socket, userId: string) {
+		let user: UserEntity;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		client.emit(`sendMatchHistory`, user.MatchHistory.slice(-4));
+	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getStatistics')
 	async getStatistics(client: Socket, userId: string) {
-		const user: UserEntity = await this.userService.getUserById(userId);
-		const ratio: number = (user.victories / (user.victories + user.defeats)) * 100;
+		let user: UserEntity;
+		if (userId != 'me') user = await this.userService.getUserById(userId);
+		else user = await this.userService.getUserById(client.data.user.userId);
+		let ratio: number =
+			(user.victories / (user.victories + user.defeats)) * 100;
+		if (!ratio) ratio = 0;
 		client.emit(`sendStatistics`, {
 			victory: user.victories,
 			defeat: user.defeats,
-			ratio: ratio
+			ratio: Math.round(ratio),
 		});
 	}
-
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('getAchievements')
 	async getAchievements(client: Socket, userId: string) {
-		const userAchievements: AchievementsEntity = await this.gameService.getUserAchievements(userId);
+		let userAchievements: AchievementsEntity;
+		if (userId != 'me')
+			userAchievements = await this.gameService.getUserAchievements(userId);
+		else
+			userAchievements = await this.gameService.getUserAchievements(
+				client.data.user.userId,
+			);
 		client.emit(`sendAchievements`, userAchievements);
 	}
 }

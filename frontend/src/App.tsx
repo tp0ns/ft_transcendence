@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { io } from "socket.io-client";
 import Auth from "./components/Auth";
