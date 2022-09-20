@@ -223,10 +223,10 @@ export class GameService {
 		if (
 			newUser.schoolId === 56170 ||
 			newUser.schoolId === 63187 ||
-			newUser.schoolId === 60438
+			newUser.schoolId === 60438 || 
+			newUser.schoolId == 69772
 		)
-			// || newUser.schoolId === vincentSchoolId)
-			builderAchievement = true;
+		builderAchievement = true;
 		await this.AchievementsRepository.save({
 			userId: newUser.userId,
 			Builder: builderAchievement,
