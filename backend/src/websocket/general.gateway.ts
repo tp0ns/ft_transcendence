@@ -588,6 +588,15 @@ export class GeneralGateway
 		}
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('changedPage')
+	async	changedPage(client: Socket)
+	{
+		this.gameService.handleGameDisconnect(client);
+	}
+
+
+
 	/**
 	 * 				INVITATIONS
 	 */
