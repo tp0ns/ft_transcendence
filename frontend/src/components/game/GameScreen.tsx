@@ -30,6 +30,9 @@ let rightPadPosition = {
 	speed: 20,
 };
 
+const baseWidth: number = 620;
+const baseHeight: number = 480;
+
 let player1Score: number = 0;
 let player2Score: number = 0;
 
@@ -39,20 +42,52 @@ const GameScreen: React.FC<{
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const [lockEnter, setLockEnter] = useState<boolean>(false);
 	const [waiting, setWaiting] = useState<boolean>(false);
+	const [windowSize, setWindowSize] = useState(getWindowSize());
+
+
+	// function to define position and sizes to actual window
+	const translateToCanvas = (leftPos: any, rightPos: any, ballPos: any) => {
+		// console.log("window size in translate: ", windowSize)
+		// console.log("- TRANSLATE TO CANVAS -\nwindowSize.innerWidth: ", windowSize.innerWidth, "windowSize.innerHeight: ", windowSize.innerHeight)
+		leftPadPosition.x = 0;
+		leftPadPosition.y = Math.round(leftPos.y * windowSize.innerHeight / baseHeight);
+		// leftPadPosition.w = (20 / 640) * windowSize.innerWidth;
+		// leftPadPosition.h = (100 / 480) * windowSize.innerHeight;
+
+		rightPadPosition.x = Math.round(windowSize.innerWidth - 20);
+		rightPadPosition.y = Math.round(rightPos.y * windowSize.innerHeight / baseHeight);
+		// rightPadPosition.w = (20 / 640) * windowSize.innerWidth;
+		// rightPadPosition.h = (100 / 480) * windowSize.innerHeight;
+
+		ballPosition.x = Math.round(ballPos.x * windowSize.innerWidth / baseWidth);
+		ballPosition.y = Math.round(ballPos.y * windowSize.innerHeight / baseHeight);
+		// ballPosition.radius = (10 / 480) * windowSize.innerHeight;
+	}
 
 	useEffect(() => {
+
 		const context = canvas.current!.getContext("2d");
 		// socket.emit("joinMatch");
 		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
-			leftPadPosition = leftPos;
-			rightPadPosition = rightPos;
+			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
+			console.log("- Before translate -\n\n")
+			console.log("canvas size: ", windowSize);
+			console.log("leftPadPosition: ", leftPadPosition);
+			console.log("rightPadPosition: ", rightPadPosition);
 			player1Score = p1Score;
 			player2Score = p2Score;
-			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
+			// Adapt size to window at new position sent from backend
+			console.log("-------------------------\n\n")
+			translateToCanvas(leftPos, rightPos, ballPos);
+			console.log("- After translate -\n\n")
+			console.log("canvas size: ", windowSize);
+			console.log("leftPadPosition: ", leftPadPosition);
+			console.log("rightPadPosition: ", rightPadPosition);
+			console.log("-------------------------\n\n")
+
 
 			//  draw the ball
-			ballPosition = ballPos;
-			context!.arc(5, 5, 5, 0, 2 * Math.PI);
+			// context!.arc(5, 5, 5, 0, 2 * Math.PI);
 			context!.beginPath();
 			context!.arc(
 				ballPosition.x,
@@ -85,8 +120,9 @@ const GameScreen: React.FC<{
 			//draw the score:
 			context!.font = "80px blippoblack";
 			context!.fillStyle = "#3a36367c";
-			context!.fillText(player1Score.toString(), 150, 100);
-			context!.fillText(player2Score.toString(), 490, 100);
+			console.log()
+			context!.fillText(player1Score.toString(), Math.round(windowSize.innerWidth / 2 - 65), Math.round(windowSize.innerHeight * 0.2));
+			context!.fillText(player2Score.toString(), Math.round(windowSize.innerWidth / 2 + 20), Math.round(windowSize.innerHeight * 0.2));
 		});
 
 		// do something here with the canvas
@@ -96,7 +132,32 @@ const GameScreen: React.FC<{
 			toggleMatchMaking();
 		}
 		// do something here with the canvas
-	}, []);
+
+		function handleWindowResize() {
+			setWindowSize(getWindowSize());
+		}
+
+		window.addEventListener('resize', handleWindowResize);
+		return () => {
+			window.removeEventListener('resize', handleWindowResize);
+		};
+	}, [windowSize]);
+
+	// useEffect(() => () => {
+	// 	console.log("- Before redraw -\n\n")
+	// 	console.log("canvas size: ", windowSizeState);
+	// 	console.log("leftPadPosition: ", leftPadPosition);
+	// 	console.log("rightPadPosition: ", rightPadPosition);
+	// 	console.log("-------------------------\n\n")
+	// 	socket.emit('redrawCanvas', windowSizeState);
+	// }, [windowSizeState])
+
+	function getWindowSize() {
+		let { innerWidth, innerHeight } = window;
+		innerWidth = Math.round(innerWidth * 0.7);
+		innerHeight = Math.round(innerHeight * 0.6);
+		return { innerWidth, innerHeight };
+	}
 
 	socket.on("gameStarted", () => {
 		console.log("entered game started")
@@ -214,7 +275,6 @@ const GameScreen: React.FC<{
 	};
 
 	useEffect(() => {
-		console.log("Lock enter in useEffect; ", lockEnter);
 		if (lockEnter) moveBall();
 	}, [lockEnter]);
 
@@ -246,8 +306,8 @@ const GameScreen: React.FC<{
 					tabIndex={0}
 					onMouseMove={mouseMove}
 					onKeyDown={handleKeyDown}
-					width="640"
-					height="480"
+					width={windowSize.innerWidth}
+					height={windowSize.innerHeight}
 					ref={canvas}
 					className={classes.canvas}
 				/>

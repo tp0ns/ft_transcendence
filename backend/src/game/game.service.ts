@@ -35,7 +35,7 @@ export class GameService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-	) {}
+	) { }
 	/**
 	 * set the default position of the elements in the game
 	 * @param match interface of the match
@@ -58,8 +58,8 @@ export class GameService {
 		};
 		const initBall: Ball = {
 			// set ball position
-			x: 250,
-			y: 250,
+			x: 310,
+			y: 240,
 			radius: 10,
 			startAngle: 0,
 			speedx: 5,

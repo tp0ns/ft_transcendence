@@ -45,8 +45,7 @@ import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -54,7 +53,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) {}
+	) { }
 
 	@WebSocketServer() server: Server;
 
@@ -471,6 +470,21 @@ export class GeneralGateway
 			);
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('redrawCanvas')
+	async redrawCanvas(client: Socket, windowSize: any) {
+		this.server
+			.to(client.data.currentMatch.roomName)
+			.emit(
+				'setPosition',
+				client.data.currentMatch.leftPad,
+				client.data.currentMatch.rightPad,
+				client.data.currentMatch.ball,
+				client.data.currentMatch.p1Score,
+				client.data.currentMatch.p2Score,
+			);
+	}
+
 	// Move event, allow the user to move its pad with mouse
 	@UseGuards(WsGuard)
 	@SubscribeMessage('mouseMove')
@@ -588,7 +602,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
-		console.log('entered toggleLocalGame');
 		await this.gameService.toggleLocalGame(client);
 	}
 
@@ -605,6 +618,12 @@ export class GeneralGateway
 		if (client.data.currentMatch != null) {
 			this.server.to(client.data.currentMatch.roomName).emit('gameStarted');
 		}
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('backHome')
+	async backHome(client: Socket) {
+		client.emit("goBackHome");
 	}
 
 	/**
@@ -750,11 +769,11 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 	/**
-	  _   _ ____  _____ ____
+		_   _ ____  _____ ____
 	 | | | / ___|| ____|  _ \
 	 | | | \___ \|  _| | |_) |
 	 | |_| |___) | |___|  _ <
-	  \___/|____/|_____|_| \_\
+		\___/|____/|_____|_| \_\
 	 */
 
 	@UseGuards(WsGuard)

@@ -10,12 +10,10 @@ const GamePage = () => {
 	const [winner, setWinner] = useState<string>("");
 
 	const handleGameType = (state: string) => {
-		console.log("state: ", state);
 		setGameState(state);
 	}
 
 	socket.on('victoryOf', (winnerSock) => {
-		console.log("entered Victory of: ", winnerSock)
 		if (gameState === "matchGame")
 			setWinner(winnerSock.username);
 		else if (gameState === "localGame")
