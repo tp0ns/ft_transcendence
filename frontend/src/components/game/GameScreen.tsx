@@ -46,21 +46,21 @@ const GameScreen: React.FC<{
 
 
 	// function to define position and sizes to actual window
-	const translateToCanvas = (leftPadPosition: any, rightPadPosition: any, ballPosition: any) => {
+	const translateToCanvas = (leftPos: any, rightPos: any, ballPos: any) => {
 		// console.log("window size in translate: ", windowSize)
 		// console.log("- TRANSLATE TO CANVAS -\nwindowSize.innerWidth: ", windowSize.innerWidth, "windowSize.innerHeight: ", windowSize.innerHeight)
 		leftPadPosition.x = 0;
-		leftPadPosition.y = Math.round(leftPadPosition.y * windowSize.innerHeight / baseHeight);
+		leftPadPosition.y = Math.round(leftPos.y * windowSize.innerHeight / baseHeight);
 		// leftPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// leftPadPosition.h = (100 / 480) * windowSize.innerHeight;
 
 		rightPadPosition.x = Math.round(windowSize.innerWidth - 20);
-		rightPadPosition.y = Math.round(rightPadPosition.y * windowSize.innerHeight / baseHeight);
+		rightPadPosition.y = Math.round(rightPos.y * windowSize.innerHeight / baseHeight);
 		// rightPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// rightPadPosition.h = (100 / 480) * windowSize.innerHeight;
 
-		ballPosition.x = Math.round(ballPosition.x * windowSize.innerWidth / baseWidth);
-		ballPosition.y = Math.round(ballPosition.y * windowSize.innerHeight / baseHeight);
+		ballPosition.x = Math.round(ballPos.x * windowSize.innerWidth / baseWidth);
+		ballPosition.y = Math.round(ballPos.y * windowSize.innerHeight / baseHeight);
 		// ballPosition.radius = (10 / 480) * windowSize.innerHeight;
 	}
 
@@ -70,18 +70,15 @@ const GameScreen: React.FC<{
 		// socket.emit("joinMatch");
 		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
 			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
-			leftPadPosition = leftPos;
-			rightPadPosition = rightPos;
-			ballPosition = ballPos;
-			player1Score = p1Score;
-			player2Score = p2Score;
-			// Adapt size to window at new position sent from backend
 			console.log("- Before translate -\n\n")
 			console.log("canvas size: ", windowSize);
 			console.log("leftPadPosition: ", leftPadPosition);
 			console.log("rightPadPosition: ", rightPadPosition);
+			player1Score = p1Score;
+			player2Score = p2Score;
+			// Adapt size to window at new position sent from backend
 			console.log("-------------------------\n\n")
-			translateToCanvas(leftPadPosition, rightPadPosition, ballPosition);
+			translateToCanvas(leftPos, rightPos, ballPos);
 			console.log("- After translate -\n\n")
 			console.log("canvas size: ", windowSize);
 			console.log("leftPadPosition: ", leftPadPosition);
