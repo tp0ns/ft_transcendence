@@ -57,16 +57,17 @@ const RelationItem: React.FC<{
 	};
 
 	const sendMessage = () => {
-		console.log(`enter in sendMessage in front`);
-		socket.emit("createDM", {
-			title: 'DM',
-			DM: true,
-			user2: props.relation.receiver?.userId,
-			protected: false,
-			private: false,
-			password: null,
-		});
-	};
+        let user_2;
+        {props.relation.receiver!.userId === props.myId ? user_2 = props.relation.creator?.userId : user_2 = props.relation.receiver?.userId};
+        socket.emit("createDM", {
+            title: 'DM',
+            DM: true,
+            user2: user_2,
+            protected: false,
+            private: false,
+            password: null,
+        });
+    };
 
 	return (
 		<div

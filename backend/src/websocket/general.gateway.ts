@@ -621,6 +621,12 @@ export class GeneralGateway
 	}
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('changedPage')
+	async	changedPage(client: Socket)
+	{
+		this.gameService.handleGameDisconnect(client);
+	}
+
 	@SubscribeMessage('backHome')
 	async backHome(client: Socket) {
 		client.emit("goBackHome");
