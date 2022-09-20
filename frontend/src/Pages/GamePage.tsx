@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { socket } from "../App";
 import EndScreen from "../components/game/EndScreen";
 import GameScreen from "../components/game/GameScreen";
@@ -12,6 +12,14 @@ const GamePage = () => {
 	const handleGameType = (state: string) => {
 		setGameState(state);
 	}
+
+	useEffect(() => {
+		socket.emit('isInGame');
+		socket.on("isDisplayGame", (ret) => {
+			if (ret)
+				setGameState("matchGame");
+		})
+	}, [])
 
 	socket.on('victoryOf', (winnerSock) => {
 		if (gameState === "matchGame")
