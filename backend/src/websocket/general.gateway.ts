@@ -463,7 +463,6 @@ export class GeneralGateway
 				client.data.currentMatch.ball,
 				client.data.currentMatch.p1Score,
 				client.data.currentMatch.p2Score,
-				windowSize
 			);
 	}
 
@@ -547,7 +546,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('toggleLocalGame')
 	async toggleSinglePlayer(client: Socket) {
-		console.log("entered toggleLocalGame")
 		await this.gameService.toggleLocalGame(client);
 	}
 
