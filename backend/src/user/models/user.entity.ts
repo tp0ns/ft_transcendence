@@ -29,6 +29,7 @@ export class UserEntity {
 	@MaxLength(10)
 	@Column({
 		type: 'varchar',
+		nullable: false,
 	})
 	username: string;
 
