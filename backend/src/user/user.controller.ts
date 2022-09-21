@@ -11,6 +11,7 @@ import {
 	Body,
 	UsePipes,
 	ValidationPipe,
+	UseFilters,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -30,7 +31,6 @@ import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
 
 @ApiTags('users')
 @Controller('users')
-// @UseFilters(UnauthorizedExceptionFilter)
 export class UserController {
 	constructor(private userService: UserService) {}
 
