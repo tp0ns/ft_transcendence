@@ -2,7 +2,7 @@
 	margin-inline: 15px;
 	padding-bottom: 5px;
 	height: fit-content;
-	overflow: scroll;
+	overflow-y: scroll;
 	/* height: 51vh; */
 	/* overflow: scroll; */
 	display: flex;
