@@ -823,7 +823,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('nameUpdate')
 	async nameUpdate(client: Socket, updateUsernameDto: UpdateUsernameDto) {
-		const resp = this.userService.update(client.data.user.userId, { username: updateUsernameDto.username })
+		const user = await this.userService.update(client.data.user.userId, { username: updateUsernameDto.username })
+		client.emit("newName", user)
 	}
 }
 

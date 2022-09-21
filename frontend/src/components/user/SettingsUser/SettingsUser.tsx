@@ -54,7 +54,10 @@ const SettingsUser: React.FC<{
 		event.preventDefault();
 		if (!nameInput.current?.value) return;
 		socket.emit("nameUpdate", { username: nameInput.current.value });
-		socket.on("newName", (response) => (props.onUserchange(response)));
+		socket.on("newName", (response) => {
+			console.log(response);
+			props.onUserchange(response)
+		});
 		nameInput.current!.value = "";
 	}
 

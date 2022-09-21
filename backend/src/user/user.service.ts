@@ -21,7 +21,7 @@ export class UserService {
 		private channelService: ChannelService,
 		@Inject(forwardRef(() => GameService))
 		private GameService: GameService,
-	) {}
+	) { }
 
 	/**
 	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il
@@ -126,15 +126,13 @@ export class UserService {
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
-		while (attrs.username === user.username) {
-			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
-		}
-		// if (this.getUserByUsername(attrs.username))
-		// 	throw new ForbiddenException("username already taken");
-		if (attrs.profileImage.split(".").at(-1) != "png")
+
+		if (await this.getUserByUsername(attrs.username))
+			throw new ForbiddenException("username already taken");
+		if (attrs.profileImage && attrs.profileImage.split(".").at(-1) != "png")
 			throw new WsException('File needs to be .png type');
 		Object.assign(user, attrs);
-		return this.userRepo.save(user);
+		return await this.userRepo.save(user);
 	}
 	// async	createUser(newUser: CreateUserDto) {
 	// 	return await this.userRepo.save(newUser);

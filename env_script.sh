@@ -71,7 +71,7 @@ function	build_other() {
 		# OAUTH42
 		FORTYTWO_APP_ID=${UID42}
 		FORTYTWO_APP_SECRET=${SECRET42}
-		REDIRECT_URL=http://localhost:8080/api/backend/callback
+		REDIRECT_URL=http://localhost:8080/backend/auth/callback
 		# JWT
 		JWT_SECRET=$(openssl rand -hex 32)
 		SIGN_CD=120000s
