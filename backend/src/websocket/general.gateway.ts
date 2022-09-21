@@ -38,6 +38,7 @@ import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 import { UpdateUsernameDto } from 'src/user/dtos/UpdateUsernameDto';
+import { writeFile } from 'fs';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -826,8 +827,14 @@ export class GeneralGateway
 		const user = await this.userService.update(client.data.user.userId, { username: updateUsernameDto.username })
 		client.emit("newName", user)
 	}
-}
 
-function jwtDecode<T>(Authentication: any) {
-	throw new Error('Function not implemented.');
+	@UseGuards(WsGuard)
+	@SubscribeMessage('fileUpload')
+	async fileUpload(client: Socket, file: any) {
+		console.log("yala");
+		const user = await this.userService.update(client.data.user.userId, { profileImage: "/backend/users/upload/" + file.name })
+		writeFile("/backend/users/upload", file, () => { })
+		client.emit("updatedFile", user);
+		// this.userService.uploadFile(client.data.user.userId, file);
+	}
 }

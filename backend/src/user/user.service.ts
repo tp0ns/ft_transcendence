@@ -12,6 +12,7 @@ import { Profile } from 'passport-42';
 import { ChannelService } from 'src/chat/channel/channel.service';
 import { WsException } from '@nestjs/websockets';
 import { GameService } from 'src/game/game.service';
+import { writeFile } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -133,6 +134,16 @@ export class UserService {
 			throw new WsException('File needs to be .png type');
 		Object.assign(user, attrs);
 		return await this.userRepo.save(user);
+	}
+
+	async uploadFile(id: string, file: any) {
+		const user = await this.userRepo.findOne({ where: { userId: id } });
+		if (!user) {
+			throw new NotFoundException('user not found');
+		}
+		writeFile("./uploads/profileimages/", file, () => { return; })
+		// Object.assign(user, {profileImage: })
+		console.log(file);
 	}
 	// async	createUser(newUser: CreateUserDto) {
 	// 	return await this.userRepo.save(newUser);

@@ -32,24 +32,6 @@ const SettingsUser: React.FC<{
 		}
 	}, [props.user]);
 
-	// async function nameSubmitHandler(event: React.FormEvent) {
-	// 	event.preventDefault();
-	// 	if (!nameInput.current?.value) return;
-	// 	const response = await (
-	// 		await fetch("/backend/users/updateUsername", {
-	// 			method: "PUT",
-	// 			headers: {
-	// 				"Content-type": "application/json; charset=UTF-8",
-	// 			},
-	// 			body: JSON.stringify({
-	// 				username: nameInput.current!.value,
-	// 			}),
-	// 		})
-	// 	).json();
-	// 	props.onUserchange(response);
-	// 	nameInput.current!.value = "";
-	// }
-
 	async function nameSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
 		if (!nameInput.current?.value) return;
@@ -61,19 +43,27 @@ const SettingsUser: React.FC<{
 		nameInput.current!.value = "";
 	}
 
+	// async function pictureSubmitHandler(event: any) {
+	// 	event.preventDefault();
+	// 	let file = new FormData();
+	// 	file.append("file", event.target[0].files[0]);
+	// 	if (file === null) return;
+	// 	const response = await (
+	// 		await fetch("/backend/users/upload", {
+	// 			method: "POST",
+	// 			body: file,
+	// 		})
+	// 	).json();
+	// 	props.onUserchange(response);
+	// 	return response;
+	// }
+
 	async function pictureSubmitHandler(event: any) {
 		event.preventDefault();
-		let file = new FormData();
-		file.append("file", event.target[0].files[0]);
-		if (file === null) return;
-		const response = await (
-			await fetch("/backend/users/upload", {
-				method: "POST",
-				body: file,
-			})
-		).json();
-		props.onUserchange(response);
-		return response;
+		if (event.target[0].files[0] === null) return;
+		console.log(event.target[0].files[0]);
+		socket.emit('fileUpload', event.target[0].files[0])
+		socket.on("updatedFile", (response) => (props.onUserchange(response)));
 	}
 
 	async function twoFASubmitHandler(event: any) {
