@@ -17,7 +17,6 @@ export const socketId = socket.on('connect', () => {
 
 function App() {
 	return (
-		<ErrorContextProvider>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
 				<Route
@@ -70,7 +69,6 @@ function App() {
 				/>
 				<Route path="debug" element={<Debug />} />
 			</Routes>
-		</ErrorContextProvider>
 	);
 }
 
