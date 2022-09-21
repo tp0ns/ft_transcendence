@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import RelationEntity from 'src/relations/models/relations.entity';
 import { RelationsService } from 'src/relations/relations.service';
 import UserEntity from 'src/user/models/user.entity';
 import { Repository } from 'typeorm';

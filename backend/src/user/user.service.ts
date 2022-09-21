@@ -139,10 +139,6 @@ export class UserService {
 		}
 		if (attrs.username === user.username || userToFind)
 			throw new HttpException("This username is already used", HttpStatus.FORBIDDEN)
-		// console.log(' user to find : ', userToFind.username);
-		// while (attrs.username === user.username) {
-		// 	attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
-		// }
 		Object.assign(user, attrs);
 		return this.userRepo.save(user);
 	}

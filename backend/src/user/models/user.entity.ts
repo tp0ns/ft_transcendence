@@ -9,7 +9,7 @@ import {
 	JoinTable,
 	ManyToMany,
 	OneToMany,
-	PrimaryGeneratedColumn,
+	PrimaryGeneratedColumn
 } from 'typeorm';
 import { RelationEntity } from '../../relations/models/relations.entity';
 

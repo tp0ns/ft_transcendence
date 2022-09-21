@@ -1,11 +1,10 @@
-import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import * as cookieParser from 'cookie-parser';
-import { UnauthorizedExceptionFilter } from './unauthorized.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
+import { join } from 'path';
+import { AppModule } from './app.module';
 import { globalExceptionFilter } from './globalException.filter';
 
 async function bootstrap() {

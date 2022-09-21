@@ -3,8 +3,7 @@ import {
 	BadRequestException,
 	Catch,
 	ForbiddenException,
-	HttpException,
-	HttpStatus,
+	HttpException
 } from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';

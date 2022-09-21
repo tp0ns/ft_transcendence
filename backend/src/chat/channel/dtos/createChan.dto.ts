@@ -1,6 +1,4 @@
-import { IsAlphanumeric, IsNotEmpty, MaxLength } from 'class-validator';
-import UserEntity from 'src/user/models/user.entity';
-
+import { IsNotEmpty, MaxLength } from 'class-validator';
 export class CreateChanDto {
 	@MaxLength(21)
 	@IsNotEmpty()

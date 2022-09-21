@@ -1,42 +1,37 @@
 import {
-	SubscribeMessage,
-	WebSocketGateway,
-	OnGatewayInit,
-	WebSocketServer,
-	OnGatewayConnection,
-	OnGatewayDisconnect,
-	WsException,
-} from '@nestjs/websockets';
-import {
 	ForbiddenException,
 	Logger,
 	UseFilters,
 	UseGuards,
 	UsePipes,
-	ValidationPipe,
+	ValidationPipe
 } from '@nestjs/common';
-import { Socket, Server } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+import {
+	OnGatewayConnection,
+	OnGatewayDisconnect, OnGatewayInit, SubscribeMessage,
+	WebSocketGateway, WebSocketServer, WsException
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { jwtConstants } from 'src/auth/jwt/jwt.constants';
 import { WsGuard } from 'src/auth/websocket/ws.guard';
+import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
+import { MessagesEntity } from 'src/chat/messages/messages.entity';
+import { MessageService } from 'src/chat/messages/messages.service';
+import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import InvitationEntity from 'src/game/invitations/invitations.entity';
+import { globalExceptionFilter } from 'src/globalException.filter';
+import RelationEntity from 'src/relations/models/relations.entity';
+import { RelationsService } from 'src/relations/relations.service';
+import UserEntity from 'src/user/models/user.entity';
+import { UserService } from 'src/user/user.service';
+import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ChannelService } from '../chat/channel/channel.service';
 import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
-import { ChannelEntity } from '../chat/channel/channel.entity';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
-import { RelationsService } from 'src/relations/relations.service';
-import RelationEntity from 'src/relations/models/relations.entity';
-import UserEntity from 'src/user/models/user.entity';
-import { MessageService } from 'src/chat/messages/messages.service';
-import { IdDto, UsernameDto } from './dtos/Relations.dto';
-import { jwtConstants } from 'src/auth/jwt/jwt.constants';
-import { JwtService } from '@nestjs/jwt';
-import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
-import { UserService } from 'src/user/user.service';
 import { Ball } from '../game/interfaces/game.interface';
-import { MessagesEntity } from 'src/chat/messages/messages.entity';
-import { globalExceptionFilter } from 'src/globalException.filter';
-import InvitationEntity from 'src/game/invitations/invitations.entity';
-import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
-import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
+import { IdDto, UsernameDto } from './dtos/Relations.dto';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -69,44 +64,11 @@ export class GeneralGateway
 		this.logger.log(`Server is properly initialized !`);
 	}
 
-	async validateConnection(client: Socket): Promise<UserEntity> {
-		try {
-			// let client: Socket = context.switchToWs().getClient();
-			if(!client.handshake.headers.cookie) return null;
-			const sessionCookie: string | string[] = client.handshake.headers.cookie
-				.split(';')
-				.find(
-					(cookie: string) =>
-						cookie.startsWith(' Authentication') ||
-						cookie.startsWith('Authentication'),
-				)
-				.split('=')[1];
-
-			const payload = await this.jwtService.verify(sessionCookie, {
-				secret: jwtConstants.secret,
-			});
-			const user = await this.userService.getUserById(payload.sub);
-			client.data.user = user;
-			if (user) return user;
-			return null;
-		} catch (err) {
-			console.log('Error occured in ws guard : ');
-			console.log(err.message);
-			throw new WsException(err.message);
-		}
-	}
-
 	/**
 	 * Handles client connection behaviour
 	 */
 	@UseGuards(WsGuard)
 	async handleConnection(client: Socket) {
-		const user: UserEntity = await this.validateConnection(client);
-
-		if (user != null) {
-			client.data.user = user;
-			this.userService.connectClient(client.data.user);
-		}
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
 		this.server.emit('updatedRelations');
@@ -639,6 +601,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async retrieveInvitations(client: Socket) {
+		if (client.data.user.status === "disconnected")
+            await this.userService.connectClient(client.data.user);
 		const properInvit: InvitationEntity[] =
 			await this.gameService.getInvitations(client);
 		client.emit('sendBackInvite', properInvit);
