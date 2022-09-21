@@ -269,6 +269,7 @@ export class GameService {
 			await this.AchievementsRepository.findOne({
 				where: { userId: user.userId },
 			});
+		if (!userAchievements) return;
 		userAchievements.FirstMatch = true;
 		if (user.victories === 3) userAchievements.Victoryx3 = true;
 		else if (user.victories === 5) userAchievements.Victoryx5 = true;

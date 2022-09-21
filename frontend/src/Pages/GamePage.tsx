@@ -13,14 +13,6 @@ const GamePage = () => {
 		setGameState(state);
 	}
 
-	useEffect(() => {
-		socket.emit('isInGame');
-		socket.on("isDisplayGame", (ret) => {
-			if (ret)
-				setGameState("matchGame");
-		})
-	}, [])
-
 	socket.on('victoryOf', (winnerSock) => {
 		if (gameState === "matchGame")
 			setWinner(winnerSock.username);
