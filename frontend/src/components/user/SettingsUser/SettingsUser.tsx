@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { socket } from "../../../App";
 import UserProp from "../../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 
@@ -31,21 +32,29 @@ const SettingsUser: React.FC<{
 		}
 	}, [props.user]);
 
+	// async function nameSubmitHandler(event: React.FormEvent) {
+	// 	event.preventDefault();
+	// 	if (!nameInput.current?.value) return;
+	// 	const response = await (
+	// 		await fetch("/backend/users/updateUsername", {
+	// 			method: "PUT",
+	// 			headers: {
+	// 				"Content-type": "application/json; charset=UTF-8",
+	// 			},
+	// 			body: JSON.stringify({
+	// 				username: nameInput.current!.value,
+	// 			}),
+	// 		})
+	// 	).json();
+	// 	props.onUserchange(response);
+	// 	nameInput.current!.value = "";
+	// }
+
 	async function nameSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
 		if (!nameInput.current?.value) return;
-		const response = await (
-			await fetch("/backend/users/updateUsername", {
-				method: "PUT",
-				headers: {
-					"Content-type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify({
-					username: nameInput.current!.value,
-				}),
-			})
-		).json();
-		props.onUserchange(response);
+		socket.emit("nameUpdate", { username: nameInput.current.value });
+		socket.on("newName", (response) => (props.onUserchange(response)));
 		nameInput.current!.value = "";
 	}
 

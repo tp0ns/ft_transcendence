@@ -37,6 +37,7 @@ import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
+import { UpdateUsernameDto } from 'src/user/dtos/UpdateUsernameDto';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -622,8 +623,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('changedPage')
-	async	changedPage(client: Socket)
-	{
+	async changedPage(client: Socket) {
 		this.gameService.handleGameDisconnect(client);
 	}
 
@@ -818,6 +818,12 @@ export class GeneralGateway
 				client.data.user.userId,
 			);
 		client.emit(`sendAchievements`, userAchievements);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('nameUpdate')
+	async nameUpdate(client: Socket, updateUsernameDto: UpdateUsernameDto) {
+		const resp = this.userService.update(client.data.user.userId, { username: updateUsernameDto.username })
 	}
 }
 
