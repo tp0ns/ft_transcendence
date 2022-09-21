@@ -27,12 +27,13 @@ import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { uuidDto } from './dtos/uuidDto';
 import { Request } from 'express';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
+import { WsGuard } from 'src/auth/websocket/ws.guard';
 
 @ApiTags('users')
 @Controller('users')
 // @UseFilters(UnauthorizedExceptionFilter)
 export class UserController {
-	constructor(private userService: UserService) {}
+	constructor(private userService: UserService) { }
 
 	/* Get my uuid */
 	@UseGuards(JwtAuthGuard)

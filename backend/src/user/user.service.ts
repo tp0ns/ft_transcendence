@@ -1,8 +1,6 @@
 import {
 	ForbiddenException,
 	forwardRef,
-	HttpException,
-	HttpStatus,
 	Inject,
 	Injectable,
 	NotFoundException,
@@ -11,15 +9,8 @@ import { UserEntity } from './models/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'passport-42';
-import {
-	Relation,
-	RelationStatus,
-	Relation_Status,
-} from '../relations/models/relations.interface';
-import { RelationEntity } from '../relations/models/relations.entity';
-import { IdDto } from 'src/websocket/dtos/Relations.dto';
-import { UserDto } from './dtos/user.dto';
 import { ChannelService } from 'src/chat/channel/channel.service';
+import { WsException } from '@nestjs/websockets';
 import { GameService } from 'src/game/game.service';
 
 @Injectable()
@@ -138,6 +129,10 @@ export class UserService {
 		while (attrs.username === user.username) {
 			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
 		}
+		// if (this.getUserByUsername(attrs.username))
+		// 	throw new ForbiddenException("username already taken");
+		if (attrs.profileImage.split(".").at(-1) != "png")
+			throw new WsException('File needs to be .png type');
 		Object.assign(user, attrs);
 		return this.userRepo.save(user);
 	}

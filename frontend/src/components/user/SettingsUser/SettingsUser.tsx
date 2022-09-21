@@ -70,6 +70,7 @@ const SettingsUser: React.FC<{
 			})
 		).json();
 		props.onUserchange(response);
+		return response;
 	}
 
 	async function twoFASubmitHandler(event: any) {
