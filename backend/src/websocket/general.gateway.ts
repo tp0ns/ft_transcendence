@@ -91,7 +91,7 @@ export class GeneralGateway
 		} catch (err) {
 			console.log('Error occured in ws guard : ');
 			console.log(err.message);
-			// throw new WsException(err.message);
+			throw new WsException(err.message);
 		}
 	}
 
