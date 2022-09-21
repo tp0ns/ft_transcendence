@@ -297,6 +297,27 @@ export class ChannelService {
 		}
 	}
 
+	async deleteDMforBlockedUser(blocker: UserEntity, blocked: UserEntity)
+	{
+		let DM: ChannelEntity = await this.channelRepository.findOne({
+			relations: ['members', 'owner', 'userInProtectedChan'],
+			where: [
+				{
+					DM: true,
+					owner: { userId: blocker.userId },
+					user2: { userId: blocked.userId },
+				},
+				{
+					DM: true,
+					owner: { userId: blocked.userId },
+					user2: { userId: blocker.userId },
+				},
+			],
+		});
+		if (DM)
+			this.deleteChan(null, DM.channelId);
+	}
+
 	/**
 	 * @brief verifier que les conditions a la modification sont remplies
 	 *
