@@ -65,8 +65,6 @@ services:
     profiles:
       - dev
     container_name: dev
-    volumes:
-      - ${PRIVATE_PATH_DEV}:/var/lib/pgadmin:cached
     ports:
       - "5050:80"
     env_file:

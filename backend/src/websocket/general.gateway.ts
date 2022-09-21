@@ -72,6 +72,7 @@ export class GeneralGateway
 	async validateConnection(client: Socket): Promise<UserEntity> {
 		try {
 			// let client: Socket = context.switchToWs().getClient();
+			if(!client.handshake.headers.cookie) return null;
 			const sessionCookie: string | string[] = client.handshake.headers.cookie
 				.split(';')
 				.find(
@@ -91,7 +92,7 @@ export class GeneralGateway
 		} catch (err) {
 			console.log('Error occured in ws guard : ');
 			console.log(err.message);
-			// throw new WsException(err.message);
+			throw new WsException(err.message);
 		}
 	}
 

@@ -35,7 +35,7 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42') {
 	/**
 	 * Validate est appelé apres 1er call à l'API 42.
 	 * Cette fonction doit etre presente dans toute Strategie pour "Valider" le retour de l'API/l'Authentification.
-	 * Dans notre cas, aucune reelle verification n'est faite (@todo), on se contente d'appeler findOrCreate.
+	 * Dans notre cas, aucune reelle verification n'est faite, on se contente d'appeler findOrCreate.
 	 *
 	 * "For each strategy, Passport will call the verify function (implemented with the validate()
 	 * method in @nestjs/passport) using an appropriate strategy-specific set of parameters."
