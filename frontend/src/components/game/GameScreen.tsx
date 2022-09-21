@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 let ballPosition = {
 	x: 0,
 	y: 0,
-	radius: 10,
+	radius: 0,
 	startAngle: 0,
-	speedx: 5,
+	speedx: 0,
 	speedy: 0,
 	goRight: 0,
 	p1Touches: 0,
@@ -16,18 +16,18 @@ let ballPosition = {
 };
 let leftPadPosition = {
 	x: 0,
-	y: 50,
-	w: 20,
-	h: 100,
-	speed: 5,
+	y: 0,
+	w: 0,
+	h: 0,
+	speed: 0,
 };
 
 let rightPadPosition = {
-	x: 620,
-	y: 200,
-	w: 20,
-	h: 100,
-	speed: 20,
+	x: 0,
+	y: 0,
+	w: 0,
+	h: 0,
+	speed: 0,
 };
 
 const baseWidth: number = 620;
@@ -36,13 +36,18 @@ const baseHeight: number = 480;
 let player1Score: number = 0;
 let player2Score: number = 0;
 
+let windowSize = {
+	innerWidth: 640,
+	innerHeight: 480
+}
+
 const GameScreen: React.FC<{
 	gameType: string
 }> = (props) => {
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const [lockEnter, setLockEnter] = useState<boolean>(false);
 	const [waiting, setWaiting] = useState<boolean>(false);
-	const [windowSize, setWindowSize] = useState(getWindowSize());
+	const [windowSizeState, setWindowSize] = useState(getWindowSize());
 
 
 	// function to define position and sizes to actual window
@@ -54,7 +59,7 @@ const GameScreen: React.FC<{
 		// leftPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// leftPadPosition.h = (100 / 480) * windowSize.innerHeight;
 
-		rightPadPosition.x = Math.round(windowSize.innerWidth - 20);
+		rightPadPosition.x = Math.round(windowSize.innerWidth - rightPadPosition.w);
 		rightPadPosition.y = Math.round(rightPos.y * windowSize.innerHeight / baseHeight);
 		// rightPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// rightPadPosition.h = (100 / 480) * windowSize.innerHeight;
@@ -69,20 +74,23 @@ const GameScreen: React.FC<{
 		const context = canvas.current!.getContext("2d");
 		// socket.emit("joinMatch");
 		socket.on("setPosition", (leftPos, rightPos, ballPos, p1Score, p2Score) => {
+			leftPadPosition = leftPos;
+			rightPadPosition = rightPos;
+			ballPosition = ballPos;
 			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
 			console.log("- Before translate -\n\n")
 			console.log("canvas size: ", windowSize);
-			console.log("leftPadPosition: ", leftPadPosition);
-			console.log("rightPadPosition: ", rightPadPosition);
+			console.log("ballPadPosition: ", ballPosition);
+			// console.log("rightPadPosition: ", rightPadPosition);
 			player1Score = p1Score;
 			player2Score = p2Score;
 			// Adapt size to window at new position sent from backend
 			console.log("-------------------------\n\n")
-			translateToCanvas(leftPos, rightPos, ballPos);
+			// translateToCanvas(leftPos, rightPos, ballPos);
 			console.log("- After translate -\n\n")
 			console.log("canvas size: ", windowSize);
-			console.log("leftPadPosition: ", leftPadPosition);
-			console.log("rightPadPosition: ", rightPadPosition);
+			console.log("ballPosition: ", ballPosition);
+			// console.log("rightPadPosition: ", rightPadPosition);
 			console.log("-------------------------\n\n")
 
 
@@ -198,14 +206,14 @@ const GameScreen: React.FC<{
 		ballPosition.isMoving = true;
 		if (ballPosition.goRight === 0) {
 			if (
-				ballPosition.y + ballPosition.speedy <= 10 ||
-				ballPosition.y + ballPosition.speedy >= 470
+				ballPosition.y + ballPosition.speedy <= ballPosition.radius ||
+				ballPosition.y + ballPosition.speedy >= windowSize.innerHeight - ballPosition.radius
 			) {
 				ballPosition.speedy = -ballPosition.speedy;
 			}
-			if (ballPosition.x + ballPosition.speedx >= 630) {
-				// collision with left wall. 630 = point of contact in px
-				ballPosition.x = 630;
+			if (ballPosition.x + ballPosition.speedx >= windowSize.innerWidth - ballPosition.radius) {
+				// collision with left wall. windowSize.innerWidth - ballPosition.radius = point of contact in px
+				ballPosition.x = windowSize.innerWidth - ballPosition.radius;
 				//end of the round - need to add score management
 				// collision with left wall -> point to right
 				// p1 += 1;
@@ -235,13 +243,13 @@ const GameScreen: React.FC<{
 		} else {
 			if (
 				ballPosition.y + ballPosition.speedy <= 0 ||
-				ballPosition.y + ballPosition.speedy >= 470
+				ballPosition.y + ballPosition.speedy >= windowSize.innerHeight - ballPosition.radius
 			) {
 				ballPosition.speedy = -ballPosition.speedy;
 			}
-			if (ballPosition.x - ballPosition.speedx <= 10) {
+			if (ballPosition.x - ballPosition.speedx <= ballPosition.radius) {
 				// collision with left wall. 10 = point of contact in px
-				ballPosition.x = 10;
+				ballPosition.x = ballPosition.radius;
 				//end of the round
 				gameFunctions("resetBall", 1);
 				return;
@@ -257,7 +265,7 @@ const GameScreen: React.FC<{
 			) {
 				impact = ballPosition.y - leftPadPosition.y + leftPadPosition.h / 2;
 				ratio = 100 / (leftPadPosition.h / 2);
-				angle = Math.round((impact * ratio) / 10);
+				angle = Math.round((impact * ratio) / 20);
 				if (angle >= 10) {
 					angle -= 10;
 					angle = -angle;
@@ -267,7 +275,7 @@ const GameScreen: React.FC<{
 				ballPosition.p1Touches++;
 			}
 		}
-		if (ballPosition.x !== 10 && ballPosition.x !== 630) {
+		if (ballPosition.x !== ballPosition.radius && ballPosition.x !== windowSize.innerWidth - ballPosition.radius) {
 			// animation until the ball touches the wall
 			requestAnimationFrame(moveBall);
 		}
