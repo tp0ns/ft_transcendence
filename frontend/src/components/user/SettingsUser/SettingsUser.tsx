@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { socket } from "../../../App";
 import UserProp from "../../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 
@@ -99,10 +100,12 @@ const SettingsUser: React.FC<{
 	}
 
 	async function logout() {
+		socket.emit('leaving');
 		try {
 			const response = await await fetch("/backend/auth/logout");
 			if (!response.ok) throw new Error("Request failed!");
-			else navigate("/login");
+			else {
+				navigate("/login")};
 		} catch (err) {
 			console.log(err);
 		}
