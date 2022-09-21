@@ -71,7 +71,6 @@ export class GeneralGateway
 	async handleConnection(client: Socket) {
 		this.logger.log(`Client connected: ${client.id}`);
 		this.server.emit('updatedChannels');
-		this.server.emit('updatedRelations');
 	}
 
 	/**
@@ -106,9 +105,17 @@ export class GeneralGateway
 	}
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('leaving')
+	async handleLeaving(client: Socket) {
+		if (client.data.user)
+			await this.userService.disconnectClient(client.data.user);
+		this.server.emit('updatedRelations');
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('playing')
-	handlePlaying(client: Socket) {
-		if (client.data.user) this.userService.playingClient(client.data.user);
+	async handlePlaying(client: Socket) {
+		if (client.data.user) await this.userService.playingClient(client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
@@ -605,6 +612,7 @@ export class GeneralGateway
             await this.userService.connectClient(client.data.user);
 		const properInvit: InvitationEntity[] =
 			await this.gameService.getInvitations(client);
+		this.server.emit('updatedRelations');
 		client.emit('sendBackInvite', properInvit);
 	}
 
