@@ -1,14 +1,17 @@
 import { createTextSpanFromBounds } from "typescript"
+import { Grid } from "../../../../../backend/src/game/interfaces/game.interface";
 
 
-export const drawBackground = (
-  context: CanvasRenderingContext2D,
-  grid: any
-)
+// export const drawBackground = (
+//   context: CanvasRenderingContext2D,
+//   grid: Grid
+// ) {
+
+// }
 
 export const drawPads = (
   context: CanvasRenderingContext2D,
-  grid: any
+  grid: Grid
 ) => {
   grid.pads.forEach((pad: any) => {
     context.fillStyle = 'black';
@@ -23,7 +26,7 @@ export const drawPads = (
 
 export const drawBall = (
   context: CanvasRenderingContext2D,
-  grid: any
+  grid: Grid
 ) => {
   context.fillStyle = 'black';
   context.arc(

@@ -30,7 +30,7 @@ import { ChannelService } from '../chat/channel/channel.service';
 import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
-import { Ball } from '../game/interfaces/game.interface';
+import { Ball, Game } from '../game/interfaces/game.interface';
 import { IdDto, UsernameDto } from './dtos/Relations.dto';
 
 @UseFilters(globalExceptionFilter)
@@ -407,9 +407,19 @@ export class GeneralGateway
 	 */
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('initGame')
-	async initGame(client: Socket) {
-		this.gameService.initGame()
+	@SubscribeMessage('joinDummyGame')
+	dummyGame(client: Socket, roomId: string) {
+		client.join(roomId);
+		let game: Game = this.gameService.initDummyGame(roomId, client.data.user);
+		if (game.player1 && game.player2)
+			this.server.to(roomId).emit('updatedGame', game)
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('createGame')
+	initGame(client: Socket, roomId: string) {
+		let game: Game = this.gameService.initGame(roomId);
+		this.server.to(roomId).emit('updatedGame', game);
 	}
 
 	/**

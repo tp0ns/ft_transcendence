@@ -7,10 +7,11 @@ const GamePage = () => {
 	const [game, setGame] = useState<Game>();
 
 	useEffect(() => {
-		socket.emit('initGame');
-		socket.on('updatedGame', (newGame: Game) => {
-			setGame(newGame);
+		socket.emit('dummyGame', 1);
+		socket.on('newGame', (newGame: any) => {
+			socket.emit('createGame');
 		})
+		socket.on('updatedGame', (updatedGame) => (setGame(updatedGame)))
 	}, [])
 
 	const handleKeyDown = () => {
@@ -19,7 +20,7 @@ const GamePage = () => {
 
 	return (
 		<div onKeyDown={handleKeyDown}>
-			{game ? <GameCanvas canvas={game.canvas} /> : null}
+			{game ? <GameCanvas canvas={game.grid} /> : null}
 		</div>
 	)
 }

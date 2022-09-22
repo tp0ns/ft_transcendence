@@ -11,10 +11,12 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { Game } from './interfaces/game.interface';
+import { Ball, Coordinate, Game, Grid, Pad } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
+import { initGrid } from './utils/initGrid';
+
 
 @Injectable()
 export class GameService {
@@ -30,12 +32,41 @@ export class GameService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-		private Games: Game[],
+		private games: Game[],
 	) { }
 
 
-	const initGame = () => {
+	initDummyGame = (roomId: string, user: UserEntity) => {
+		this.games.map((game) => {
+			if (game.id === roomId) {
+				game.player2.user = user;
+				game.player2.score = 0;
+				return game;
+			}
+		})
+		let grid: Grid = initGrid();
+		let game: Game = {
+			id: roomId,
+			grid: grid,
+			player1: null,
+			player2: null
+		}
+		game.player1.user = user;
+		game.player1.score = 0;
+		return game;
+	}
 
+
+
+	initGame = (roomId: string) => {
+		let grid: Grid = initGrid();
+		let game: Game = {
+			id: roomId,
+			grid: grid,
+			player1: null,
+			player2: null
+		}
+		return game;
 	}
 
 	/**

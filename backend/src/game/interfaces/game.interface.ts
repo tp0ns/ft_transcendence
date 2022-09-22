@@ -17,11 +17,9 @@ export class Ball {
 
 export class Grid {
 	ball: Ball;
-	pads: Pad[];
-}
-
-export class Canvas {
-	grid: Grid;
+	pad1: Pad;
+	pad2: Pad;
+	size: Coordinate;
 }
 
 export class Player {
@@ -30,8 +28,8 @@ export class Player {
 }
 
 export class Game {
-	id: number;
-	canvas: Canvas;
+	id: string;
+	grid: Grid;
 	player1: Player;
 	player2: Player;
 }
