@@ -1,8 +1,8 @@
 import { Ball, Coordinate, Pad } from "../interfaces/game.interface"
 
 enum GRID {
-  HEIGHT = 100,
-  WIDTH = 175,
+  HEIGHT = 500,
+  WIDTH = 900,
   BALL_RADIUS = 10,
   PAD_WIDTH = 20,
   PAD_HEIGHT = 40,

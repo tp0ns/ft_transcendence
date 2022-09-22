@@ -19,8 +19,8 @@ export const drawPads = (
     context.fillRect(
       pad.pos.x,
       pad.pos.y,
-      pad.width,
-      pad.height
+      pad.size.x,
+      pad.size.y
     );
   })
 }

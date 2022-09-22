@@ -45,6 +45,8 @@ export class GameService {
 
 	initDummyGame = (roomId: string, user: UserEntity) => {
 		let res: Game = null;
+		if (games && games[0] && games[0].player1 && games[0].player2)
+			return games[0];
 		if (games) {
 			games.map((game) => {
 				if (game.id === roomId && !game.player2) {
@@ -57,7 +59,6 @@ export class GameService {
 			})
 		}
 		if (!res) {
-			console.log("COUCOU")
 			let grid: Grid = initGrid();
 			let game: Game = {
 				id: roomId,
@@ -71,9 +72,7 @@ export class GameService {
 			}
 			games.push(game);
 			res = game;
-			console.log("games: ", games)
 		}
-		console.log("res: ", res)
 		return res;
 	}
 

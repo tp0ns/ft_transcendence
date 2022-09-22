@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { drawBall, drawPads } from "./utils/GameDraw";
+import "./GameCanvas.css"
+import { Grid } from "./interfaces/game.interfaces";
 
-const GameCanvas: React.FC<{ grid: any }> = (props) => {
+const GameCanvas: React.FC<{ grid: Grid }> = (props) => {
 	const grid = props.grid;
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -16,14 +18,14 @@ const GameCanvas: React.FC<{ grid: any }> = (props) => {
 		const canvas = canvasRef.current;
 		const context = canvas?.getContext('2d');
 		drawCanvas(context, grid);
-	})
+	}, [grid])
 
 	return (
 		<canvas
 			id='gameCanvas'
 			ref={canvasRef}
-			width={grid.width}
-			height={grid.height}
+			width={grid.size.x}
+			height={grid.size.y}
 		/>
 	)
 }
