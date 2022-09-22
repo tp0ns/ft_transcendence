@@ -47,10 +47,12 @@
 	background-color: #3a3636;
 	color: #fdd05d;
 	border: 2px solid #3a3636;
+	cursor: pointer;
 }
 
 .delete_chan {
 	background-color: red;
 	border: 2px solid red;
 	color: #f4edde;
+	cursor: pointer;
 }

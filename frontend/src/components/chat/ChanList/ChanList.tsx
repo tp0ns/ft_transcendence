@@ -18,7 +18,9 @@ function ChanList() {
 				+
 			</button>
 			<div className={classes.chan_list}>
-				{ctx.channels.length === 0 ? <div>You have no channels yet</div> : null}
+				{ctx.channels.length === 0 ? (
+					<div className={classes.no_chan}>You have no channels yet</div>
+				) : null}
 				{ctx.channels.map((chan) => {
 					return <Chan key={chan.channelId} chan={chan} />;
 				})}
