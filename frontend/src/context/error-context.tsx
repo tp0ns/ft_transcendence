@@ -22,8 +22,8 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 		socket.on("sendBackInvite", (gameInvites) => {
 			setInvites(gameInvites);
 		});
-		socket.on("updateInvitation", () => {
-			socket.emit("retrieveInvitations");
+		socket.on("updatedInvitations", () => {
+			socket.emit("getInvitations");
 		});
 	}, []);
 

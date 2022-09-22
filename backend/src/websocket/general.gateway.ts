@@ -436,6 +436,8 @@ export class GeneralGateway
 	 *
 	 */
 
+
+
 	//Join Match event, draw the game for the user
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinMatch')
@@ -626,35 +628,64 @@ export class GeneralGateway
 		client.emit("goBackHome");
 	}
 
+
+/**
+ * +-+-+-+-+-+-+-+-+-+-+-+
+ * |I|N|V|I|T|A|T|I|O|N|S|
+ * +-+-+-+-+-+-+-+-+-+-+-+
+ */
+
+
 	/**
-	 * 				INVITATIONS
+	 * 
+	 * @brief Envoie d'une invitation a jouer
+	 * 
+	 * @param client celui qui envoie l'invitation
+	 * @param userToInviteId celui qui doit recevoir l'invitation
 	 */
 	@UseGuards(WsGuard)
-	@SubscribeMessage('retrieveInvitations')
-	async retrieveInvitations(client: Socket) {
-		const properInvit: InvitationEntity[] =
-			await this.gameService.getInvitations(client);
+	@SubscribeMessage('sendInvitation')
+	async sendInvitation(client: Socket, userToInviteId: string) {
+	await this.gameService.sendInvitation(client, userToInviteId);
+	this.server.emit('updatedInvitations');
+	}
+
+	
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getInvitations')
+	async getInvitations(client: Socket) {
+		const properInvit =
+		await this.gameService.getInvitations(client.data.user);
 		client.emit('sendBackInvite', properInvit);
 	}
-
+	
+	/**
+	 * @brief Si un joueur qui a envoye une invitation 
+	 * quitte la partie ou si un joueur refuse une invitation
+	 * => annulation de l'invit
+	 * @param client personne concernee par l'annulation
+	 */
 	@UseGuards(WsGuard)
-	@SubscribeMessage('sendInvite')
-	async sendInvite(client: Socket, userToInviteId: string) {
-		await this.gameService.sendInvite(client, userToInviteId);
-		this.server.emit('updateInvitation');
-		client.emit('pendingInvitation');
-		console.log('invite sent');
+	@SubscribeMessage('deleteInvitation')
+	async deleteInvitation(client: Socket)
+	{
+	//  await this.gameService.deleteInvitation(client.data.user);
+		this.server.emit('updatedInvitations')
 	}
-
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptInvite')
 	async acceptInvite(client: Socket, userInvitingId: string) {
-		const currentRoom = await this.gameService.joinInvite(
-			client,
-			userInvitingId,
+		const invitInformations = await this.gameService.acceptInvit(
+			client.data.user, 
+			userInvitingId
 		);
-		this.server.to(currentRoom).emit('updateInvitation');
-		console.log('invite accepted');
+		this.server.to(invitInfo.)
+		// const currentRoom = await this.gameService.joinInvite(
+		// 	client,
+		// 	userInvitingId,
+		// );
+		// this.server.to(currentRoom).emit('updateInvitation');
+		// console.log('invite accepted');
 	}
 
 	@UseGuards(WsGuard)
