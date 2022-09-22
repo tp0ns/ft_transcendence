@@ -1,43 +1,37 @@
-export class Pad {
+import UserEntity from "src/user/models/user.entity";
+
+export class Coordinate {
 	x: number;
 	y: number;
-	w: number;
-	h: number;
-	speed: number;
+}
+
+export class Pad {
+	pos: Coordinate;
+	size: Coordinate;
 }
 
 export class Ball {
-	x: number;
-	y: number;
+	pos: Coordinate;
 	radius: number;
-	startAngle: number;
-	speedx: number;
-	speedy: number;
-	goRight: boolean;
-	p1Touches: number;
-	p2Touches: number;
-	isMoving: boolean;
 }
 
-// export class Player extends UserEntity {}
-
-export class Match {
-	rightPad: Pad;
-	leftPad: Pad;
+export class Grid {
 	ball: Ball;
-	player1: string;
-	player2: string;
-	// stats
-	p1Score: number;
-	p2Score: number;
-	p1Touches: number;
-	p2Touches: number;
-	//end stats
-	p1User: string;
-	p2User: string;
-	isLocal: boolean;
-	//name of the associated room for sockets
-	roomName: string;
-	//boolean to tell if the game has ended or not
-	isEnd: boolean;
+	pads: Pad[];
+}
+
+export class Canvas {
+	grid: Grid;
+}
+
+export class Player {
+	user: UserEntity;
+	score: number;
+}
+
+export class Game {
+	id: number;
+	canvas: Canvas;
+	player1: Player;
+	player2: Player;
 }

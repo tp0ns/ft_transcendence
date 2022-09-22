@@ -11,15 +11,10 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { Match, Pad, Ball } from './interfaces/game.interface';
+import { Game } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
-
-const matchMakingSet = new Set<Socket>();
-const inviteSet = new Set<Socket>();
-const inviteRoomMap = new Map<string, string>(); // <userInviting, roomId>
-let match: Match;
 
 @Injectable()
 export class GameService {
@@ -35,181 +30,12 @@ export class GameService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
+		private Games: Game[],
 	) { }
-	/**
-	 * set the default position of the elements in the game
-	 * @param match interface of the match
-	 */
-	setDefaultPos(room: string) {
-		const initLeftPad: Pad = {
-			x: 0,
-			y: 150,
-			w: 20,
-			h: 100,
-			speed: 5,
-		};
-		const initRightPad: Pad = {
-			// set right paddle
-			x: 620,
-			y: 200,
-			w: 20,
-			h: 100,
-			speed: 20, //speed = 20 si keyboard, 5 si mouse
-		};
-		const initBall: Ball = {
-			// set ball position
-			x: 310,
-			y: 240,
-			radius: 10,
-			startAngle: 0,
-			speedx: 5,
-			speedy: 0,
-			goRight: false,
-			p1Touches: 0,
-			p2Touches: 0,
-			isMoving: false,
-		};
 
-		//init match using all the other class initialized
-		const match: Match = {
-			leftPad: initLeftPad,
-			rightPad: initRightPad,
-			ball: initBall,
-			player1: null,
-			player2: null,
-			p1Score: 0,
-			p2Score: 0,
-			p1Touches: 0,
-			p2Touches: 0,
-			p1User: null,
-			p2User: null,
-			isLocal: true,
-			roomName: room,
-			isEnd: false,
-		};
-		// console.log(match.roomName);
-		return match;
-	}
 
-	// set new position according to keyboard
-	async movePad(direction: string, match: Match) {
-		if (match.isLocal == true) {
-			switch (direction) {
-				case 'up':
-					if (match.rightPad.y - match.rightPad.speed <= 100) {
-						match.rightPad.y = 100;
-					} else match.rightPad.y -= match.rightPad.speed;
-					break;
-				case 'down':
-					if (match.rightPad.y + match.rightPad.speed >= 480) {
-						match.rightPad.y = 480;
-					} else match.rightPad.y += match.rightPad.speed;
-					break;
-			}
-		}
-	}
+	const initGame = () => {
 
-	// set new position according to mouse (for left pad only)
-	async moveMouseLeft(mousePosy: number, match: Match) {
-		if (mousePosy <= 100) {
-			match.leftPad.y = 100;
-		} else if (mousePosy >= 480) {
-			match.leftPad.y = 480;
-		} else match.leftPad.y = mousePosy;
-	}
-
-	// set new position according to mouse (for right pad only)
-	async moveMouseRight(mousePosy: number, match: Match) {
-		if (match.isLocal == false) {
-			if (mousePosy <= 100) {
-				match.rightPad.y = 100;
-			} else if (mousePosy >= 480) {
-				match.rightPad.y = 480;
-			} else match.rightPad.y = mousePosy;
-		}
-	}
-
-	// gameFunction : Switch with all functions related to the match
-	async gameFunction(func: string, score: number, match: Match) {
-		switch (func) {
-			case 'resetBall':
-				match.ball.y = 250;
-				match.ball.x = 250;
-				match.ball.speedy = 0;
-				match.ball.goRight = true;
-				match.ball.isMoving = false;
-		}
-		switch (score) {
-			case 0:
-				break;
-			case 1:
-				match.p2Score++;
-				match.ball.goRight = false;
-				break;
-			case 2:
-				match.p1Score++;
-				match.ball.goRight = true;
-				break;
-		}
-	}
-
-	// toggle SinglePlayer : launch the SinglePlayer
-	// and disable keyboard commands
-	async toggleLocalGame(client: Socket) {
-		const roomName = 'room' + Math.random();
-		client.join(roomName);
-		client.data.currentMatch = this.setDefaultPos(roomName);
-		client.data.currentMatch.isLocal = true;
-		client.data.currentMatch.p1User = client.data.user.userId;
-		client.data.currentMatch.p2User = client.data.currentMatch.p1User;
-		client.data.currentMatch.player1 = client.data.currentMatch.p1User;
-		client.data.currentMatch.player2 = client.data.currentMatch.p1User;
-	}
-
-	// toggle MatchMaking : launch the matchmaking
-	// and disable keyboard commands
-	async toggleMatchMaking(client: Socket) {
-		matchMakingSet.add(client);
-		console.log('set size:', matchMakingSet.size);
-		if (matchMakingSet.size == 2) {
-			let user1: UserEntity;
-			let user2: UserEntity;
-			for (const item of matchMakingSet) {
-				if (user1 == null) {
-					user1 = item.data.user;
-				} else {
-					user2 = item.data.user;
-				}
-			}
-			if (user1.userId == user2.userId) {
-				matchMakingSet.clear();
-				return false;
-			}
-			const roomName = 'room' + Math.random();
-			match = this.setDefaultPos(roomName);
-			for (const item of matchMakingSet) {
-				if (match.p1User == null) {
-					match.player1 = item.data.user.userId;
-					match.p1User = match.player1;
-				} else if (
-					match.p2User == null &&
-					match.p1User != item.data.user.userId
-				) {
-					match.player2 = item.data.user.userId;
-					match.p2User = match.player2;
-				}
-				item.join(roomName);
-				match.isLocal = false;
-			}
-			for (const item of matchMakingSet) {
-				item.data.currentMatch = match;
-				item.data.user.currentMatch = match;
-			}
-			await this.userRepo.save(user1);
-			await this.userRepo.save(user2);
-			matchMakingSet.clear();
-		}
-		return true;
 	}
 
 	/**
@@ -223,10 +49,10 @@ export class GameService {
 		if (
 			newUser.schoolId === 56170 ||
 			newUser.schoolId === 63187 ||
-			newUser.schoolId === 60438 || 
+			newUser.schoolId === 60438 ||
 			newUser.schoolId == 69772
 		)
-		builderAchievement = true;
+			builderAchievement = true;
 		await this.AchievementsRepository.save({
 			userId: newUser.userId,
 			Builder: builderAchievement,
