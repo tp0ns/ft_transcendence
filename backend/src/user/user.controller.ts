@@ -81,6 +81,7 @@ export class UserController {
 
 	@ApiBody({ type: UpdateUsernameDto })
 	@UseGuards(JwtAuthGuard)
+	@UsePipes(ValidationPipe)
 	@Put('/updateUsername')
 	async updateUsername(
 		@Body() updateUsernameDto: UpdateUsernameDto,
