@@ -22,19 +22,10 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 		socket.on("sendBackInvite", (gameInvites) => {
 			setInvites(gameInvites);
 		});
-		socket.on("updatedInvitations", () => {
-			socket.emit("getInvitations");
+		socket.on("updateInvitation", () => {
+			socket.emit("retrieveInvitations");
 		});
 	}, []);
-
-	useEffect(() => {
-		const identifier = setTimeout(() => {
-			socket.emit("retrieveInvitations");
-		}, 10000);
-		return () => {
-			clearTimeout(identifier);
-		};
-	}, [invites]);
 
 	useEffect(() => {
 		const identifier = setTimeout(() => {
@@ -58,7 +49,7 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 			<div className={classes.layout}>
 				{error ? <ErrorBadge message={error} /> : null}
 				{invites?.map((invite) => {
-					return <InviteItem key={invite.requestId} invite={invite} />;
+					return <InviteItem key={invite.id} invite={invite} />;
 				})}
 			</div>
 			{props.children}

@@ -37,6 +37,7 @@ import { globalExceptionFilter } from 'src/globalException.filter';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
+import {v4 as uuidv4} from 'uuid';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -117,29 +118,29 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
-		if (client.data.user) {
-			const winnerId: string = await this.gameService.handleGameDisconnect(
-				client,
-			);
-			if (winnerId != null) {
-				const winner = await this.userService.getUserById(winnerId);
-				winner.victories++;
-				client.data.user.defeats++;
-				await this.gameService.setAchievements(winner);
-				await this.gameService.setAchievements(client.data.user);
-				// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
-				this.server
-					.to(client.data.user.currentMatch.roomName)
-					.emit('victoryOf', winner);
-				this.server
-					.to(client.data.user.currentMatch.roomName)
-					.emit('errorEvent', 'Your opponnent has disconnected.');
-				this.server.emit('endGame');
-			}
-			this.server.emit('updateInvitation');
-			this.userService.disconnectClient(client.data.user);
-		}
-		this.server.emit('updatedRelations');
+		// if (client.data.user) {
+		// 	const winnerId: string = await this.gameService.handleGameDisconnect(
+		// 		client,
+		// 	);
+		// 	if (winnerId != null) {
+		// 		const winner = await this.userService.getUserById(winnerId);
+		// 		winner.victories++;
+		// 		client.data.user.defeats++;
+		// 		await this.gameService.setAchievements(winner);
+		// 		await this.gameService.setAchievements(client.data.user);
+		// 		// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
+		// 		this.server
+		// 			.to(client.data.user.currentMatch.roomName)
+		// 			.emit('victoryOf', winner);
+		// 		this.server
+		// 			.to(client.data.user.currentMatch.roomName)
+		// 			.emit('errorEvent', 'Your opponnent has disconnected.');
+		// 		this.server.emit('endGame');
+		// 	}
+		// 	this.server.emit('updateInvitation');
+		// 	this.userService.disconnectClient(client.data.user);
+		// }
+		// this.server.emit('updatedRelations');
 	}
 
 	@UseGuards(WsGuard)
@@ -635,7 +636,6 @@ export class GeneralGateway
  * +-+-+-+-+-+-+-+-+-+-+-+
  */
 
-
 	/**
 	 * 
 	 * @brief Envoie d'une invitation a jouer
@@ -644,18 +644,20 @@ export class GeneralGateway
 	 * @param userToInviteId celui qui doit recevoir l'invitation
 	 */
 	@UseGuards(WsGuard)
-	@SubscribeMessage('sendInvitation')
-	async sendInvitation(client: Socket, userToInviteId: string) {
-	await this.gameService.sendInvitation(client, userToInviteId);
-	this.server.emit('updatedInvitations');
+	@SubscribeMessage('sendInvite')
+	async sendInvite(client: Socket, userToInviteId: string) {
+		this.gameService.sendInvitation(client, userToInviteId);
+		this.gameService.deleteAllOthersInvite(client.data.user.userId, null);
+		client.emit("receivedInvite");
+		this.server.emit('updateInvitation');
 	}
 
 	
 	@UseGuards(WsGuard)
-	@SubscribeMessage('getInvitations')
+	@SubscribeMessage('retrieveInvitations')
 	async getInvitations(client: Socket) {
 		const properInvit =
-		await this.gameService.getInvitations(client.data.user);
+		this.gameService.getInvitations(client.data.user);
 		client.emit('sendBackInvite', properInvit);
 	}
 	
@@ -670,72 +672,76 @@ export class GeneralGateway
 	async deleteInvitation(client: Socket)
 	{
 	//  await this.gameService.deleteInvitation(client.data.user);
-		this.server.emit('updatedInvitations')
+		this.server.emit('updateInvitation')
 	}
+
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptInvite')
-	async acceptInvite(client: Socket, userInvitingId: string) {
-		const invitInformations = await this.gameService.acceptInvit(
-			client.data.user, 
-			userInvitingId
+	async acceptInvite(client: Socket, invitationId: string) {
+		const invite = this.gameService.acceptInvite(
+			client.data.user,
+			invitationId
 		);
-		this.server.to(invitInfo.)
-		// const currentRoom = await this.gameService.joinInvite(
-		// 	client,
-		// 	userInvitingId,
-		// );
-		// this.server.to(currentRoom).emit('updateInvitation');
-		// console.log('invite accepted');
+		let roomId = uuidv4();
+		client.join(roomId);
+		this.server.to(invite.id).emit("inviteAccepted", roomId);
+		this.gameService.deleteAllOthersInvite(client.data.user.userId, null);
+		this.server.emit("newGame", invite, roomId);
+		this.server.emit("updateInvitation")
+		//verifier que c'est VRAIMENT un truc unique (pour theo)
 	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('needWaiting')
+	async needWaiting(client: Socket) {
+		const waiting: boolean = this.gameService.needWaiting(client.data.user.userId);
+		client.emit('waiting', waiting);
+		}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('refuseInvite')
-	async refuseInvite(client: Socket, userInvitingId: string) {
-		const currentRoom = await this.gameService.refuseInvite(
-			client,
-			userInvitingId,
-		);
+	async refuseInvite(client: Socket, invitationId: string) {
+		this.gameService.refuseInvite(invitationId);
 		this.server.emit('updateInvitation');
-		this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
-		console.log('invite refused');
+		// this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('inviteIsDeclined')
-	async inviteIsDeclined(client: Socket, userInvitedId) {
-		await this.gameService.inviteIsDeclined(client, userInvitedId);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('inviteIsDeclined')
+	// async inviteIsDeclined(client: Socket, userInvitedId) {
+	// 	await this.gameService.inviteIsDeclined(client, userInvitedId);
+	// }
 
 	/**
 	 *		SPECTATE
 	 */
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('spectate')
-	async spectate(client: Socket, userIdToSpec: string) {
-		await this.gameService.spectate(client, userIdToSpec);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('spectate')
+	// async spectate(client: Socket, userIdToSpec: string) {
+	// 	await this.gameService.spectate(client, userIdToSpec);
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getCurrentMatch')
-	async getCurrentMatch(client: Socket, userIdToSpec: string) {
-		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
-		if (
-			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
-		) {
-			client.emit('sendCurrentMatch', true);
-		} else client.emit('sendCurrentMatch', false);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('getCurrentMatch')
+	// async getCurrentMatch(client: Socket, userIdToSpec: string) {
+	// 	if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
+	// 	if (
+	// 		(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
+	// 	) {
+	// 		client.emit('sendCurrentMatch', true);
+	// 	} else client.emit('sendCurrentMatch', false);
+	// }
 
 	/**
 	 * User State in game
 	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('isInGame')
-	async isInGame(client: Socket) {
-		const ret: boolean = await this.gameService.isInGame(client);
-		client.emit('isDisplayGame', ret);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('isInGame')
+	// async isInGame(client: Socket) {
+	// 	const ret: boolean = await this.gameService.isInGame(client);
+	// 	client.emit('isDisplayGame', ret);
+	// }
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
