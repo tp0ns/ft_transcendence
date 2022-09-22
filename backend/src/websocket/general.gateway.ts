@@ -473,6 +473,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('redrawCanvas')
 	async redrawCanvas(client: Socket, windowSize: any) {
+		console.log('redraw');
 		this.server
 			.to(client.data.currentMatch.roomName)
 			.emit(
