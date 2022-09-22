@@ -59,19 +59,19 @@ function	build_other() {
 		# DOCKER CONFIG
 		DOCKER_SOCK=/var/run/docker.sock
 		# DB CONFIG
-		PRIVATE_PATH_DB=./private/db
+		PRIVATE_PATH_DB=./secret/db
 		POSTGRES_USER=${USER}
 		POSTGRES_PASSWORD=$(openssl rand -hex 20)
 		POSTGRES_DB=${USER}
 		# PG ADMIN
-		PRIVATE_PATH_DEV=./private/pgadmin
+		PRIVATE_PATH_DEV=./secret/pgadmin
 		PGADMIN_DEFAULT_EMAIL=${USER}@mail.fr
 		PGADMIN_DEFAULT_PASSWORD=password_nul
 		GUNICORN_ACCESS_LOGFILE=/dev/null
 		# OAUTH42
 		FORTYTWO_APP_ID=${UID42}
 		FORTYTWO_APP_SECRET=${SECRET42}
-		REDIRECT_URL=http://localhost:8080/api/backend/callback
+		REDIRECT_URL=http://localhost:8080/backend/auth/callback
 		# JWT
 		JWT_SECRET=$(openssl rand -hex 32)
 		SIGN_CD=120000s

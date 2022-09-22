@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../../App";
+import ErrorContext from "../../../context/error-context";
 import UserProp from "../../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 
@@ -14,11 +15,13 @@ const SettingsUser: React.FC<{
 	const [qrcode, setqrcode] = useState<any>([]);
 	const [twoFAForm, settwoFAForm] = useState<boolean>(false);
 	const twoFAInput = useRef<HTMLInputElement>(null);
+	const ctx_error = useContext(ErrorContext);
 
 	useEffect(() => {
 		if (!twoFAForm) return;
 		async function getQrCode() {
 			const response = await fetch("/backend/auth/2fa/generate");
+			if (!response.ok) return ctx_error?.changeError("Can't retrieve QR Code");
 			const data = await response.json();
 			setqrcode(data);
 		}
@@ -34,19 +37,20 @@ const SettingsUser: React.FC<{
 
 	async function nameSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		if (!nameInput.current?.value) return;
-		const response = await (
-			await fetch("/backend/users/updateUsername", {
-				method: "PUT",
-				headers: {
-					"Content-type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify({
-					username: nameInput.current!.value,
-				}),
-			})
-		).json();
-		props.onUserchange(response);
+		const response = await fetch("/backend/users/updateUsername", {
+			method: "PUT",
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			},
+			body: JSON.stringify({
+				username: nameInput.current!.value,
+			}),
+		});
+		if (!response.ok) {
+			console.log(response);
+			return ctx_error?.changeError("Username is invalid");
+		}
+		props.onUserchange(await response.json());
 		nameInput.current!.value = "";
 	}
 
@@ -55,59 +59,47 @@ const SettingsUser: React.FC<{
 		let file = new FormData();
 		file.append("file", event.target[0].files[0]);
 		if (file === null) return;
-		const response = await (
-			await fetch("/backend/users/upload", {
-				method: "POST",
-				body: file,
-			})
-		).json();
-		props.onUserchange(response);
+		const response = await await fetch("/backend/users/upload", {
+			method: "POST",
+			body: file,
+		});
+		if (!response.ok) return ctx_error?.changeError("File upload failed");
+		props.onUserchange(await response.json());
 	}
 
 	async function twoFASubmitHandler(event: any) {
 		event.preventDefault();
-		try {
-			const response: UserProp = await (
-				await fetch("/backend/auth/2fa/turn-on", {
-					method: "POST",
-					headers: {
-						"Content-type": "application/json; charset=UTF-8",
-					},
-					body: JSON.stringify({
-						twoFACode: twoFAInput.current?.value,
-					}),
-				})
-			).json();
-			props.onUserchange(response);
-			twoFAInput.current!.value = "";
-		} catch (err) {
-			console.log(err);
-		}
+		const response = await fetch("/backend/auth/2fa/turn-on", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			},
+			body: JSON.stringify({
+				twoFACode: twoFAInput.current?.value,
+			}),
+		});
+		if (!response.ok) 
+			return ctx_error?.changeError("2FA code might be invalid");
+		props.onUserchange(await response.json());
+		twoFAInput.current!.value = "";
 	}
 
 	async function disableTwoFA() {
-		try {
-			const response: UserProp = await (
-				await fetch("/backend/auth/2fa/turn-off", {
-					method: "POST",
-				})
-			).json();
-			props.onUserchange(response);
-			settwofa(false);
-		} catch (err) {
-			console.log(err);
-		}
+		const response = await fetch("/backend/auth/2fa/turn-off", {
+			method: "POST",
+		});
+		if (!response.ok)
+			return ctx_error?.changeError("Can't turn off 2fa for now");
+		props.onUserchange(await response.json());
+		settwofa(false);
 	}
 
 	async function logout() {
-		socket.emit('leaving');
-		try {
-			const response = await await fetch("/backend/auth/logout");
-			if (!response.ok) throw new Error("Request failed!");
-			else {
-				navigate("/login")};
-		} catch (err) {
-			console.log(err);
+		socket.emit("leaving");
+		const response = await await fetch("/backend/auth/logout");
+		if (!response.ok) return ctx_error?.changeError("Can't disconnect for now");
+		else {
+			navigate("/login");
 		}
 	}
 
