@@ -1,33 +1,30 @@
 import {
-	Controller,
-	Get,
-	Param,
-	Post,
-	UploadedFile,
+	Body, Controller,
+	Get, HttpException,
+	HttpStatus, Param,
+	Post, Put,
+	Req, UploadedFile,
 	UseGuards,
-	UseInterceptors,
-	Put,
-	Req,
-	Body,
-	UsePipes,
-	ValidationPipe,
-	UseFilters,
+	UseInterceptors, UsePipes,
+	ValidationPipe
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
 	ApiBody,
 	ApiConsumes,
 	ApiCreatedResponse,
 	ApiOkResponse,
 	ApiTags,
-	ApiUnauthorizedResponse,
+	ApiUnauthorizedResponse
 } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from './storage/storage';
-import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
-import { uuidDto } from './dtos/uuidDto';
 import { Request } from 'express';
+import { diskStorage } from 'multer';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { v4 as uuidv4 } from 'uuid';
 import { UpdateUsernameDto } from './dtos/UpdateUsernameDto';
+import { uuidDto } from './dtos/uuidDto';
+import { UserService } from './user.service';
+import path = require('path');
 
 @ApiTags('users')
 @Controller('users')
@@ -72,7 +69,34 @@ export class UserController {
 	@ApiUnauthorizedResponse({ description: 'user not authorized' })
 	@UseGuards(JwtAuthGuard)
 	@Post('/upload')
-	@UseInterceptors(FileInterceptor('file', storage))
+	@UseInterceptors(
+		FileInterceptor('file', {
+			limits: {
+				fileSize: 8000000, // 1MB in Bytes
+			},
+			storage: diskStorage({
+				destination: './uploads/profileimages',
+				filename: (req, file, cb) => {
+					const filename: string =
+						path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+					const extension: string = path.parse(file.originalname).ext;
+
+					cb(null, `${filename}${extension}`);
+				},
+			}),
+			fileFilter: (req, file, cb) => {
+				if (file.mimetype.split('/')[0] !== 'image')
+					return cb(
+						new HttpException(
+							'Only upload image',
+							HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+						),
+						false,
+					);
+				return cb(null, true);
+			},
+		}),
+	)
 	uploadFile(@UploadedFile() file, @Req() req) {
 		return this.userService.update(req.user.userId, {
 			profileImage: './uploads/profileimages/' + file.filename,

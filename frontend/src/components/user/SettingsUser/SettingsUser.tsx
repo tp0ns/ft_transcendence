@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../../App";
-import ErrorContext, { ErrorContextProvider } from "../../../context/error-context";
+import ErrorContext from "../../../context/error-context";
 import UserProp from "../../../interfaces/User.interface";
 import classes from "./SettingsUser.module.css";
 
@@ -21,8 +21,7 @@ const SettingsUser: React.FC<{
 		if (!twoFAForm) return;
 		async function getQrCode() {
 			const response = await fetch("/backend/auth/2fa/generate");
-			if (!response.ok)
-				return ctx_error?.changeError("Can't retrieve QR Code");
+			if (!response.ok) return ctx_error?.changeError("Can't retrieve QR Code");
 			const data = await response.json();
 			setqrcode(data);
 		}
@@ -38,16 +37,15 @@ const SettingsUser: React.FC<{
 
 	async function nameSubmitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		const response =
-			await fetch("/backend/users/updateUsername", {
-				method: "PUT",
-				headers: {
-					"Content-type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify({
-					username: nameInput.current!.value,
-				}),
-			});
+		const response = await fetch("/backend/users/updateUsername", {
+			method: "PUT",
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			},
+			body: JSON.stringify({
+				username: nameInput.current!.value,
+			}),
+		});
 		if (!response.ok) {
 			console.log(response);
 			return ctx_error?.changeError("Username is invalid");
@@ -61,40 +59,35 @@ const SettingsUser: React.FC<{
 		let file = new FormData();
 		file.append("file", event.target[0].files[0]);
 		if (file === null) return;
-		const response = await (
-			await fetch("/backend/users/upload", {
-				method: "POST",
-				body: file,
-			})
-		);
-		if (!response.ok)
-			return ctx_error?.changeError("File upload failed");
+		const response = await await fetch("/backend/users/upload", {
+			method: "POST",
+			body: file,
+		});
+		if (!response.ok) return ctx_error?.changeError("File upload failed");
 		props.onUserchange(await response.json());
 	}
 
 	async function twoFASubmitHandler(event: any) {
 		event.preventDefault();
-			const response =
-				await fetch("/backend/auth/2fa/turn-on", {
-					method: "POST",
-					headers: {
-						"Content-type": "application/json; charset=UTF-8",
-					},
-					body: JSON.stringify({
-						twoFACode: twoFAInput.current?.value,
-					}),
-				});
-			if (!response.ok)
-				return ctx_error?.changeError("2FA code might be invalid");
-			props.onUserchange(await response.json());
-			twoFAInput.current!.value = "";
+		const response = await fetch("/backend/auth/2fa/turn-on", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			},
+			body: JSON.stringify({
+				twoFACode: twoFAInput.current?.value,
+			}),
+		});
+		if (!response.ok) 
+			return ctx_error?.changeError("2FA code might be invalid");
+		props.onUserchange(await response.json());
+		twoFAInput.current!.value = "";
 	}
 
 	async function disableTwoFA() {
-		const response =
-			await fetch("/backend/auth/2fa/turn-off", {
-				method: "POST",
-			});
+		const response = await fetch("/backend/auth/2fa/turn-off", {
+			method: "POST",
+		});
 		if (!response.ok)
 			return ctx_error?.changeError("Can't turn off 2fa for now");
 		props.onUserchange(await response.json());
@@ -102,12 +95,12 @@ const SettingsUser: React.FC<{
 	}
 
 	async function logout() {
-		socket.emit('leaving');
+		socket.emit("leaving");
 		const response = await await fetch("/backend/auth/logout");
 		if (!response.ok) return ctx_error?.changeError("Can't disconnect for now");
 		else {
-			navigate("/login")
-		};
+			navigate("/login");
+		}
 	}
 
 	return (
