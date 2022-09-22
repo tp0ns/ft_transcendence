@@ -31,7 +31,7 @@ export class UserService {
 		private channelService: ChannelService,
 		@Inject(forwardRef(() => GameService))
 		private GameService: GameService,
-	) {}
+	) { }
 
 	/**
 	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il
@@ -137,8 +137,8 @@ export class UserService {
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
-		if (attrs.username === user.username || userToFind)
-			throw new HttpException("This username is already used", HttpStatus.FORBIDDEN)
+		// if (attrs.username === user.username || userToFind)
+		// 	throw new HttpException("This username is already used", HttpStatus.FORBIDDEN)
 		Object.assign(user, attrs);
 		return this.userRepo.save(user);
 	}

@@ -5,7 +5,7 @@ enum GRID {
   WIDTH = 900,
   BALL_RADIUS = 10,
   PAD_WIDTH = 20,
-  PAD_HEIGHT = 40,
+  PAD_HEIGHT = 120,
 }
 
 export const initPad = (xStart: number, yStart: number) => {

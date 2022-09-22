@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { socket } from "../App";
 import GameCanvas from "../components/game/GameCanvas";
 import { Game } from "../components/game/interfaces/game.interfaces";
+import classes from "./GamePage.module.css"
 
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
@@ -23,8 +24,8 @@ const GamePage = () => {
 	}
 
 	return (
-		<div onKeyDown={handleKeyDown}>
-			{game ? <GameCanvas grid={game.grid} /> : null}
+		<div className={classes.window} onKeyDown={handleKeyDown}>
+			{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : null}
 		</div>
 	)
 }

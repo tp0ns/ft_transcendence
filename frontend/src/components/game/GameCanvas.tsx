@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
-import { drawBall, drawPads } from "./utils/GameDraw";
+import { drawBall, drawPads, drawScore } from "./utils/GameDraw";
 import "./GameCanvas.css"
-import { Grid } from "./interfaces/game.interfaces";
+import { Game, Grid } from "./interfaces/game.interfaces";
 
-const GameCanvas: React.FC<{ grid: Grid }> = (props) => {
-	const grid = props.grid;
+const GameCanvas: React.FC<{
+	game: Game,
+	className: any
+}> = (props) => {
+	const { id, grid, player1, player2 } = props.game;
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 
 	const drawCanvas = (context: any, grid: any) => {
@@ -12,6 +15,7 @@ const GameCanvas: React.FC<{ grid: Grid }> = (props) => {
 		context.beginPath();
 		drawPads(context, grid);
 		drawBall(context, grid);
+		drawScore(context, player1.score, player2.score, grid.size);
 	}
 
 	useEffect(() => {

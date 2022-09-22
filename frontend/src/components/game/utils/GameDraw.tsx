@@ -1,5 +1,5 @@
 import { createTextSpanFromBounds } from "typescript"
-import { Grid, Pad } from "../interfaces/game.interfaces";
+import { Coordinate, Grid, Pad } from "../interfaces/game.interfaces";
 
 
 // export const drawBackground = (
@@ -38,4 +38,16 @@ export const drawBall = (
     2 * Math.PI,
   )
   context.fill();
+}
+
+export const drawScore = (
+  context: CanvasRenderingContext2D,
+  score1: number,
+  score2: number,
+  gridSize: Coordinate
+) => {
+  context.font = "80px blippoblack";
+  context!.fillStyle = "#3a36367c";
+  context!.fillText(score1.toString(), Math.round(gridSize.x / 2 - 65), Math.round(gridSize.y * 0.2));
+  context!.fillText(score2.toString(), Math.round(gridSize.x / 2 + 20), Math.round(gridSize.y * 0.2));
 }
