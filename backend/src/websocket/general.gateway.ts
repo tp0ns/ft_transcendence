@@ -80,24 +80,24 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			const winnerId: string = await this.gameService.handleGameDisconnect(
-				client,
-			);
-			if (winnerId != null) {
-				const winner = await this.userService.getUserById(winnerId);
-				winner.victories++;
-				client.data.user.defeats++;
-				await this.gameService.setAchievements(winner);
-				await this.gameService.setAchievements(client.data.user);
-				// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
-				this.server
-					.to(client.data.user.currentMatch.roomName)
-					.emit('victoryOf', winner);
-				this.server
-					.to(client.data.user.currentMatch.roomName)
-					.emit('errorEvent', 'Your opponnent has disconnected.');
-				this.server.emit('endGame');
-			}
+			// 	const winnerId: string = await this.gameService.handleGameDisconnect(
+			// 		client,
+			// 	);
+			// 	if (winnerId != null) {
+			// 		const winner = await this.userService.getUserById(winnerId);
+			// 		winner.victories++;
+			// 		client.data.user.defeats++;
+			// 		await this.gameService.setAchievements(winner);
+			// 		await this.gameService.setAchievements(client.data.user);
+			// 		// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
+			// 		this.server
+			// 			.to(client.data.user.currentMatch.roomName)
+			// 			.emit('victoryOf', winner);
+			// 		this.server
+			// 			.to(client.data.user.currentMatch.roomName)
+			// 			.emit('errorEvent', 'Your opponnent has disconnected.');
+			// 		this.server.emit('endGame');
+			// 	}
 			this.server.emit('updateInvitation');
 			this.userService.disconnectClient(client.data.user);
 		}
@@ -422,88 +422,88 @@ export class GeneralGateway
 		this.server.to(roomId).emit('updatedGame', game);
 	}
 
-	/**
-	 * 				INVITATIONS
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('retrieveInvitations')
-	async retrieveInvitations(client: Socket) {
-		if (client.data.user.status === "disconnected")
-			await this.userService.connectClient(client.data.user);
-		const properInvit: InvitationEntity[] =
-			await this.gameService.getInvitations(client);
-		this.server.emit('updatedRelations');
-		client.emit('sendBackInvite', properInvit);
-	}
+	// /**
+	//  * 				INVITATIONS
+	//  */
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('retrieveInvitations')
+	// async retrieveInvitations(client: Socket) {
+	// 	if (client.data.user.status === "disconnected")
+	// 		await this.userService.connectClient(client.data.user);
+	// 	const properInvit: InvitationEntity[] =
+	// 		await this.gameService.getInvitations(client);
+	// 	this.server.emit('updatedRelations');
+	// 	client.emit('sendBackInvite', properInvit);
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('sendInvite')
-	async sendInvite(client: Socket, userToInviteId: string) {
-		await this.gameService.sendInvite(client, userToInviteId);
-		this.server.emit('updateInvitation');
-		client.emit('pendingInvitation');
-		console.log('invite sent');
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('sendInvite')
+	// async sendInvite(client: Socket, userToInviteId: string) {
+	// 	await this.gameService.sendInvite(client, userToInviteId);
+	// 	this.server.emit('updateInvitation');
+	// 	client.emit('pendingInvitation');
+	// 	console.log('invite sent');
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('acceptInvite')
-	async acceptInvite(client: Socket, userInvitingId: string) {
-		const currentRoom = await this.gameService.joinInvite(
-			client,
-			userInvitingId,
-		);
-		this.server.to(currentRoom).emit('updateInvitation');
-		console.log('invite accepted');
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('acceptInvite')
+	// async acceptInvite(client: Socket, userInvitingId: string) {
+	// 	const currentRoom = await this.gameService.joinInvite(
+	// 		client,
+	// 		userInvitingId,
+	// 	);
+	// 	this.server.to(currentRoom).emit('updateInvitation');
+	// 	console.log('invite accepted');
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('refuseInvite')
-	async refuseInvite(client: Socket, userInvitingId: string) {
-		const currentRoom = await this.gameService.refuseInvite(
-			client,
-			userInvitingId,
-		);
-		this.server.emit('updateInvitation');
-		this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
-		console.log('invite refused');
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('refuseInvite')
+	// async refuseInvite(client: Socket, userInvitingId: string) {
+	// 	const currentRoom = await this.gameService.refuseInvite(
+	// 		client,
+	// 		userInvitingId,
+	// 	);
+	// 	this.server.emit('updateInvitation');
+	// 	this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
+	// 	console.log('invite refused');
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('inviteIsDeclined')
-	async inviteIsDeclined(client: Socket, userInvitedId) {
-		await this.gameService.inviteIsDeclined(client, userInvitedId);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('inviteIsDeclined')
+	// async inviteIsDeclined(client: Socket, userInvitedId) {
+	// 	await this.gameService.inviteIsDeclined(client, userInvitedId);
+	// }
 
-	/**
-	 *		SPECTATE
-	 */
+	// /**
+	//  *		SPECTATE
+	//  */
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('spectate')
-	async spectate(client: Socket, userIdToSpec: string) {
-		await this.gameService.spectate(client, userIdToSpec);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('spectate')
+	// async spectate(client: Socket, userIdToSpec: string) {
+	// 	await this.gameService.spectate(client, userIdToSpec);
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getCurrentMatch')
-	async getCurrentMatch(client: Socket, userIdToSpec: string) {
-		if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
-		if (
-			(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
-		) {
-			client.emit('sendCurrentMatch', true);
-		} else client.emit('sendCurrentMatch', false);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('getCurrentMatch')
+	// async getCurrentMatch(client: Socket, userIdToSpec: string) {
+	// 	if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
+	// 	if (
+	// 		(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
+	// 	) {
+	// 		client.emit('sendCurrentMatch', true);
+	// 	} else client.emit('sendCurrentMatch', false);
+	// }
 
-	/**
-	 * User State in game
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('isInGame')
-	async isInGame(client: Socket) {
-		const ret: boolean = await this.gameService.isInGame(client);
-		client.emit('isDisplayGame', ret);
-	}
+	// /**
+	//  * User State in game
+	//  */
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('isInGame')
+	// async isInGame(client: Socket) {
+	// 	const ret: boolean = await this.gameService.isInGame(client);
+	// 	client.emit('isDisplayGame', ret);
+	// }
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -600,20 +600,16 @@ export class GeneralGateway
 		});
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getAchievements')
-	async getAchievements(client: Socket, userId: string) {
-		let userAchievements: AchievementsEntity;
-		if (userId != 'me')
-			userAchievements = await this.gameService.getUserAchievements(userId);
-		else
-			userAchievements = await this.gameService.getUserAchievements(
-				client.data.user.userId,
-			);
-		client.emit(`sendAchievements`, userAchievements);
-	}
-}
-
-function jwtDecode<T>(Authentication: any) {
-	throw new Error('Function not implemented.');
+	// 	@UseGuards(WsGuard)
+	// 	@SubscribeMessage('getAchievements')
+	// 	async getAchievements(client: Socket, userId: string) {
+	// 		let userAchievements: AchievementsEntity;
+	// 		if (userId != 'me')
+	// 			userAchievements = await this.gameService.getUserAchievements(userId);
+	// 		else
+	// 			userAchievements = await this.gameService.getUserAchievements(
+	// 				client.data.user.userId,
+	// 			);
+	// 		client.emit(`sendAchievements`, userAchievements);
+	// 	}
 }

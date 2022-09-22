@@ -16,7 +16,15 @@ import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { initGrid } from './utils/initGrid';
+import { Match } from 'src/game/interfaces/match.interface';
 
+
+const matchMakingSet = new Set<Socket>();
+const inviteSet = new Set<Socket>();
+const inviteRoomMap = new Map<string, string>(); // <userInviting, roomId>
+let match: Match;
+
+let games: Game[] = [];
 
 @Injectable()
 export class GameService {
@@ -32,28 +40,41 @@ export class GameService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-		private games: Game[],
 	) { }
 
 
 	initDummyGame = (roomId: string, user: UserEntity) => {
-		this.games.map((game) => {
-			if (game.id === roomId) {
-				game.player2.user = user;
-				game.player2.score = 0;
-				return game;
-			}
-		})
-		let grid: Grid = initGrid();
-		let game: Game = {
-			id: roomId,
-			grid: grid,
-			player1: null,
-			player2: null
+		let res: Game = null;
+		if (games) {
+			games.map((game) => {
+				if (game.id === roomId && !game.player2) {
+					game.player2 = {
+						user: user,
+						score: 0
+					}
+					res = game;
+				}
+			})
 		}
-		game.player1.user = user;
-		game.player1.score = 0;
-		return game;
+		if (!res) {
+			console.log("COUCOU")
+			let grid: Grid = initGrid();
+			let game: Game = {
+				id: roomId,
+				grid: grid,
+				player1: null,
+				player2: null
+			}
+			game.player1 = {
+				user: user,
+				score: 0
+			}
+			games.push(game);
+			res = game;
+			console.log("games: ", games)
+		}
+		console.log("res: ", res)
+		return res;
 	}
 
 
@@ -176,8 +197,8 @@ export class GameService {
 
 	//check if the game should end and exec the proper funciton if so
 	async checkEndGame(client: Socket, match: Match) {
-		const user1: UserEntity = await this.userService.getUserById(match.player1);
-		const user2: UserEntity = await this.userService.getUserById(match.player2);
+		const user1: UserEntity = await this.userService.getUserById(match.player1.userId);
+		const user2: UserEntity = await this.userService.getUserById(match.player2.userId);
 		if (match.p1Score >= 2) return 1;
 		else if (match.p2Score >= 2) return 2;
 		return 0;
@@ -268,15 +289,15 @@ export class GameService {
 		// aren't invitation
 		const currentRoomName: string = inviteRoomMap.get(userInvitingId);
 		inviteRoomMap.delete(userInvitingId);
-		const currentMatch: Match = this.setDefaultPos(currentRoomName);
-		currentMatch.player1 = client.data.user.userId;
-		currentMatch.p1User = currentMatch.player1;
-		currentMatch.player2 = userInviting.userId;
-		currentMatch.p2User = currentMatch.player2;
-		currentMatch.isLocal = false;
-		client.join(currentMatch.roomName);
-		client.data.user.currentMatch = currentMatch;
-		userInviting.currentMatch = currentMatch;
+		// const currentMatch: Match = this.setDefaultPos(currentRoomName);
+		// currentMatch.player1 = client.data.user.userId;
+		// currentMatch.p1User = currentMatch.player1;
+		// currentMatch.player2 = userInviting.userId;
+		// currentMatch.p2User = currentMatch.player2;
+		// currentMatch.isLocal = false;
+		// client.join(currentMatch.roomName);
+		// client.data.user.currentMatch = currentMatch;
+		// userInviting.currentMatch = currentMatch;
 		await this.userRepo.save(client.data.user);
 		await this.userRepo.save(userInviting);
 		return currentRoomName;

@@ -1,29 +1,29 @@
 import { useEffect, useRef } from "react";
 import { drawBall, drawPads } from "./utils/GameDraw";
 
-const GameCanvas: React.FC<{ canvas: any }> = (props) => {
-	const canvas = props.canvas;
-	const ref = useRef<HTMLCanvasElement>(null)
+const GameCanvas: React.FC<{ grid: any }> = (props) => {
+	const grid = props.grid;
+	const canvasRef = useRef<HTMLCanvasElement>(null)
 
-	const drawCanvas = (context: CanvasRenderingContext2D, grid: any) => {
-		context.clearRect(0, 0, canvas.width, canvas.height);
+	const drawCanvas = (context: any, grid: any) => {
+		context.clearRect(0, 0, grid.width, grid.height);
 		context.beginPath();
 		drawPads(context, grid);
 		drawBall(context, grid);
 	}
 
 	useEffect(() => {
-		const canvasRef = ref.current;
-		const context = canvas.getContext('2d');
-		drawCanvas(context, canvas.grid);
+		const canvas = canvasRef.current;
+		const context = canvas?.getContext('2d');
+		drawCanvas(context, grid);
 	})
 
 	return (
 		<canvas
 			id='gameCanvas'
-			ref={canvas.reference}
-			width={canvas.width}
-			height={canvas.height}
+			ref={canvasRef}
+			width={grid.width}
+			height={grid.height}
 		/>
 	)
 }
