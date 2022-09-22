@@ -49,23 +49,37 @@ const GameScreen: React.FC<{
 	const [waiting, setWaiting] = useState<boolean>(false);
 	const [windowSizeState, setWindowSize] = useState(getWindowSize());
 
-
 	// function to define position and sizes to actual window
 	const translateToCanvas = (leftPos: any, rightPos: any, ballPos: any) => {
 		// console.log("window size in translate: ", windowSize)
 		// console.log("- TRANSLATE TO CANVAS -\nwindowSize.innerWidth: ", windowSize.innerWidth, "windowSize.innerHeight: ", windowSize.innerHeight)
-		leftPadPosition.x = 0;
+		leftPadPosition.w = Math.round(leftPos.w * windowSize.innerWidth / baseWidth);
+		// leftPadPosition.x = Math.round(leftPos.x * windowSize.innerWidth / baseWidth);
 		leftPadPosition.y = Math.round(leftPos.y * windowSize.innerHeight / baseHeight);
 		// leftPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// leftPadPosition.h = (100 / 480) * windowSize.innerHeight;
 
-		rightPadPosition.x = Math.round(windowSize.innerWidth - rightPadPosition.w);
+		rightPadPosition.w = Math.round(rightPos.w * windowSize.innerWidth / baseWidth);
+		rightPadPosition.x = windowSize.innerWidth - rightPadPosition.w;
 		rightPadPosition.y = Math.round(rightPos.y * windowSize.innerHeight / baseHeight);
+
+		// console.log('AFTER');
+		// console.log('rightPadPosition.x', rightPadPosition.x);
+		// console.log('rightPadPosition.y', rightPadPosition.y);
+
 		// rightPadPosition.w = (20 / 640) * windowSize.innerWidth;
 		// rightPadPosition.h = (100 / 480) * windowSize.innerHeight;
 
-		ballPosition.x = Math.round(ballPos.x * windowSize.innerWidth / baseWidth);
+		//	ball
+		console.log('BEFORE');
+		// console.log('ballPosition.x', ballPosition.x);
+		console.log('ballPosition.y', ballPosition.y);
+		// ballPosition.x = Math.round(ballPos.x * windowSize.innerWidth / baseWidth);
 		ballPosition.y = Math.round(ballPos.y * windowSize.innerHeight / baseHeight);
+		console.log('AFTER');
+		// console.log('ballPosition.x', ballPosition.x);
+		console.log('ballPosition.y', ballPosition.y);
+
 		// ballPosition.radius = (10 / 480) * windowSize.innerHeight;
 	}
 
@@ -78,24 +92,23 @@ const GameScreen: React.FC<{
 			rightPadPosition = rightPos;
 			ballPosition = ballPos;
 			context!.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
-			console.log("- Before translate -\n\n")
-			console.log("canvas size: ", windowSize);
-			console.log("ballPadPosition: ", ballPosition);
+			// console.log("- Before translate -\n\n")
+			// console.log("canvas size: ", windowSize);
+			// console.log("ballPadPosition: ", ballPosition);
 			// console.log("rightPadPosition: ", rightPadPosition);
 			player1Score = p1Score;
 			player2Score = p2Score;
 			// Adapt size to window at new position sent from backend
-			console.log("-------------------------\n\n")
-			// translateToCanvas(leftPos, rightPos, ballPos);
-			console.log("- After translate -\n\n")
-			console.log("canvas size: ", windowSize);
-			console.log("ballPosition: ", ballPosition);
+			// console.log("-------------------------\n\n")
+			translateToCanvas(leftPos, rightPos, ballPos);
+			// console.log("- After translate -\n\n")
+			// console.log("canvas size: ", windowSize);
+			// console.log("ballPosition: ", ballPosition);
 			// console.log("rightPadPosition: ", rightPadPosition);
-			console.log("-------------------------\n\n")
+			// console.log("-------------------------\n\n")
 
 
 			//  draw the ball
-			// context!.arc(5, 5, 5, 0, 2 * Math.PI);
 			context!.beginPath();
 			context!.arc(
 				ballPosition.x,
@@ -151,14 +164,14 @@ const GameScreen: React.FC<{
 		};
 	}, [windowSize]);
 
-	// useEffect(() => () => {
-	// 	console.log("- Before redraw -\n\n")
-	// 	console.log("canvas size: ", windowSizeState);
-	// 	console.log("leftPadPosition: ", leftPadPosition);
-	// 	console.log("rightPadPosition: ", rightPadPosition);
-	// 	console.log("-------------------------\n\n")
-	// 	socket.emit('redrawCanvas', windowSizeState);
-	// }, [windowSizeState])
+	useEffect(() => () => {
+		console.log("- Before redraw -\n\n")
+		console.log("canvas size: ", windowSizeState);
+		console.log("leftPadPosition: ", leftPadPosition);
+		console.log("rightPadPosition: ", rightPadPosition);
+		console.log("-------------------------\n\n")
+		socket.emit('redrawCanvas', windowSizeState);
+	}, [windowSizeState])
 
 	function getWindowSize() {
 		let { innerWidth, innerHeight } = window;
@@ -214,7 +227,7 @@ const GameScreen: React.FC<{
 			if (ballPosition.x + ballPosition.speedx >= windowSize.innerWidth - ballPosition.radius) {
 				// collision with left wall. windowSize.innerWidth - ballPosition.radius = point of contact in px
 				ballPosition.x = windowSize.innerWidth - ballPosition.radius;
-				//end of the round - need to add score management
+				//end of the round
 				// collision with left wall -> point to right
 				// p1 += 1;
 				gameFunctions("resetBall", 2);

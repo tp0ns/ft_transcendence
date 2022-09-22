@@ -623,7 +623,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('backHome')
 	async backHome(client: Socket) {
-		client.emit("goBackHome");
+		client.emit('goBackHome');
 	}
 
 	/**

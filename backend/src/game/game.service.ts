@@ -44,7 +44,7 @@ export class GameService {
 		const initLeftPad: Pad = {
 			x: 0,
 			y: 150,
-			w: 30,
+			w: 20,
 			h: 100,
 			speed: 5,
 		};
@@ -52,7 +52,7 @@ export class GameService {
 			// set right paddle
 			x: 620,
 			y: 200,
-			w: 30,
+			w: 20,
 			h: 100,
 			speed: 20, //speed = 20 si keyboard, 5 si mouse
 		};
