@@ -54,17 +54,11 @@ export class GameService {
 	}
 
 	getMyGame(userId: string) {
-		console.log("yaala");
-		// console.log("games", (this.games));
-		// console.log("map size", this.games.size)
-		console.log(JSON.stringify(this.games.values()));
 		for (const value of this.games.values()) {
-			console.log("inFor");
 			if (value.player1.user.userId === userId || value.player2.user.userId === userId) {
 				return value;
 			};
 		}
-		console.log("outFor");
 	}
 
 	initGame = (invitation: invitationInterface) => {
@@ -83,16 +77,13 @@ export class GameService {
 			ongoing: false,
 		}
 		this.games.set(invitation.roomId, game);
-		console.log("this.games: ", this.games)
 		return game;
 	}
 
 	movePad(user: UserEntity, direction: string, gameId: string) {
-		let game: Game = this.games[gameId];
+		let game: Game = this.games.get(gameId);
 		let padToMove: Pad = game.grid.pad1;
 
-		console.log("game.player2.user: ", game.player2.user)
-		console.log("user: ", user)
 		if (game.player2.user.userId === user.userId)
 			padToMove = game.grid.pad2;
 		if (direction === "up" && padToMove.pos.y > 0)
@@ -109,12 +100,12 @@ export class GameService {
 
 	gameLoop(server: any, gameId: string, state: string) {
 		let timer;
-		console.log("caca");
-		this.games[gameId].ongoing = true;
+
+		this.games.get(gameId).ongoing = true;
 		if (state === "start") {
 			timer = setInterval(() => {
 				this.moveBall(gameId)
-				server.to(gameId).emit('updatedGame', this.games[gameId]);
+				server.to(gameId).emit('updatedGame', this.games.get(gameId));
 			}
 
 				, 5000)

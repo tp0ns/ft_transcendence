@@ -503,7 +503,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinGame')
 	joinGame(client: Socket, roomId: string) {
-		console.log(" COUCOUOUCOUCOCUCOU", client.data.user.username);
 		client.join(roomId);
 		this.gameService.setMatch(client.data.user, roomId);
 	}
@@ -599,7 +598,6 @@ export class GeneralGateway
 	@SubscribeMessage('getMyGame')
 	getMyGame(client: Socket) {
 		let game: Game = this.gameService.getMyGame(client.data.user.userId);
-		console.log("\n\ngame in gateway:\n ", game)
 		client.emit('updatedGame', game);
 	}
 
@@ -607,6 +605,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('movePad')
 	movePad(client: Socket, { roomId, direction }) {
+		console.log('movePad')
 		let game: Game = this.gameService.movePad(client.data.user, direction, roomId);
 		this.server.to(roomId).emit('updatedGame', game);
 	}

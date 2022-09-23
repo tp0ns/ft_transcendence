@@ -18,7 +18,6 @@ const GamePage = () => {
 			autoFocusRef.current.focus()
 		socket.emit('getMyGame');
 		socket.on('updatedGame', (updatedGame) => {
-			console.log('hello');
 			console.log("updatedGame", updatedGame)
 			setGame(updatedGame)
 		})
@@ -31,7 +30,6 @@ const GamePage = () => {
 			if (event.key === "s")
 				socket.emit("movePad", { direction: "down", roomId: game.id });
 			if (!game.ongoing && event.key === "Enter") {
-				console.log("entered enter")
 				socket.emit('gameLoop', { roomId: game.id, state: "start" });
 			}
 		}
