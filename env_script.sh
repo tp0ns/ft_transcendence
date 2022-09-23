@@ -1,15 +1,3 @@
-function	check_env_file() {
-	if [ -f ".env" ]; then
-		read -p "Env file already exist, do you want to erase it ? " -n 1 -r
-		echo
-		if [[ ${REPLY} =~ ^[Yy]$ ]]; then
-			rm -rf .env
-		else
-			exit 0
-		fi
-	fi
-}
-
 function	check_fortytwo() {
 	local home_path=${HOME}
 	if [[ ${home_path} == /mnt/nfs/homes/* ]]; then
@@ -28,11 +16,11 @@ function	read_42api_secret() {
 }
 
 function	build_fortytwo() {
-	echo "FortyTwo iMac detected."
+	echo "FortyTwo computer detected."
 	read -r -d '' "ENV_VAR" <<- EOM
-		# DOCKER CONFIG
+		# DOCKER
 		DOCKER_SOCK=${DOCKER_HOST:7}
-		# DB CONFIG
+		# DB
 		PRIVATE_PATH_DB=${HOME}/goinfre/db
 		POSTGRES_USER=${USER}
 		POSTGRES_PASSWORD=$(openssl rand -hex 20)
@@ -42,7 +30,7 @@ function	build_fortytwo() {
 		PGADMIN_DEFAULT_EMAIL=${USER}@student.42.fr
 		PGADMIN_DEFAULT_PASSWORD=password_nul
 		GUNICORN_ACCESS_LOGFILE=/dev/null
-		# OAUTH42
+		# AUTH42
 		FORTYTWO_APP_ID=${UID42}
 		FORTYTWO_APP_SECRET=${SECRET42}
 		REDIRECT_URL=http://localhost:8080/backend/auth/callback
@@ -54,11 +42,11 @@ function	build_fortytwo() {
 }
 
 function	build_other() {
-	echo "This is not a fortytwo iMac. Enjoy TDM or remote !"
+	echo "Personnal computer detected !"
 	read -r -d '' "ENV_VAR" <<- EOM
-		# DOCKER CONFIG
+		# DOCKER
 		DOCKER_SOCK=/var/run/docker.sock
-		# DB CONFIG
+		# DB
 		PRIVATE_PATH_DB=./secret/db
 		POSTGRES_USER=${USER}
 		POSTGRES_PASSWORD=$(openssl rand -hex 20)
@@ -68,7 +56,7 @@ function	build_other() {
 		PGADMIN_DEFAULT_EMAIL=${USER}@mail.fr
 		PGADMIN_DEFAULT_PASSWORD=password_nul
 		GUNICORN_ACCESS_LOGFILE=/dev/null
-		# OAUTH42
+		# AUTH42
 		FORTYTWO_APP_ID=${UID42}
 		FORTYTWO_APP_SECRET=${SECRET42}
 		REDIRECT_URL=http://localhost:8080/backend/auth/callback
