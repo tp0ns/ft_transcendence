@@ -17,6 +17,7 @@ import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
 import { WsException } from '@nestjs/websockets';
+import { v4 as uuidv4 } from 'uuid';
 
 let match: Match;
 
@@ -312,6 +313,7 @@ export class GameService {
 	 */
 	async sendInvite(client: Socket, userToInviteId: string) {
 		const user: UserEntity = client.data.user;
+		const roomId: string = uuidv4();
 		const userToInvite: UserEntity = await this.userService.getUserById(
 			userToInviteId,
 		);
@@ -330,9 +332,9 @@ export class GameService {
 		if (this.matchMakingMap.has(userToInviteId))
 			return "You can't send invitations while in matchmaking.";
 		else {
-			console.log(' enter here');
 			this.inviteMap.set(user.userId, {
 				id: client.id,
+				roomId: roomId,
 				player1: user,
 				player2: userToInvite,
 			});
@@ -420,6 +422,7 @@ export class GameService {
 
 	matchmaking(client: Socket) {
 		const user: UserEntity = client.data.user;
+		const roomId: string = uuidv4();
 		if (user.currentMatch != null)
 			throw new ForbiddenException("You can't start matchmaking while playing");
 		if (this.inviteMap.has(user.userId))
@@ -435,6 +438,7 @@ export class GameService {
 		}
 		this.matchMakingMap.set(user.userId, {
 			id: client.id,
+			roomId: roomId,
 			player1: user,
 			player2: null,
 		});

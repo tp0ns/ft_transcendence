@@ -36,7 +36,6 @@ import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
 import { Ball } from '../game/interfaces/game.interface';
 import { IdDto, UsernameDto } from './dtos/Relations.dto';
-import { v4 as uuidv4 } from 'uuid';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -690,12 +689,17 @@ export class GeneralGateway
 			client.data.user,
 			invitationId,
 		);
-		this.server.to(invite.id).emit('matchAccepted');
+		this.server.to(invite.id).emit('matchAccepted', invite.roomId);
+		client.emit('matchAccepted', invite.roomId);
 		this.gameService.deleteReceivedInvite(client.data.user.userId);
-		this.server.emit('newGame', invite);
-		// setTimeout(() => {
 		client.emit('updateInvitation');
-		// }, 10000);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('joinGame')
+	joinGame(client: Socket, roomId: string)
+	{
+		client.join(roomId);
 	}
 
 	/**
@@ -756,8 +760,10 @@ export class GeneralGateway
 	matchmaking(client: Socket) {
 		const matchMaking = this.gameService.matchmaking(client);
 		if (!matchMaking) return client.emit('waitingMatchmaking');
-		this.server.to(matchMaking.id).emit('matchAccepted');
-		client.emit('matchAccepted');
+		//generer le uuid pour le mettre en argument 
+		client.emit("newGame", matchMaking);
+		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
+		client.emit('matchAccepted', matchMaking.roomId);
 		this.server.emit('newGame', matchMaking);
 	}
 
