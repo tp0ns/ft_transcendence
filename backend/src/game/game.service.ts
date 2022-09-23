@@ -34,11 +34,10 @@ export class GameService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-	) { }
+	) {}
 
 	protected inviteMap = new Map<string, invitationInterface>();
 	protected matchMakingMap = new Map<string, invitationInterface>();
-
 
 	/**
 	 * set the default position of the elements in the game
@@ -171,15 +170,14 @@ export class GameService {
 	}
 
 	/**
-		 * ------------------ STATISTICS FOR USER PAGE  ------------------ *
-		 *
-		 * -  newConnection(newUser)
-		 * - getUserAchievements(userId)
-		 * - setMatchHistory(winner, loser, match)
-		 * - setAchievements(user)
-		 * - async endGame(client, match, winner, loser)
-		 */
-
+	 * ------------------ STATISTICS FOR USER PAGE  ------------------ *
+	 *
+	 * -  newConnection(newUser)
+	 * - getUserAchievements(userId)
+	 * - setMatchHistory(winner, loser, match)
+	 * - setAchievements(user)
+	 * - async endGame(client, match, winner, loser)
+	 */
 
 	/**
 	 * @brief Permet de creer une entite achievements lie a chaque user connecte
@@ -192,10 +190,10 @@ export class GameService {
 		if (
 			newUser.schoolId === 56170 ||
 			newUser.schoolId === 63187 ||
-			newUser.schoolId === 60438 || 
+			newUser.schoolId === 60438 ||
 			newUser.schoolId == 69772
 		)
-		builderAchievement = true;
+			builderAchievement = true;
 		await this.AchievementsRepository.save({
 			userId: newUser.userId,
 			Builder: builderAchievement,
@@ -295,145 +293,145 @@ export class GameService {
 		return 0;
 	}
 
+	/**
+	 * ------------------ INVITATIONS  ------------------ *
+	 *
+	 * - sendInvitation(user, userToInviteId);
+	 * - getUserAchievements(userId)
+	 * - setMatchHistory(winner, loser, match)
+	 * - setAchievements(user)
+	 * - async endGame(client, match, winner, loser)
+	 */
 
 	/**
-		 * ------------------ INVITATIONS  ------------------ *
-		 *
-		 * - sendInvitation(user, userToInviteId);
-		 * - getUserAchievements(userId)
-		 * - setMatchHistory(winner, loser, match)
-		 * - setAchievements(user)
-		 * - async endGame(client, match, winner, loser)
-		 */
-
-		/**
-	 * 
+	 *
 	 * @brief Envoie d'un invitation pour jouer
-	 * 
+	 *
 	 * @param client celui qui envoie l'invitation
 	 * @param userToInviteId l'id du user invite
 	 */
-	async sendInvitation(client: Socket, userToInviteId: string) {
-		const user : UserEntity = client.data.user;
+	async sendInvite(client: Socket, userToInviteId: string) {
+		const user: UserEntity = client.data.user;
 		const userToInvite: UserEntity = await this.userService.getUserById(
 			userToInviteId,
 		);
 		if (userToInvite.status === 'disconnected')
-			throw new ForbiddenException("User is disconnected, try again later")
+			return 'User is disconnected, try again later';
 		if (user.currentMatch != null)
-			throw new ForbiddenException("You can't invite someone while playing");
+			return "You can't invite someone while playing";
 		if (userToInvite.currentMatch != null)
-			throw new ForbiddenException('This user is already in game.');
+			return 'This user is already in game.';
 		if (this.inviteMap.has(user.userId))
-			throw new ForbiddenException("You can't send more than one invitation.");
+			return "You can't send more than one invitation.";
 		if (this.inviteMap.has(userToInviteId))
-			throw new ForbiddenException("This player is already waiting to play");
-		//verifier que les users de l'invitation ne sont pas dans le matchMaking
-		this.inviteMap.set(user.userId, {
-			id: client.id,
-			player1: user,
-			player2: userToInvite, 
-		});
+			return 'This player is already waiting to play';
+		if (this.matchMakingMap.has(user.userId))
+			return "You can't send invitations while in matchmaking.";
+		if (this.matchMakingMap.has(userToInviteId))
+			return "You can't send invitations while in matchmaking.";
+		else {
+			console.log(' enter here');
+			this.inviteMap.set(user.userId, {
+				id: client.id,
+				player1: user,
+				player2: userToInvite,
+			});
+			return null;
+		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @brief Recupere les invitations du user
-	 * 
+	 *
 	 */
 	getInvitations(user: UserEntity) {
 		let invites: invitationInterface[] = [];
 		for (let [key, value] of this.inviteMap.entries())
-			if (value.player2.userId === user.userId)
-				invites.push(value);
+			if (value.player2.userId === user.userId) invites.push(value);
 		return invites;
 	}
 
-
 	/**
-	 * 
+	 *
 	 * @brief Acceptation de l'invitation
-	 * 
+	 *
 	 * @param user celui qui accepte l'invitation
 	 * @param invitationId l'invitation concernee
 	 * @returns l'invitation pour pouvoir supprimer
 	 * toutes les autres invitations
-	 * 
+	 *
 	 * @todo supprimer le user si pas utile
 	 */
-	acceptInvite(user: UserEntity, invitationId: string)
-	{
+	acceptInvite(user: UserEntity, invitationId: string) {
 		if (!this.inviteMap.has(invitationId))
-			throw new WsException("The other player has left");
+			throw new WsException('The other player has left');
 		return this.inviteMap.get(invitationId);
 	}
-	 
+
 	/**
-	 * 
+	 *
 	 * @brief Supprime l'invitation refusee
-	 * 
+	 *
 	 * @param invitationId l'invitation concernee
 	 */
-	refuseInvite(invitationId: string)
-	{
+	refuseInvite(invitationId: string) {
 		this.inviteMap.delete(invitationId);
 	}
 
 	/**
-	 * @brief Permet de refuser toutes autres les invitations si 
-	 * le user en accepte une 
-	 * 
+	 * @brief Permet de refuser toutes autres les invitations si
+	 * le user en accepte une
+	 *
 	 * @param userId de celui qui a accepte une invitation
 	 * @param InvitationsToAvoidId l'invitation a ne pas supprimer
 	 */
-	deleteReceivedInvite(userId: string)
-	{
+	deleteReceivedInvite(userId: string) {
 		let invitesToDelete: string[] = [];
 		for (let [key, value] of this.inviteMap.entries())
-			if (value.player2.userId === userId)
-				invitesToDelete.push(key);
+			if (value.player2.userId === userId) invitesToDelete.push(key);
 		for (const invite of invitesToDelete) {
 			this.inviteMap.delete(invite);
 		}
 	}
- 
+
 	/**
-	 * 
-	 * @brief Permet de savoir si l'invitation 
+	 *
+	 * @brief Permet de savoir si l'invitation
 	 * qu'il attend n'a pas ete refuse
-	 * 
-	 * @param userId l'id de celui qui attends 
+	 *
+	 * @param userId l'id de celui qui attends
 	 * @returns true ou false
 	 */
-	needWaiting(userId: string)
-	{
-		return this.inviteMap.has(userId);
+	needWaiting(userId: string) {
+		return this.inviteMap.has(userId) || this.matchMakingMap.has(userId);
 	}
 
-	deleteAllUserInvite(userId: string)
-	{
+	deleteAllUserInvite(userId: string) {
 		this.deleteReceivedInvite(userId);
 		this.inviteMap.delete(userId);
+		this.matchMakingMap.delete(userId);
 	}
 
 	/**
-	 * 
+	 *
 	 * MATCHMAKING
 	 */
 
-	matchMaking(client: Socket)
-	{
-		const user : UserEntity = client.data.user;
+	matchmaking(client: Socket) {
+		const user: UserEntity = client.data.user;
 		if (user.currentMatch != null)
 			throw new ForbiddenException("You can't start matchmaking while playing");
 		if (this.inviteMap.has(user.userId))
-			throw new ForbiddenException("You can't start matchmaking while waiting for an invite");
-		if(this.matchMakingMap.has(user.userId))
-			throw new ForbiddenException("You already are in a matchmaking")
-		if (this.matchMakingMap.size > 0)
-		{
-			this.matchMakingMap[0].player2 = user;
-			return this.matchMakingMap[0];
+			throw new ForbiddenException(
+				"You can't start matchmaking while waiting for an invite",
+			);
+		if (this.matchMakingMap.has(user.userId))
+			throw new ForbiddenException('You already are in a matchmaking');
+		if (this.matchMakingMap.size > 0) {
+			let matchmake = this.matchMakingMap.entries().next();
+			matchmake.value[1].player2 = user;
+			return matchmake.value[1];
 		}
 		this.matchMakingMap.set(user.userId, {
 			id: client.id,
@@ -443,17 +441,15 @@ export class GameService {
 		return null;
 	}
 
-
-/**
-		 * ------------------ SPECTATE  ------------------ *
-		 *
-		 * - 
-		 * - 
-		 * - 
-		 * - 
-		 * - 
-		 */
-
+	/**
+	 * ------------------ SPECTATE  ------------------ *
+	 *
+	 * -
+	 * -
+	 * -
+	 * -
+	 * -
+	 */
 
 	/**
 	 * try to spectate the chosen user
@@ -530,32 +526,32 @@ export class GameService {
 	// 	// 		}
 	// 	// 	}
 	// 	}
-		// delete sent invitation
-		// const sentInvitation: InvitationEntity[] =
-		// 	await this.invitationRepository.find({
-		// 		where: [{ creator: { userId: client.data.user.userId } }],
-		// 	});
-		// for (const inviteIter of sentInvitation) {
-		// 	this.refuseInvite(client, inviteIter.creator.userId);
-		// }
-		// // refuse received invitations
-		// const allReceivedInvitations: InvitationEntity[] =
-		// 	await this.invitationRepository.find({
-		// 		where: [{ receiver: { userId: client.data.user.userId } }],
-		// 	});
-		// for (const inviteIter of allReceivedInvitations) {
-		// 	this.refuseInvite(client, inviteIter.creator.userId);
-		// }
+	// delete sent invitation
+	// const sentInvitation: InvitationEntity[] =
+	// 	await this.invitationRepository.find({
+	// 		where: [{ creator: { userId: client.data.user.userId } }],
+	// 	});
+	// for (const inviteIter of sentInvitation) {
+	// 	this.refuseInvite(client, inviteIter.creator.userId);
+	// }
+	// // refuse received invitations
+	// const allReceivedInvitations: InvitationEntity[] =
+	// 	await this.invitationRepository.find({
+	// 		where: [{ receiver: { userId: client.data.user.userId } }],
+	// 	});
+	// for (const inviteIter of allReceivedInvitations) {
+	// 	this.refuseInvite(client, inviteIter.creator.userId);
+	// }
 	// 	return winnerId;
 	// }
 
-// 	async isInGame(client: Socket) {
-// 		const sentInvitations: InvitationEntity[] =
-// 			await this.invitationRepository.find({
-// 				where: [{ creator: { userId: client.data.user.userId } }],
-// 			});
-// 		if (client.data.user.currentMatch != null || sentInvitations != null)
-// 			return true;
-// 		else return false;
-// 	}
+	// 	async isInGame(client: Socket) {
+	// 		const sentInvitations: InvitationEntity[] =
+	// 			await this.invitationRepository.find({
+	// 				where: [{ creator: { userId: client.data.user.userId } }],
+	// 			});
+	// 		if (client.data.user.currentMatch != null || sentInvitations != null)
+	// 			return true;
+	// 		else return false;
+	// 	}
 }

@@ -19,11 +19,9 @@ const MatchList: React.FC<{ userId: string }> = (props) => {
 
 	useEffect(() => {
 		socket.on("sendCurrentMatch", (currentMatch) => {
-			console.log("current match" + currentMatch);
 			setCurrent(currentMatch);
 		});
 		socket.on("sendMatchHistory", (matchHistory) => {
-			console.log(matchHistory);
 			setHistory(matchHistory);
 		});
 	}, []);

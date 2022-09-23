@@ -8,7 +8,7 @@ const InviteItem: React.FC<{ invite: MatchInviteInterface }> = (props) => {
 
 	function acceptInvite() {
 		socket.emit("acceptInvite", props.invite.player1.userId);
-		navigate("/");
+		navigate("/game");
 	}
 
 	function declineInvite() {

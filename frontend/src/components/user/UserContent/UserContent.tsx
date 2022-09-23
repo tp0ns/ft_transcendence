@@ -21,6 +21,9 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 		socket.on("newDM", (id) => {
 			navigate("/chat/" + id);
 		});
+		socket.on("receivedInvite", () => {
+			navigate("/waiting");
+		});
 	}, [navigate]);
 
 	useEffect(() => {
@@ -56,7 +59,6 @@ const UserContent: React.FC<{ userId: string }> = (props) => {
 
 	function sendGameInvite() {
 		socket.emit("sendInvite", props.userId);
-		navigate("/");
 	}
 
 	function sendMessage() {

@@ -1,6 +1,6 @@
 import classes from "./AdminMemberItem.module.css";
 import UserProp from "../../../../../interfaces/User.interface";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChatContext from "../../../../../context/chat-context";
 import { socket } from "../../../../../App";
 import Modal from "../../../../../ui/Modal/Modal";
@@ -13,13 +13,18 @@ const AdminMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const navigate = useNavigate();
 	const ctx = useContext(ChatContext);
 
+	useEffect(() => {
+		socket.on("receivedInvite", () => {
+			navigate("/waiting");
+		});
+	}, []);
+
 	function changeItemSide(value: boolean) {
 		setItemSide(value);
 	}
 
 	function sendGameInvite() {
 		socket.emit("sendInvite", props.member.userId);
-		navigate("/");
 	}
 
 	function isMuted() {

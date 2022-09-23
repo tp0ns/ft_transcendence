@@ -4,13 +4,17 @@ import {
 	UseFilters,
 	UseGuards,
 	UsePipes,
-	ValidationPipe
+	ValidationPipe,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
 	OnGatewayConnection,
-	OnGatewayDisconnect, OnGatewayInit, SubscribeMessage,
-	WebSocketGateway, WebSocketServer, WsException
+	OnGatewayDisconnect,
+	OnGatewayInit,
+	SubscribeMessage,
+	WebSocketGateway,
+	WebSocketServer,
+	WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { jwtConstants } from 'src/auth/jwt/jwt.constants';
@@ -32,7 +36,7 @@ import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
 import { Ball } from '../game/interfaces/game.interface';
 import { IdDto, UsernameDto } from './dtos/Relations.dto';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 @UseFilters(globalExceptionFilter)
 @WebSocketGateway({
@@ -41,7 +45,8 @@ import {v4 as uuidv4} from 'uuid';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -49,7 +54,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) { }
+	) {}
 
 	@WebSocketServer() server: Server;
 
@@ -81,7 +86,7 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.deleteAllUserInvite(client.data.user.userId)
+			this.gameService.deleteAllUserInvite(client.data.user.userId);
 			// const winnerId: string = await this.gameService.handleGameDisconnect(
 			// 	client,
 			// );
@@ -117,7 +122,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('playing')
 	async handlePlaying(client: Socket) {
-		if (client.data.user) await this.userService.playingClient(client.data.user);
+		if (client.data.user)
+			await this.userService.playingClient(client.data.user);
 		this.server.emit('updatedRelations');
 	}
 
@@ -604,181 +610,170 @@ export class GeneralGateway
 	// 	client.emit("goBackHome");
 	// }
 
-
-
-/**
- *  _      ____   _____          _         _____          __  __ ______ 
- * | |    / __ \ / ____|   /\   | |       / ____|   /\   |  \/  |  ____|
- * | |   | |  | | |       /  \  | |      | |  __   /  \  | \  / | |__   
- * | |   | |  | | |      / /\ \ | |      | | |_ | / /\ \ | |\/| |  __|  
- * | |___| |__| | |____ / ____ \| |____  | |__| |/ ____ \| |  | | |____ 
- * |______\____/ \_____/_/    \_\______|  \_____/_/    \_\_|  |_|______|
- * 
- */
+	/**
+	 *  _      ____   _____          _         _____          __  __ ______
+	 * | |    / __ \ / ____|   /\   | |       / ____|   /\   |  \/  |  ____|
+	 * | |   | |  | | |       /  \  | |      | |  __   /  \  | \  / | |__
+	 * | |   | |  | | |      / /\ \ | |      | | |_ | / /\ \ | |\/| |  __|
+	 * | |___| |__| | |____ / ____ \| |____  | |__| |/ ____ \| |  | | |____
+	 * |______\____/ \_____/_/    \_\______|  \_____/_/    \_\_|  |_|______|
+	 *
+	 */
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('localGame')
-	localGame(client: Socket)
-	{
-		this.server.emit("newGame", {
+	localGame(client: Socket) {
+		this.server.emit('newGame', {
 			player1: client.data.user,
 			player2: client.data.user,
 		});
 	}
 
-
-/**
- *   _____          __  __ ______   _____ _   ___      _______ _______    _______ _____ ____  _   _ 
- *  / ____|   /\   |  \/  |  ____| |_   _| \ | \ \    / /_   _|__   __|/\|__   __|_   _/ __ \| \ | |
- * | |  __   /  \  | \  / | |__      | | |  \| |\ \  / /  | |    | |  /  \  | |    | || |  | |  \| |
- * | | |_ | / /\ \ | |\/| |  __|     | | | . ` | \ \/ /   | |    | | / /\ \ | |    | || |  | | . ` |
- * | |__| |/ ____ \| |  | | |____   _| |_| |\  |  \  /   _| |_   | |/ ____ \| |   _| || |__| | |\  |
- *  \_____/_/    \_\_|  |_|______| |_____|_| \_|   \/   |_____|  |_/_/    \_\_|  |_____\____/|_| \_|
- * 
- */
+	/**
+	 *   _____          __  __ ______   _____ _   ___      _______ _______    _______ _____ ____  _   _
+	 *  / ____|   /\   |  \/  |  ____| |_   _| \ | \ \    / /_   _|__   __|/\|__   __|_   _/ __ \| \ | |
+	 * | |  __   /  \  | \  / | |__      | | |  \| |\ \  / /  | |    | |  /  \  | |    | || |  | |  \| |
+	 * | | |_ | / /\ \ | |\/| |  __|     | | | . ` | \ \/ /   | |    | | / /\ \ | |    | || |  | | . ` |
+	 * | |__| |/ ____ \| |  | | |____   _| |_| |\  |  \  /   _| |_   | |/ ____ \| |   _| || |__| | |\  |
+	 *  \_____/_/    \_\_|  |_|______| |_____|_| \_|   \/   |_____|  |_/_/    \_\_|  |_____\____/|_| \_|
+	 *
+	 */
 
 	/**
-	 * 
+	 *
 	 * @brief Envoie d'une invitation a jouer
-	 * 
+	 *
 	 * @param client celui qui envoie l'invitation
 	 * @param userToInviteId celui qui doit recevoir l'invitation
 	 */
-	 @UseGuards(WsGuard)
-	 @SubscribeMessage('sendInvite')
-	 async sendInvite(client: Socket, userToInviteId: string) {
-		 this.gameService.sendInvitation(client, userToInviteId);
-		 this.gameService.deleteReceivedInvite(client.data.user.userId);
-		 client.emit("receivedInvite");
-		 this.server.emit('updateInvitation');
-	 }
-
+	@UseGuards(WsGuard)
+	@SubscribeMessage('sendInvite')
+	async sendInvite(client: Socket, userToInviteId: string) {
+		const response = await this.gameService.sendInvite(client, userToInviteId);
+		if (response) throw new ForbiddenException(response);
+		this.gameService.deleteReceivedInvite(client.data.user.userId);
+		client.emit('receivedInvite');
+		this.server.emit('updateInvitation');
+	}
 
 	/**
-	 * @brief Permet de recuperer les invitations 
+	 * @brief Permet de recuperer les invitations
 	 * pour chaque client
-	 * 
+	 *
 	 * @param client celui qui cherche ses invitations
-	 * 
+	 *
 	 * -> appel a retrieveInvitations a chaque updateInvitation
 	 */
-	 @UseGuards(WsGuard)
-	 @SubscribeMessage('retrieveInvitations')
-	 async getInvitations(client: Socket) {
-		if (client.data.user.status === "disconnected")
+	@UseGuards(WsGuard)
+	@SubscribeMessage('retrieveInvitations')
+	async getInvitations(client: Socket) {
+		if (client.data.user.status === 'disconnected')
 			await this.userService.connectClient(client.data.user);
-		const properInvit =
-			this.gameService.getInvitations(client.data.user);
+		const properInvit = this.gameService.getInvitations(client.data.user);
 		client.emit('sendBackInvite', properInvit);
 		this.server.emit('updatedRelations');
-	 }
-
+	}
 
 	/**
 	 * @brief Si le joueur invite accepte l'invitation
-	 * 
+	 *
 	 * @param client celui qui accepte
-	 * @param invitationId l'invitation concernee 
-	 * 
-	 * -> creation de la room 
+	 * @param invitationId l'invitation concernee
+	 *
+	 * -> creation de la room
 	 * -> suppression de toutes les autres invitations
 	 */
-	 @UseGuards(WsGuard)
-	 @SubscribeMessage('acceptInvite')
-	 async acceptInvite(client: Socket, invitationId: string) {
-		 const invite = this.gameService.acceptInvite(
-			 client.data.user,
-			 invitationId
-		 );
-		this.server.to(invite.id).emit("matchAccepted");
+	@UseGuards(WsGuard)
+	@SubscribeMessage('acceptInvite')
+	async acceptInvite(client: Socket, invitationId: string) {
+		const invite = this.gameService.acceptInvite(
+			client.data.user,
+			invitationId,
+		);
+		this.server.to(invite.id).emit('matchAccepted');
 		this.gameService.deleteReceivedInvite(client.data.user.userId);
-		this.server.emit("newGame", invite);
-		this.server.emit("updateInvitation")
-	 }
+		this.server.emit('newGame', invite);
+		// setTimeout(() => {
+		client.emit('updateInvitation');
+		// }, 10000);
+	}
 
 	/**
-	 * 
+	 *
 	 * @brief Refus de l'invitation
-	 * 
+	 *
 	 * @param client celui qui refuse
 	 * @param invitationId l'invitation concernee
 	 */
-	 @UseGuards(WsGuard)
-	 @SubscribeMessage('refuseInvite')
-	 async refuseInvite(client: Socket, invitationId: string) {
-		 this.gameService.refuseInvite(invitationId);
-		 this.server.emit('updateInvitation');
-		 // this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
-	 }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('refuseInvite')
+	async refuseInvite(client: Socket, invitationId: string) {
+		this.gameService.refuseInvite(invitationId);
+		this.server.emit('updateInvitation');
+		// this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
+	}
 
 	/**
-	 * 
+	 *
 	 * @brief Permet de determiner si une invitation a ete refuse ou non
-	 * 
+	 *
 	 * @param client le user en attente d'une reponse a une invit
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('needWaiting')
-	async needWaiting(client: Socket) {
-		const waiting: boolean = this.gameService.needWaiting(client.data.user.userId);
-		 client.emit('waiting', waiting);
-	 }
-
+	needWaiting(client: Socket) {
+		const waiting: boolean = this.gameService.needWaiting(
+			client.data.user.userId,
+		);
+		client.emit('waiting', waiting);
+	}
 
 	/**
-	 * @brief Si un joueur qui a envoye une invitation 
+	 * @brief Si un joueur qui a envoye une invitation
 	 * quitte la partie ou si un joueur refuse une invitation
 	 * => annulation de l'invit
 	 * @param client personne concernee par l'annulation
 	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('deleteInvitation')
-	async deleteInvitation(client: Socket)
-	{
+	async deleteInvitation(client: Socket) {
 		//  await this.gameService.deleteInvitation(client.data.user);
-		this.server.emit('updateInvitation')
+		this.server.emit('updateInvitation');
 	}
 
-
-/**
- * __  __       _______ _____ _    _   __  __          _  _______ _   _  _____ 
- * |  \/  |   /\|__   __/ ____| |  | | |  \/  |   /\   | |/ /_   _| \ | |/ ____|
- * | \  / |  /  \  | | | |    | |__| | | \  / |  /  \  | ' /  | | |  \| | |  __ 
- * | |\/| | / /\ \ | | | |    |  __  | | |\/| | / /\ \ |  <   | | | . ` | | |_ |
- * | |  | |/ ____ \| | | |____| |  | | | |  | |/ ____ \| . \ _| |_| |\  | |__| |
- * |_|  |_/_/    \_\_|  \_____|_|  |_| |_|  |_/_/    \_\_|\_\_____|_| \_|\_____|
- * 
- */
+	/**
+	 * __  __       _______ _____ _    _   __  __          _  _______ _   _  _____
+	 * |  \/  |   /\|__   __/ ____| |  | | |  \/  |   /\   | |/ /_   _| \ | |/ ____|
+	 * | \  / |  /  \  | | | |    | |__| | | \  / |  /  \  | ' /  | | |  \| | |  __
+	 * | |\/| | / /\ \ | | | |    |  __  | | |\/| | / /\ \ |  <   | | | . ` | | |_ |
+	 * | |  | |/ ____ \| | | |____| |  | | | |  | |/ ____ \| . \ _| |_| |\  | |__| |
+	 * |_|  |_/_/    \_\_|  \_____|_|  |_| |_|  |_/_/    \_\_|\_\_____|_| \_|\_____|
+	 *
+	 */
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('matchMaking')
-	matchMaking(client: Socket)
-	{
-		const matchMaking = this.gameService.matchMaking(client);
-		if (!matchMaking)
-			return (this.server.emit("waitingMatchmaking"));
-		this.server.to(matchMaking.id).emit("matchAccepted");
-		this.server.emit("newGame", matchMaking);
+	@SubscribeMessage('matchmaking')
+	matchmaking(client: Socket) {
+		const matchMaking = this.gameService.matchmaking(client);
+		if (!matchMaking) return client.emit('waitingMatchmaking');
+		this.server.to(matchMaking.id).emit('matchAccepted');
+		client.emit('matchAccepted');
+		this.server.emit('newGame', matchMaking);
 	}
 
-
-/**
- *  _____ _____  ______ _____ _______    _______ ______ 
- * / ____|  __ \|  ____/ ____|__   __|/\|__   __|  ____|
- *| (___ | |__) | |__ | |       | |  /  \  | |  | |__   
- * \___ \|  ___/|  __|| |       | | / /\ \ | |  |  __|  
- * ____) | |    | |___| |____   | |/ ____ \| |  | |____ 
- *|_____/|_|    |______\_____|  |_/_/    \_\_|  |______|
- * 
- */																			 
+	/**
+	 *  _____ _____  ______ _____ _______    _______ ______
+	 * / ____|  __ \|  ____/ ____|__   __|/\|__   __|  ____|
+	 *| (___ | |__) | |__ | |       | |  /  \  | |  | |__
+	 * \___ \|  ___/|  __|| |       | | / /\ \ | |  |  __|
+	 * ____) | |    | |___| |____   | |/ ____ \| |  | |____
+	 *|_____/|_|    |______\_____|  |_/_/    \_\_|  |______|
+	 *
+	 */
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket)
-	{
-
-	}
-
+	spectate(client: Socket) {}
 
 	/**
 	 *		SPECTATE
