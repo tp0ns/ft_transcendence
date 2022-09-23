@@ -1,32 +1,30 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import { useNavigate } from "react-router";
+import ErrorContext from "../../../context/error-context";
 import classes from "./TwoFAPage.module.css";
 
 const TwoFAPAge = () => {
 	const userInput = useRef<HTMLInputElement>(null);
 	const navigate = useNavigate();
+	const ctx_error = useContext(ErrorContext);
 
 	async function submitHandler(event: React.FormEvent) {
 		event.preventDefault();
-		if (userInput.current?.value === "") return;
-		try {
-			const response = await fetch("/backend/auth/2fa/authenticate", {
-				method: "POST",
-				headers: {
-					"Content-type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify({
-					twoFACode: userInput.current!.value,
-				}),
-			});
-			if (!response.ok) {
-				throw new Error("Request failed!");
-			} else {
-				userInput.current!.value = "";
-				navigate(0);
-			}
-		} catch (err) {
-			console.log(err);
+		const response = await fetch("/backend/auth/2fa/authenticate", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			},
+			body: JSON.stringify({
+				twoFACode: userInput.current!.value,
+			}),
+		});
+		if (!response.ok) {
+			userInput.current!.value = "";
+			return ctx_error?.changeError("2FA code is invalid");
+		} else {
+			userInput.current!.value = "";
+			navigate(0);
 		}
 	}
 

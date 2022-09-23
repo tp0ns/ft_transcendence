@@ -15,6 +15,13 @@
 	border-radius: 10px;
 }
 
+.no_chan {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+	color: #3a363665;
+}
+
 .chan_list {
 	height: 81vh;
 	display: flex;

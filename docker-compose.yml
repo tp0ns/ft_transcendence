@@ -15,7 +15,7 @@ services:
       # - 80:80
       - 8080:8080
     volumes:
-      -  ${DOCKER_SOCK}:/var/run/docker.sock:ro
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
     networks:
       - front_back
 

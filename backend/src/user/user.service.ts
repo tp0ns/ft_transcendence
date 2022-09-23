@@ -132,12 +132,17 @@ export class UserService {
 	These are represented by the Partial<UserEntity> parameter (Partial<> permits to give as arguments parts of an entity)*/
 	async update(id: string, attrs: Partial<UserEntity>) {
 		const user = await this.userRepo.findOne({ where: { userId: id } });
+		const userToFind = await this.userRepo.findOne({
+			where: { username: attrs.username },
+		});
 		if (!user) {
 			throw new NotFoundException('user not found');
 		}
-		while (attrs.username === user.username) {
-			attrs.username += Math.floor(Math.random() * (999 - 100 + 1) + 100);
-		}
+		if (attrs.username && (attrs.username === user.username || userToFind))
+			throw new HttpException(
+				'This username is already used',
+				HttpStatus.FORBIDDEN,
+			);
 		Object.assign(user, attrs);
 		return this.userRepo.save(user);
 	}
