@@ -430,157 +430,157 @@ export class GeneralGateway
 				);
 	}
 
-	// Move event, allow the user to move its pad
-	@UseGuards(WsGuard)
-	@SubscribeMessage('move')
-	async move(client: Socket, direction: string) {
-		await this.gameService.movePad(direction, client.data.currentMatch);
-		this.server
-			.to(client.data.currentMatch.roomName)
-			.emit(
-				'setPosition',
-				client.data.currentMatch.leftPad,
-				client.data.currentMatch.rightPad,
-				client.data.currentMatch.ball,
-				client.data.currentMatch.p1Score,
-				client.data.currentMatch.p2Score,
-			);
-	}
+	// // Move event, allow the user to move its pad
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('move')
+	// async move(client: Socket, direction: string) {
+	// 	await this.gameService.movePad(direction, client.data.currentMatch);
+	// 	this.server
+	// 		.to(client.data.currentMatch.roomName)
+	// 		.emit(
+	// 			'setPosition',
+	// 			client.data.currentMatch.leftPad,
+	// 			client.data.currentMatch.rightPad,
+	// 			client.data.currentMatch.ball,
+	// 			client.data.currentMatch.p1Score,
+	// 			client.data.currentMatch.p2Score,
+	// 		);
+	// }
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('redrawCanvas')
-	async redrawCanvas(client: Socket, windowSize: any) {
-		this.server
-			.to(client.data.currentMatch.roomName)
-			.emit(
-				'setPosition',
-				client.data.currentMatch.leftPad,
-				client.data.currentMatch.rightPad,
-				client.data.currentMatch.ball,
-				client.data.currentMatch.p1Score,
-				client.data.currentMatch.p2Score,
-			);
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('redrawCanvas')
+	// async redrawCanvas(client: Socket, windowSize: any) {
+	// 	this.server
+	// 		.to(client.data.currentMatch.roomName)
+	// 		.emit(
+	// 			'setPosition',
+	// 			client.data.currentMatch.leftPad,
+	// 			client.data.currentMatch.rightPad,
+	// 			client.data.currentMatch.ball,
+	// 			client.data.currentMatch.p1Score,
+	// 			client.data.currentMatch.p2Score,
+	// 		);
+	// }
 
-	// Move event, allow the user to move its pad with mouse
-	@UseGuards(WsGuard)
-	@SubscribeMessage('mouseMove')
-	async mouseMove(client: Socket, mousePosy: number) {
-		if (client.data.currentMatch) {
-			if (client.data.user.userId == client.data.currentMatch.player1)
-				await this.gameService.moveMouseLeft(
-					mousePosy,
-					client.data.currentMatch,
-				);
-			else if (client.data.user.userId == client.data.currentMatch.player2)
-				await this.gameService.moveMouseRight(
-					mousePosy,
-					client.data.currentMatch,
-				);
-			this.server
-				.to(client.data.currentMatch.roomName)
-				.emit(
-					'setPosition',
-					client.data.currentMatch.leftPad,
-					client.data.currentMatch.rightPad,
-					client.data.currentMatch.ball,
-					client.data.currentMatch.p1Score,
-					client.data.currentMatch.p2Score,
-				);
-		}
-	}
+	// // Move event, allow the user to move its pad with mouse
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('mouseMove')
+	// async mouseMove(client: Socket, mousePosy: number) {
+	// 	if (client.data.currentMatch) {
+	// 		if (client.data.user.userId == client.data.currentMatch.player1)
+	// 			await this.gameService.moveMouseLeft(
+	// 				mousePosy,
+	// 				client.data.currentMatch,
+	// 			);
+	// 		else if (client.data.user.userId == client.data.currentMatch.player2)
+	// 			await this.gameService.moveMouseRight(
+	// 				mousePosy,
+	// 				client.data.currentMatch,
+	// 			);
+	// 		this.server
+	// 			.to(client.data.currentMatch.roomName)
+	// 			.emit(
+	// 				'setPosition',
+	// 				client.data.currentMatch.leftPad,
+	// 				client.data.currentMatch.rightPad,
+	// 				client.data.currentMatch.ball,
+	// 				client.data.currentMatch.p1Score,
+	// 				client.data.currentMatch.p2Score,
+	// 			);
+	// 	}
+	// }
 
 	//	Game Functions, start, reset
-	@UseGuards(WsGuard)
-	@SubscribeMessage('gameFunctions')
-	async gameFunctions(client: Socket, payload) {
-		await this.gameService.gameFunction(
-			payload[0], //function
-			payload[1], //score
-			client.data.currentMatch,
-		);
-		this.server
-			.to(client.data.currentMatch.roomName)
-			.emit(
-				'setPosition',
-				client.data.currentMatch.leftPad,
-				client.data.currentMatch.rightPad,
-				client.data.currentMatch.ball,
-				client.data.currentMatch.p1Score,
-				client.data.currentMatch.p2Score,
-			);
-		//end of the game
-		const end = await this.gameService.checkEndGame(
-			client,
-			client.data.currentMatch,
-		);
-		if (end != 0) {
-			const user1: UserEntity = await this.userService.getUserById(
-				client.data.currentMatch.player1,
-			);
-			const user2: UserEntity = await this.userService.getUserById(
-				client.data.currentMatch.player2,
-			);
-			if (end == 1) {
-				if (
-					(await this.gameService.endGame(
-						client,
-						client.data.currentMatch,
-						user1,
-						user2,
-					)) == true
-				) {
-					this.server.emit('endGame');
-				}
-				this.server
-					.to(client.data.currentMatch.roomName)
-					.emit('victoryOf', user1);
-			} else if (end == 2) {
-				if (
-					await this.gameService.endGame(
-						client,
-						client.data.currentMatch,
-						user2,
-						user1,
-					)
-				) {
-					// console.log('room:', client.data.currentMatch.roomName);
-					this.server.emit('endGame');
-				}
-				this.server
-					.to(client.data.currentMatch.roomName)
-					.emit('victoryOf', user2);
-			}
-		}
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('gameFunctions')
+	// async gameFunctions(client: Socket, payload) {
+	// 	await this.gameService.gameFunction(
+	// 		payload[0], //function
+	// 		payload[1], //score
+	// 		client.data.currentMatch,
+	// 	);
+	// 	this.server
+	// 		.to(client.data.currentMatch.roomName)
+	// 		.emit(
+	// 			'setPosition',
+	// 			client.data.currentMatch.leftPad,
+	// 			client.data.currentMatch.rightPad,
+	// 			client.data.currentMatch.ball,
+	// 			client.data.currentMatch.p1Score,
+	// 			client.data.currentMatch.p2Score,
+	// 		);
+	// 	//end of the game
+	// 	const end = await this.gameService.checkEndGame(
+	// 		client,
+	// 		client.data.currentMatch,
+	// 	);
+	// 	if (end != 0) {
+	// 		const user1: UserEntity = await this.userService.getUserById(
+	// 			client.data.currentMatch.player1,
+	// 		);
+	// 		const user2: UserEntity = await this.userService.getUserById(
+	// 			client.data.currentMatch.player2,
+	// 		);
+	// 		if (end == 1) {
+	// 			if (
+	// 				(await this.gameService.endGame(
+	// 					client,
+	// 					client.data.currentMatch,
+	// 					user1,
+	// 					user2,
+	// 				)) == true
+	// 			) {
+	// 				this.server.emit('endGame');
+	// 			}
+	// 			this.server
+	// 				.to(client.data.currentMatch.roomName)
+	// 				.emit('victoryOf', user1);
+	// 		} else if (end == 2) {
+	// 			if (
+	// 				await this.gameService.endGame(
+	// 					client,
+	// 					client.data.currentMatch,
+	// 					user2,
+	// 					user1,
+	// 				)
+	// 			) {
+	// 				// console.log('room:', client.data.currentMatch.roomName);
+	// 				this.server.emit('endGame');
+	// 			}
+	// 			this.server
+	// 				.to(client.data.currentMatch.roomName)
+	// 				.emit('victoryOf', user2);
+	// 		}
+	// 	}
+	// }
 
-	// get the position of the ball and emit it
-	@UseGuards(WsGuard)
-	@SubscribeMessage('ballMovement')
-	async ballMovement(client: Socket, ballPosition: Ball) {
-		client.data.currentMatch.ball = ballPosition;
-		client.data.currentMatch.p1Touches =
-			client.data.currentMatch.ball.p1Touches;
-		client.data.currentMatch.p2Touches =
-			client.data.currentMatch.ball.p2Touches;
-		this.server
-			.to(client.data.currentMatch.roomName)
-			.emit(
-				'setPosition',
-				client.data.currentMatch.leftPad,
-				client.data.currentMatch.rightPad,
-				client.data.currentMatch.ball,
-				client.data.currentMatch.p1Score,
-				client.data.currentMatch.p2Score,
-			);
-	}
+	// // get the position of the ball and emit it
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('ballMovement')
+	// async ballMovement(client: Socket, ballPosition: Ball) {
+	// 	client.data.currentMatch.ball = ballPosition;
+	// 	client.data.currentMatch.p1Touches =
+	// 		client.data.currentMatch.ball.p1Touches;
+	// 	client.data.currentMatch.p2Touches =
+	// 		client.data.currentMatch.ball.p2Touches;
+	// 	this.server
+	// 		.to(client.data.currentMatch.roomName)
+	// 		.emit(
+	// 			'setPosition',
+	// 			client.data.currentMatch.leftPad,
+	// 			client.data.currentMatch.rightPad,
+	// 			client.data.currentMatch.ball,
+	// 			client.data.currentMatch.p1Score,
+	// 			client.data.currentMatch.p2Score,
+	// 		);
+	// }
 
-	//able keyboard commands for local game
-	@UseGuards(WsGuard)
-	@SubscribeMessage('toggleLocalGame')
-	async toggleSinglePlayer(client: Socket) {
-		await this.gameService.toggleLocalGame(client);
-	}
+	// //able keyboard commands for local game
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('toggleLocalGame')
+	// async toggleSinglePlayer(client: Socket) {
+	// 	await this.gameService.toggleLocalGame(client);
+	// }
 
 	//disable keyboard commands for local game
 	// @UseGuards(WsGuard)
@@ -691,8 +691,9 @@ export class GeneralGateway
 		);
 		this.server.to(invite.id).emit('matchAccepted', invite.roomId);
 		client.emit('matchAccepted', invite.roomId);
-		this.gameService.deleteReceivedInvite(client.data.user.userId);
 		client.emit('updateInvitation');
+		this.gameService.deleteReceivedInvite(client.data.user.userId);
+		// this.gameService.initGame(invite);
 	}
 
 	@UseGuards(WsGuard)
@@ -700,6 +701,7 @@ export class GeneralGateway
 	joinGame(client: Socket, roomId: string)
 	{
 		client.join(roomId);
+		this.gameService.setMatch(client.data.user, roomId);
 	}
 
 	/**
@@ -760,11 +762,9 @@ export class GeneralGateway
 	matchmaking(client: Socket) {
 		const matchMaking = this.gameService.matchmaking(client);
 		if (!matchMaking) return client.emit('waitingMatchmaking');
-		//generer le uuid pour le mettre en argument 
-		client.emit("newGame", matchMaking);
 		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
 		client.emit('matchAccepted', matchMaking.roomId);
-		this.server.emit('newGame', matchMaking);
+		// this.gameService.initGame(matchMaking);
 	}
 
 	/**
