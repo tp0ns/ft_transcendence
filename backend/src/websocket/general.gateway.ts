@@ -62,6 +62,16 @@ export class GeneralGateway
 	// private beginMatch: Match;
 	// private beginMatch: Match = this.gameService.setDefaultPos();
 
+/**
+ * _____ _   _ _____ _______    _____ ______ _______      ________ _____  
+ *|_   _| \ | |_   _|__   __|  / ____|  ____|  __ \ \    / /  ____|  __ \ 
+ *  | | |  \| | | |    | |    | (___ | |__  | |__) \ \  / /| |__  | |__) |
+ *  | | | . ` | | |    | |     \___ \|  __| |  _  / \ \/ / |  __| |  _  / 
+ * _| |_| |\  |_| |_   | |     ____) | |____| | \ \  \  /  | |____| | \ \ 
+ *|_____|_| \_|_____|  |_|    |_____/|______|_|  \_\  \/   |______|_|  \_\
+ * 
+ */
+
 	/**
 	 * Handles server initialization behaviour
 	 */
@@ -117,30 +127,31 @@ export class GeneralGateway
 	 */
 	@UseGuards(WsGuard)
 	async handleDisconnect(client: Socket) {
+		this.gameService.deleteAllOthersInvite(client.data.user.userId, null)
+		this.server.emit("updateInvitation");
+		this.server.emit('updatedRelations');
 		this.logger.log(`Client disconnected: ${client.id}`);
 		// if (client.data.user) {
-		// 	const winnerId: string = await this.gameService.handleGameDisconnect(
-		// 		client,
-		// 	);
-		// 	if (winnerId != null) {
-		// 		const winner = await this.userService.getUserById(winnerId);
-		// 		winner.victories++;
-		// 		client.data.user.defeats++;
-		// 		await this.gameService.setAchievements(winner);
-		// 		await this.gameService.setAchievements(client.data.user);
-		// 		// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
-		// 		this.server
-		// 			.to(client.data.user.currentMatch.roomName)
-		// 			.emit('victoryOf', winner);
-		// 		this.server
-		// 			.to(client.data.user.currentMatch.roomName)
-		// 			.emit('errorEvent', 'Your opponnent has disconnected.');
-		// 		this.server.emit('endGame');
-		// 	}
-		// 	this.server.emit('updateInvitation');
-		// 	this.userService.disconnectClient(client.data.user);
-		// }
-		// this.server.emit('updatedRelations');
+			// 	const winnerId: string = await this.gameService.handleGameDisconnect(
+				// 		client,
+				// 	);
+				// 	if (winnerId != null) {
+					// 		const winner = await this.userService.getUserById(winnerId);
+					// 		winner.victories++;
+					// 		client.data.user.defeats++;
+					// 		await this.gameService.setAchievements(winner);
+					// 		await this.gameService.setAchievements(client.data.user);
+					// 		// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
+					// 		this.server
+					// 			.to(client.data.user.currentMatch.roomName)
+					// 			.emit('victoryOf', winner);
+					// 		this.server
+					// 			.to(client.data.user.currentMatch.roomName)
+					// 			.emit('errorEvent', 'Your opponnent has disconnected.');
+					// 		this.server.emit('endGame');
+					// 	}
+					// 	this.userService.disconnectClient(client.data.user);
+					// }
 	}
 
 	@UseGuards(WsGuard)
@@ -150,15 +161,15 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 
-	/**
-	 *   _____ _    _       _______
-	 *  / ____| |  | |   /\|__   __|
-	 * | |    | |__| |  /  \  | |
-	 * | |    |  __  | / /\ \ | |
-	 * | |____| |  | |/ ____ \| |
-	 *  \_____|_|  |_/_/    \_|_|
-	 *
-	 */
+/**
+ *   _____ _    _       _______
+ *  / ____| |  | |   /\|__   __|
+ * | |    | |__| |  /  \  | |
+ * | |    |  __  | / /\ \ | |
+ * | |____| |  | |/ ____ \| |
+ *  \_____|_|  |_/_/    \_|_|
+ *
+ */
 
 	/**
 	 * ------------------------ SETTINGS CHANNEL  ------------------------- *
@@ -331,16 +342,6 @@ export class GeneralGateway
 	 * ------------------------ HANDLE MESSAGES  ------------------------- *
 	 */
 
-	/**
-	 * MESSAGE POUR LE SERVEUR
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('msgToServer')
-	handleMessage(client: Socket, payload: string[]) {
-		this.channelService.sendMessage(client.data.user, payload);
-		this.server.emit('msgToClient', payload);
-		return payload;
-	}
 
 	/**
 	 * MESSAGE DANS UN CHANNEL
@@ -361,19 +362,6 @@ export class GeneralGateway
 		this.server.to(chanId).emit('updatedMessage');
 	}
 
-	/**
-	 * DIRECT MESSAGE
-	 * @param client
-	 * @param payload
-	 *
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('msgToUser')
-	handleMessageToClient(client: Socket, payload: string[]) {
-		this.server
-			.to(payload[1])
-			.emit('directMessage', payload, client.data.user.username);
-	}
 
 	/**
 	 * ------------------------ GET CHANNELS  ------------------------- *
@@ -427,15 +415,15 @@ export class GeneralGateway
 		client.emit('sendChannelMessages', messages);
 	}
 
-	/**
-	 *   _____          __  __ ______
-	 *  / ____|   /\   |  \/  |  ____|
-	 * | |  __   /  \  | \  / | |__
-	 * | | |_ | / /\ \ | |\/| |  __|
-	 * | |__| |/ ____ \| |  | | |____
-	 *  \_____/_/    \_|_|  |_|______|
-	 *
-	 */
+/**
+ *   _____          __  __ ______
+ *  / ____|   /\   |  \/  |  ____|
+ * | |  __   /  \  | \  / | |__
+ * | | |_ | / /\ \ | |\/| |  __|
+ * | |__| |/ ____ \| |  | | |____
+ *  \_____/_/    \_|_|  |_|______|
+ *
+ */
 
 
 
@@ -631,9 +619,13 @@ export class GeneralGateway
 
 
 /**
- * +-+-+-+-+-+-+-+-+-+-+-+
- * |I|N|V|I|T|A|T|I|O|N|S|
- * +-+-+-+-+-+-+-+-+-+-+-+
+ *   _____          __  __ ______   _____ _   ___      _______ _______    _______ _____ ____  _   _ 
+ *  / ____|   /\   |  \/  |  ____| |_   _| \ | \ \    / /_   _|__   __|/\|__   __|_   _/ __ \| \ | |
+ * | |  __   /  \  | \  / | |__      | | |  \| |\ \  / /  | |    | |  /  \  | |    | || |  | |  \| |
+ * | | |_ | / /\ \ | |\/| |  __|     | | | . ` | \ \/ /   | |    | | / /\ \ | |    | || |  | | . ` |
+ * | |__| |/ ____ \| |  | | |____   _| |_| |\  |  \  /   _| |_   | |/ ____ \| |   _| || |__| | |\  |
+ *  \_____/_/    \_\_|  |_|______| |_____|_| \_|   \/   |_____|  |_/_/    \_\_|  |_____\____/|_| \_|
+ * 
  */
 
 	/**
@@ -652,7 +644,14 @@ export class GeneralGateway
 		this.server.emit('updateInvitation');
 	}
 
-	
+	/**
+	 * @brief Permet de recuperer les invitations 
+	 * pour chaque client
+	 * 
+	 * @param client celui qui cherche ses invitations
+	 * 
+	 * -> appel a retrieveInvitations a chaque updateInvitation
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('retrieveInvitations')
 	async getInvitations(client: Socket) {
@@ -675,6 +674,15 @@ export class GeneralGateway
 		this.server.emit('updateInvitation')
 	}
 
+	/**
+	 * @brief Si le joueur invite accepte l'invitation
+	 * 
+	 * @param client celui qui accepte
+	 * @param invitationId l'invitation concernee 
+	 * 
+	 * -> creation de la room 
+	 * -> suppression de toutes les autres invitations
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('acceptInvite')
 	async acceptInvite(client: Socket, invitationId: string) {
@@ -691,13 +699,26 @@ export class GeneralGateway
 		//verifier que c'est VRAIMENT un truc unique (pour theo)
 	}
 
+	/**
+	 * 
+	 * @brief Permet de determiner si une invitation a ete refuse ou non
+	 * 
+	 * @param client le user en attente d'une reponse a une invit
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('needWaiting')
 	async needWaiting(client: Socket) {
 		const waiting: boolean = this.gameService.needWaiting(client.data.user.userId);
 		client.emit('waiting', waiting);
-		}
+	}
 
+	/**
+	 * 
+	 * @brief Refus de l'invitation
+	 * 
+	 * @param client celui qui refuse
+	 * @param invitationId l'invitation concernee
+	 */
 	@UseGuards(WsGuard)
 	@SubscribeMessage('refuseInvite')
 	async refuseInvite(client: Socket, invitationId: string) {
@@ -706,11 +727,37 @@ export class GeneralGateway
 		// this.server.to(currentRoom).emit('inviteRefused', client.data.user.userId);
 	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('inviteIsDeclined')
-	// async inviteIsDeclined(client: Socket, userInvitedId) {
-	// 	await this.gameService.inviteIsDeclined(client, userInvitedId);
-	// }
+
+/**
+ * __  __       _______ _____ _    _   __  __          _  _______ _   _  _____ 
+ * |  \/  |   /\|__   __/ ____| |  | | |  \/  |   /\   | |/ /_   _| \ | |/ ____|
+ * | \  / |  /  \  | | | |    | |__| | | \  / |  /  \  | ' /  | | |  \| | |  __ 
+ * | |\/| | / /\ \ | | | |    |  __  | | |\/| | / /\ \ |  <   | | | . ` | | |_ |
+ * | |  | |/ ____ \| | | |____| |  | | | |  | |/ ____ \| . \ _| |_| |\  | |__| |
+ * |_|  |_/_/    \_\_|  \_____|_|  |_| |_|  |_/_/    \_\_|\_\_____|_| \_|\_____|
+ * 
+ */
+
+
+//faire le match making
+
+
+/**
+ *  _____ _____  ______ _____ _______    _______ ______ 
+ * / ____|  __ \|  ____/ ____|__   __|/\|__   __|  ____|
+ *| (___ | |__) | |__ | |       | |  /  \  | |  | |__   
+ * \___ \|  ___/|  __|| |       | | / /\ \ | |  |  __|  
+ * ____) | |    | |___| |____   | |/ ____ \| |  | |____ 
+ *|_____/|_|    |______\_____|  |_/_/    \_\_|  |______|
+ * 
+ */																			 
+
+		
+//faire le spectate												  
+													  
+											 
+													  
+
 
 	/**
 	 *		SPECTATE

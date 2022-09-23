@@ -19,7 +19,6 @@ import { WsException } from '@nestjs/websockets';
 
 const matchMakingSet = new Set<Socket>();
 const inviteSet = new Set<Socket>();
-// const inviteMap = new Map<string, invitation>(); // <senderId, invitationInfos>
 let match: Match;
 
 @Injectable()
@@ -37,6 +36,7 @@ export class GameService {
 	) { }
 
 	protected inviteMap = new Map<string, invitationInterface>();
+
 	/**
 	 * set the default position of the elements in the game
 	 * @param match interface of the match
@@ -256,6 +256,15 @@ export class GameService {
 		return userAchievements;
 	}
 
+	/**
+	 * 
+	 * @brief Permet de recuperer les scores pour 
+	 * les stocker dans les matchs History des joueurs
+	 * 
+	 * @param winner la userEntity du gagnant 
+	 * @param loser la userEntity du perdant
+	 * @param match les informations du match
+	 */
 	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match) {
 		let newMatchHistory: MatchHistoryEntity =
 			await this.MatchHistoryRepository.save({
@@ -271,7 +280,7 @@ export class GameService {
 	}
 
 	/**
-	 * Permet de set les achivements d'un joueur
+	 * @brief Permet de set les achivements d'un joueur
 	 * - premiere entree dans la fonction: firstMatch
 	 * - calcul selon le nombre de victoires ou de defaites
 	 * du user pour les autres achievements
@@ -351,8 +360,11 @@ export class GameService {
 
 		
 	/**
-	 * create a room, initialize it and join it.
-	 * @param client the user that sends an invitation
+	 * 
+	 * @brief Envoie d'un invitation pour jouer
+	 * 
+	 * @param client celui qui envoie l'invitation
+	 * @param userToInviteId l'id du user invite
 	 */
 	async sendInvitation(client: Socket, userToInviteId: string) {
 		const user : UserEntity = client.data.user;
@@ -379,6 +391,11 @@ export class GameService {
 	}
 
 
+	/**
+	 * 
+	 * @brief Recupere les invitations du user
+	 * 
+	 */
 	getInvitations(user: UserEntity) {
 		let invites: invitationInterface[] = [];
 		for (let [key, value] of this.inviteMap.entries())
@@ -387,6 +404,17 @@ export class GameService {
 		return invites;
 	}
 
+	/**
+	 * 
+	 * @brief Acceptation de l'invitation
+	 * 
+	 * @param user celui qui accepte l'invitation
+	 * @param invitationId l'invitation concernee
+	 * @returns l'invitation pour pouvoir supprimer
+	 * toutes les autres invitations
+	 * 
+	 * @todo supprimer le user si pas utile
+	 */
 	acceptInvite(user: UserEntity, invitationId: string)
 	{
 		if (!this.inviteMap.has(invitationId))
@@ -394,11 +422,24 @@ export class GameService {
 		return this.inviteMap.get(invitationId);
 	}
 
+	/**
+	 * 
+	 * @brief Supprime l'invitation refusee
+	 * 
+	 * @param invitationId l'invitation concernee
+	 */
 	refuseInvite(invitationId: string)
 	{
 		this.inviteMap.delete(invitationId);
 	}
 
+	/**
+	 * @brief Permet de refuser toutes autres les invitations si 
+	 * le user en accepte une 
+	 * 
+	 * @param userId de celui qui a accepte une invitation
+	 * @param InvitationsToAvoidId l'invitation a ne pas supprimer
+	 */
 	deleteAllOthersInvite(userId: string, InvitationsToAvoidId: string)
 	{
 		let invitesToDelete: string[] = [];
@@ -410,6 +451,14 @@ export class GameService {
 		}
 	}
 
+	/**
+	 * 
+	 * @brief Permet de savoir si l'invitation 
+	 * qu'il attend n'a pas ete refuse
+	 * 
+	 * @param userId l'id de celui qui attends 
+	 * @returns true ou false
+	 */
 	needWaiting(userId: string)
 	{
 		return this.inviteMap.has(userId);
@@ -417,129 +466,15 @@ export class GameService {
 }
 
 
-
-
-	/**
-	 * the user accepted the invitation
-	 * the user is now joining the game
-	 * @param client the user accepting the invitation
-	 */
-	// async joinInvite(client: Socket, userInvitingId: string) {
-	// 	const userInviting: UserEntity = await this.userService.getUserById(
-	// 		userInvitingId,
-	// 	);
-	// 	let invitation: InvitationEntity = await this.invitationRepository
-	// 		.createQueryBuilder('invitation')
-	// 		.select(['invitation.requestId', 'creator', 'invitation.creationDate'])
-	// 		.leftJoinAndSelect('invitation.creator', 'creator')
-	// 		.leftJoinAndSelect('invitation.receiver', 'receiver')
-	// 		.where('invitation.creator = :id', { id: userInvitingId })
-	// 		.getOne();
-	// 	const invitId: string = invitation.requestId;
-	// 	invitation = await this.invitationRepository.save({
-	// 		requestId: invitId,
-	// 		creator: userInviting,
-	// 		receiver: client.data.user,
-	// 		status: 'accepted',
-	// 	});
-	// 	const allInvitations: InvitationEntity[] =
-	// 		await this.invitationRepository.find({
-	// 			where: [{ receiver: { userId: client.data.user.userId } }],
-	// 		});
-	// 	for (const inviteIter of allInvitations) {
-	// 		if (inviteIter != invitation) {
-	// 			this.refuseInvite(client, inviteIter.creator.userId);
-	// 		}
-	// 	}
-		// get all invitations received, refuse all that
-		// aren't invitation
-	// 	const currentRoomName: string = inviteMap.get(userInvitingId);
-	// 	inviteMap.delete(userInvitingId);
-	// 	const currentMatch: Match = this.setDefaultPos(currentRoomName);
-	// 	currentMatch.player1 = client.data.user.userId;
-	// 	currentMatch.p1User = currentMatch.player1;
-	// 	currentMatch.player2 = userInviting.userId;
-	// 	currentMatch.p2User = currentMatch.player2;
-	// 	currentMatch.isLocal = false;
-	// 	client.join(currentMatch.roomName);
-	// 	client.data.user.currentMatch = currentMatch;
-	// 	userInviting.currentMatch = currentMatch;
-	// 	await this.userRepo.save(client.data.user);
-	// 	await this.userRepo.save(userInviting);
-	// 	return currentRoomName;
-	// }
-
-	/**
-	 * cancels the invitation
-	 */
-	// async refuseInvite(user: UserEntity, userInvitingId: string) {
-	// 	const userInviting: UserEntity = await this.userService.getUserById(
-	// 		userInvitingId,
-	// 	);
-	// 	let invitation: InvitationEntity = await this.invitationRepository
-	// 		.createQueryBuilder('invitation')
-	// 		.select(['invitation.requestId', 'creator'])
-	// 		.leftJoin('invitation.creator', 'creator')
-	// 		.leftJoin('invitation.receiver', 'receiver')
-	// 		.where('invitation.creator = :id', { id: userInvitingId })
-	// 		.getOne();
-	// 	const invitId: string = invitation.requestId;
-	// 	invitation = await this.invitationRepository.save({
-	// 		requestId: invitId,
-	// 		creator: userInviting,
-	// 		receiver: user,
-	// 		status: 'declined',
-	// 	}); //pas certaine que declined soit obligatoire avant de supprimer
-	// 	await this.invitationRepository
-	// 		.createQueryBuilder()
-	// 		.delete()
-	// 		.from(InvitationEntity)
-	// 		.where('creator = :id', { id: userInvitingId })
-	// 		.execute();
-	// 	const currentRoomName: string = inviteMap.get(userInvitingId);
-	// 	return currentRoomName;
-	// }
-
-	// async refuseSentInvite(client: Socket, userInviting: UserEntity) {
-	// 	let invitation: InvitationEntity = await this.invitationRepository
-	// 		.createQueryBuilder('invitation')
-	// 		.select(['invitation.requestId', 'creator'])
-	// 		.leftJoin('invitation.creator', 'creator')
-	// 		.leftJoin('invitation.receiver', 'receiver')
-	// 		.where('invitation.creator = :id', { id: userInviting.userId })
-	// 		.getOne();
-	// 	const invitId: string = invitation.requestId;
-	// 	const receiv: UserEntity = invitation.receiver;
-	// 	invitation = await this.invitationRepository.save({
-	// 		requestId: invitId,
-	// 		creator: userInviting,
-	// 		receiver: receiv,
-	// 		status: 'declined',
-	// 	});
-	// 	await this.invitationRepository
-	// 		.createQueryBuilder()
-	// 		.delete()
-	// 		.from(InvitationEntity)
-	// 		.where('creator = :id', { id: userInviting.userId })
-	// 		.execute();
-	// 	const currentRoomName: string = inviteMap.get(userInviting.userId);
-	// 	return currentRoomName;
-	// }
-
-	/**
-	 * tells the emitter that the invitation
-	 * has been declined
-	 */
-	// async inviteIsDeclined(client: Socket, userInvitedId: string) {
-	// 	client.leave(inviteMap.get(client.data.user.userId));
-	// 	inviteMap.delete(client.data.user.userId);
-	// 	this.endGame(
-	// 		client,
-	// 		client.data.currentMatch,
-	// 		client.data.user,
-	// 		client.data.user,
-	// 	);
-	// }
+/**
+		 * ------------------ SPECTATE  ------------------ *
+		 *
+		 * - 
+		 * - 
+		 * - 
+		 * - 
+		 * - 
+		 */
 
 	/**
 	 * try to spectate the chosen user
