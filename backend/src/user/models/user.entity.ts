@@ -52,9 +52,8 @@ export class UserEntity {
 
 	@Column({
 		nullable: true,
-		type: 'json',
 	})
-	public currentMatch: Match | null;
+	currentMatch: string;
 
 	@OneToMany(
 		() => InvitationEntity,

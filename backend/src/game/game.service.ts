@@ -17,6 +17,7 @@ import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
 import { WsException } from '@nestjs/websockets';
+import { v4 as uuidv4 } from 'uuid';
 
 let match: Match;
 
@@ -39,134 +40,141 @@ export class GameService {
 	protected inviteMap = new Map<string, invitationInterface>();
 	protected matchMakingMap = new Map<string, invitationInterface>();
 
-	/**
-	 * set the default position of the elements in the game
-	 * @param match interface of the match
-	 */
-	setDefaultPos(room: string) {
-		const initLeftPad: Pad = {
-			x: 0,
-			y: 150,
-			w: 20,
-			h: 100,
-			speed: 5,
-		};
-		const initRightPad: Pad = {
-			// set right paddle
-			x: 620,
-			y: 200,
-			w: 20,
-			h: 100,
-			speed: 20, //speed = 20 si keyboard, 5 si mouse
-		};
-		const initBall: Ball = {
-			// set ball position
-			x: 310,
-			y: 240,
-			radius: 10,
-			startAngle: 0,
-			speedx: 5,
-			speedy: 0,
-			goRight: false,
-			p1Touches: 0,
-			p2Touches: 0,
-			isMoving: false,
-		};
+	// /**
+	//  * set the default position of the elements in the game
+	//  * @param match interface of the match
+	//  */
+	// setDefaultPos(room: string) {
+	// 	const initLeftPad: Pad = {
+	// 		x: 0,
+	// 		y: 150,
+	// 		w: 20,
+	// 		h: 100,
+	// 		speed: 5,
+	// 	};
+	// 	const initRightPad: Pad = {
+	// 		// set right paddle
+	// 		x: 620,
+	// 		y: 200,
+	// 		w: 20,
+	// 		h: 100,
+	// 		speed: 20, //speed = 20 si keyboard, 5 si mouse
+	// 	};
+	// 	const initBall: Ball = {
+	// 		// set ball position
+	// 		x: 310,
+	// 		y: 240,
+	// 		radius: 10,
+	// 		startAngle: 0,
+	// 		speedx: 5,
+	// 		speedy: 0,
+	// 		goRight: false,
+	// 		p1Touches: 0,
+	// 		p2Touches: 0,
+	// 		isMoving: false,
+	// 	};
 
-		//init match using all the other class initialized
-		const match: Match = {
-			leftPad: initLeftPad,
-			rightPad: initRightPad,
-			ball: initBall,
-			player1: null,
-			player2: null,
-			p1Score: 0,
-			p2Score: 0,
-			p1Touches: 0,
-			p2Touches: 0,
-			p1User: null,
-			p2User: null,
-			isLocal: true,
-			roomName: room,
-			isEnd: false,
-		};
-		// console.log(match.roomName);
-		return match;
-	}
+	// 	//init match using all the other class initialized
+	// 	const match: Match = {
+	// 		leftPad: initLeftPad,
+	// 		rightPad: initRightPad,
+	// 		ball: initBall,
+	// 		player1: null,
+	// 		player2: null,
+	// 		p1Score: 0,
+	// 		p2Score: 0,
+	// 		p1Touches: 0,
+	// 		p2Touches: 0,
+	// 		p1User: null,
+	// 		p2User: null,
+	// 		isLocal: true,
+	// 		roomName: room,
+	// 		isEnd: false,
+	// 	};
+	// 	// console.log(match.roomName);
+	// 	return match;
+	// }
 
-	// set new position according to keyboard
-	async movePad(direction: string, match: Match) {
-		if (match.isLocal == true) {
-			switch (direction) {
-				case 'up':
-					if (match.rightPad.y - match.rightPad.speed <= 100) {
-						match.rightPad.y = 100;
-					} else match.rightPad.y -= match.rightPad.speed;
-					break;
-				case 'down':
-					if (match.rightPad.y + match.rightPad.speed >= 480) {
-						match.rightPad.y = 480;
-					} else match.rightPad.y += match.rightPad.speed;
-					break;
-			}
-		}
-	}
+	// // set new position according to keyboard
+	// async movePad(direction: string, match: Match) {
+	// 	if (match.isLocal == true) {
+	// 		switch (direction) {
+	// 			case 'up':
+	// 				if (match.rightPad.y - match.rightPad.speed <= 100) {
+	// 					match.rightPad.y = 100;
+	// 				} else match.rightPad.y -= match.rightPad.speed;
+	// 				break;
+	// 			case 'down':
+	// 				if (match.rightPad.y + match.rightPad.speed >= 480) {
+	// 					match.rightPad.y = 480;
+	// 				} else match.rightPad.y += match.rightPad.speed;
+	// 				break;
+	// 		}
+	// 	}
+	// }
 
-	// set new position according to mouse (for left pad only)
-	async moveMouseLeft(mousePosy: number, match: Match) {
-		if (mousePosy <= 100) {
-			match.leftPad.y = 100;
-		} else if (mousePosy >= 480) {
-			match.leftPad.y = 480;
-		} else match.leftPad.y = mousePosy;
-	}
+	// // set new position according to mouse (for left pad only)
+	// async moveMouseLeft(mousePosy: number, match: Match) {
+	// 	if (mousePosy <= 100) {
+	// 		match.leftPad.y = 100;
+	// 	} else if (mousePosy >= 480) {
+	// 		match.leftPad.y = 480;
+	// 	} else match.leftPad.y = mousePosy;
+	// }
 
-	// set new position according to mouse (for right pad only)
-	async moveMouseRight(mousePosy: number, match: Match) {
-		if (match.isLocal == false) {
-			if (mousePosy <= 100) {
-				match.rightPad.y = 100;
-			} else if (mousePosy >= 480) {
-				match.rightPad.y = 480;
-			} else match.rightPad.y = mousePosy;
-		}
-	}
+	// // set new position according to mouse (for right pad only)
+	// async moveMouseRight(mousePosy: number, match: Match) {
+	// 	if (match.isLocal == false) {
+	// 		if (mousePosy <= 100) {
+	// 			match.rightPad.y = 100;
+	// 		} else if (mousePosy >= 480) {
+	// 			match.rightPad.y = 480;
+	// 		} else match.rightPad.y = mousePosy;
+	// 	}
+	// }
 
-	// gameFunction : Switch with all functions related to the match
-	async gameFunction(func: string, score: number, match: Match) {
-		switch (func) {
-			case 'resetBall':
-				match.ball.y = 250;
-				match.ball.x = 250;
-				match.ball.speedy = 0;
-				match.ball.goRight = true;
-				match.ball.isMoving = false;
-		}
-		switch (score) {
-			case 0:
-				break;
-			case 1:
-				match.p2Score++;
-				match.ball.goRight = false;
-				break;
-			case 2:
-				match.p1Score++;
-				match.ball.goRight = true;
-				break;
-		}
-	}
+	// // gameFunction : Switch with all functions related to the match
+	// async gameFunction(func: string, score: number, match: Match) {
+	// 	switch (func) {
+	// 		case 'resetBall':
+	// 			match.ball.y = 250;
+	// 			match.ball.x = 250;
+	// 			match.ball.speedy = 0;
+	// 			match.ball.goRight = true;
+	// 			match.ball.isMoving = false;
+	// 	}
+	// 	switch (score) {
+	// 		case 0:
+	// 			break;
+	// 		case 1:
+	// 			match.p2Score++;
+	// 			match.ball.goRight = false;
+	// 			break;
+	// 		case 2:
+	// 			match.p1Score++;
+	// 			match.ball.goRight = true;
+	// 			break;
+	// 	}
+	// }
 
-	// toggle SinglePlayer : launch the SinglePlayer
-	// and disable keyboard commands
-	async toggleLocalGame(client: Socket) {
-		const roomName = 'room' + Math.random();
-		client.join(roomName);
-		client.data.currentMatch = this.setDefaultPos(roomName);
-		client.data.currentMatch.isLocal = true;
-		client.data.currentMatch.p1User = client.data.user.userId;
-		client.data.currentMatch.p2User = client.data.currentMatch.p1User;
-		client.data.currentMatch.player1 = client.data.currentMatch.p1User;
-		client.data.currentMatch.player2 = client.data.currentMatch.p1User;
+	// // toggle SinglePlayer : launch the SinglePlayer
+	// // and disable keyboard commands
+	// async toggleLocalGame(client: Socket) {
+	// 	const roomName = 'room' + Math.random();
+	// 	client.join(roomName);
+	// 	client.data.currentMatch = this.setDefaultPos(roomName);
+	// 	client.data.currentMatch.isLocal = true;
+	// 	client.data.currentMatch.p1User = client.data.user.userId;
+	// 	client.data.currentMatch.p2User = client.data.currentMatch.p1User;
+	// 	client.data.currentMatch.player1 = client.data.currentMatch.p1User;
+	// 	client.data.currentMatch.player2 = client.data.currentMatch.p1User;
+	// }
+
+
+	setMatch(user: UserEntity, roomId: string)
+	{
+		user.currentMatch = roomId;
+		this.userRepo.save(user);
 	}
 
 	/**
@@ -245,53 +253,53 @@ export class GameService {
 	}
 
 	//ends the game
-	async endGame(
-		client: Socket,
-		match: Match,
-		winner: UserEntity,
-		loser: UserEntity,
-	) {
-		if (match == null) {
-			// opponent refused the invitation
-			winner.currentMatch = null;
-			loser.currentMatch = null;
-			await this.userRepo.save(winner);
-			await this.userRepo.save(loser);
-			client.leave(winner.currentMatch.roomName);
-			throw new ForbiddenException('Your opponent gave up the game.');
-		}
-		match.isEnd = true;
-		if (match.isLocal == false) {
-			winner.victories++;
-			loser.defeats++;
-			await this.setAchievements(winner);
-			await this.setAchievements(loser);
-			await this.setMatchHistory(winner, loser, match);
-		} else {
-			// trigger the pop-up(?modal) with victory info and home button
-			winner.currentMatch = null;
-			loser.currentMatch = null;
-			await this.userRepo.save(winner);
-			await this.userRepo.save(loser);
-			console.log('We have a winner !');
+	// async endGame(
+	// 	client: Socket,
+	// 	match: Match,
+	// 	winner: UserEntity,
+	// 	loser: UserEntity,
+	// ) {
+	// 	if (match == null) {
+	// 		// opponent refused the invitation
+	// 		winner.currentMatch = null;
+	// 		loser.currentMatch = null;
+	// 		await this.userRepo.save(winner);
+	// 		await this.userRepo.save(loser);
+	// 		client.leave(winner.currentMatch.roomName);
+	// 		throw new ForbiddenException('Your opponent gave up the game.');
+	// 	}
+	// 	match.isEnd = true;
+	// 	if (match.isLocal == false) {
+	// 		winner.victories++;
+	// 		loser.defeats++;
+	// 		await this.setAchievements(winner);
+	// 		await this.setAchievements(loser);
+	// 		await this.setMatchHistory(winner, loser, match);
+	// 	} else {
+	// 		// trigger the pop-up(?modal) with victory info and home button
+	// 		winner.currentMatch = null;
+	// 		loser.currentMatch = null;
+	// 		await this.userRepo.save(winner);
+	// 		await this.userRepo.save(loser);
+	// 		console.log('We have a winner !');
 
-			return false;
-		}
-		winner.currentMatch = null;
-		loser.currentMatch = null;
-		await this.userRepo.save(winner);
-		await this.userRepo.save(loser);
-		return true;
-	}
+	// 		return false;
+	// 	}
+	// 	winner.currentMatch = null;
+	// 	loser.currentMatch = null;
+	// 	await this.userRepo.save(winner);
+	// 	await this.userRepo.save(loser);
+	// 	return true;
+	// }
 
-	//check if the game should end and exec the proper funciton if so
-	async checkEndGame(client: Socket, match: Match) {
-		const user1: UserEntity = await this.userService.getUserById(match.player1);
-		const user2: UserEntity = await this.userService.getUserById(match.player2);
-		if (match.p1Score >= 2) return 1;
-		else if (match.p2Score >= 2) return 2;
-		return 0;
-	}
+	// //check if the game should end and exec the proper funciton if so
+	// async checkEndGame(client: Socket, match: Match) {
+	// 	const user1: UserEntity = await this.userService.getUserById(match.player1);
+	// 	const user2: UserEntity = await this.userService.getUserById(match.player2);
+	// 	if (match.p1Score >= 2) return 1;
+	// 	else if (match.p2Score >= 2) return 2;
+	// 	return 0;
+	// }
 
 	/**
 	 * ------------------ INVITATIONS  ------------------ *
@@ -312,6 +320,7 @@ export class GameService {
 	 */
 	async sendInvite(client: Socket, userToInviteId: string) {
 		const user: UserEntity = client.data.user;
+		const roomId: string = uuidv4();
 		const userToInvite: UserEntity = await this.userService.getUserById(
 			userToInviteId,
 		);
@@ -330,9 +339,9 @@ export class GameService {
 		if (this.matchMakingMap.has(userToInviteId))
 			return "You can't send invitations while in matchmaking.";
 		else {
-			console.log(' enter here');
 			this.inviteMap.set(user.userId, {
 				id: client.id,
+				roomId: roomId,
 				player1: user,
 				player2: userToInvite,
 			});
@@ -420,6 +429,7 @@ export class GameService {
 
 	matchmaking(client: Socket) {
 		const user: UserEntity = client.data.user;
+		const roomId: string = uuidv4();
 		if (user.currentMatch != null)
 			throw new ForbiddenException("You can't start matchmaking while playing");
 		if (this.inviteMap.has(user.userId))
@@ -435,6 +445,7 @@ export class GameService {
 		}
 		this.matchMakingMap.set(user.userId, {
 			id: client.id,
+			roomId: roomId,
 			player1: user,
 			player2: null,
 		});
@@ -454,45 +465,45 @@ export class GameService {
 	/**
 	 * try to spectate the chosen user
 	 */
-	async spectate(client: Socket, userIdToSpec: string) {
-		// find user
-		const userToSpec: UserEntity = await this.userService.getUserById(
-			userIdToSpec,
-		);
-		// check if userToSpec.currentMatch != null
-		if (client.data.user.currentMatch != null) {
-			throw new ForbiddenException('You are already in a match.');
-		}
-		if (
-			userToSpec.currentMatch != null &&
-			userToSpec.currentMatch.isEnd == false
-		) {
-			client.data.user.currentMatch = userToSpec.currentMatch;
-			client.join(userToSpec.currentMatch.roomName);
-			await this.userRepo.save(client.data.user);
-		} else {
-			throw new ForbiddenException("You can't spectate this match.");
-		}
-	}
+	// async spectate(client: Socket, userIdToSpec: string) {
+	// 	// find user
+	// 	const userToSpec: UserEntity = await this.userService.getUserById(
+	// 		userIdToSpec,
+	// 	);
+	// 	// check if userToSpec.currentMatch != null
+	// 	if (client.data.user.currentMatch != null) {
+	// 		throw new ForbiddenException('You are already in a match.');
+	// 	}
+	// 	if (
+	// 		userToSpec.currentMatch != null &&
+	// 		userToSpec.currentMatch.isEnd == false
+	// 	) {
+	// 		client.data.user.currentMatch = userToSpec.currentMatch;
+	// 		client.join(userToSpec.currentMatch.roomName);
+	// 		await this.userRepo.save(client.data.user);
+	// 	} else {
+	// 		throw new ForbiddenException("You can't spectate this match.");
+	// 	}
+	// }
 
 	/**
 	 * try to know if the user is in a game
 	 */
-	async getCurrentMatch(client: Socket, userIdToSpec: string) {
-		// find user
-		const userToSpec: UserEntity = await this.userService.getUserById(
-			userIdToSpec,
-		);
-		// check if userToSpec.currentMatch != null
-		if (
-			userToSpec.currentMatch != null &&
-			userToSpec.currentMatch.isEnd == false
-		) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	// async getCurrentMatch(client: Socket, userIdToSpec: string) {
+	// 	// find user
+	// 	const userToSpec: UserEntity = await this.userService.getUserById(
+	// 		userIdToSpec,
+	// 	);
+	// 	// check if userToSpec.currentMatch != null
+	// 	if (
+	// 		userToSpec.currentMatch != null &&
+	// 		userToSpec.currentMatch.isEnd == false
+	// 	) {
+	// 		return true;
+	// 	} else {
+	// 		return false;
+	// 	}
+	// }
 
 	/**
 	 * HANDLE DISCONNECTION
