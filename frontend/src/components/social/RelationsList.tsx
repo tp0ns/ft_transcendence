@@ -1,6 +1,6 @@
 import RelationsProp from "../../interfaces/Relations.interface";
 import RelationItem from "./RelationItem";
-import classes from "../../Pages/SocialPage.module.css";
+import classes from "../../Pages/SocialPage/SocialPage.module.css";
 
 const RelationsList: React.FC<{
   relations: RelationsProp[];
@@ -9,7 +9,7 @@ const RelationsList: React.FC<{
   return (
     <div className={classes.relationsList}>
       {props.relations.map((relation) => (
-        <RelationItem relation={relation} myId={props.myId} key={relation.requestId}/>
+        <RelationItem relation={relation} myId={props.myId} key={relation.requestId} />
       ))}
     </div>
   );

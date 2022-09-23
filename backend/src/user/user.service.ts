@@ -31,7 +31,7 @@ export class UserService {
 		private channelService: ChannelService,
 		@Inject(forwardRef(() => GameService))
 		private GameService: GameService,
-	) {}
+	) { }
 
 	/**
 	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il

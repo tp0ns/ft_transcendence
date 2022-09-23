@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { socket } from "../../App";
 import RelationsProp from "../../interfaces/Relations.interface";
 import UserProp from "../../interfaces/User.interface";
-import classes from "../../Pages/SocialPage.module.css";
+import classes from "../../Pages/SocialPage/SocialPage.module.css";
 
 const RelationItem: React.FC<{
 	relation: RelationsProp;
@@ -57,17 +57,17 @@ const RelationItem: React.FC<{
 	};
 
 	const sendMessage = () => {
-        let user_2;
-        {props.relation.receiver!.userId === props.myId ? user_2 = props.relation.creator?.userId : user_2 = props.relation.receiver?.userId};
-        socket.emit("createDM", {
-            title: 'DM',
-            DM: true,
-            user2: user_2,
-            protected: false,
-            private: false,
-            password: null,
-        });
-    };
+		let user_2;
+		{ props.relation.receiver!.userId === props.myId ? user_2 = props.relation.creator?.userId : user_2 = props.relation.receiver?.userId };
+		socket.emit("createDM", {
+			title: 'DM',
+			DM: true,
+			user2: user_2,
+			protected: false,
+			private: false,
+			password: null,
+		});
+	};
 
 	return (
 		<div
@@ -89,8 +89,8 @@ const RelationItem: React.FC<{
 						toDisplay?.status === "connected"
 							? classes.connected
 							: toDisplay?.status === "disconnected"
-							? classes.disconnected
-							: classes.playing
+								? classes.disconnected
+								: classes.playing
 					}
 				></img>
 				<h3 className={classes.username}>{toDisplay?.username}</h3>

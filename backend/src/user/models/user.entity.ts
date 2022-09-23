@@ -1,6 +1,6 @@
 import { MaxLength } from 'class-validator';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
-import { Match } from 'src/game/interfaces/game.interface';
+import { Match } from 'src/game/interfaces/match.interface';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 import {
@@ -76,7 +76,7 @@ export class UserEntity {
 	@OneToMany(() => MessagesEntity, (message) => message.user)
 	messages: MessagesEntity[];
 
-	@Column({default: "disconnected"})
+	@Column({ default: "disconnected" })
 	status: User_Status;
 
 	@Column({
