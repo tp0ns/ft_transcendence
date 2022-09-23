@@ -45,6 +45,7 @@ export class GameService {
 
 
 	initDummyGame = (roomId: string, user: UserEntity) => {
+		console.log("roomId in initDummyGame", roomId);
 		let res: Game = null;
 		if (games && games[roomId] && games[roomId].player1 && games[roomId].player2)
 			return games[roomId];
@@ -84,7 +85,9 @@ export class GameService {
 	}
 
 	movePad(user: UserEntity, direction: string, gameId: string) {
+		console.log("gameId", gameId)
 		let game: Game = games[gameId];
+		console.log("games[gameId] in movePad", games[gameId]);
 		let padToMove: Pad = game.grid.pad1;
 		if (game.player2.user === user)
 			padToMove = game.grid.pad2;

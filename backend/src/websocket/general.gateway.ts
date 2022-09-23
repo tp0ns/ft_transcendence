@@ -424,9 +424,9 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('movePad')
-	movePad(client: Socket, direction: string, roomId: string) {
-		let game: Game = this.gameService.movePad(client.data.user, direction, roomId);
-		this.server.to(roomId).emit('updatedGame', game);
+	movePad(client: Socket, arg: any) {
+		let game: Game = this.gameService.movePad(client.data.user, arg.direction, arg.roomId);
+		this.server.to(arg.roomId).emit('updatedGame', game);
 	}
 
 	// /**
