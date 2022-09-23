@@ -24,7 +24,7 @@ import { Match } from 'src/game/interfaces/match.interface';
 
 let match: Match;
 
-let games = new Map<string, Game>();
+// let games = new Map<string, Game>();
 let PAD_SPEED = 10;
 
 @Injectable()
@@ -45,6 +45,7 @@ export class GameService {
 
 	protected inviteMap = new Map<string, invitationInterface>();
 	protected matchMakingMap = new Map<string, invitationInterface>();
+	protected games = new Map<string, Game>();
 
 	setMatch(user: UserEntity, roomId: string) {
 		user.currentMatch = roomId;
@@ -52,36 +53,19 @@ export class GameService {
 
 	}
 
-
-	initDummyGame = (roomId: string, user: UserEntity) => {
-		console.log("roomId in initDummyGame", roomId);
-		let res: Game = null;
-		if (games && games[roomId] && games[roomId].player1 && games[roomId].player2)
-			return games[roomId];
-		if (games && games[roomId] && !games[roomId].player2) {
-			games[roomId].player2 = {
-				user: user,
-				score: 0
-			}
+	getMyGame(userId: string) {
+		console.log("yaala");
+		// console.log("games", (this.games));
+		// console.log("map size", this.games.size)
+		console.log(JSON.stringify(this.games.values()));
+		for (const value of this.games.values()) {
+			console.log("inFor");
+			if (value.player1.user.userId === userId || value.player2.user.userId === userId) {
+				return value;
+			};
 		}
-		if (!games[roomId]) {
-			let grid: Grid = initGrid();
-			let game: Game = {
-				id: roomId,
-				grid: grid,
-				player1: {
-					user: user,
-					score: 0
-				},
-				player2: null,
-				ongoing: false,
-			}
-			games[roomId] = game;
-		}
-		return games[roomId];
+		console.log("outFor");
 	}
-
-
 
 	initGame = (invitation: invitationInterface) => {
 		let grid: Grid = initGrid();
@@ -98,11 +82,13 @@ export class GameService {
 			},
 			ongoing: false,
 		}
+		this.games.set(invitation.roomId, game);
+		console.log("this.games: ", this.games)
 		return game;
 	}
 
 	movePad(user: UserEntity, direction: string, gameId: string) {
-		let game: Game = games[gameId];
+		let game: Game = this.games[gameId];
 		let padToMove: Pad = game.grid.pad1;
 
 		console.log("game.player2.user: ", game.player2.user)
@@ -124,11 +110,11 @@ export class GameService {
 	gameLoop(server: any, gameId: string, state: string) {
 		let timer;
 		console.log("caca");
-		games[gameId].ongoing = true;
+		this.games[gameId].ongoing = true;
 		if (state === "start") {
 			timer = setInterval(() => {
 				this.moveBall(gameId)
-				server.to(gameId).emit('updatedGame', games[gameId]);
+				server.to(gameId).emit('updatedGame', this.games[gameId]);
 			}
 
 				, 5000)

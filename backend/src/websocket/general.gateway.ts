@@ -503,6 +503,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinGame')
 	joinGame(client: Socket, roomId: string) {
+		console.log(" COUCOUOUCOUCOCUCOU", client.data.user.username);
 		client.join(roomId);
 		this.gameService.setMatch(client.data.user, roomId);
 	}
@@ -587,18 +588,21 @@ export class GeneralGateway
 	/**
 	 *		SPECTATE
 	 */
-	@SubscribeMessage('joinDummyGame')
-	dummyGame(client: Socket, roomId: string) {
-		client.join(roomId);
-		let game: Game = this.gameService.initDummyGame(roomId, client.data.user);
-		if (game.player1 && game.player2)
-			this.server.to(roomId).emit('updatedGame', game)
-	}
 
 	initGame(invitation: invitationInterface) {
 		let game: Game = this.gameService.initGame(invitation);
 		this.server.to(game.id).emit('updatedGame', game);
 	}
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMyGame')
+	getMyGame(client: Socket) {
+		let game: Game = this.gameService.getMyGame(client.data.user.userId);
+		console.log("\n\ngame in gateway:\n ", game)
+		client.emit('updatedGame', game);
+	}
+
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('movePad')

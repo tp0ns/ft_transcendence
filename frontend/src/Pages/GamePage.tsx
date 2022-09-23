@@ -16,12 +16,10 @@ const GamePage = () => {
 	useEffect(() => {
 		if (autoFocusRef.current)
 			autoFocusRef.current.focus()
-		socket.emit('joinDummyGame', "1");
-		socket.on('newGame', (newGame: any) => {
-			socket.emit('createGame');
-		})
+		socket.emit('getMyGame');
 		socket.on('updatedGame', (updatedGame) => {
 			console.log('hello');
+			console.log("updatedGame", updatedGame)
 			setGame(updatedGame)
 		})
 	}, [])
@@ -44,7 +42,7 @@ const GamePage = () => {
 	return (
 		<Layout>
 			<div tabIndex={0} className={classes.autoFocus} ref={autoFocusRef} onKeyDown={handleKeyDown}>
-				{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : null}
+				{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : <p>patata</p>}
 			</div>
 		</Layout>
 	)
