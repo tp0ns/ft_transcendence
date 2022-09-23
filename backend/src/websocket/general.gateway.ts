@@ -422,6 +422,13 @@ export class GeneralGateway
 		this.server.to(roomId).emit('updatedGame', game);
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('movePad')
+	movePad(client: Socket, direction: string, roomId: string) {
+		let game: Game = this.gameService.movePad(client.data.user, direction, roomId);
+		this.server.to(roomId).emit('updatedGame', game);
+	}
+
 	// /**
 	//  * 				INVITATIONS
 	//  */

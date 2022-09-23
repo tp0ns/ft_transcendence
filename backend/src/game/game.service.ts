@@ -24,7 +24,8 @@ const inviteSet = new Set<Socket>();
 const inviteRoomMap = new Map<string, string>(); // <userInviting, roomId>
 let match: Match;
 
-let games: Game[] = [];
+let games = new Map<string, Game>();
+let MOVE_PIXEL = 1;
 
 @Injectable()
 export class GameService {
@@ -45,35 +46,28 @@ export class GameService {
 
 	initDummyGame = (roomId: string, user: UserEntity) => {
 		let res: Game = null;
-		if (games && games[0] && games[0].player1 && games[0].player2)
-			return games[0];
-		if (games) {
-			games.map((game) => {
-				if (game.id === roomId && !game.player2) {
-					game.player2 = {
-						user: user,
-						score: 0
-					}
-					res = game;
-				}
-			})
+		if (games && games[roomId] && games[roomId].player1 && games[roomId].player2)
+			return games[roomId];
+		if (games && games[roomId] && !games[roomId].player2) {
+			games[roomId].player2 = {
+				user: user,
+				score: 0
+			}
 		}
-		if (!res) {
+		if (!games[roomId]) {
 			let grid: Grid = initGrid();
 			let game: Game = {
 				id: roomId,
 				grid: grid,
-				player1: null,
+				player1: {
+					user: user,
+					score: 0
+				},
 				player2: null
 			}
-			game.player1 = {
-				user: user,
-				score: 0
-			}
-			games.push(game);
-			res = game;
+			games[roomId] = game;
 		}
-		return res;
+		return games[roomId];
 	}
 
 
@@ -86,6 +80,18 @@ export class GameService {
 			player1: null,
 			player2: null
 		}
+		return game;
+	}
+
+	movePad(user: UserEntity, direction: string, gameId: string) {
+		let game: Game = games[gameId];
+		let padToMove: Pad = game.grid.pad1;
+		if (game.player2.user === user)
+			padToMove = game.grid.pad2;
+		if (direction === "up" && padToMove.pos.y - MOVE_PIXEL > 0)
+			padToMove.pos.y -= MOVE_PIXEL;
+		else if (direction === "down" && padToMove.pos.y + MOVE_PIXEL < game.grid.size.y)
+			padToMove.pos.y = MOVE_PIXEL;
 		return game;
 	}
 

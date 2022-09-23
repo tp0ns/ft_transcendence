@@ -19,9 +19,18 @@ const GamePage = () => {
 		console.log(game);
 	}, [game])
 
-	const handleKeyDown = () => {
-
+	const handleKeyDown = (event: any) => {
+		console.log("entered key down")
+		if (game) {
+			if (event.key === "w")
+				socket.emit("movePad", "up", game.id);
+			if (event.key === "s")
+				socket.emit("movePad", "down", game.id);
+		}
 	}
+
+	document.addEventListener('keydown', handleKeyDown);
+	document.removeEventListener('keydown', handleKeyDown);
 
 	return (
 		<div className={classes.window} onKeyDown={handleKeyDown}>
