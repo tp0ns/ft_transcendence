@@ -25,7 +25,7 @@ const inviteRoomMap = new Map<string, string>(); // <userInviting, roomId>
 let match: Match;
 
 let games = new Map<string, Game>();
-let MOVE_PIXEL = 1;
+let PAD_SPEED = 10;
 
 @Injectable()
 export class GameService {
@@ -85,16 +85,17 @@ export class GameService {
 	}
 
 	movePad(user: UserEntity, direction: string, gameId: string) {
-		console.log("gameId", gameId)
 		let game: Game = games[gameId];
-		console.log("games[gameId] in movePad", games[gameId]);
 		let padToMove: Pad = game.grid.pad1;
-		if (game.player2.user === user)
+
+		console.log("game.player2.user: ", game.player2.user)
+		console.log("user: ", user)
+		if (game.player2.user.userId === user.userId)
 			padToMove = game.grid.pad2;
-		if (direction === "up" && padToMove.pos.y - MOVE_PIXEL > 0)
-			padToMove.pos.y -= MOVE_PIXEL;
-		else if (direction === "down" && padToMove.pos.y + MOVE_PIXEL < game.grid.size.y)
-			padToMove.pos.y = MOVE_PIXEL;
+		if (direction === "up" && padToMove.pos.y > 0)
+			padToMove.pos.y -= PAD_SPEED;
+		else if (direction === "down" && padToMove.pos.y + padToMove.size.y < game.grid.size.y)
+			padToMove.pos.y += PAD_SPEED;
 		return game;
 	}
 

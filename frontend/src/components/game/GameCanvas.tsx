@@ -11,7 +11,7 @@ const GameCanvas: React.FC<{
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 
 	const drawCanvas = (context: any, grid: any) => {
-		context.clearRect(0, 0, grid.width, grid.height);
+		context.clearRect(0, 0, grid.size.x, grid.size.y);
 		context.beginPath();
 		drawPads(context, grid);
 		drawBall(context, grid);

@@ -1,13 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { socket } from "../App";
 import GameCanvas from "../components/game/GameCanvas";
 import { Game } from "../components/game/interfaces/game.interfaces";
+import Layout from "../components/Layout/Layout";
 import classes from "./GamePage.module.css"
+
+let pressLock = false;
 
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
+	const autoFocusRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
+		if (autoFocusRef.current)
+			autoFocusRef.current.focus()
 		socket.emit('joinDummyGame', "1");
 		socket.on('newGame', (newGame: any) => {
 			socket.emit('createGame');
@@ -15,20 +22,13 @@ const GamePage = () => {
 		socket.on('updatedGame', (updatedGame) => (setGame(updatedGame)))
 	}, [])
 
-	useEffect(() => {
-		console.log(game);
-		window.addEventListener('keydown', handleKeyDown);
-		return () => {
-			socket.off('newGame', (newGame: any) => {
-				socket.emit('createGame');
-			})
-			socket.off('updatedGame', (updatedGame) => (setGame(updatedGame)))
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [game])
+	// useEffect(() => {
+	// 	window.addEventListener('keydown', handleKeyDown, { once: true });
+	// 	document.removeEventListener('keydown', handleKeyDown);
+	// }, [game])
 
 	const handleKeyDown = (event: any) => {
-		// console.log("entered key down")
+		console.log("entered key down")
 		// console.log("game in handleKeyDown", game)
 		if (game) {
 			console.log("entered if")
@@ -44,9 +44,11 @@ const GamePage = () => {
 
 
 	return (
-		<div className={classes.window} onKeyDown={handleKeyDown}>
-			{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : null}
-		</div>
+		<Layout>
+			<div tabIndex={0} className={classes.autoFocus} ref={autoFocusRef} onKeyDown={handleKeyDown}>
+				{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : null}
+			</div>
+		</Layout>
 	)
 }
 
