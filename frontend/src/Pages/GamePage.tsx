@@ -10,6 +10,7 @@ let pressLock = false;
 
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
+	const [gameOn, setGameOn] = useState<boolean>(false);
 	const autoFocusRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -19,25 +20,22 @@ const GamePage = () => {
 		socket.on('newGame', (newGame: any) => {
 			socket.emit('createGame');
 		})
-		socket.on('updatedGame', (updatedGame) => (setGame(updatedGame)))
+		socket.on('updatedGame', (updatedGame) => {
+			console.log('hello');
+			setGame(updatedGame)
+		})
 	}, [])
 
-	// useEffect(() => {
-	// 	window.addEventListener('keydown', handleKeyDown, { once: true });
-	// 	document.removeEventListener('keydown', handleKeyDown);
-	// }, [game])
-
 	const handleKeyDown = (event: any) => {
-		console.log("entered key down")
-		// console.log("game in handleKeyDown", game)
 		if (game) {
-			console.log("entered if")
-			if (event.key === "w") {
-				console.log("game in handleKeyDown if", game.id)
+			if (event.key === "w")
 				socket.emit("movePad", { direction: "up", roomId: game.id });
-			}
 			if (event.key === "s")
 				socket.emit("movePad", { direction: "down", roomId: game.id });
+			if (!game.ongoing && event.key === "Enter") {
+				console.log("entered enter")
+				socket.emit('gameLoop', { roomId: game.id, state: "start" });
+			}
 		}
 	}
 

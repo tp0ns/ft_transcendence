@@ -64,7 +64,8 @@ export class GameService {
 					user: user,
 					score: 0
 				},
-				player2: null
+				player2: null,
+				ongoing: false,
 			}
 			games[roomId] = game;
 		}
@@ -79,7 +80,8 @@ export class GameService {
 			id: roomId,
 			grid: grid,
 			player1: null,
-			player2: null
+			player2: null,
+			ongoing: false,
 		}
 		return game;
 	}
@@ -97,6 +99,25 @@ export class GameService {
 		else if (direction === "down" && padToMove.pos.y + padToMove.size.y < game.grid.size.y)
 			padToMove.pos.y += PAD_SPEED;
 		return game;
+	}
+
+
+	moveBall(gameId: string) {
+
+	}
+
+	gameLoop(server: any, gameId: string, state: string) {
+		let timer;
+		console.log("caca");
+		games[gameId].ongoing = true;
+		if (state === "start") {
+			timer = setInterval(() => {
+				this.moveBall(gameId)
+				server.to(gameId).emit('updatedGame', games[gameId]);
+			}
+
+				, 5000)
+		}
 	}
 
 	/**

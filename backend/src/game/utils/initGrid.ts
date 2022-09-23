@@ -1,6 +1,6 @@
 import { Ball, Coordinate, Pad } from "../interfaces/game.interface"
 
-enum GRID {
+export enum GRID {
   HEIGHT = 500,
   WIDTH = 700,
   BALL_RADIUS = 10,

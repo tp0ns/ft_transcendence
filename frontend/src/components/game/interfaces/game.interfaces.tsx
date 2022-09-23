@@ -32,4 +32,5 @@ export interface Game {
   grid: Grid;
   player1: Player;
   player2: Player;
+  ongoing: boolean;
 }
