@@ -77,6 +77,7 @@ export class UserService {
 
 	async disconnectClient(userReq: Partial<UserEntity>) {
 		const user: UserEntity = userReq as UserEntity;
+		this.GameService.deleteAllUserInvite(user.userId);
 		return await this.userRepo.update(user.userId, {
 			status: 'disconnected',
 		});

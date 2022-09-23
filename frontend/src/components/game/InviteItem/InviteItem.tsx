@@ -7,18 +7,18 @@ const InviteItem: React.FC<{ invite: MatchInviteInterface }> = (props) => {
 	const navigate = useNavigate();
 
 	function acceptInvite() {
-		socket.emit("acceptInvite", props.invite.creator.userId);
+		socket.emit("acceptInvite", props.invite.player1.userId);
 		navigate("/");
 	}
 
 	function declineInvite() {
-		socket.emit("refuseInvite", props.invite.creator.userId);
+		socket.emit("refuseInvite", props.invite.player1.userId);
 	}
 
 	return (
 		<div className={classes.item_layout}>
 			<img src="/pong.svg" alt="Game invite" className={classes.logo} />
-			<div className={classes.username}>{props.invite.creator.username}</div>
+			<div className={classes.username}>{props.invite.player1.username}</div>
 			<div
 				className={classes.button}
 				onClick={() => {
