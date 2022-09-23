@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../App";
 import Layout from "../../components/Layout/Layout";
+import classes from "HomePage.module.css";
 
 const HomePage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -10,7 +11,8 @@ const HomePage: React.FC<{}> = () => {
 		socket.on("waitingMatchmaking", () => {
 			navigate("/waiting");
 		});
-		socket.on("matchAccepted", () => {
+		socket.on("matchAccepted", (roomId) => {
+			socket.emit("joinGame", roomId);
 			navigate("/game");
 		});
 	}, []);

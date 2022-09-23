@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../../App";
 import MatchInviteInterface from "../../../interfaces/MatchInvite.interface";
@@ -6,9 +7,15 @@ import classes from "./InviteItem.module.css";
 const InviteItem: React.FC<{ invite: MatchInviteInterface }> = (props) => {
 	const navigate = useNavigate();
 
+	useEffect(() => {
+		socket.on("matchAccepted", (roomId) => {
+			socket.emit("joinGame", roomId);
+			navigate("/game");
+		});
+	}, []);
+
 	function acceptInvite() {
 		socket.emit("acceptInvite", props.invite.player1.userId);
-		navigate("/game");
 	}
 
 	function declineInvite() {
