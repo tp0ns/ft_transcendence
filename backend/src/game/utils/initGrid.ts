@@ -1,4 +1,5 @@
-import { Ball, Coordinate, Pad } from "../interfaces/game.interface"
+import { BALL_SPEED } from "../game.service"
+import { Ball, Coordinate, Grid, Pad } from "../interfaces/game.interface"
 
 export enum GRID {
   HEIGHT = 500,
@@ -28,7 +29,11 @@ export const initGrid = () => {
       x: size.x / 2,
       y: size.y / 2,
     },
-    radius: GRID.BALL_RADIUS
+    radius: GRID.BALL_RADIUS,
+    direction: {
+      x: BALL_SPEED,
+      y: 0,
+    }
   }
   let pad1: Pad = initPad(0, size.y / 2 - GRID.PAD_HEIGHT / 2);
   let pad2: Pad = initPad(GRID.WIDTH - GRID.PAD_WIDTH, size.y / 2 - GRID.PAD_HEIGHT / 2);

@@ -568,14 +568,11 @@ export class GeneralGateway
 	 *
 	 */
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('localGame')
-	localGame(client: Socket) {
-		this.server.emit('newGame', {
-			player1: client.data.user,
-			player2: client.data.user,
-		});
-	}
+	// @UseGuards(WsGuard)
+	// @SubscribeMessage('localGame')
+	// localGame(client: Socket) {
+	// 	this.server.emit('newGame', null);
+	// }
 
 	initGame(invitation: invitationInterface) {
 		let game: Game = this.gameService.initGame(invitation);
@@ -594,7 +591,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('movePad')
 	movePad(client: Socket, { roomId, direction }) {
-		console.log('movePad')
 		let game: Game = this.gameService.movePad(client.data.user, direction, roomId);
 		this.server.to(roomId).emit('updatedGame', game);
 	}
@@ -602,7 +598,27 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameLoop')
 	gameLoop(client: Socket, { roomId, state }) {
-		this.gameService.gameLoop(this.server, roomId);
+		let game: Game = this.gameService.gameLoop(this.server, roomId);
+		if (game.state === "end")
+			client.leave(roomId);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('changedTab')
+	async checkChangedTab(client: Socket)
+	{
+		if (client.data.user.currentMatch != null)
+		{
+			console.log('enter in currentMatch non null');
+			//besoin de faire leave la room aux 2 joueurs 
+			this.gameService.quitGame(client.data.user);
+		}
+		else 
+		{
+			this.gameService.changedTab(client.data.user);
+			// this.server.emit('updateInvitation');
+		}
+		
 	}
 
 	/*

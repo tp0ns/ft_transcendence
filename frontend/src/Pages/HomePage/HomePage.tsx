@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../App";
 import Layout from "../../components/Layout/Layout";
-import classes from "HomePage.module.css";
+import classes from "./HomePage.module.css";
 
 const HomePage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -17,20 +17,38 @@ const HomePage: React.FC<{}> = () => {
 		});
 	}, []);
 
+	function startLocalGame() {
+		console.log("startLocalGame");
+	}
+
 	function startMatchmaking() {
 		socket.emit("matchmaking");
 	}
 
 	return (
 		<Layout>
-			<div>
-				<p>HomePage</p>
-				<div
-					onClick={() => {
-						startMatchmaking();
-					}}
-				>
-					START MATCHMAKING
+			<div className={classes.fakegame}>
+				<div className={classes.title}>PONG</div>
+				<div className={classes.buttons}>
+					<div className={classes.pad}></div>
+					<div
+						className={classes.button}
+						onClick={() => {
+							startLocalGame();
+						}}
+					>
+						LOCAL GAME
+					</div>
+					<div className={classes.ball}></div>
+					<div
+						className={classes.button}
+						onClick={() => {
+							startMatchmaking();
+						}}
+					>
+						MATCHMAKING
+					</div>
+					<div className={classes.pad}></div>
 				</div>
 			</div>
 		</Layout>
