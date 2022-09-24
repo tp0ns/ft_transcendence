@@ -23,6 +23,7 @@ import { JoinChanDto } from 'src/chat/channel/dtos/joinChan.dto';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
+import { invitationInterface } from 'src/game/invitations/invitation.interface';
 import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import RelationEntity from 'src/relations/models/relations.entity';
@@ -34,7 +35,7 @@ import { ChannelService } from '../chat/channel/channel.service';
 import { CreateChanDto } from '../chat/channel/dtos/createChan.dto';
 import { ModifyChanDto } from '../chat/channel/dtos/modifyChan.dto';
 import { GameService } from '../game/game.service';
-import { Ball } from '../game/interfaces/game.interface';
+import { Ball, Game } from '../game/interfaces/game.interface';
 import { IdDto, UsernameDto } from './dtos/Relations.dto';
 
 @UseFilters(globalExceptionFilter)
@@ -44,8 +45,7 @@ import { IdDto, UsernameDto } from './dtos/Relations.dto';
 	},
 })
 export class GeneralGateway
-	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private channelService: ChannelService,
 		private gameService: GameService,
@@ -53,7 +53,7 @@ export class GeneralGateway
 		private messageService: MessageService,
 		private userService: UserService,
 		private readonly jwtService: JwtService,
-	) {}
+	) { }
 
 	@WebSocketServer() server: Server;
 
@@ -404,231 +404,6 @@ export class GeneralGateway
 	}
 
 	/**
-	 *   _____          __  __ ______
-	 *  / ____|   /\   |  \/  |  ____|
-	 * | |  __   /  \  | \  / | |__
-	 * | | |_ | / /\ \ | |\/| |  __|
-	 * | |__| |/ ____ \| |  | | |____
-	 *  \_____/_/    \_|_|  |_|______|
-	 *
-	 */
-
-	//Join Match event, draw the game for the user
-	@UseGuards(WsGuard)
-	@SubscribeMessage('joinMatch')
-	async sendDefaultPos(client: Socket) {
-		if (client.data.currentMatch)
-			this.server
-				.to(client.data.currentMatch.roomName)
-				.emit(
-					'setPosition',
-					client.data.currentMatch.leftPad,
-					client.data.currentMatch.rightPad,
-					client.data.currentMatch.ball,
-					client.data.currentMatch.p1Score,
-					client.data.currentMatch.p2Score,
-				);
-	}
-
-	// // Move event, allow the user to move its pad
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('move')
-	// async move(client: Socket, direction: string) {
-	// 	await this.gameService.movePad(direction, client.data.currentMatch);
-	// 	this.server
-	// 		.to(client.data.currentMatch.roomName)
-	// 		.emit(
-	// 			'setPosition',
-	// 			client.data.currentMatch.leftPad,
-	// 			client.data.currentMatch.rightPad,
-	// 			client.data.currentMatch.ball,
-	// 			client.data.currentMatch.p1Score,
-	// 			client.data.currentMatch.p2Score,
-	// 		);
-	// }
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('redrawCanvas')
-	// async redrawCanvas(client: Socket, windowSize: any) {
-	// 	this.server
-	// 		.to(client.data.currentMatch.roomName)
-	// 		.emit(
-	// 			'setPosition',
-	// 			client.data.currentMatch.leftPad,
-	// 			client.data.currentMatch.rightPad,
-	// 			client.data.currentMatch.ball,
-	// 			client.data.currentMatch.p1Score,
-	// 			client.data.currentMatch.p2Score,
-	// 		);
-	// }
-
-	// // Move event, allow the user to move its pad with mouse
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('mouseMove')
-	// async mouseMove(client: Socket, mousePosy: number) {
-	// 	if (client.data.currentMatch) {
-	// 		if (client.data.user.userId == client.data.currentMatch.player1)
-	// 			await this.gameService.moveMouseLeft(
-	// 				mousePosy,
-	// 				client.data.currentMatch,
-	// 			);
-	// 		else if (client.data.user.userId == client.data.currentMatch.player2)
-	// 			await this.gameService.moveMouseRight(
-	// 				mousePosy,
-	// 				client.data.currentMatch,
-	// 			);
-	// 		this.server
-	// 			.to(client.data.currentMatch.roomName)
-	// 			.emit(
-	// 				'setPosition',
-	// 				client.data.currentMatch.leftPad,
-	// 				client.data.currentMatch.rightPad,
-	// 				client.data.currentMatch.ball,
-	// 				client.data.currentMatch.p1Score,
-	// 				client.data.currentMatch.p2Score,
-	// 			);
-	// 	}
-	// }
-
-	//	Game Functions, start, reset
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('gameFunctions')
-	// async gameFunctions(client: Socket, payload) {
-	// 	await this.gameService.gameFunction(
-	// 		payload[0], //function
-	// 		payload[1], //score
-	// 		client.data.currentMatch,
-	// 	);
-	// 	this.server
-	// 		.to(client.data.currentMatch.roomName)
-	// 		.emit(
-	// 			'setPosition',
-	// 			client.data.currentMatch.leftPad,
-	// 			client.data.currentMatch.rightPad,
-	// 			client.data.currentMatch.ball,
-	// 			client.data.currentMatch.p1Score,
-	// 			client.data.currentMatch.p2Score,
-	// 		);
-	// 	//end of the game
-	// 	const end = await this.gameService.checkEndGame(
-	// 		client,
-	// 		client.data.currentMatch,
-	// 	);
-	// 	if (end != 0) {
-	// 		const user1: UserEntity = await this.userService.getUserById(
-	// 			client.data.currentMatch.player1,
-	// 		);
-	// 		const user2: UserEntity = await this.userService.getUserById(
-	// 			client.data.currentMatch.player2,
-	// 		);
-	// 		if (end == 1) {
-	// 			if (
-	// 				(await this.gameService.endGame(
-	// 					client,
-	// 					client.data.currentMatch,
-	// 					user1,
-	// 					user2,
-	// 				)) == true
-	// 			) {
-	// 				this.server.emit('endGame');
-	// 			}
-	// 			this.server
-	// 				.to(client.data.currentMatch.roomName)
-	// 				.emit('victoryOf', user1);
-	// 		} else if (end == 2) {
-	// 			if (
-	// 				await this.gameService.endGame(
-	// 					client,
-	// 					client.data.currentMatch,
-	// 					user2,
-	// 					user1,
-	// 				)
-	// 			) {
-	// 				// console.log('room:', client.data.currentMatch.roomName);
-	// 				this.server.emit('endGame');
-	// 			}
-	// 			this.server
-	// 				.to(client.data.currentMatch.roomName)
-	// 				.emit('victoryOf', user2);
-	// 		}
-	// 	}
-	// }
-
-	// // get the position of the ball and emit it
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('ballMovement')
-	// async ballMovement(client: Socket, ballPosition: Ball) {
-	// 	client.data.currentMatch.ball = ballPosition;
-	// 	client.data.currentMatch.p1Touches =
-	// 		client.data.currentMatch.ball.p1Touches;
-	// 	client.data.currentMatch.p2Touches =
-	// 		client.data.currentMatch.ball.p2Touches;
-	// 	this.server
-	// 		.to(client.data.currentMatch.roomName)
-	// 		.emit(
-	// 			'setPosition',
-	// 			client.data.currentMatch.leftPad,
-	// 			client.data.currentMatch.rightPad,
-	// 			client.data.currentMatch.ball,
-	// 			client.data.currentMatch.p1Score,
-	// 			client.data.currentMatch.p2Score,
-	// 		);
-	// }
-
-	// //able keyboard commands for local game
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('toggleLocalGame')
-	// async toggleSinglePlayer(client: Socket) {
-	// 	await this.gameService.toggleLocalGame(client);
-	// }
-
-	//disable keyboard commands for local game
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('toggleMatchMaking')
-	// async toggleMatchMaking(client: Socket) {
-	// 	if ((await this.gameService.toggleMatchMaking(client)) == false) {
-	// 		client.emit('goBackHome');
-	// 		throw new ForbiddenException(
-	// 			"You're playing with yourself ! Use local game or get some friends.",
-	// 		);
-	// 	}
-	// 	if (client.data.currentMatch != null) {
-	// 		this.server.to(client.data.currentMatch.roomName).emit('gameStarted');
-	// 	}
-	// }
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('changedPage')
-	// async	changedPage(client: Socket)
-	// {
-	// 	this.gameService.handleGameDisconnect(client);
-	// }
-
-	// @SubscribeMessage('backHome')
-	// async backHome(client: Socket) {
-	// 	client.emit("goBackHome");
-	// }
-
-	/**
-	 *  _      ____   _____          _         _____          __  __ ______
-	 * | |    / __ \ / ____|   /\   | |       / ____|   /\   |  \/  |  ____|
-	 * | |   | |  | | |       /  \  | |      | |  __   /  \  | \  / | |__
-	 * | |   | |  | | |      / /\ \ | |      | | |_ | / /\ \ | |\/| |  __|
-	 * | |___| |__| | |____ / ____ \| |____  | |__| |/ ____ \| |  | | |____
-	 * |______\____/ \_____/_/    \_\______|  \_____/_/    \_\_|  |_|______|
-	 *
-	 */
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('localGame')
-	localGame(client: Socket) {
-		this.server.emit('newGame', {
-			player1: client.data.user,
-			player2: client.data.user,
-		});
-	}
-
-	/**
 	 *   _____          __  __ ______   _____ _   ___      _______ _______    _______ _____ ____  _   _
 	 *  / ____|   /\   |  \/  |  ____| |_   _| \ | \ \    / /_   _|__   __|/\|__   __|_   _/ __ \| \ | |
 	 * | |  __   /  \  | \  / | |__      | | |  \| |\ \  / /  | |    | |  /  \  | |    | || |  | |  \| |
@@ -693,13 +468,12 @@ export class GeneralGateway
 		client.emit('matchAccepted', invite.roomId);
 		client.emit('updateInvitation');
 		this.gameService.deleteReceivedInvite(client.data.user.userId);
-		// this.gameService.initGame(invite);
+		this.initGame(invite);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('joinGame')
-	joinGame(client: Socket, roomId: string)
-	{
+	joinGame(client: Socket, roomId: string) {
 		client.join(roomId);
 		this.gameService.setMatch(client.data.user, roomId);
 	}
@@ -764,7 +538,7 @@ export class GeneralGateway
 		if (!matchMaking) return client.emit('waitingMatchmaking');
 		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
 		client.emit('matchAccepted', matchMaking.roomId);
-		// this.gameService.initGame(matchMaking);
+		this.initGame(matchMaking);
 	}
 
 	/**
@@ -779,38 +553,56 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket) {}
+	spectate(client: Socket, player: string) { 
+		client.emit('spectate', player);
+	}
 
 	/**
-	 *		SPECTATE
+	 *   _____          __  __ ______
+	 *  / ____|   /\   |  \/  |  ____|
+	 * | |  __   /  \  | \  / | |__
+	 * | | |_ | / /\ \ | |\/| |  __|
+	 * | |__| |/ ____ \| |  | | |____
+	 *  \_____/_/    \_|_|  |_|______|
+	 *
 	 */
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('spectate')
-	// async spectate(client: Socket, userIdToSpec: string) {
-	// 	await this.gameService.spectate(client, userIdToSpec);
-	// }
+	@UseGuards(WsGuard)
+	@SubscribeMessage('localGame')
+	localGame(client: Socket) {
+		this.server.emit('newGame', {
+			player1: client.data.user,
+			player2: client.data.user,
+		});
+	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('getCurrentMatch')
-	// async getCurrentMatch(client: Socket, userIdToSpec: string) {
-	// 	if (userIdToSpec === 'me') userIdToSpec = client.data.user.userId;
-	// 	if (
-	// 		(await this.gameService.getCurrentMatch(client, userIdToSpec)) == true
-	// 	) {
-	// 		client.emit('sendCurrentMatch', true);
-	// 	} else client.emit('sendCurrentMatch', false);
-	// }
+	initGame(invitation: invitationInterface) {
+		let game: Game = this.gameService.initGame(invitation);
+		this.server.to(game.id).emit('updatedGame', game);
+	}
 
-	/**
-	 * User State in game
-	 */
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('isInGame')
-	// async isInGame(client: Socket) {
-	// 	const ret: boolean = await this.gameService.isInGame(client);
-	// 	client.emit('isDisplayGame', ret);
-	// }
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getMyGame')
+	getMyGame(client: Socket) {
+		let game: Game = this.gameService.getMyGame(client.data.user.userId);
+		client.emit('updatedGame', game);
+	}
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('movePad')
+	movePad(client: Socket, { roomId, direction }) {
+		console.log('movePad')
+		let game: Game = this.gameService.movePad(client.data.user, direction, roomId);
+		this.server.to(roomId).emit('updatedGame', game);
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('gameLoop')
+	gameLoop(client: Socket, { roomId, state }) {
+		this.gameService.gameLoop(this.server, roomId, state);
+	}
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -907,20 +699,16 @@ export class GeneralGateway
 		});
 	}
 
-	@UseGuards(WsGuard)
-	@SubscribeMessage('getAchievements')
-	async getAchievements(client: Socket, userId: string) {
-		let userAchievements: AchievementsEntity;
-		if (userId != 'me')
-			userAchievements = await this.gameService.getUserAchievements(userId);
-		else
-			userAchievements = await this.gameService.getUserAchievements(
-				client.data.user.userId,
-			);
-		client.emit(`sendAchievements`, userAchievements);
-	}
-}
-
-function jwtDecode<T>(Authentication: any) {
-	throw new Error('Function not implemented.');
+		@UseGuards(WsGuard)
+		@SubscribeMessage('getAchievements')
+		async getAchievements(client: Socket, userId: string) {
+			let userAchievements: AchievementsEntity;
+			if (userId != 'me')
+				userAchievements = await this.gameService.getUserAchievements(userId);
+			else
+				userAchievements = await this.gameService.getUserAchievements(
+					client.data.user.userId,
+				);
+			client.emit(`sendAchievements`, userAchievements);
+		}
 }
