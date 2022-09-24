@@ -25,9 +25,9 @@ import { Match } from 'src/game/interfaces/match.interface';
 let match: Match;
 
 // let games = new Map<string, Game>();
-let PAD_SPEED = 1;
-let BALL_SPEED = GRID.BALL_RADIUS;
-let INTERVAL_SPEED = 50;
+let PAD_SPEED = 20;
+export let BALL_SPEED = 5;
+let INTERVAL_SPEED = 15;
 let MAX_SCORE = 2;
 
 @Injectable()
@@ -78,6 +78,7 @@ export class GameService {
 				score: 0,
 			},
 			state: "readyPlay",
+			type: "online"
 		}
 		this.games.set(invitation.roomId, game);
 		return game;
@@ -98,8 +99,8 @@ export class GameService {
 
 
 	moveBall(ball: Ball) {
-		if (ball.pos.x - ball.radius >= 0)
-			ball.pos.x -= BALL_SPEED;
+		ball.pos.x += ball.direction.x;
+		ball.pos.y += ball.direction.y;
 	}
 
 	defineWall(posX: number, posY: number, width: number, height: number) {
@@ -117,6 +118,9 @@ export class GameService {
 	}
 
 	resetGrid(grid: Grid) {
+		if (grid.ball.pos.x)
+			grid.ball.direction.x = BALL_SPEED;
+		grid.ball.direction.y = 0;
 		grid.ball.pos.x = grid.size.x / 2;
 		grid.ball.pos.y = grid.size.y / 2;
 		grid.pad1.pos.x = 0;
@@ -135,21 +139,78 @@ export class GameService {
 
 	}
 
-	isLeftWallCollision(ball: Ball, wall: Pad) {
-		if (ball.pos.x - ball.radius <= wall.pos.x)
+	isLeftWallCollision(ball: Ball, wall: Pad, game: Game) {
+		if (ball.pos.x - ball.radius <= wall.pos.x) {
+			game.player2.score += 1;
 			return true;
+		}
 		return false;
 	}
 
+	isRightWallCollision(ball: Ball, wall: Pad, game: Game) {
+		if (ball.pos.x + ball.radius >= wall.pos.x) {
+			game.player1.score += 1;
+			return true;
+		}
+		return false;
+	}
+
+	isTopWallCollision(ball: Ball, wall: Pad) {
+		if (ball.pos.y - ball.radius <= wall.pos.y)
+			ball.direction.y = -ball.direction.y;
+	}
+
+	isBottomWallCollision(ball: Ball, wall: Pad) {
+		if (ball.pos.y + ball.radius >= wall.pos.y)
+			ball.direction.y = -ball.direction.y;
+	}
+
+	isLeftPadCollision(ball: Ball, pad: Pad) {
+		if (ball.pos.x - ball.radius <= pad.pos.x + pad.size.x && (ball.pos.y >= pad.pos.y && ball.pos.y <= pad.pos.y + pad.size.y)) {
+			this.bouncePad(ball, pad);
+			return true;
+		}
+		return false;
+
+	}
+
+	isRightPadCollision(ball: Ball, pad: Pad) {
+		if (ball.pos.x + ball.radius >= pad.pos.x && (ball.pos.y >= pad.pos.y && ball.pos.y <= pad.pos.y + pad.size.y)) {
+			this.bouncePad(ball, pad);
+			return true;
+		}
+		return false;
+
+	}
+
+	bouncePad(ball: Ball, pad: Pad) {
+		var impact = ball.pos.y - pad.pos.y + pad.size.y / 2;
+		var ratio = 100 / (pad.size.y / 2);
+		var angle = Math.round((impact * ratio) / 10);
+		if (angle >= 10) {
+			angle -= 10;
+			angle = -angle;
+		}
+		ball.direction.y = angle;
+		ball.direction.y = -ball.direction.y;
+		ball.direction.x = -ball.direction.x;
+	}
+
 	checkCollision(game: Game) {
+		let padCollision = false;
 		let leftWall: Pad = this.defineWall(0, 0, 0, game.grid.size.y);
 		let rightWall = this.defineWall(game.grid.size.x, 0, 0, game.grid.size.y);
 		let topWall = this.defineWall(0, 0, game.grid.size.x, 0);
 		let bottomWall = this.defineWall(0, game.grid.size.y, game.grid.size.x, 0);
-		if (this.isLeftWallCollision(game.grid.ball, leftWall)) {
-			game.player2.score += 1;
-			game.state = "readyPlay";
-			this.resetGrid(game.grid);
+		padCollision = this.isRightPadCollision(game.grid.ball, game.grid.pad2)
+		padCollision = this.isLeftPadCollision(game.grid.ball, game.grid.pad1)
+		this.isTopWallCollision(game.grid.ball, topWall)
+		this.isBottomWallCollision(game.grid.ball, bottomWall)
+		if (!padCollision) {
+			if (this.isLeftWallCollision(game.grid.ball, leftWall, game) || this.isRightWallCollision(game.grid.ball, rightWall, game)) {
+				game.state = "readyPlay";
+				this.resetGrid(game.grid);
+			}
 		}
 	}
 
@@ -158,9 +219,9 @@ export class GameService {
 		game.state = "ongoing";
 		if (game.state === "ongoing") {
 			let timer = setInterval(() => {
-				this.moveBall(game.grid.ball)
 				this.checkCollision(game);
-				this.checkWinner(game)
+				this.checkWinner(game);
+				this.moveBall(game.grid.ball);
 				server.to(gameId).emit('updatedGame', this.games.get(gameId));
 				if (game.state != "ongoing")
 					clearInterval(timer);

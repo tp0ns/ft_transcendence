@@ -13,6 +13,7 @@ export interface Pad {
 export interface Ball {
   pos: Coordinate;
   radius: number;
+  direction: Coordinate;
 }
 
 export interface Grid {

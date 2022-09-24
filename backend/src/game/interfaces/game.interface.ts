@@ -16,6 +16,7 @@ export class Pad {
 export class Ball {
 	pos: Coordinate;
 	radius: number;
+	direction: Coordinate;
 }
 
 export class Grid {
