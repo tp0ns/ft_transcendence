@@ -11,21 +11,24 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { Ball, Coordinate, Game, Grid, Pad } from './interfaces/game.interface';
+import { Ball, Coordinate, Game, Grid, Pad, Player } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
 import { WsException } from '@nestjs/websockets';
 import { v4 as uuidv4 } from 'uuid';
-import { initGrid } from './utils/initGrid';
+import { GRID, initGrid } from './utils/initGrid';
 import { Match } from 'src/game/interfaces/match.interface';
 
 
 let match: Match;
 
 // let games = new Map<string, Game>();
-let PAD_SPEED = 10;
+let PAD_SPEED = 20;
+export let BALL_SPEED = 2;
+let INTERVAL_SPEED = 15;
+let MAX_SCORE = 2;
 
 @Injectable()
 export class GameService {
@@ -61,7 +64,7 @@ export class GameService {
 		}
 	}
 
-	initGame = (invitation: invitationInterface) => {
+	initOnline(invitation: invitationInterface) {
 		let grid: Grid = initGrid();
 		let game: Game = {
 			id: invitation.roomId,
@@ -74,18 +77,41 @@ export class GameService {
 				user: invitation.player2,
 				score: 0,
 			},
-			ongoing: false,
+			state: "readyPlay",
+			type: 'online',
 		}
 		this.games.set(invitation.roomId, game);
 		return game;
 	}
 
-	movePad(user: UserEntity, direction: string, gameId: string) {
+	initLocal(user: UserEntity) {
+		let grid: Grid = initGrid();
+		let game: Game = {
+			id: uuidv4(),
+			grid: grid,
+			player1: {
+				user: user,
+				score: 0,
+			},
+			player2: {
+				user: user,
+				score: 0,
+			},
+			state: "readyPlay",
+			type: "online"
+		}
+		this.games.set(game.id, game);
+		return game;
+	}
+
+	movePad(user: UserEntity, direction: string, gameId: string, type: string) {
 		let game: Game = this.games.get(gameId);
 		let padToMove: Pad = game.grid.pad1;
 
 		if (game.player2.user.userId === user.userId)
 			padToMove = game.grid.pad2;
+		if (type === "local")
+			padToMove = game.grid.pad1;
 		if (direction === "up" && padToMove.pos.y > 0)
 			padToMove.pos.y -= PAD_SPEED;
 		else if (direction === "down" && padToMove.pos.y + padToMove.size.y < game.grid.size.y)
@@ -94,23 +120,221 @@ export class GameService {
 	}
 
 
-	moveBall(gameId: string) {
+	moveBall(ball: Ball) {
+		ball.pos.x += ball.direction.x;
+		ball.pos.y += ball.direction.y;
+	}
+
+	defineWall(posX: number, posY: number, width: number, height: number) {
+		let wall: Pad = {
+			pos: {
+				x: posX,
+				y: posY,
+			},
+			size: {
+				x: width,
+				y: height
+			}
+		}
+		return wall;
+	}
+
+	resetGrid(grid: Grid) {
+		if (grid.ball.pos.x)
+			grid.ball.direction.x = BALL_SPEED;
+		grid.ball.direction.y = 0;
+		grid.ball.pos.x = grid.size.x / 2;
+		grid.ball.pos.y = grid.size.y / 2;
+		grid.pad1.pos.x = 0;
+		grid.pad1.pos.y = grid.size.y / 2 - grid.pad1.size.y / 2;
+		grid.pad2.pos.x = grid.size.x - grid.pad2.size.x;
+		grid.pad2.pos.y = grid.size.y / 2 - grid.pad2.size.y / 2;
+	}
+
+	checkWinner(game: Game) {
+		if (game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) {
+			game.state = "end";
+			let gameToSend: Game = Object.assign({}, game);
+			this.endGame(gameToSend);
+			this.games.delete(game.id);
+		}
 
 	}
 
-	gameLoop(server: any, gameId: string, state: string) {
-		let timer;
+	isLeftWallCollision(ball: Ball, wall: Pad, game: Game) {
+		if (ball.pos.x - ball.radius <= wall.pos.x) {
+			game.player2.score += 1;
+			return true;
+		}
+		return false;
+	}
 
-		this.games.get(gameId).ongoing = true;
-		if (state === "start") {
-			timer = setInterval(() => {
-				this.moveBall(gameId)
-				server.to(gameId).emit('updatedGame', this.games.get(gameId));
+	isRightWallCollision(ball: Ball, wall: Pad, game: Game) {
+		if (ball.pos.x + ball.radius >= wall.pos.x) {
+			game.player1.score += 1;
+			return true;
+		}
+		return false;
+	}
+
+	isTopWallCollision(ball: Ball, wall: Pad) {
+		if (ball.pos.y - ball.radius <= wall.pos.y)
+			ball.direction.y = -ball.direction.y;
+	}
+
+	isBottomWallCollision(ball: Ball, wall: Pad) {
+		if (ball.pos.y + ball.radius >= wall.pos.y)
+			ball.direction.y = -ball.direction.y;
+	}
+
+	isLeftPadCollision(ball: Ball, pad: Pad) {
+		if (ball.pos.x - ball.radius <= pad.pos.x + pad.size.x && (ball.pos.y >= pad.pos.y && ball.pos.y <= pad.pos.y + pad.size.y)) {
+			this.bouncePad(ball, pad);
+			return true;
+		}
+		return false;
+
+	}
+
+	isRightPadCollision(ball: Ball, pad: Pad) {
+		if (ball.pos.x + ball.radius >= pad.pos.x && (ball.pos.y >= pad.pos.y && ball.pos.y <= pad.pos.y + pad.size.y)) {
+			this.bouncePad(ball, pad);
+			return true;
+		}
+		return false;
+
+	}
+
+	bouncePad(ball: Ball, pad: Pad) {
+		var impact = ball.pos.y - pad.pos.y + pad.size.y / 2;
+		var ratio = 100 / (pad.size.y / 2);
+		var angle = Math.round((impact * ratio) / 10);
+		if (angle >= 10) {
+			angle -= 10;
+			angle = -angle;
+		}
+		ball.direction.y = angle;
+		ball.direction.y = -ball.direction.y;
+		ball.direction.x = -ball.direction.x;
+	}
+
+	checkCollision(game: Game) {
+		let padCollision = false;
+		let leftWall: Pad = this.defineWall(0, 0, 0, game.grid.size.y);
+		let rightWall = this.defineWall(game.grid.size.x, 0, 0, game.grid.size.y);
+		let topWall = this.defineWall(0, 0, game.grid.size.x, 0);
+		let bottomWall = this.defineWall(0, game.grid.size.y, game.grid.size.x, 0);
+		padCollision = this.isRightPadCollision(game.grid.ball, game.grid.pad2)
+		padCollision = this.isLeftPadCollision(game.grid.ball, game.grid.pad1)
+		this.isTopWallCollision(game.grid.ball, topWall)
+		this.isBottomWallCollision(game.grid.ball, bottomWall)
+		if (!padCollision) {
+			if (this.isLeftWallCollision(game.grid.ball, leftWall, game) || this.isRightWallCollision(game.grid.ball, rightWall, game)) {
+				game.state = "readyPlay";
+				this.resetGrid(game.grid);
 			}
-
-				, 5000)
 		}
 	}
+
+	gameLoop(server: any, gameId: string) {
+		let game = this.games.get(gameId);
+		game.state = "ongoing";
+		if (game.state === "ongoing") {
+			let timer = setInterval(() => {
+				this.checkCollision(game);
+				this.checkWinner(game);
+				this.moveBall(game.grid.ball);
+				server.to(gameId).emit('updatedGame', this.games.get(gameId));
+				if (game.state != "ongoing")
+					clearInterval(timer);
+			}, INTERVAL_SPEED)
+			return game;
+		}
+	}
+
+	async setGameInfos(winner: UserEntity, loser: UserEntity)
+	{
+		winner.victories++;
+		loser.defeats++;
+		winner.currentMatch = null;
+		loser.currentMatch = null;
+		await this.setAchievements(winner);
+		await this.setAchievements(loser);
+		this.userRepo.save(winner);
+		this.userRepo.save(loser);
+	}
+
+	/**
+	 * 
+	 * @param game 
+	 * 
+	 * @todo CHANGER LE SCORE A 5
+	 */
+	async endGame(game: Game) {
+		if (game.type != 'local')
+		{
+			let winner: UserEntity;
+			let loser: UserEntity;
+			if (game.player1.score === 2) {
+				winner = game.player1.user;
+				loser = game.player2.user;
+				await this.setMatchHistory(game.player1, game.player2);
+			}
+			else {
+				winner = game.player2.user;
+				loser = game.player1.user;
+				await this.setMatchHistory(game.player2, game.player1);
+			}
+			this.setGameInfos(winner, loser)
+		}
+	}
+
+	changedTab(user: UserEntity) {
+		this.inviteMap.delete(user.userId);
+		this.matchMakingMap.delete(user.userId)
+	}
+
+	async quitGame(user: UserEntity)
+	{
+		let game: Game = this.getMyGame(user.userId);
+		if (game) {
+			let winner: UserEntity;
+			let loser: UserEntity = user;
+			if (game.player2.user.userId === user.userId) {
+				winner = game.player1.user;
+				game.player1.score = 5;
+				game.player2.score = 0;
+				await this.setMatchHistory(game.player1, game.player2);
+			}
+			else {
+				winner = game.player2.user;
+				game.player2.score = 5;
+				game.player1.score = 0;
+				await this.setMatchHistory(game.player2, game.player1);
+			}
+			this.setGameInfos(winner, loser);
+		}
+	}
+
+	cleanGame(user: UserEntity) {
+
+		this.deleteAllUserInvite(user.userId);
+		user.currentMatch = null;
+		this.userRepo.save(user);
+	}
+
+	/**
+ * ------------------ SPECTATE  ------------------ *
+ *
+ * -  spectate(user)
+ */
+
+	spectate(user: UserEntity) {
+		if (user.currentMatch != null)
+			throw new ForbiddenException("You can't spectate while you are playing");
+
+	}
+
 
 	/**
 	 * ------------------ STATISTICS FOR USER PAGE  ------------------ *
@@ -154,18 +378,16 @@ export class GameService {
 		return userAchievements;
 	}
 
-	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match) {
+	async setMatchHistory(winner: Player, loser: Player) {
 		let newMatchHistory: MatchHistoryEntity =
 			await this.MatchHistoryRepository.save({
-				winnerUsername: winner.username,
-				winnerScore:
-					match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
-				loserUsername: loser.username,
-				loserScore:
-					match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+				winnerUsername: winner.user.username,
+				winnerScore: winner.score,
+				loserUsername: loser.user.username,
+				loserScore: loser.score
 			});
-		winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
-		loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+		winner.user.MatchHistory = [...winner.user.MatchHistory, newMatchHistory];
+		loser.user.MatchHistory = [...loser.user.MatchHistory, newMatchHistory];
 	}
 
 	/**

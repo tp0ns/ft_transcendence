@@ -13,6 +13,7 @@ export interface Pad {
 export interface Ball {
   pos: Coordinate;
   radius: number;
+  direction: Coordinate;
 }
 
 export interface Grid {
@@ -32,5 +33,5 @@ export interface Game {
   grid: Grid;
   player1: Player;
   player2: Player;
-  ongoing: boolean;
+  state: string;
 }

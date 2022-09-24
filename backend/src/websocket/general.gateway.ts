@@ -85,7 +85,7 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.deleteAllUserInvite(client.data.user.userId);
+			this.gameService.cleanGame(client.data.user);
 			// const winnerId: string = await this.gameService.handleGameDisconnect(
 			// 	client,
 			// );
@@ -553,7 +553,8 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket, player: string) { 
+	spectate(client: Socket, player: string) {
+		this.gameService.spectate(client.data.user);
 		client.emit('spectate', player);
 	}
 
@@ -568,16 +569,16 @@ export class GeneralGateway
 	 */
 
 	@UseGuards(WsGuard)
-	@SubscribeMessage('localGame')
+	@SubscribeMessage('localgame')
 	localGame(client: Socket) {
-		this.server.emit('newGame', {
-			player1: client.data.user,
-			player2: client.data.user,
-		});
+		console.log('Hello');
+		let game: Game = this.gameService.initLocal(client.data.user);
+		client.join(game.id);
+		this.server.to(game.id).emit('updatedGame', game);
 	}
 
 	initGame(invitation: invitationInterface) {
-		let game: Game = this.gameService.initGame(invitation);
+		let game: Game = this.gameService.initOnline(invitation);
 		this.server.to(game.id).emit('updatedGame', game);
 	}
 
@@ -592,16 +593,33 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('movePad')
-	movePad(client: Socket, { roomId, direction }) {
-		console.log('movePad')
-		let game: Game = this.gameService.movePad(client.data.user, direction, roomId);
+	movePad(client: Socket, { roomId, direction, type }) {
+		let game: Game = this.gameService.movePad(client.data.user, direction, roomId, type);
 		this.server.to(roomId).emit('updatedGame', game);
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameLoop')
 	gameLoop(client: Socket, { roomId, state }) {
-		this.gameService.gameLoop(this.server, roomId, state);
+		let game: Game = this.gameService.gameLoop(this.server, roomId);
+		if (game.state === "end") {
+			client.leave(roomId);
+		}
+	}
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('changedTab')
+	async checkChangedTab(client: Socket) {
+		if (client.data.user.currentMatch != null) {
+			console.log('enter in currentMatch non null');
+			//besoin de faire leave la room aux 2 joueurs 
+			this.gameService.quitGame(client.data.user);
+		}
+		else {
+			this.gameService.changedTab(client.data.user);
+			// this.server.emit('updateInvitation');
+		}
+
 	}
 
 	/*
@@ -638,6 +656,7 @@ export class GeneralGateway
 	async blockUser(client: Socket, userId: IdDto) {
 		await this.relationsService.blockUser(userId.id, client.data.user);
 		this.server.emit('updatedRelations');
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)
@@ -645,6 +664,7 @@ export class GeneralGateway
 	async unblockUser(client: Socket, relationId: IdDto) {
 		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)
@@ -699,16 +719,16 @@ export class GeneralGateway
 		});
 	}
 
-		@UseGuards(WsGuard)
-		@SubscribeMessage('getAchievements')
-		async getAchievements(client: Socket, userId: string) {
-			let userAchievements: AchievementsEntity;
-			if (userId != 'me')
-				userAchievements = await this.gameService.getUserAchievements(userId);
-			else
-				userAchievements = await this.gameService.getUserAchievements(
-					client.data.user.userId,
-				);
-			client.emit(`sendAchievements`, userAchievements);
-		}
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getAchievements')
+	async getAchievements(client: Socket, userId: string) {
+		let userAchievements: AchievementsEntity;
+		if (userId != 'me')
+			userAchievements = await this.gameService.getUserAchievements(userId);
+		else
+			userAchievements = await this.gameService.getUserAchievements(
+				client.data.user.userId,
+			);
+		client.emit(`sendAchievements`, userAchievements);
+	}
 }
