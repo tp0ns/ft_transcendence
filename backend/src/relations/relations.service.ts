@@ -119,11 +119,7 @@ export class RelationsService {
 	): Promise<boolean> {
 		const blocker: UserEntity = blockerReq as UserEntity;
 		const blocked: UserEntity = await this.userService.getUserById(blockedUserId);
-		// console.log("blocker: ", blocker)
-		console.log("blockedUserId", blockedUserId)
-		console.log("blocked: ", blocked)
 		const relation: Relation = await this.findRelationByUserId(blocker, blocked);
-		// console.log("relation: ", relation);
 		if (relation && relation.status === 'blocked' && relation.creator.userId === blocker.userId)
 			return true;
 		return false;
