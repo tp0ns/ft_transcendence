@@ -226,6 +226,7 @@ export class GameService {
 				if (game.state != "ongoing")
 					clearInterval(timer);
 			}, INTERVAL_SPEED)
+			return game;
 		}
 	}
 
