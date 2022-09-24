@@ -1,6 +1,7 @@
 import UserEntity from "src/user/models/user.entity";
 
 export type Game_State = "readyPlay" | "ongoing" | "end"
+export type Game_Type = "local" | "online"
 
 export class Coordinate {
 	x: number;
@@ -35,4 +36,5 @@ export class Game {
 	player1: Player;
 	player2: Player;
 	state: Game_State;
+	type: Game_Type;
 }
