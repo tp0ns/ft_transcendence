@@ -108,12 +108,12 @@ export class GameService {
 
 	movePad(user: UserEntity, direction: string, gameId: string, type: string) {
 		let game: Game = this.games.get(gameId);
-		let padToMove: Pad = game.grid.pad1;
+		let padToMove: Pad = game.grid.pad2;
 
 		if (game.player2.user.userId === user.userId)
-			padToMove = game.grid.pad2;
-		if (type === "local")
 			padToMove = game.grid.pad1;
+		if (type === "local")
+			padToMove = game.grid.pad2;
 		if (direction === "up" && padToMove.pos.y > 0)
 			padToMove.pos.y -= PAD_SPEED;
 		else if (direction === "down" && padToMove.pos.y + padToMove.size.y < game.grid.size.y)
@@ -158,8 +158,8 @@ export class GameService {
 		if (game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) {
 			game.state = "end";
 			let gameToSend: Game = Object.assign({}, game);
-			this.endGame(gameToSend);
 			this.games.delete(game.id);
+			this.endGame(gameToSend);
 		}
 
 	}

@@ -571,7 +571,6 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('localgame')
 	localGame(client: Socket) {
-		console.log('Hello');
 		let game: Game = this.gameService.initLocal(client.data.user);
 		client.join(game.id);
 		this.server.to(game.id).emit('updatedGame', game);
