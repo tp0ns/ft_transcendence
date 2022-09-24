@@ -607,12 +607,20 @@ export class GeneralGateway
 		}
 	}
 
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('endGame')
-	// endGame(client: Socket, game: Game)
-	// {
+	@UseGuards(WsGuard)
+	@SubscribeMessage('changedTab')
+	async checkChangedTab(client: Socket) {
+		if (client.data.user.currentMatch != null) {
+			console.log('enter in currentMatch non null');
+			//besoin de faire leave la room aux 2 joueurs 
+			this.gameService.quitGame(client.data.user);
+		}
+		else {
+			this.gameService.changedTab(client.data.user);
+			// this.server.emit('updateInvitation');
+		}
 
-	// }
+	}
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -648,6 +656,7 @@ export class GeneralGateway
 	async blockUser(client: Socket, userId: IdDto) {
 		await this.relationsService.blockUser(userId.id, client.data.user);
 		this.server.emit('updatedRelations');
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)
@@ -655,6 +664,7 @@ export class GeneralGateway
 	async unblockUser(client: Socket, relationId: IdDto) {
 		await this.relationsService.unblockUser(relationId.id, client.data.user);
 		this.server.emit('updatedRelations');
+		this.server.emit('updatedChannels');
 	}
 
 	@UseGuards(WsGuard)

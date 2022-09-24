@@ -29,7 +29,6 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	}, []);
 
 	useEffect(() => {
-		if (activeChan) socket.emit("leaveRoom", activeChan);
 		if (params.channelId) {
 			setactiveChan(() => {
 				const newActiveChan = channels.find((channel) => {
@@ -43,6 +42,8 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 			window.history.pushState("Url goes back to /chat", "Chat", "/chat");
 			return;
 		}
+		if (activeChan)
+			socket.emit("leaveRoom", activeChan);
 		setactiveChan((prevChan) => {
 			if (prevChan === null) return prevChan;
 			const newActiveChan = channels.find((channel) => {
@@ -68,7 +69,8 @@ export const ChatContextProvider: React.FC<{ children: JSX.Element }> = (
 	}
 
 	function changeActiveChan(chan: ChannelInterface | null) {
-		if (activeChan) socket.emit("leaveRoom", activeChan);
+		if (activeChan)
+			socket.emit("leaveRoom", activeChan);
 		setactiveChan(chan);
 		changeIsAdmin(chan);
 		if (!chan) return;

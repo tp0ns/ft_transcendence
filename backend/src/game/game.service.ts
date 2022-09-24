@@ -78,7 +78,7 @@ export class GameService {
 				score: 0,
 			},
 			state: "readyPlay",
-			type: "online"
+			type: 'online',
 		}
 		this.games.set(invitation.roomId, game);
 		return game;
@@ -252,17 +252,68 @@ export class GameService {
 		}
 	}
 
-	endGame(game: Game) {
-		//si c'est pas un localGame, ajouter dans les statistiques 
-		//comment checker que c'est pas un localGame ???? 
+	async setGameInfos(winner: UserEntity, loser: UserEntity)
+	{
+		winner.victories++;
+		loser.defeats++;
+		winner.currentMatch = null;
+		loser.currentMatch = null;
+		await this.setAchievements(winner);
+		await this.setAchievements(loser);
+		this.userRepo.save(winner);
+		this.userRepo.save(loser);
+	}
 
-		//si aucun des deux joueurs n'a obtenu 5 points 
-		// ==== declarer forfait donc mettre celui qui a declarer 
-		//forfait a 0 et l'autre a 5 
-		//comment on fait pour savoir qui a declarer forfait ??? 
+	/**
+	 * 
+	 * @param game 
+	 * 
+	 * @todo CHANGER LE SCORE A 5
+	 */
+	async endGame(game: Game) {
+		if (game.type != 'local')
+		{
+			let winner: UserEntity;
+			let loser: UserEntity;
+			if (game.player1.score === 2) {
+				winner = game.player1.user;
+				loser = game.player2.user;
+				await this.setMatchHistory(game.player1, game.player2);
+			}
+			else {
+				winner = game.player2.user;
+				loser = game.player1.user;
+				await this.setMatchHistory(game.player2, game.player1);
+			}
+			this.setGameInfos(winner, loser)
+		}
+	}
 
-		//set les achievements 
-		//
+	changedTab(user: UserEntity) {
+		this.inviteMap.delete(user.userId);
+		this.matchMakingMap.delete(user.userId)
+	}
+
+	async quitGame(user: UserEntity)
+	{
+		let game: Game = this.getMyGame(user.userId);
+		if (game) {
+			let winner: UserEntity;
+			let loser: UserEntity = user;
+			if (game.player2.user.userId === user.userId) {
+				winner = game.player1.user;
+				game.player1.score = 5;
+				game.player2.score = 0;
+				await this.setMatchHistory(game.player1, game.player2);
+			}
+			else {
+				winner = game.player2.user;
+				game.player2.score = 5;
+				game.player1.score = 0;
+				await this.setMatchHistory(game.player2, game.player1);
+			}
+			this.setGameInfos(winner, loser);
+		}
 	}
 
 	cleanGame(user: UserEntity) {
@@ -327,18 +378,16 @@ export class GameService {
 		return userAchievements;
 	}
 
-	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match) {
+	async setMatchHistory(winner: Player, loser: Player) {
 		let newMatchHistory: MatchHistoryEntity =
 			await this.MatchHistoryRepository.save({
-				winnerUsername: winner.username,
-				winnerScore:
-					match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
-				loserUsername: loser.username,
-				loserScore:
-					match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+				winnerUsername: winner.user.username,
+				winnerScore: winner.score,
+				loserUsername: loser.user.username,
+				loserScore: loser.score
 			});
-		winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
-		loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+		winner.user.MatchHistory = [...winner.user.MatchHistory, newMatchHistory];
+		loser.user.MatchHistory = [...loser.user.MatchHistory, newMatchHistory];
 	}
 
 	/**

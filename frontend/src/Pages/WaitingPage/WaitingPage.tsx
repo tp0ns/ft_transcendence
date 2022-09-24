@@ -8,7 +8,6 @@ const WaitingPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		console.log("Je suis dans la waiting page");
 		socket.emit("needWaiting");
 		socket.on("updateInvitation", () => {
 			socket.emit("needWaiting");
