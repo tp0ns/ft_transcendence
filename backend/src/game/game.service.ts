@@ -26,7 +26,7 @@ let match: Match;
 
 // let games = new Map<string, Game>();
 let PAD_SPEED = 20;
-export let BALL_SPEED = 5;
+export let BALL_SPEED = 2;
 let INTERVAL_SPEED = 15;
 let MAX_SCORE = 2;
 
