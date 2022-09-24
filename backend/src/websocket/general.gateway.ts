@@ -553,7 +553,7 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket, player: string) { 
+	spectate(client: Socket, player: string) {
 		this.gameService.spectate(client.data.user);
 		client.emit('spectate', player);
 	}
@@ -602,15 +602,8 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameLoop')
 	gameLoop(client: Socket, { roomId, state }) {
-		this.gameService.gameLoop(this.server, roomId, state);
+		this.gameService.gameLoop(this.server, roomId);
 	}
-
-	// @UseGuards(WsGuard)
-	// @SubscribeMessage('endGame')
-	// endGame(client: Socket, game: Game)
-	// {
-
-	// }
 
 	/*
 	______ _____  _____ ______ _   _ _____   _____
@@ -707,16 +700,16 @@ export class GeneralGateway
 		});
 	}
 
-		@UseGuards(WsGuard)
-		@SubscribeMessage('getAchievements')
-		async getAchievements(client: Socket, userId: string) {
-			let userAchievements: AchievementsEntity;
-			if (userId != 'me')
-				userAchievements = await this.gameService.getUserAchievements(userId);
-			else
-				userAchievements = await this.gameService.getUserAchievements(
-					client.data.user.userId,
-				);
-			client.emit(`sendAchievements`, userAchievements);
-		}
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getAchievements')
+	async getAchievements(client: Socket, userId: string) {
+		let userAchievements: AchievementsEntity;
+		if (userId != 'me')
+			userAchievements = await this.gameService.getUserAchievements(userId);
+		else
+			userAchievements = await this.gameService.getUserAchievements(
+				client.data.user.userId,
+			);
+		client.emit(`sendAchievements`, userAchievements);
+	}
 }
