@@ -10,7 +10,7 @@ import { fstat } from 'fs';
 import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { GridFSBucket, Repository } from 'typeorm';
 import { Ball, Coordinate, Game, Grid, Pad, Player } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
@@ -26,9 +26,11 @@ let match: Match;
 
 // let games = new Map<string, Game>();
 let PAD_SPEED = 20;
-export let BALL_SPEED = 2;
+export let BALL_SPEED = 5;
 let INTERVAL_SPEED = 15;
 let MAX_SCORE = 2;
+let MAX_BOUNCE_ANGLE = 5 * Math.PI / 12
+let BALL_ACCELERATION = 1.15
 
 @Injectable()
 export class GameService {
@@ -140,9 +142,10 @@ export class GameService {
 	}
 
 	resetGrid(grid: Grid) {
-		if (grid.ball.pos.x)
+		grid.ball.direction.x = -BALL_SPEED;
+		if (grid.ball.pos.x <= 0)
 			grid.ball.direction.x = BALL_SPEED;
-		grid.ball.direction.y = 0;
+		grid.ball.direction.y = BALL_SPEED / 4;
 		grid.ball.pos.x = grid.size.x / 2;
 		grid.ball.pos.y = grid.size.y / 2;
 		grid.pad1.pos.x = 0;
@@ -189,7 +192,9 @@ export class GameService {
 
 	isLeftPadCollision(ball: Ball, pad: Pad) {
 		if (ball.pos.x - ball.radius <= pad.pos.x + pad.size.x && (ball.pos.y >= pad.pos.y && ball.pos.y <= pad.pos.y + pad.size.y)) {
-			this.bouncePad(ball, pad);
+			// let intersect = ball.pos.y - ball.radius;
+			// this.bouncePad(ball, pad, intersect);
+			ball.direction.x = -ball.direction.x * BALL_ACCELERATION;
 			return true;
 		}
 		return false;
@@ -198,24 +203,31 @@ export class GameService {
 
 	isRightPadCollision(ball: Ball, pad: Pad) {
 		if (ball.pos.x + ball.radius >= pad.pos.x && (ball.pos.y >= pad.pos.y && ball.pos.y <= pad.pos.y + pad.size.y)) {
-			this.bouncePad(ball, pad);
+			// let intersect = ball.pos.y + ball.radius;
+			// this.bouncePad(ball, pad, intersect);
+			ball.direction.x = -ball.direction.x * BALL_ACCELERATION;
 			return true;
 		}
 		return false;
 
 	}
 
-	bouncePad(ball: Ball, pad: Pad) {
-		var impact = ball.pos.y - pad.pos.y + pad.size.y / 2;
-		var ratio = 100 / (pad.size.y / 2);
-		var angle = Math.round((impact * ratio) / 10);
-		if (angle >= 10) {
-			angle -= 10;
-			angle = -angle;
-		}
-		ball.direction.y = angle;
-		ball.direction.y = -ball.direction.y;
-		ball.direction.x = -ball.direction.x;
+	bouncePad(ball: Ball, pad: Pad, intersect: number) {
+		// var impact = ball.pos.y - pad.pos.y + pad.size.y / 2;
+		// var ratio = pad.size.y / (pad.size.y / 2);
+		// var angle = Math.round((impact * ratio) / 10);
+		// if (angle >= 10) {
+		// 	angle -= 10;
+		// 	angle = -angle;
+		// }
+		// ball.direction.y = angle;
+		// ball.direction.y = -ball.direction.y;
+		// ball.direction.x = -ball.direction.x;
+		var relativeIntersectY = (pad.pos.y + (pad.size.y / 2)) - (intersect);
+		var normalizedIntersectionY = (relativeIntersectY / (pad.size.y / 2));
+		var bounceAngle = normalizedIntersectionY * MAX_BOUNCE_ANGLE;
+		ball.direction.x = BALL_SPEED * Math.cos(bounceAngle);
+		ball.direction.y = BALL_SPEED * (-Math.sin(bounceAngle));
 	}
 
 	checkCollision(game: Game) {
@@ -252,8 +264,7 @@ export class GameService {
 		}
 	}
 
-	async setGameInfos(winner: UserEntity, loser: UserEntity)
-	{
+	async setGameInfos(winner: UserEntity, loser: UserEntity) {
 		winner.victories++;
 		loser.defeats++;
 		winner.currentMatch = null;
@@ -271,8 +282,7 @@ export class GameService {
 	 * @todo CHANGER LE SCORE A 5
 	 */
 	async endGame(game: Game) {
-		if (game.type != 'local')
-		{
+		if (game.type != 'local') {
 			let winner: UserEntity;
 			let loser: UserEntity;
 			if (game.player1.score === 2) {
@@ -294,8 +304,7 @@ export class GameService {
 		this.matchMakingMap.delete(user.userId)
 	}
 
-	async quitGame(user: UserEntity)
-	{
+	async quitGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
 		if (game) {
 			let winner: UserEntity;

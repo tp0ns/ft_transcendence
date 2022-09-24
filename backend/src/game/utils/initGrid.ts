@@ -32,7 +32,7 @@ export const initGrid = () => {
     radius: GRID.BALL_RADIUS,
     direction: {
       x: BALL_SPEED,
-      y: 0,
+      y: BALL_SPEED / 4,
     }
   }
   let pad1: Pad = initPad(0, size.y / 2 - GRID.PAD_HEIGHT / 2);

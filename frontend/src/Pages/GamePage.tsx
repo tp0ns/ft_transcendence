@@ -6,8 +6,6 @@ import { Game } from "../components/game/interfaces/game.interfaces";
 import Layout from "../components/Layout/Layout";
 import classes from "./GamePage.module.css"
 
-let pressLock = false;
-
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
 	const autoFocusRef = useRef<HTMLDivElement>(null)
