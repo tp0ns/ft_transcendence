@@ -354,7 +354,7 @@ export class ChannelService {
 			await this.deleteMember(user, channel);
 			if (channel.adminsId.includes(user.userId))
 				this.deleteAdmin(user, channel);
-			if (channel.owner.userId === user.userId)
+			if (channel.owner && channel.owner.userId === user.userId)
 				channel.owner = null;
 			await channel.save();
 			if (channel.members.length <= 0) this.deleteChan(null, channel.channelId);
