@@ -18,7 +18,8 @@ const HomePage: React.FC<{}> = () => {
 	}, []);
 
 	function startLocalGame() {
-		console.log("startLocalGame");
+		socket.emit("localgame");
+		navigate("/game");
 	}
 
 	function startMatchmaking() {

@@ -26,7 +26,7 @@ let match: Match;
 
 // let games = new Map<string, Game>();
 let PAD_SPEED = 20;
-export let BALL_SPEED = 5;
+export let BALL_SPEED = 2;
 let INTERVAL_SPEED = 15;
 let MAX_SCORE = 2;
 
@@ -64,7 +64,7 @@ export class GameService {
 		}
 	}
 
-	initGame = (invitation: invitationInterface) => {
+	initOnline(invitation: invitationInterface) {
 		let grid: Grid = initGrid();
 		let game: Game = {
 			id: invitation.roomId,
@@ -84,12 +84,34 @@ export class GameService {
 		return game;
 	}
 
-	movePad(user: UserEntity, direction: string, gameId: string) {
+	initLocal(user: UserEntity) {
+		let grid: Grid = initGrid();
+		let game: Game = {
+			id: uuidv4(),
+			grid: grid,
+			player1: {
+				user: user,
+				score: 0,
+			},
+			player2: {
+				user: user,
+				score: 0,
+			},
+			state: "readyPlay",
+			type: "online"
+		}
+		this.games.set(game.id, game);
+		return game;
+	}
+
+	movePad(user: UserEntity, direction: string, gameId: string, type: string) {
 		let game: Game = this.games.get(gameId);
 		let padToMove: Pad = game.grid.pad1;
 
 		if (game.player2.user.userId === user.userId)
 			padToMove = game.grid.pad2;
+		if (type === "local")
+			padToMove = game.grid.pad1;
 		if (direction === "up" && padToMove.pos.y > 0)
 			padToMove.pos.y -= PAD_SPEED;
 		else if (direction === "down" && padToMove.pos.y + padToMove.size.y < game.grid.size.y)
