@@ -128,6 +128,8 @@ export class GameService {
 	checkWinner(game: Game) {
 		if (game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) {
 			game.state = "end";
+			let gameToSend: Game = Object.assign({}, game);
+			this.endGame(gameToSend);
 			this.games.delete(game.id);
 		}
 
@@ -160,14 +162,13 @@ export class GameService {
 				this.checkCollision(game);
 				this.checkWinner(game)
 				server.to(gameId).emit('updatedGame', this.games.get(gameId));
-				console.log("game.state", game.state);
 				if (game.state != "ongoing")
 					clearInterval(timer);
 			}, INTERVAL_SPEED)
 		}
 	}
 
-	endGame(player1: Player, player2: Player) {
+	endGame(game: Game) {
 		//si c'est pas un localGame, ajouter dans les statistiques 
 		//comment checker que c'est pas un localGame ???? 
 

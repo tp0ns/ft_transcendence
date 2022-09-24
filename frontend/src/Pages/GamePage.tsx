@@ -17,7 +17,6 @@ const GamePage = () => {
 			autoFocusRef.current.focus()
 		socket.emit('getMyGame');
 		socket.on('updatedGame', (updatedGame) => {
-			console.log("updatedGame", updatedGame)
 			setGame(updatedGame)
 		})
 	}, [])
