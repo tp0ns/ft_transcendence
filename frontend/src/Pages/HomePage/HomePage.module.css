@@ -1,26 +1,64 @@
 .fakegame {
 	aspect-ratio: calc(7 / 5);
-	width: 60%;
 	border: 5px solid #3a3636;
 	border-radius: 20px;
 	padding-left: 0;
 	padding-right: 0;
 	margin-left: auto;
 	margin-right: auto;
-	margin-top: 5%;
 	display: flex;
 	flex-direction: column;
+	align-items: center;
+}
+
+@media only screen and (min-height: 0px) and (max-height: 440px) {
+	.fakegame {
+		aspect-ratio: unset;
+		margin-block: 10px;
+		width: 50%;
+		border: none;
+	}
+
+	.title {
+		display: none;
+	}
+
+	.ball {
+		display: none;
+	}
+
+	.pad {
+		display: none;
+	}
+}
+
+@media only screen and (min-height: 440px) {
+	.fakegame {
+		width: 40%;
+	}
+}
+
+@media only screen and (min-height: 540px) {
+	.fakegame {
+		width: 50%;
+	}
+}
+
+@media only screen and (min-height: 640px) {
+	.fakegame {
+		width: 60%;
+	}
 }
 
 .title {
-	font-size: 6vw;
+	font-size: 5vw;
 	position: absolute;
-	left: 42%;
 	cursor: default;
 }
 
 .buttons {
 	margin-block: auto;
+	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -43,8 +81,8 @@
 .button {
 	aspect-ratio: calc(137 / 20);
 	cursor: pointer;
-	font-size: 3vw;
-	width: 30%;
+	font-size: 2vw;
+	width: 16vw;
 	text-align: center;
 	border: 1px solid #3a3636;
 	border-radius: 20px;
