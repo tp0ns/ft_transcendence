@@ -10,7 +10,6 @@ let pressLock = false;
 
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
-	const [gameOn, setGameOn] = useState<boolean>(false);
 	const autoFocusRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -29,7 +28,7 @@ const GamePage = () => {
 				socket.emit("movePad", { direction: "up", roomId: game.id });
 			if (event.key === "s")
 				socket.emit("movePad", { direction: "down", roomId: game.id });
-			if (!game.ongoing && event.key === "Enter") {
+			if (game.state === "readyPlay" && event.key === "Enter") {
 				socket.emit('gameLoop', { roomId: game.id, state: "start" });
 			}
 		}
@@ -40,7 +39,7 @@ const GamePage = () => {
 	return (
 		<Layout>
 			<div tabIndex={0} className={classes.autoFocus} ref={autoFocusRef} onKeyDown={handleKeyDown}>
-				{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : null}
+				{game && game.state != "end" ? <GameCanvas className={classes.gameCanvas} game={game} /> : <p>There is a winner</p>}
 			</div>
 		</Layout>
 	)

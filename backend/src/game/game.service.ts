@@ -28,6 +28,7 @@ let match: Match;
 let PAD_SPEED = 1;
 let BALL_SPEED = GRID.BALL_RADIUS;
 let INTERVAL_SPEED = 50;
+let MAX_SCORE = 2;
 
 @Injectable()
 export class GameService {
@@ -76,7 +77,7 @@ export class GameService {
 				user: invitation.player2,
 				score: 0,
 			},
-			ongoing: false,
+			state: "readyPlay",
 		}
 		this.games.set(invitation.roomId, game);
 		return game;
@@ -101,18 +102,72 @@ export class GameService {
 			ball.pos.x -= BALL_SPEED;
 	}
 
-	gameLoop(server: any, gameId: string, state: string) {
-		this.games.get(gameId).ongoing = true;
-		if (state === "start") {
+	defineWall(posX: number, posY: number, width: number, height: number) {
+		let wall: Pad = {
+			pos: {
+				x: posX,
+				y: posY,
+			},
+			size: {
+				x: width,
+				y: height
+			}
+		}
+		return wall;
+	}
+
+	resetGrid(grid: Grid) {
+		grid.ball.pos.x = grid.size.x / 2;
+		grid.ball.pos.y = grid.size.y / 2;
+		grid.pad1.pos.x = 0;
+		grid.pad1.pos.y = grid.size.y / 2 - grid.pad1.size.y / 2;
+		grid.pad2.pos.x = grid.size.x - grid.pad2.size.x;
+		grid.pad1.pos.y = grid.size.y / 2 - grid.pad2.size.y / 2;
+	}
+
+	checkWinner(game: Game) {
+		if (game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) {
+			game.state = "end";
+			this.games.delete(game.id);
+		}
+
+	}
+
+	isLeftWallCollision(ball: Ball, wall: Pad) {
+		if (ball.pos.x - ball.radius <= wall.pos.x)
+			return true;
+		return false;
+	}
+
+	checkCollision(game: Game) {
+		let leftWall: Pad = this.defineWall(0, 0, 0, game.grid.size.y);
+		let rightWall = this.defineWall(game.grid.size.x, 0, 0, game.grid.size.y);
+		let topWall = this.defineWall(0, 0, game.grid.size.x, 0);
+		let bottomWall = this.defineWall(0, game.grid.size.y, game.grid.size.x, 0);
+		if (this.isLeftWallCollision(game.grid.ball, leftWall)) {
+			game.player2.score += 1;
+			game.state = "readyPlay";
+			this.resetGrid(game.grid);
+		}
+	}
+
+	gameLoop(server: any, gameId: string) {
+		let game = this.games.get(gameId);
+		game.state = "ongoing";
+		if (game.state === "ongoing") {
 			let timer = setInterval(() => {
-				this.moveBall(this.games.get(gameId).grid.ball)
+				this.moveBall(game.grid.ball)
+				this.checkCollision(game);
+				this.checkWinner(game)
 				server.to(gameId).emit('updatedGame', this.games.get(gameId));
+				console.log("game.state", game.state);
+				if (game.state != "ongoing")
+					clearInterval(timer);
 			}, INTERVAL_SPEED)
 		}
 	}
 
-	endGame(player1: Player, player2: Player)
-	{
+	endGame(player1: Player, player2: Player) {
 		//si c'est pas un localGame, ajouter dans les statistiques 
 		//comment checker que c'est pas un localGame ???? 
 
@@ -125,25 +180,23 @@ export class GameService {
 		//
 	}
 
-	cleanGame(user: UserEntity)
-	{
+	cleanGame(user: UserEntity) {
 
 		this.deleteAllUserInvite(user.userId);
 		user.currentMatch = null;
 		this.userRepo.save(user);
 	}
 
-		/**
-	 * ------------------ SPECTATE  ------------------ *
-	 *
-	 * -  spectate(user)
-	 */
+	/**
+ * ------------------ SPECTATE  ------------------ *
+ *
+ * -  spectate(user)
+ */
 
-	spectate(user: UserEntity)
-	{
+	spectate(user: UserEntity) {
 		if (user.currentMatch != null)
 			throw new ForbiddenException("You can't spectate while you are playing");
-		
+
 	}
 
 
