@@ -122,7 +122,7 @@ export class GameService {
 		grid.pad1.pos.x = 0;
 		grid.pad1.pos.y = grid.size.y / 2 - grid.pad1.size.y / 2;
 		grid.pad2.pos.x = grid.size.x - grid.pad2.size.x;
-		grid.pad1.pos.y = grid.size.y / 2 - grid.pad2.size.y / 2;
+		grid.pad2.pos.y = grid.size.y / 2 - grid.pad2.size.y / 2;
 	}
 
 	checkWinner(game: Game) {
