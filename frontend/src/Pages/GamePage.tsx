@@ -40,7 +40,7 @@ const GamePage = () => {
 	return (
 		<Layout>
 			<div tabIndex={0} className={classes.autoFocus} ref={autoFocusRef} onKeyDown={handleKeyDown}>
-				{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : <p>patata</p>}
+				{game ? <GameCanvas className={classes.gameCanvas} game={game} /> : null}
 			</div>
 		</Layout>
 	)

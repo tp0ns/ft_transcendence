@@ -18,14 +18,16 @@ import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
 import { WsException } from '@nestjs/websockets';
 import { v4 as uuidv4 } from 'uuid';
-import { initGrid } from './utils/initGrid';
+import { GRID, initGrid } from './utils/initGrid';
 import { Match } from 'src/game/interfaces/match.interface';
 
 
 let match: Match;
 
 // let games = new Map<string, Game>();
-let PAD_SPEED = 10;
+let PAD_SPEED = 1;
+let BALL_SPEED = GRID.BALL_RADIUS;
+let INTERVAL_SPEED = 50;
 
 @Injectable()
 export class GameService {
@@ -94,21 +96,18 @@ export class GameService {
 	}
 
 
-	moveBall(gameId: string) {
-
+	moveBall(ball: Ball) {
+		if (ball.pos.x - ball.radius >= 0)
+			ball.pos.x -= BALL_SPEED;
 	}
 
 	gameLoop(server: any, gameId: string, state: string) {
-		let timer;
-
 		this.games.get(gameId).ongoing = true;
 		if (state === "start") {
-			timer = setInterval(() => {
-				this.moveBall(gameId)
+			let timer = setInterval(() => {
+				this.moveBall(this.games.get(gameId).grid.ball)
 				server.to(gameId).emit('updatedGame', this.games.get(gameId));
-			}
-
-				, 5000)
+			}, INTERVAL_SPEED)
 		}
 	}
 
