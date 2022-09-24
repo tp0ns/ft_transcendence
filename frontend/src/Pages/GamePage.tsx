@@ -24,9 +24,13 @@ const GamePage = () => {
 	const handleKeyDown = (event: any) => {
 		if (game) {
 			if (event.key === "w")
-				socket.emit("movePad", { direction: "up", roomId: game.id });
+				socket.emit("movePad", { direction: "up", roomId: game.id, type: "online" });
 			if (event.key === "s")
-				socket.emit("movePad", { direction: "down", roomId: game.id });
+				socket.emit("movePad", { direction: "down", roomId: game.id, type: "online" });
+			if (event.keyCode === 38)
+				socket.emit("movePad", { direction: "up", roomId: game.id, type: "local" });
+			if (event.keyCode === 40)
+				socket.emit("movePad", { direction: "down", roomId: game.id, type: "local" });
 			if (game.state === "readyPlay" && event.key === "Enter") {
 				socket.emit('gameLoop', { roomId: game.id, state: "start" });
 			}
