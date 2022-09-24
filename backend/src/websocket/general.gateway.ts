@@ -85,7 +85,7 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.deleteAllUserInvite(client.data.user.userId);
+			this.gameService.cleanGame(client.data.user);
 			// const winnerId: string = await this.gameService.handleGameDisconnect(
 			// 	client,
 			// );
@@ -553,7 +553,8 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket, player: string) { 
+	spectate(client: Socket, player: string) {
+		this.gameService.spectate(client.data.user);
 		client.emit('spectate', player);
 	}
 
@@ -601,7 +602,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameLoop')
 	gameLoop(client: Socket, { roomId, state }) {
-		this.gameService.gameLoop(this.server, roomId, state);
+		this.gameService.gameLoop(this.server, roomId);
 	}
 
 	/*
@@ -701,16 +702,16 @@ export class GeneralGateway
 		});
 	}
 
-		@UseGuards(WsGuard)
-		@SubscribeMessage('getAchievements')
-		async getAchievements(client: Socket, userId: string) {
-			let userAchievements: AchievementsEntity;
-			if (userId != 'me')
-				userAchievements = await this.gameService.getUserAchievements(userId);
-			else
-				userAchievements = await this.gameService.getUserAchievements(
-					client.data.user.userId,
-				);
-			client.emit(`sendAchievements`, userAchievements);
-		}
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getAchievements')
+	async getAchievements(client: Socket, userId: string) {
+		let userAchievements: AchievementsEntity;
+		if (userId != 'me')
+			userAchievements = await this.gameService.getUserAchievements(userId);
+		else
+			userAchievements = await this.gameService.getUserAchievements(
+				client.data.user.userId,
+			);
+		client.emit(`sendAchievements`, userAchievements);
+	}
 }
