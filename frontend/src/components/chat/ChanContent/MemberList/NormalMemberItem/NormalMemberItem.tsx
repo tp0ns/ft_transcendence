@@ -2,7 +2,7 @@ import classes from "./NormalMemberItem.module.css";
 import UserProp from "../../../../../interfaces/User.interface";
 import Modal from "../../../../../ui/Modal/Modal";
 import UserContent from "../../../../user/UserContent/UserContent";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChatContext from "../../../../../context/chat-context";
 import { socket } from "../../../../../App";
 import { useNavigate } from "react-router-dom";
@@ -13,13 +13,18 @@ const NormalMemberItem: React.FC<{ member: UserProp }> = (props) => {
 	const navigate = useNavigate();
 	const ctx = useContext(ChatContext);
 
+	useEffect(() => {
+		socket.on("receivedInvite", () => {
+			navigate("/waiting");
+		});
+	}, []);
+
 	function changeItemSide(value: boolean) {
 		setItemSide(value);
 	}
 
 	function sendGameInvite() {
 		socket.emit("sendInvite", props.member.userId);
-		navigate("/");
 	}
 
 	function changeUserModal() {

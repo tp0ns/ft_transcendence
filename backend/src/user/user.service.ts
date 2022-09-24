@@ -31,7 +31,7 @@ export class UserService {
 		private channelService: ChannelService,
 		@Inject(forwardRef(() => GameService))
 		private GameService: GameService,
-	) {}
+	) { }
 
 	/**
 	 * Return un profile dont le schoolId correspond au profile.id passé en param, si il
@@ -77,6 +77,7 @@ export class UserService {
 
 	async disconnectClient(userReq: Partial<UserEntity>) {
 		const user: UserEntity = userReq as UserEntity;
+		this.GameService.deleteAllUserInvite(user.userId);
 		return await this.userRepo.update(user.userId, {
 			status: 'disconnected',
 		});

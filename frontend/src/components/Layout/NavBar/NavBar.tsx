@@ -18,7 +18,9 @@ function NavBar() {
 						<Link
 							to="/"
 							className={
-								location.pathname === "/"
+								location.pathname === "/" ||
+								location.pathname === "/waiting" ||
+								location.pathname === "/game"
 									? classes.selected
 									: classes.unselected
 							}

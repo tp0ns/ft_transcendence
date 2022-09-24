@@ -58,7 +58,7 @@ export const ErrorContextProvider: React.FC<{ children: JSX.Element }> = (
 			<div className={classes.layout}>
 				{error ? <ErrorBadge message={error} /> : null}
 				{invites?.map((invite) => {
-					return <InviteItem key={invite.requestId} invite={invite} />;
+					return <InviteItem key={invite.id} invite={invite} />;
 				})}
 			</div>
 			{props.children}

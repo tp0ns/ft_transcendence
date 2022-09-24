@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { socket } from "../App";
+import { socket } from "../../App";
 import classes from "./SocialPage.module.css";
-import RelationsProp from "../interfaces/Relations.interface";
-import RelationsList from "../components/social/RelationsList";
+import RelationsProp from "../../interfaces/Relations.interface";
+import RelationsList from "../../components/social/RelationsList";
 import { useCookies } from "react-cookie";
 import jwtDecode, { JwtPayload } from "jwt-decode";
-import Layout from "../components/Layout/Layout";
+import Layout from "../../components/Layout/Layout";
 
 const SocialPage = () => {
   const [receivedRelations, setReceivedRelations] = useState<RelationsProp[]>(
