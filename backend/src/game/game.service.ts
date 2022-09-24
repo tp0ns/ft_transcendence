@@ -11,21 +11,24 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { Ball, Coordinate, Game, Grid, Pad } from './interfaces/game.interface';
+import { Ball, Coordinate, Game, Grid, Pad, Player } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
 import { WsException } from '@nestjs/websockets';
 import { v4 as uuidv4 } from 'uuid';
-import { initGrid } from './utils/initGrid';
+import { GRID, initGrid } from './utils/initGrid';
 import { Match } from 'src/game/interfaces/match.interface';
 
 
 let match: Match;
 
 // let games = new Map<string, Game>();
-let PAD_SPEED = 10;
+let PAD_SPEED = 1;
+let BALL_SPEED = GRID.BALL_RADIUS;
+let INTERVAL_SPEED = 50;
+let MAX_SCORE = 2;
 
 @Injectable()
 export class GameService {
@@ -74,7 +77,8 @@ export class GameService {
 				user: invitation.player2,
 				score: 0,
 			},
-			ongoing: false,
+			state: "readyPlay",
+			type: 'online',
 		}
 		this.games.set(invitation.roomId, game);
 		return game;
@@ -94,23 +98,132 @@ export class GameService {
 	}
 
 
-	moveBall(gameId: string) {
+	moveBall(ball: Ball) {
+		if (ball.pos.x - ball.radius >= 0)
+			ball.pos.x -= BALL_SPEED;
+	}
+
+	defineWall(posX: number, posY: number, width: number, height: number) {
+		let wall: Pad = {
+			pos: {
+				x: posX,
+				y: posY,
+			},
+			size: {
+				x: width,
+				y: height
+			}
+		}
+		return wall;
+	}
+
+	resetGrid(grid: Grid) {
+		grid.ball.pos.x = grid.size.x / 2;
+		grid.ball.pos.y = grid.size.y / 2;
+		grid.pad1.pos.x = 0;
+		grid.pad1.pos.y = grid.size.y / 2 - grid.pad1.size.y / 2;
+		grid.pad2.pos.x = grid.size.x - grid.pad2.size.x;
+		grid.pad2.pos.y = grid.size.y / 2 - grid.pad2.size.y / 2;
+	}
+
+	checkWinner(game: Game) {
+		if (game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) {
+			game.state = "end";
+			let gameToSend: Game = Object.assign({}, game);
+			this.endGame(gameToSend);
+			this.games.delete(game.id);
+		}
 
 	}
 
-	gameLoop(server: any, gameId: string, state: string) {
-		let timer;
+	isLeftWallCollision(ball: Ball, wall: Pad) {
+		if (ball.pos.x - ball.radius <= wall.pos.x)
+			return true;
+		return false;
+	}
 
-		this.games.get(gameId).ongoing = true;
-		if (state === "start") {
-			timer = setInterval(() => {
-				this.moveBall(gameId)
-				server.to(gameId).emit('updatedGame', this.games.get(gameId));
-			}
-
-				, 5000)
+	checkCollision(game: Game) {
+		let leftWall: Pad = this.defineWall(0, 0, 0, game.grid.size.y);
+		let rightWall = this.defineWall(game.grid.size.x, 0, 0, game.grid.size.y);
+		let topWall = this.defineWall(0, 0, game.grid.size.x, 0);
+		let bottomWall = this.defineWall(0, game.grid.size.y, game.grid.size.x, 0);
+		if (this.isLeftWallCollision(game.grid.ball, leftWall)) {
+			game.player2.score += 1;
+			game.state = "readyPlay";
+			this.resetGrid(game.grid);
 		}
 	}
+
+	gameLoop(server: any, gameId: string) {
+		let game = this.games.get(gameId);
+		game.state = "ongoing";
+		if (game.state === "ongoing") {
+			let timer = setInterval(() => {
+				this.moveBall(game.grid.ball)
+				this.checkCollision(game);
+				this.checkWinner(game)
+				server.to(gameId).emit('updatedGame', this.games.get(gameId));
+				if (game.state != "ongoing")
+					clearInterval(timer);
+			}, INTERVAL_SPEED)
+		}
+	}
+
+	/**
+	 * 
+	 * @param game 
+	 * 
+	 * @todo CHANGER LE SCORE A 5
+	 */
+	async endGame(game: Game) {
+		if (game.type != 'local')
+		{
+			let winner: UserEntity;
+			let loser: UserEntity;
+			if (game.player1.score === 2) {
+				winner = game.player1.user;
+				loser = game.player2.user;
+				await this.setMatchHistory(game.player1, game.player2);
+			}
+			else {
+				winner = game.player2.user;
+				loser = game.player1.user;
+				await this.setMatchHistory(game.player2, game.player1);
+			}
+			winner.victories++;
+			loser.defeats++;
+			winner.currentMatch = null;
+			loser.currentMatch = null;
+			await this.setAchievements(winner);
+			await this.setAchievements(loser);
+		}
+		this.userRepo.save(game.player1.user);
+		this.userRepo.save(game.player2.user);
+		//si aucun des deux joueurs n'a obtenu 5 points 
+		// ==== declarer forfait donc mettre celui qui a declarer 
+		//forfait a 0 et l'autre a 5 
+		//comment on fait pour savoir qui a declarer forfait ??? 
+	}
+
+	cleanGame(user: UserEntity) {
+
+		this.deleteAllUserInvite(user.userId);
+		user.currentMatch = null;
+		this.userRepo.save(user);
+	}
+
+	/**
+ * ------------------ SPECTATE  ------------------ *
+ *
+ * -  spectate(user)
+ */
+
+	spectate(user: UserEntity) {
+		if (user.currentMatch != null)
+			throw new ForbiddenException("You can't spectate while you are playing");
+
+	}
+
 
 	/**
 	 * ------------------ STATISTICS FOR USER PAGE  ------------------ *
@@ -154,18 +267,16 @@ export class GameService {
 		return userAchievements;
 	}
 
-	async setMatchHistory(winner: UserEntity, loser: UserEntity, match: Match) {
+	async setMatchHistory(winner: Player, loser: Player) {
 		let newMatchHistory: MatchHistoryEntity =
 			await this.MatchHistoryRepository.save({
-				winnerUsername: winner.username,
-				winnerScore:
-					match.p1Score >= match.p2Score ? match.p1Score : match.p2Score,
-				loserUsername: loser.username,
-				loserScore:
-					match.p1Score <= match.p2Score ? match.p1Score : match.p2Score,
+				winnerUsername: winner.user.username,
+				winnerScore: winner.score,
+				loserUsername: loser.user.username,
+				loserScore: loser.score
 			});
-		winner.MatchHistory = [...winner.MatchHistory, newMatchHistory];
-		loser.MatchHistory = [...loser.MatchHistory, newMatchHistory];
+		winner.user.MatchHistory = [...winner.user.MatchHistory, newMatchHistory];
+		loser.user.MatchHistory = [...loser.user.MatchHistory, newMatchHistory];
 	}
 
 	/**
