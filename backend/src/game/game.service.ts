@@ -169,6 +169,18 @@ export class GameService {
 		}
 	}
 
+	async setGameInfos(winner: UserEntity, loser: UserEntity)
+	{
+		winner.victories++;
+		loser.defeats++;
+		winner.currentMatch = null;
+		loser.currentMatch = null;
+		await this.setAchievements(winner);
+		await this.setAchievements(loser);
+		this.userRepo.save(winner);
+		this.userRepo.save(loser);
+	}
+
 	/**
 	 * 
 	 * @param game 
@@ -190,19 +202,35 @@ export class GameService {
 				loser = game.player1.user;
 				await this.setMatchHistory(game.player2, game.player1);
 			}
-			winner.victories++;
-			loser.defeats++;
-			winner.currentMatch = null;
-			loser.currentMatch = null;
-			await this.setAchievements(winner);
-			await this.setAchievements(loser);
+			this.setGameInfos(winner, loser)
 		}
-		this.userRepo.save(game.player1.user);
-		this.userRepo.save(game.player2.user);
-		//si aucun des deux joueurs n'a obtenu 5 points 
-		// ==== declarer forfait donc mettre celui qui a declarer 
-		//forfait a 0 et l'autre a 5 
-		//comment on fait pour savoir qui a declarer forfait ??? 
+	}
+
+	changedTab(user: UserEntity) {
+		this.inviteMap.delete(user.userId);
+		this.matchMakingMap.delete(user.userId)
+	}
+
+	async quitGame(user: UserEntity)
+	{
+		let game: Game = this.getMyGame(user.userId);
+		if (game) {
+			let winner: UserEntity;
+			let loser: UserEntity = user;
+			if (game.player2.user.userId === user.userId) {
+				winner = game.player1.user;
+				game.player1.score = 5;
+				game.player2.score = 0;
+				await this.setMatchHistory(game.player1, game.player2);
+			}
+			else {
+				winner = game.player2.user;
+				game.player2.score = 5;
+				game.player1.score = 0;
+				await this.setMatchHistory(game.player2, game.player1);
+			}
+			this.setGameInfos(winner, loser);
+		}
 	}
 
 	cleanGame(user: UserEntity) {
