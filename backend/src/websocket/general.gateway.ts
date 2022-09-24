@@ -404,35 +404,6 @@ export class GeneralGateway
 	}
 
 	/**
-	 *   _____          __  __ ______
-	 *  / ____|   /\   |  \/  |  ____|
-	 * | |  __   /  \  | \  / | |__
-	 * | | |_ | / /\ \ | |\/| |  __|
-	 * | |__| |/ ____ \| |  | | |____
-	 *  \_____/_/    \_|_|  |_|______|
-	 *
-	 */
-
-	/**
-	 *  _      ____   _____          _         _____          __  __ ______
-	 * | |    / __ \ / ____|   /\   | |       / ____|   /\   |  \/  |  ____|
-	 * | |   | |  | | |       /  \  | |      | |  __   /  \  | \  / | |__
-	 * | |   | |  | | |      / /\ \ | |      | | |_ | / /\ \ | |\/| |  __|
-	 * | |___| |__| | |____ / ____ \| |____  | |__| |/ ____ \| |  | | |____
-	 * |______\____/ \_____/_/    \_\______|  \_____/_/    \_\_|  |_|______|
-	 *
-	 */
-
-	@UseGuards(WsGuard)
-	@SubscribeMessage('localGame')
-	localGame(client: Socket) {
-		this.server.emit('newGame', {
-			player1: client.data.user,
-			player2: client.data.user,
-		});
-	}
-
-	/**
 	 *   _____          __  __ ______   _____ _   ___      _______ _______    _______ _____ ____  _   _
 	 *  / ____|   /\   |  \/  |  ____| |_   _| \ | \ \    / /_   _|__   __|/\|__   __|_   _/ __ \| \ | |
 	 * | |  __   /  \  | \  / | |__      | | |  \| |\ \  / /  | |    | |  /  \  | |    | || |  | |  \| |
@@ -582,11 +553,28 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket) { }
+	spectate(client: Socket, player: string) { 
+		client.emit('spectate', player);
+	}
 
 	/**
-	 *		SPECTATE
+	 *   _____          __  __ ______
+	 *  / ____|   /\   |  \/  |  ____|
+	 * | |  __   /  \  | \  / | |__
+	 * | | |_ | / /\ \ | |\/| |  __|
+	 * | |__| |/ ____ \| |  | | |____
+	 *  \_____/_/    \_|_|  |_|______|
+	 *
 	 */
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('localGame')
+	localGame(client: Socket) {
+		this.server.emit('newGame', {
+			player1: client.data.user,
+			player2: client.data.user,
+		});
+	}
 
 	initGame(invitation: invitationInterface) {
 		let game: Game = this.gameService.initGame(invitation);
@@ -711,16 +699,16 @@ export class GeneralGateway
 		});
 	}
 
-	// 	@UseGuards(WsGuard)
-	// 	@SubscribeMessage('getAchievements')
-	// 	async getAchievements(client: Socket, userId: string) {
-	// 		let userAchievements: AchievementsEntity;
-	// 		if (userId != 'me')
-	// 			userAchievements = await this.gameService.getUserAchievements(userId);
-	// 		else
-	// 			userAchievements = await this.gameService.getUserAchievements(
-	// 				client.data.user.userId,
-	// 			);
-	// 		client.emit(`sendAchievements`, userAchievements);
-	// 	}
+		@UseGuards(WsGuard)
+		@SubscribeMessage('getAchievements')
+		async getAchievements(client: Socket, userId: string) {
+			let userAchievements: AchievementsEntity;
+			if (userId != 'me')
+				userAchievements = await this.gameService.getUserAchievements(userId);
+			else
+				userAchievements = await this.gameService.getUserAchievements(
+					client.data.user.userId,
+				);
+			client.emit(`sendAchievements`, userAchievements);
+		}
 }
