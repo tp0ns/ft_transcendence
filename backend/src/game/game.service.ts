@@ -11,7 +11,7 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { Ball, Coordinate, Game, Grid, Pad } from './interfaces/game.interface';
+import { Ball, Coordinate, Game, Grid, Pad, Player } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
@@ -110,6 +110,42 @@ export class GameService {
 			}, INTERVAL_SPEED)
 		}
 	}
+
+	endGame(player1: Player, player2: Player)
+	{
+		//si c'est pas un localGame, ajouter dans les statistiques 
+		//comment checker que c'est pas un localGame ???? 
+
+		//si aucun des deux joueurs n'a obtenu 5 points 
+		// ==== declarer forfait donc mettre celui qui a declarer 
+		//forfait a 0 et l'autre a 5 
+		//comment on fait pour savoir qui a declarer forfait ??? 
+
+		//set les achievements 
+		//
+	}
+
+	cleanGame(user: UserEntity)
+	{
+
+		this.deleteAllUserInvite(user.userId);
+		user.currentMatch = null;
+		this.userRepo.save(user);
+	}
+
+		/**
+	 * ------------------ SPECTATE  ------------------ *
+	 *
+	 * -  spectate(user)
+	 */
+
+	spectate(user: UserEntity)
+	{
+		if (user.currentMatch != null)
+			throw new ForbiddenException("You can't spectate while you are playing");
+		
+	}
+
 
 	/**
 	 * ------------------ STATISTICS FOR USER PAGE  ------------------ *
