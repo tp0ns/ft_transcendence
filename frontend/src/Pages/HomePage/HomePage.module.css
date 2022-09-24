@@ -1,0 +1,79 @@
+.fakegame {
+	aspect-ratio: calc(7 / 5);
+	width: 60%;
+	border: 5px solid #3a3636;
+	border-radius: 20px;
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 5%;
+	display: flex;
+	flex-direction: column;
+}
+
+.title {
+	font-size: 6vw;
+	position: absolute;
+	left: 42%;
+	cursor: default;
+}
+
+.buttons {
+	margin-block: auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pad {
+	aspect-ratio: calc(1 / 6);
+	width: 3%;
+	background-color: #3a363689;
+}
+
+.ball {
+	aspect-ratio: calc(1 / 1);
+	width: 3%;
+	background-color: #3a363689;
+	border-radius: 50%;
+	animation: bounce 1.5s ease infinite 0.1s;
+}
+
+.button {
+	aspect-ratio: calc(137 / 20);
+	cursor: pointer;
+	font-size: 3vw;
+	width: 30%;
+	text-align: center;
+	border: 1px solid #3a3636;
+	border-radius: 20px;
+	background-color: #3a3636;
+	color: #fdd05d;
+	padding-block: 10px;
+	padding-inline: 5px;
+}
+
+@keyframes bounce {
+	0% {
+		transform: scale(1, 1) translateY(0);
+	}
+	10% {
+		transform: scale(1.1, 0.9) translateY(0);
+	}
+	30% {
+		transform: scale(0.9, 1.1) translateY(-55px);
+	}
+	50% {
+		transform: scale(1.05, 0.95) translateY(0);
+	}
+	58% {
+		transform: scale(1, 1) translateY(-7px);
+	}
+	65% {
+		transform: scale(1, 1) translateY(0);
+	}
+	100% {
+		transform: scale(1, 1) translateY(0);
+	}
+}
