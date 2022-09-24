@@ -112,7 +112,7 @@ export class GameService {
 		}
 	}
 
-	endGame(player1: Player, player2: Player)
+	endGame(game : Game)
 	{
 		//si c'est pas un localGame, ajouter dans les statistiques 
 		//comment checker que c'est pas un localGame ???? 
