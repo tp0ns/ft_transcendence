@@ -202,20 +202,36 @@ export class RelationsService {
 		});
 	}
 
-	async getBlockedUsersByUser(user: UserEntity): Promise<string[]> {
-		let usersBlockedByUser: string[] = [];
+
+	async getBlockedRelations(user: UserEntity): Promise<string[]> {
+		let usersBlocked: string[] = [];
 		let userBlockedRelations: any[] =
 			await this.RelationRepo.createQueryBuilder('relations')
-				.select(['relations.requestId', 'receiver.userId'])
+				.select(['relations.requestId', 'receiver.userId', 'creator.userId'])
 				.leftJoin('relations.receiver', 'receiver')
-				.where('relations.creator = :id', { id: user.userId })
-				.andWhere('relations.status = :blocked', { blocked: 'blocked' })
+				.leftJoin('relations.creator', 'creator')
+				.where('relations.status = :blocked', { blocked: 'blocked' })
 				.getMany();
 		for (const relation of userBlockedRelations) {
-			usersBlockedByUser.push(relation.receiver.userId);
+			usersBlocked.push(relation.receiver.userId);
+			usersBlocked.push(relation.creator.userId);
 		}
-		return usersBlockedByUser;
+		return usersBlocked;
 	}
+	// async getBlockedUsersByUser(user: UserEntity): Promise<string[]> {
+	// 	let usersBlockedByUser: string[] = [];
+	// 	let userBlockedRelations: any[] =
+	// 		await this.RelationRepo.createQueryBuilder('relations')
+	// 			.select(['relations.requestId', 'receiver.userId'])
+	// 			.leftJoin('relations.receiver', 'receiver')
+	// 			.where('relations.creator = :id', { id: user.userId })
+	// 			.andWhere('relations.status = :blocked', { blocked: 'blocked' })
+	// 			.getMany();
+	// 	for (const relation of userBlockedRelations) {
+	// 		usersBlockedByUser.push(relation.receiver.userId);
+	// 	}
+	// 	return usersBlockedByUser;
+	// }
 
 	// async getUsersWhoBlockedMe(user: UserEntity): Promise<string[]> {
 	// 	let usersWhoBlockedMe: string[] = [];

@@ -44,6 +44,41 @@ export class MessageService {
 		return message;
 	}
 
+	// async getChannelMessages(
+	// 	user: UserEntity,
+	// 	channelId: string,
+	// ): Promise<MessagesEntity[]> {
+	// 	let channel: ChannelEntity = await this.channelService.getChanById(
+	// 		channelId,
+	// 	);
+	// 	let msgs: MessagesEntity[];
+	// 	if (channel) {
+	// 		if (channel.bannedMembers && channel.bannedId.includes(user.userId))
+	// 			return null;
+	// 		let blockedUsersByUser: string[] =
+	// 			await this.relationsService.getBlockedUsersByUser(user);
+	// 		// let usersWhoBlockedMe: string[] = 
+	// 			// await this.relationsService.getUsersWhoBlockedMe(user);
+	// 		if (blockedUsersByUser.length > 0) {
+	// 			msgs = await this.MessageRepository.createQueryBuilder('messages')
+	// 				.leftJoinAndSelect('messages.user', 'sender')
+	// 				.leftJoinAndSelect('messages.channel', 'channel')
+	// 				.where('channel.channelId = :id', { id: channel.channelId })
+	// 				.andWhere('sender.userId NOT IN (:...blocked)', {
+	// 					blocked: blockedUsersByUser,
+	// 				})
+	// 				.getMany();
+	// 		} else {
+	// 			msgs = await this.MessageRepository.createQueryBuilder('messages')
+	// 				.leftJoinAndSelect('messages.user', 'sender')
+	// 				.leftJoinAndSelect('messages.channel', 'channel')
+	// 				.where('channel.channelId = :id', { id: channel.channelId })
+	// 				.getMany();
+	// 		}
+	// 	}
+	// 	return msgs;
+	// }
+
 	async getChannelMessages(
 		user: UserEntity,
 		channelId: string,
@@ -55,17 +90,18 @@ export class MessageService {
 		if (channel) {
 			if (channel.bannedMembers && channel.bannedId.includes(user.userId))
 				return null;
-			let blockedUsersByUser: string[] =
-				await this.relationsService.getBlockedUsersByUser(user);
-			// let usersWhoBlockedMe: string[] = 
-				// await this.relationsService.getUsersWhoBlockedMe(user);
-			if (blockedUsersByUser.length > 0) {
+			let blockedRelations: string[] =
+				await this.relationsService.getBlockedRelations(user);
+				if (blockedRelations.length > 0 && blockedRelations.includes(user.userId)) {
+					blockedRelations = blockedRelations.filter((me) => {
+						return me !== user.userId;
+					});
 				msgs = await this.MessageRepository.createQueryBuilder('messages')
 					.leftJoinAndSelect('messages.user', 'sender')
 					.leftJoinAndSelect('messages.channel', 'channel')
 					.where('channel.channelId = :id', { id: channel.channelId })
 					.andWhere('sender.userId NOT IN (:...blocked)', {
-						blocked: blockedUsersByUser,
+						blocked: blockedRelations,
 					})
 					.getMany();
 			} else {
