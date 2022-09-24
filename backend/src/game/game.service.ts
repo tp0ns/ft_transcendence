@@ -155,7 +155,7 @@ export class GameService {
 	}
 
 	checkWinner(game: Game) {
-		if (game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) {
+		if ((game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) && game.state === 'ongoing' ) {
 			game.state = "end";
 			let gameToSend: Game = Object.assign({}, game);
 			this.games.delete(game.id);
@@ -306,6 +306,7 @@ export class GameService {
 
 	async quitGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
+		game.state = 'outOfGame';
 		if (game) {
 			let winner: UserEntity;
 			let loser: UserEntity = user;
