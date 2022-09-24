@@ -11,15 +11,21 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { Match, Pad, Ball } from './interfaces/game.interface';
+import { Ball, Coordinate, Game, Grid, Pad } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
 import { WsException } from '@nestjs/websockets';
 import { v4 as uuidv4 } from 'uuid';
+import { initGrid } from './utils/initGrid';
+import { Match } from 'src/game/interfaces/match.interface';
+
 
 let match: Match;
+
+// let games = new Map<string, Game>();
+let PAD_SPEED = 10;
 
 @Injectable()
 export class GameService {
@@ -35,146 +41,75 @@ export class GameService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		@Inject(forwardRef(() => UserService)) private userService: UserService,
-	) {}
+	) { }
 
 	protected inviteMap = new Map<string, invitationInterface>();
 	protected matchMakingMap = new Map<string, invitationInterface>();
+	protected games = new Map<string, Game>();
 
-	// /**
-	//  * set the default position of the elements in the game
-	//  * @param match interface of the match
-	//  */
-	// setDefaultPos(room: string) {
-	// 	const initLeftPad: Pad = {
-	// 		x: 0,
-	// 		y: 150,
-	// 		w: 20,
-	// 		h: 100,
-	// 		speed: 5,
-	// 	};
-	// 	const initRightPad: Pad = {
-	// 		// set right paddle
-	// 		x: 620,
-	// 		y: 200,
-	// 		w: 20,
-	// 		h: 100,
-	// 		speed: 20, //speed = 20 si keyboard, 5 si mouse
-	// 	};
-	// 	const initBall: Ball = {
-	// 		// set ball position
-	// 		x: 310,
-	// 		y: 240,
-	// 		radius: 10,
-	// 		startAngle: 0,
-	// 		speedx: 5,
-	// 		speedy: 0,
-	// 		goRight: false,
-	// 		p1Touches: 0,
-	// 		p2Touches: 0,
-	// 		isMoving: false,
-	// 	};
-
-	// 	//init match using all the other class initialized
-	// 	const match: Match = {
-	// 		leftPad: initLeftPad,
-	// 		rightPad: initRightPad,
-	// 		ball: initBall,
-	// 		player1: null,
-	// 		player2: null,
-	// 		p1Score: 0,
-	// 		p2Score: 0,
-	// 		p1Touches: 0,
-	// 		p2Touches: 0,
-	// 		p1User: null,
-	// 		p2User: null,
-	// 		isLocal: true,
-	// 		roomName: room,
-	// 		isEnd: false,
-	// 	};
-	// 	// console.log(match.roomName);
-	// 	return match;
-	// }
-
-	// // set new position according to keyboard
-	// async movePad(direction: string, match: Match) {
-	// 	if (match.isLocal == true) {
-	// 		switch (direction) {
-	// 			case 'up':
-	// 				if (match.rightPad.y - match.rightPad.speed <= 100) {
-	// 					match.rightPad.y = 100;
-	// 				} else match.rightPad.y -= match.rightPad.speed;
-	// 				break;
-	// 			case 'down':
-	// 				if (match.rightPad.y + match.rightPad.speed >= 480) {
-	// 					match.rightPad.y = 480;
-	// 				} else match.rightPad.y += match.rightPad.speed;
-	// 				break;
-	// 		}
-	// 	}
-	// }
-
-	// // set new position according to mouse (for left pad only)
-	// async moveMouseLeft(mousePosy: number, match: Match) {
-	// 	if (mousePosy <= 100) {
-	// 		match.leftPad.y = 100;
-	// 	} else if (mousePosy >= 480) {
-	// 		match.leftPad.y = 480;
-	// 	} else match.leftPad.y = mousePosy;
-	// }
-
-	// // set new position according to mouse (for right pad only)
-	// async moveMouseRight(mousePosy: number, match: Match) {
-	// 	if (match.isLocal == false) {
-	// 		if (mousePosy <= 100) {
-	// 			match.rightPad.y = 100;
-	// 		} else if (mousePosy >= 480) {
-	// 			match.rightPad.y = 480;
-	// 		} else match.rightPad.y = mousePosy;
-	// 	}
-	// }
-
-	// // gameFunction : Switch with all functions related to the match
-	// async gameFunction(func: string, score: number, match: Match) {
-	// 	switch (func) {
-	// 		case 'resetBall':
-	// 			match.ball.y = 250;
-	// 			match.ball.x = 250;
-	// 			match.ball.speedy = 0;
-	// 			match.ball.goRight = true;
-	// 			match.ball.isMoving = false;
-	// 	}
-	// 	switch (score) {
-	// 		case 0:
-	// 			break;
-	// 		case 1:
-	// 			match.p2Score++;
-	// 			match.ball.goRight = false;
-	// 			break;
-	// 		case 2:
-	// 			match.p1Score++;
-	// 			match.ball.goRight = true;
-	// 			break;
-	// 	}
-	// }
-
-	// // toggle SinglePlayer : launch the SinglePlayer
-	// // and disable keyboard commands
-	// async toggleLocalGame(client: Socket) {
-	// 	const roomName = 'room' + Math.random();
-	// 	client.join(roomName);
-	// 	client.data.currentMatch = this.setDefaultPos(roomName);
-	// 	client.data.currentMatch.isLocal = true;
-	// 	client.data.currentMatch.p1User = client.data.user.userId;
-	// 	client.data.currentMatch.p2User = client.data.currentMatch.p1User;
-	// 	client.data.currentMatch.player1 = client.data.currentMatch.p1User;
-	// 	client.data.currentMatch.player2 = client.data.currentMatch.p1User;
-	// }
-
-
-	setMatch(user: UserEntity, roomId: string)
-	{
+	setMatch(user: UserEntity, roomId: string) {
 		user.currentMatch = roomId;
 		this.userRepo.save(user);
+
+	}
+
+	getMyGame(userId: string) {
+		for (const value of this.games.values()) {
+			if (value.player1.user.userId === userId || value.player2.user.userId === userId) {
+				return value;
+			};
+		}
+	}
+
+	initGame = (invitation: invitationInterface) => {
+		let grid: Grid = initGrid();
+		let game: Game = {
+			id: invitation.roomId,
+			grid: grid,
+			player1: {
+				user: invitation.player1,
+				score: 0,
+			},
+			player2: {
+				user: invitation.player2,
+				score: 0,
+			},
+			ongoing: false,
+		}
+		this.games.set(invitation.roomId, game);
+		return game;
+	}
+
+	movePad(user: UserEntity, direction: string, gameId: string) {
+		let game: Game = this.games.get(gameId);
+		let padToMove: Pad = game.grid.pad1;
+
+		if (game.player2.user.userId === user.userId)
+			padToMove = game.grid.pad2;
+		if (direction === "up" && padToMove.pos.y > 0)
+			padToMove.pos.y -= PAD_SPEED;
+		else if (direction === "down" && padToMove.pos.y + padToMove.size.y < game.grid.size.y)
+			padToMove.pos.y += PAD_SPEED;
+		return game;
+	}
+
+
+	moveBall(gameId: string) {
+
+	}
+
+	gameLoop(server: any, gameId: string, state: string) {
+		let timer;
+
+		this.games.get(gameId).ongoing = true;
+		if (state === "start") {
+			timer = setInterval(() => {
+				this.moveBall(gameId)
+				server.to(gameId).emit('updatedGame', this.games.get(gameId));
+			}
+
+				, 5000)
+		}
 	}
 
 	/**
@@ -251,46 +186,6 @@ export class GameService {
 		else if (user.defeats === 3) userAchievements.Defeatx3 = true;
 		await userAchievements.save();
 	}
-
-	//ends the game
-	// async endGame(
-	// 	client: Socket,
-	// 	match: Match,
-	// 	winner: UserEntity,
-	// 	loser: UserEntity,
-	// ) {
-	// 	if (match == null) {
-	// 		// opponent refused the invitation
-	// 		winner.currentMatch = null;
-	// 		loser.currentMatch = null;
-	// 		await this.userRepo.save(winner);
-	// 		await this.userRepo.save(loser);
-	// 		client.leave(winner.currentMatch.roomName);
-	// 		throw new ForbiddenException('Your opponent gave up the game.');
-	// 	}
-	// 	match.isEnd = true;
-	// 	if (match.isLocal == false) {
-	// 		winner.victories++;
-	// 		loser.defeats++;
-	// 		await this.setAchievements(winner);
-	// 		await this.setAchievements(loser);
-	// 		await this.setMatchHistory(winner, loser, match);
-	// 	} else {
-	// 		// trigger the pop-up(?modal) with victory info and home button
-	// 		winner.currentMatch = null;
-	// 		loser.currentMatch = null;
-	// 		await this.userRepo.save(winner);
-	// 		await this.userRepo.save(loser);
-	// 		console.log('We have a winner !');
-
-	// 		return false;
-	// 	}
-	// 	winner.currentMatch = null;
-	// 	loser.currentMatch = null;
-	// 	await this.userRepo.save(winner);
-	// 	await this.userRepo.save(loser);
-	// 	return true;
-	// }
 
 	// //check if the game should end and exec the proper funciton if so
 	// async checkEndGame(client: Socket, match: Match) {
@@ -461,108 +356,4 @@ export class GameService {
 	 * -
 	 * -
 	 */
-
-	/**
-	 * try to spectate the chosen user
-	 */
-	// async spectate(client: Socket, userIdToSpec: string) {
-	// 	// find user
-	// 	const userToSpec: UserEntity = await this.userService.getUserById(
-	// 		userIdToSpec,
-	// 	);
-	// 	// check if userToSpec.currentMatch != null
-	// 	if (client.data.user.currentMatch != null) {
-	// 		throw new ForbiddenException('You are already in a match.');
-	// 	}
-	// 	if (
-	// 		userToSpec.currentMatch != null &&
-	// 		userToSpec.currentMatch.isEnd == false
-	// 	) {
-	// 		client.data.user.currentMatch = userToSpec.currentMatch;
-	// 		client.join(userToSpec.currentMatch.roomName);
-	// 		await this.userRepo.save(client.data.user);
-	// 	} else {
-	// 		throw new ForbiddenException("You can't spectate this match.");
-	// 	}
-	// }
-
-	/**
-	 * try to know if the user is in a game
-	 */
-	// async getCurrentMatch(client: Socket, userIdToSpec: string) {
-	// 	// find user
-	// 	const userToSpec: UserEntity = await this.userService.getUserById(
-	// 		userIdToSpec,
-	// 	);
-	// 	// check if userToSpec.currentMatch != null
-	// 	if (
-	// 		userToSpec.currentMatch != null &&
-	// 		userToSpec.currentMatch.isEnd == false
-	// 	) {
-	// 		return true;
-	// 	} else {
-	// 		return false;
-	// 	}
-	// }
-
-	/**
-	 * HANDLE DISCONNECTION
-	 *(from game, matchmaking, after sending an invitation)
-	 */
-
-	// async handleGameDisconnect(client: Socket): Promise<string> {
-	// 	// in game
-	// 	let winnerId: string = null;
-	// 	if (
-	// 		client.data.user.currentMatch != null &&
-	// 		client.data.user.currentMatch.isEnd == false
-	// 	) {
-	// 		if (client.data.user.currentMatch.p1User == client.data.user.userId) {
-	// 			winnerId = client.data.user.currentMatch.player2;
-	// 			client.data.user.currentMatch.p2Score = 5;
-	// 			client.data.user.currentMatch.p1Score = 0;
-	// 		} else {
-	// 			winnerId = client.data.user.currentMatch.player1;
-	// 			client.data.user.currentMatch.p1Score = 5;
-	// 			client.data.user.currentMatch.p2Score = 0;
-	// 		}
-	// 		await this.userRepo.save(client.data.user);
-	// 	}
-	// 	// in matchmaking
-	// 	// if (matchMakingSet.size != 0) {
-	// 	// 	for (const item of matchMakingSet) {
-	// 	// 		if (item == client) {
-	// 	// 			matchMakingSet.clear();
-	// 	// 			break;
-	// 	// 		}
-	// 	// 	}
-	// 	}
-	// delete sent invitation
-	// const sentInvitation: InvitationEntity[] =
-	// 	await this.invitationRepository.find({
-	// 		where: [{ creator: { userId: client.data.user.userId } }],
-	// 	});
-	// for (const inviteIter of sentInvitation) {
-	// 	this.refuseInvite(client, inviteIter.creator.userId);
-	// }
-	// // refuse received invitations
-	// const allReceivedInvitations: InvitationEntity[] =
-	// 	await this.invitationRepository.find({
-	// 		where: [{ receiver: { userId: client.data.user.userId } }],
-	// 	});
-	// for (const inviteIter of allReceivedInvitations) {
-	// 	this.refuseInvite(client, inviteIter.creator.userId);
-	// }
-	// 	return winnerId;
-	// }
-
-	// 	async isInGame(client: Socket) {
-	// 		const sentInvitations: InvitationEntity[] =
-	// 			await this.invitationRepository.find({
-	// 				where: [{ creator: { userId: client.data.user.userId } }],
-	// 			});
-	// 		if (client.data.user.currentMatch != null || sentInvitations != null)
-	// 			return true;
-	// 		else return false;
-	// 	}
 }
