@@ -1,12 +1,20 @@
 import { useLocation, Navigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import jwtDecode from "jwt-decode";
-import React from "react";
+import React, { useEffect } from "react";
 import { ErrorContextProvider } from "../context/error-context";
+import { socket } from "../App";
 
 const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 	const [cookies] = useCookies();
 	const location = useLocation();
+
+	useEffect(() => {
+		if (location.pathname != "/game" && location.pathname != "/waiting") {
+			console.log("changedTab");
+			socket.emit("changedTab");
+		}
+	}, [location]);
 
 	if (!cookies.Authentication) {
 		return <Navigate to="/login" state={{ from: location }} replace />;
