@@ -1,0 +1,56 @@
+.fakegame {
+	aspect-ratio: calc(7 / 5);
+	width: 50%;
+	border: 5px solid #3a3636;
+	border-radius: 20px;
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.title {
+	font-size: 3vw;
+	position: absolute;
+	cursor: default;
+}
+
+.buttons {
+	margin-block: auto;
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pad {
+	aspect-ratio: calc(1 / 6);
+	width: 3%;
+	background-color: #3a363689;
+}
+
+.loading::before {
+	animation: 1.5s linear infinite spinner;
+	animation-play-state: inherit;
+	border: solid 5px #3a3636;
+	border-bottom-color: #fdd05d;
+	border-radius: 50%;
+	content: "";
+	position: absolute;
+	height: 40px;
+	transform: translate3d(-50%, -50%, 0);
+	width: 40px;
+	will-change: transform;
+}
+
+@keyframes spinner {
+	0% {
+		transform: translate3d(-50%, -50%, 0) rotate(0deg);
+	}
+	100% {
+		transform: translate3d(-50%, -50%, 0) rotate(360deg);
+	}
+}

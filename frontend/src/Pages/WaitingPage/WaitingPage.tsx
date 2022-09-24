@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../App";
 import Layout from "../../components/Layout/Layout";
-import classes from "WaitingPage.module.css";
+import classes from "./WaitingPage.module.css";
 
 const WaitingPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -24,7 +24,14 @@ const WaitingPage: React.FC<{}> = () => {
 
 	return (
 		<Layout>
-			<p>Waiting page</p>
+			<div className={classes.fakegame}>
+				<div className={classes.title}>Waiting for opponent</div>
+				<div className={classes.buttons}>
+					<div className={classes.pad}></div>
+					<div className={classes.loading}></div>
+					<div className={classes.pad}></div>
+				</div>
+			</div>
 		</Layout>
 	);
 };
