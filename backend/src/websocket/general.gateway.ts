@@ -85,10 +85,6 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			if (this.gameService.isSpectator(client.data.user.userId)) {
-				client.leave(client.data.user.currentMatch);
-				return;
-			}
 			if (client.data.user.currentMatch != null) {
 				this.gameService.quitGame(client.data.user);
 				this.server.to('client.data.user.currentMatch').emit('errorEvent', 'Disconnection of the game');
