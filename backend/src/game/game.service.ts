@@ -261,6 +261,7 @@ export class GameService {
 						client.leave(gameId);
 					}
 					if (game.state === "quit") {
+						// console.log("entered quit")
 						this.games.delete(game.id);
 						client.leave(gameId);
 					}
@@ -268,7 +269,6 @@ export class GameService {
 				}
 			}, INTERVAL_SPEED)
 		}
-		console.log("game.state after loop: ", game.state);
 		return game;
 	}
 
@@ -314,24 +314,29 @@ export class GameService {
 
 	async quitGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
+		// console.log("quit game: ", game);
 		if (game)
 			game.state = "quit";
 		if (game) {
-			let winner: UserEntity;
-			let loser: UserEntity = user;
-			if (game.player2.user.userId === user.userId) {
-				winner = game.player1.user;
-				game.player1.score = 5;
-				game.player2.score = 0;
-				await this.setMatchHistory(game.player1, game.player2);
-			}
-			else {
-				winner = game.player2.user;
-				game.player2.score = 5;
-				game.player1.score = 0;
-				await this.setMatchHistory(game.player2, game.player1);
-			}
-			this.setGameInfos(winner, loser);
+			let user1: UserEntity = game.player1.user;
+			let user2: UserEntity = game.player2.user;
+			user1.currentMatch = null;
+			user2.currentMatch = null;
+			this.userRepo.save(user1);
+			this.userRepo.save(user2);
+			// if (game.player2.user.userId === user.userId) {
+			// 	winner = game.player1.user;
+			// 	game.player1.score = 5;
+			// 	game.player2.score = 0;
+			// 	await this.setMatchHistory(game.player1, game.player2);
+			// }
+			// else {
+			// 	winner = game.player2.user;
+			// 	game.player2.score = 5;
+			// 	game.player1.score = 0;
+			// 	await this.setMatchHistory(game.player2, game.player1);
+			// }
+			// this.setGameInfos(winner, loser);
 		}
 	}
 
@@ -351,7 +356,8 @@ export class GameService {
 	spectate(user: UserEntity) {
 		if (user.currentMatch != null)
 			throw new ForbiddenException("You can't spectate while you are playing");
-
+		let game: Game = this.getMyGame(user.userId);
+		return (game);
 	}
 
 
@@ -576,10 +582,11 @@ export class GameService {
 			throw new ForbiddenException('You already are in a matchmaking');
 		if (this.matchMakingMap.size > 0) {
 			let matchmake = this.matchMakingMap.entries().next();
-			console.log('matchmake 1: ', matchmake);
-			matchmake.value[1].player2 = user;
-			console.log('matchmake 2: ', matchmake);
-			return matchmake.value[1];
+			if (matchmake.value[1].player2 === null) {
+				matchmake.value[1].player2 = user;
+				return matchmake.value[1];
+				//delete le matchmaking
+			}
 		}
 		this.matchMakingMap.set(user.userId, {
 			id: client.id,
@@ -588,6 +595,10 @@ export class GameService {
 			player2: null,
 		});
 		return null;
+	}
+
+	deleteMatchMaking(userId: string) {
+		this.matchMakingMap.delete(userId);
 	}
 
 	/**

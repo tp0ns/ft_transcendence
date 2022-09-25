@@ -524,6 +524,7 @@ export class GeneralGateway
 		if (!matchMaking) return client.emit('waitingMatchmaking');
 		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
 		client.emit('matchAccepted', matchMaking.roomId);
+		this.gameService.deleteMatchMaking(matchMaking.player1.userId);
 		this.initGame(matchMaking);
 	}
 
@@ -540,7 +541,9 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
 	spectate(client: Socket, player: string) {
-		this.gameService.spectate(client.data.user);
+		let game: Game = this.gameService.spectate(client.data.user);
+		// console.log("game: ", game);
+		client.join(game.id);
 		client.emit('spectate', player);
 	}
 
@@ -553,6 +556,15 @@ export class GeneralGateway
 	 *  \_____/_/    \_|_|  |_|______|
 	 *
 	 */
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getCurrentMatch')
+	getCurrentMatch(client: Socket, userId: string) {
+		let game: Game = this.gameService.getMyGame(userId);
+		client.emit('sendCurrentMatch', game);
+
+	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('localgame')
