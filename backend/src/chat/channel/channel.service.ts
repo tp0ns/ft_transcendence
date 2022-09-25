@@ -497,7 +497,6 @@ export class ChannelService {
 		);
 		if (newBan && channel.membersId.includes(newBan.userId)) {
 			channel.bannedMembers = [...channel.bannedMembers, newBan];
-			await this.deleteMember(newBan, channel);
 			await channel.save();
 		}
 	}
