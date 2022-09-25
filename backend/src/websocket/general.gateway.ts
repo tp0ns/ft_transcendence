@@ -495,19 +495,6 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Si un joueur qui a envoye une invitation
-	 * quitte la partie ou si un joueur refuse une invitation
-	 * => annulation de l'invit
-	 * @param client personne concernee par l'annulation
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('deleteInvitation')
-	async deleteInvitation(client: Socket) {
-		//  await this.gameService.deleteInvitation(client.data.user);
-		this.server.emit('updateInvitation');
-	}
-
-	/**
 	 * __  __       _______ _____ _    _   __  __          _  _______ _   _  _____
 	 * |  \/  |   /\|__   __/ ____| |  | | |  \/  |   /\   | |/ /_   _| \ | |/ ____|
 	 * | \  / |  /  \  | | | |    | |__| | | \  / |  /  \  | ' /  | | |  \| | |  __
