@@ -611,7 +611,6 @@ export class GeneralGateway
 	@SubscribeMessage('changedTab')
 	async checkChangedTab(client: Socket) {
 		if (client.data.user.currentMatch != null) {
-			console.log('enter in currentMatch non null');
 			//besoin de faire leave la room aux 2 joueurs 
 			this.gameService.quitGame(client.data.user);
 		}
