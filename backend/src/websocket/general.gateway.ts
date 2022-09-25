@@ -85,25 +85,11 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.quitGame(client.data.user);
-			// const winnerId: string = await this.gameService.handleGameDisconnect(
-			// 	client,
-			// );
-			// if (winnerId != null) {
-			// 	const winner = await this.userService.getUserById(winnerId);
-			// 	winner.victories++;
-			// 	client.data.user.defeats++;
-			// 	await this.gameService.setAchievements(winner);
-			// 	await this.gameService.setAchievements(client.data.user);
-			// 	// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
-			// 	this.server
-			// 		.to(client.data.user.currentMatch.roomName)
-			// 		.emit('victoryOf', winner);
-			// 	this.server
-			// 		.to(client.data.user.currentMatch.roomName)
-			// 		.emit('errorEvent', 'Your opponnent has disconnected.');
-			// 	this.server.emit('endGame');
-			// }
+			if (client.data.user.currentMatch != null) {
+				this.gameService.quitGame(client.data.user);
+				this.server.to('client.data.user.currentMatch').emit('errorEvent', 'Disconnection of the game');
+
+			}
 			this.server.emit('updateInvitation');
 			this.userService.disconnectClient(client.data.user);
 		}

@@ -576,7 +576,9 @@ export class GameService {
 			throw new ForbiddenException('You already are in a matchmaking');
 		if (this.matchMakingMap.size > 0) {
 			let matchmake = this.matchMakingMap.entries().next();
+			console.log('matchmake 1: ', matchmake);
 			matchmake.value[1].player2 = user;
+			console.log('matchmake 2: ', matchmake);
 			return matchmake.value[1];
 		}
 		this.matchMakingMap.set(user.userId, {
