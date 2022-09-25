@@ -85,7 +85,7 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.cleanGame(client.data.user);
+			this.gameService.quitGame(client.data.user);
 			// const winnerId: string = await this.gameService.handleGameDisconnect(
 			// 	client,
 			// );
@@ -599,11 +599,12 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('gameLoop')
-	gameLoop(client: Socket, { roomId, state }) {
-		let game: Game = this.gameService.gameLoop(this.server, roomId);
-		if (game.state === "end") {
-			client.leave(roomId);
-		}
+	gameLoop(client: Socket, roomId: string) {
+		let game: Game = this.gameService.gameLoop(client, this.server, roomId);
+		// if (game.state === "end" || game.state === "quit") {
+		// 	console.log("hello");
+		// 	client.leave(roomId);
+		// }
 	}
 
 	@UseGuards(WsGuard)
