@@ -85,7 +85,8 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.quitGame(client.data.user);
+			if (client.data.user.currentMatch != null)
+				this.gameService.quitGame(client.data.user);
 			// const winnerId: string = await this.gameService.handleGameDisconnect(
 			// 	client,
 			// );
@@ -554,7 +555,9 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
 	spectate(client: Socket, player: string) {
-		this.gameService.spectate(client.data.user);
+		let game: Game = this.gameService.spectate(client.data.user);
+		// console.log("game: ", game);
+		client.join(game.id);
 		client.emit('spectate', player);
 	}
 
@@ -567,6 +570,15 @@ export class GeneralGateway
 	 *  \_____/_/    \_|_|  |_|______|
 	 *
 	 */
+
+
+	@UseGuards(WsGuard)
+	@SubscribeMessage('getCurrentMatch')
+	getCurrentMatch(client: Socket, userId: string) {
+		let game: Game = this.gameService.getMyGame(userId);
+		client.emit('sendCurrentMatch', game);
+
+	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('localgame')
@@ -611,7 +623,6 @@ export class GeneralGateway
 	@SubscribeMessage('changedTab')
 	async checkChangedTab(client: Socket) {
 		if (client.data.user.currentMatch != null) {
-			console.log('enter in currentMatch non null');
 			//besoin de faire leave la room aux 2 joueurs 
 			this.gameService.quitGame(client.data.user);
 		}
