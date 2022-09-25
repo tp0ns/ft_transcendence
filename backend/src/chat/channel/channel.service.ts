@@ -11,7 +11,7 @@ import UserEntity from 'src/user/models/user.entity';
 import { Repository } from 'typeorm';
 import { MessageService } from '../messages/messages.service';
 import { ChannelEntity } from './channel.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { CreateChanDto } from './dtos/createChan.dto';
 import { UserService } from 'src/user/user.service';
 import { ModifyChanDto } from './dtos/modifyChan.dto';
@@ -31,7 +31,7 @@ export class ChannelService {
 
 	/**
 	 * ------------------------ CREATE CHANNEL  ------------------------- *
-	 * 
+	 *
 	 * - createNewChan(user, chan)
 	 * - createNewDM(user, chan)
 	 * - saveNewChan(user, chan)
@@ -234,7 +234,7 @@ export class ChannelService {
 			await this.deleteBanMember(user, channel, modifications.deleteBan);
 		else if (modifications.deleteMute)
 			await this.deleteMuteMember(user, channel, modifications.deleteMute);
-		else //if (modifications.newPassword || !modifications.protected) 
+		else //if (modifications.newPassword || !modifications.protected)
 		{
 			await this.modifyPassword(
 				user,
@@ -685,8 +685,8 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Recuperer un channel avec son id 
-	 * 
+	 * @brief Recuperer un channel avec son id
+	 *
 	 */
 	async getChanById(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
@@ -706,10 +706,10 @@ export class ChannelService {
 	}
 
 	/**
-	 * @brief Recuperer un channel avec son id et son password 
+	 * @brief Recuperer un channel avec son id et son password
 	 * -> Permet de ne pas envoyer le password dans les recuperations
 	 * des channels de base
-	 * 
+	 *
 	 */
 	async getChanByIdWithPassword(chanId: string): Promise<ChannelEntity> {
 		if (isValidUUID(chanId)) {
