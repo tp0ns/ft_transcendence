@@ -25,6 +25,27 @@ const GamePage = () => {
 		});
 	}, [])
 
+	const handleMouseWheel = (event: any) => {
+		console.log(event.nativeEvent.wheelDelta);
+		if (game) {
+			if (game.type === "local") {
+				if (event.nativeEvent.wheelDelta > 0)
+					socket.emit("movePad", {
+						direction: "up",
+						roomId: game.id,
+						type: "local",
+					});
+				else {
+					socket.emit("movePad", {
+						direction: "down",
+						roomId: game.id,
+						type: "local",
+					});
+				}
+			}
+		}
+	}
+
 	const handleKeyDown = (event: any) => {
 		if (game) {
 			if (event.key === "w")
@@ -39,20 +60,20 @@ const GamePage = () => {
 					roomId: game.id,
 					type: "online",
 				});
-			if (game.type === "local") {
-				if (event.keyCode === 38)
-					socket.emit("movePad", {
-						direction: "up",
-						roomId: game.id,
-						type: "local",
-					});
-				if (event.keyCode === 40)
-					socket.emit("movePad", {
-						direction: "down",
-						roomId: game.id,
-						type: "local",
-					});
-			}
+			// if (game.type === "local") {
+			// 	if (event.keyCode === 38)
+			// socket.emit("movePad", {
+			// 	direction: "up",
+			// 	roomId: game.id,
+			// 	type: "local",
+			// });
+			// 	if (event.keyCode === 40)
+			// socket.emit("movePad", {
+			// 	direction: "down",
+			// 	roomId: game.id,
+			// 	type: "local",
+			// });
+			// }
 			if (game.state === "readyPlay" && event.key === "Enter")
 				socket.emit('gameLoop', game.id);
 		}
@@ -65,6 +86,7 @@ const GamePage = () => {
 				className={classes.autoFocus}
 				ref={autoFocusRef}
 				onKeyDown={handleKeyDown}
+				onWheel={handleMouseWheel}
 			>
 				{game && game.state != "end" ? (
 					<React.Fragment>
