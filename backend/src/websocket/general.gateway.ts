@@ -633,9 +633,9 @@ export class GeneralGateway
 			//besoin de faire leave la room aux 2 joueurs
 			// this.gameService.quitGame(client.data.user);
 			client.leave(client.data.user.currentMatch);
-			await this.gameService.firstPlayerQuit(client.data.user);
 			//if le client qui c est barre est un joueur alors :
 			this.server.to(client.data.user.currentMatch).emit('clientLeft');
+			await this.gameService.firstPlayerQuit(client.data.user);
 		}
 		else {
 			this.gameService.changedTab(client.data.user);
