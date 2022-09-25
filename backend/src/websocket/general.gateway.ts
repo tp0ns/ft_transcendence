@@ -92,7 +92,6 @@ export class GeneralGateway
 			}
 			else {
 				this.gameService.deleteAllUserInvite(client.data.user.userId);
-				this.server.emit('updateInvitation');
 			}
 			this.userService.disconnectClient(client.data.user);
 		}
