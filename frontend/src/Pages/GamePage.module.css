@@ -1,3 +1,72 @@
 .autoFocus:focus {
-  /* outline: none; */
+	outline: none;
+}
+
+.badges {
+	display: flex;
+	margin-left: auto;
+	margin-right: auto;
+	width: 50%;
+	justify-content: space-between;
+	margin-block: 1vw;
+}
+
+.badge1 {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.badge2 {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: center;
+	align-items: center;
+}
+
+.profile {
+	border-radius: 50%;
+	aspect-ratio: 1;
+	width: 6vw;
+}
+
+.username {
+	color: #3a3636;
+	font-size: 2vw;
+	padding-inline: 2vw;
+}
+
+@media only screen and (min-height: 0px) and (max-height: 440px) {
+	.badges {
+		width: 15%;
+	}
+
+	.username {
+		display: none;
+	}
+}
+
+@media only screen and (min-height: 340px) {
+	.badges {
+		width: 25%;
+	}
+}
+
+@media only screen and (min-height: 440px) {
+	.badges {
+		width: 35%;
+	}
+}
+
+@media only screen and (min-height: 540px) {
+	.badges {
+		width: 45%;
+	}
+}
+
+@media only screen and (min-height: 640px) {
+	.badges {
+		width: 55%;
+	}
 }

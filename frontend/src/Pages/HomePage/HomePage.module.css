@@ -34,19 +34,19 @@
 
 @media only screen and (min-height: 440px) {
 	.fakegame {
-		width: 40%;
+		width: 35%;
 	}
 }
 
 @media only screen and (min-height: 540px) {
 	.fakegame {
-		width: 50%;
+		width: 45%;
 	}
 }
 
 @media only screen and (min-height: 640px) {
 	.fakegame {
-		width: 60%;
+		width: 55%;
 	}
 }
 
