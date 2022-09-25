@@ -20,6 +20,7 @@ import { WsException } from '@nestjs/websockets';
 import { v4 as uuidv4 } from 'uuid';
 import { GRID, initGrid } from './utils/initGrid';
 import { Match } from 'src/game/interfaces/match.interface';
+import { arrayBuffer } from 'stream/consumers';
 
 
 let match: Match;
@@ -81,6 +82,7 @@ export class GameService {
 			},
 			state: "readyPlay",
 			type: 'online',
+			spectatorIds: [],
 		}
 		this.games.set(invitation.roomId, game);
 		return game;
@@ -100,7 +102,8 @@ export class GameService {
 				score: 0,
 			},
 			state: "readyPlay",
-			type: "local"
+			type: "local",
+			spectatorIds: [],
 		}
 		this.games.set(game.id, game);
 		return game;
@@ -108,6 +111,9 @@ export class GameService {
 
 	movePad(user: UserEntity, direction: string, gameId: string, type: string) {
 		let game: Game = this.games.get(gameId);
+		if (user.userId !== game.player1.user.userId && user.userId !== game.player2.user.userId)
+			return game;
+
 		let padToMove: Pad = game.grid.pad2;
 
 		if (game.player1.user.userId === user.userId)
@@ -267,6 +273,17 @@ export class GameService {
 		return game;
 	}
 
+	isSpectator(userId: string) {
+		for (const value of this.games.values()) {
+			if (value.spectatorIds.includes(userId)) {
+				const index = value.spectatorIds.indexOf(userId);
+				value.spectatorIds.splice(index, 1);
+				return value;
+			};
+		}
+		return null;
+	}
+
 	async setGameInfos(winner: UserEntity, loser: UserEntity) {
 		winner.victories++;
 		loser.defeats++;
@@ -343,10 +360,11 @@ export class GameService {
 	* -  spectate(user)
 	*/
 
-	spectate(user: UserEntity) {
+	spectate(user: UserEntity, playerId: string) {
 		if (user.currentMatch != null)
 			throw new ForbiddenException("You can't spectate while you are playing");
-		let game: Game = this.getMyGame(user.userId);
+		let game: Game = this.getMyGame(playerId);
+		game.spectatorIds.push(user.userId);
 		return (game);
 	}
 

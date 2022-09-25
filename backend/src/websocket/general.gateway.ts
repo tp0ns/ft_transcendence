@@ -85,6 +85,11 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
+			if (this.gameService.isSpectator(client.data.user.userId)) {
+				client.leave(client.data.user.currentMatch);
+				this.userService.disconnectClient(client.data.user);
+				return;
+			}
 			if (client.data.user.currentMatch != null) {
 				client.leave(client.data.user.currentMatch);
 				this.server.to(client.data.user.currentMatch).emit('clientLeft');
@@ -518,7 +523,7 @@ export class GeneralGateway
 	@SubscribeMessage('matchmaking')
 	matchmaking(client: Socket) {
 		const matchMaking = this.gameService.matchmaking(client);
-		if (!matchMaking){
+		if (!matchMaking) {
 			this.gameService.deleteReceivedInvite(client.data.user.userId);
 			this.server.emit("updateInvitation");
 			return client.emit('waitingMatchmaking')
@@ -542,10 +547,9 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('spectate')
-	spectate(client: Socket, player: string) {
-		let game: Game = this.gameService.spectate(client.data.user);
+	spectate(client: Socket, playerId: string) {
+		let game: Game = this.gameService.spectate(client.data.user, playerId);
 		client.join(game.id);
-		client.emit('spectate', player);
 	}
 
 	/**
@@ -585,6 +589,8 @@ export class GeneralGateway
 	@SubscribeMessage('getMyGame')
 	getMyGame(client: Socket) {
 		let game: Game = this.gameService.getMyGame(client.data.user.userId);
+		if (!game)
+			game = this.gameService.isSpectator(client.data.user.userId);
 		client.emit('updatedGame', game);
 	}
 
@@ -617,6 +623,10 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('changedTab')
 	async checkChangedTab(client: Socket) {
+		if (this.gameService.isSpectator(client.data.user.userId)) {
+			client.leave(client.data.user.currentMatch);
+			return;
+		}
 		if (client.data.user.currentMatch != null) {
 			//besoin de faire leave la room aux 2 joueurs
 			// this.gameService.quitGame(client.data.user);
