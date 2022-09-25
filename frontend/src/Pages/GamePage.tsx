@@ -37,8 +37,6 @@ const GamePage = () => {
 		}
 	}
 
-
-
 	return (
 		<Layout>
 			<div tabIndex={0} className={classes.autoFocus} ref={autoFocusRef} onKeyDown={handleKeyDown}>
