@@ -115,6 +115,14 @@ export class GeneralGateway
 		this.server.emit('updatedRelations');
 	}
 
+	@UseGuards(WsGuard)
+	@SubscribeMessage('notPlaying')
+	async handleNotPlaying(client: Socket) {
+		if (client.data.user)
+			await this.userService.notPlayingClient(client.data.user);
+		this.server.emit('updatedRelations');
+	}
+
 	/**
 	 *   _____ _    _       _______
 	 *  / ____| |  | |   /\|__   __|

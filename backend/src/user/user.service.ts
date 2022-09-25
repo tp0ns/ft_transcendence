@@ -90,6 +90,13 @@ export class UserService {
 		});
 	}
 
+	async notPlayingClient(userReq: Partial<UserEntity>) {
+		const user: UserEntity = userReq as UserEntity;
+		return this.userRepo.update(user.userId, {
+			status: 'connected',
+		});
+	}
+
 	async setTwoFASecret(secret: string, userId: string) {
 		return this.userRepo.update(userId, {
 			twoFASecret: secret,
