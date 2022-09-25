@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { socket } from "../../../App";
 import MatchHistoryInterface from "../../../interfaces/MatchHistory.interface";
 import MatchItem from "./MatchItem/MatchItem";
@@ -7,6 +8,7 @@ import classes from "./MatchList.module.css";
 const MatchList: React.FC<{ userId: string }> = (props) => {
 	const [current, setCurrent] = useState<boolean>(false);
 	const [history, setHistory] = useState<MatchHistoryInterface[]>();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		socket.emit("getCurrentMatch", props.userId);
@@ -28,6 +30,8 @@ const MatchList: React.FC<{ userId: string }> = (props) => {
 
 	function spectate() {
 		socket.emit("spectate", props.userId);
+		navigate("/game");
+
 	}
 
 	return (

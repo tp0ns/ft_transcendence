@@ -36,6 +36,7 @@ export class Game {
 	grid: Grid;
 	player1: Player;
 	player2: Player;
+	spectatorIds: string[];
 	state: Game_State;
 	type: Game_Type;
 }
