@@ -156,8 +156,8 @@ export class GameService {
 
 	checkWinner(game: Game): Game_State {
 		if ((game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE))
-			return "end";
-		return "ongoing";
+			game.state = "end";
+		return game.state;
 	}
 
 	isLeftWallCollision(ball: Ball, wall: Pad, game: Game) {
@@ -226,7 +226,7 @@ export class GameService {
 		ball.direction.y = BALL_SPEED * (-Math.sin(bounceAngle));
 	}
 
-	checkCollision(game: Game) {
+	checkCollision(game: Game): Game_State {
 		let padCollision = false;
 		let leftWall: Pad = this.defineWall(0, 0, 0, game.grid.size.y);
 		let rightWall = this.defineWall(game.grid.size.x, 0, 0, game.grid.size.y);
@@ -238,10 +238,11 @@ export class GameService {
 		this.isBottomWallCollision(game.grid.ball, bottomWall)
 		if (!padCollision) {
 			if (this.isLeftWallCollision(game.grid.ball, leftWall, game) || this.isRightWallCollision(game.grid.ball, rightWall, game)) {
-				game.state = "readyPlay";
 				this.resetGrid(game.grid);
+				game.state = "readyPlay";
 			}
 		}
+		return game.state;
 	}
 
 	gameLoop(client: Socket, server: any, gameId: string) {
@@ -249,18 +250,20 @@ export class GameService {
 		game.state = 'ongoing';
 		if (game.state === 'ongoing') {
 			let timer = setInterval(() => {
-				this.checkCollision(game);
+				game.state = this.checkCollision(game);
 				game.state = this.checkWinner(game);
 				this.moveBall(game.grid.ball);
-				server.to(gameId).emit('updatedGame', this.games.get(gameId));
-				if (game.state === "end" || game.state === "readyPlay" || game.state === "quit") {
+				server.to(gameId).emit('updatedGame', game);
+				if (game.state === "end" || game.state === "readyPlay") {
 					if (game.state === "end") {
 						this.endGame(game);
 						this.games.delete(game.id);
+						client.leave(gameId);
 					}
-					if (game.state === "quit")
-						this.games.delete(game.id);
-					client.leave(gameId);
+					// if (game.state === "quit") {
+					// 	this.games.delete(game.id);
+					// 	client.leave(gameId);
+					// }
 					clearInterval(timer);
 				}
 			}, INTERVAL_SPEED)
