@@ -31,9 +31,8 @@ const GamePage = () => {
 				if (event.keyCode === 40)
 					socket.emit("movePad", { direction: "down", roomId: game.id, type: "local" });
 			}
-			if (game.state === "readyPlay" && event.key === "Enter") {
-				socket.emit('gameLoop', { roomId: game.id, state: "start" });
-			}
+			if (game.state === "readyPlay" && event.key === "Enter")
+				socket.emit('gameLoop', game.id);
 		}
 	}
 
