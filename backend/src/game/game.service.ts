@@ -11,7 +11,7 @@ import { Socket } from 'socket.io';
 import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { GridFSBucket, Repository } from 'typeorm';
-import { Ball, Coordinate, Game, Grid, Pad, Player } from './interfaces/game.interface';
+import { Ball, Coordinate, Game, Game_State, Grid, Pad, Player } from './interfaces/game.interface';
 import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
@@ -154,14 +154,10 @@ export class GameService {
 		grid.pad2.pos.y = grid.size.y / 2 - grid.pad2.size.y / 2;
 	}
 
-	checkWinner(game: Game) {
-		if ((game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) && game.state === 'ongoing') {
-			game.state = "end";
-			let gameToSend: Game = Object.assign({}, game);
-			this.games.delete(game.id);
-			// this.endGame(gameToSend);
-		}
-
+	checkWinner(game: Game): Game_State {
+		if ((game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE))
+			return "end";
+		return "ongoing";
 	}
 
 	isLeftWallCollision(ball: Ball, wall: Pad, game: Game) {
@@ -248,20 +244,29 @@ export class GameService {
 		}
 	}
 
-	gameLoop(server: any, gameId: string) {
+	gameLoop(client: Socket, server: any, gameId: string) {
 		let game = this.games.get(gameId);
-		game.state = "ongoing";
-		if (game.state === "ongoing") {
+		game.state = 'ongoing';
+		if (game.state === 'ongoing') {
 			let timer = setInterval(() => {
 				this.checkCollision(game);
-				this.checkWinner(game);
+				game.state = this.checkWinner(game);
 				this.moveBall(game.grid.ball);
 				server.to(gameId).emit('updatedGame', this.games.get(gameId));
-				if (game.state != "ongoing")
+				if (game.state === "end" || game.state === "readyPlay" || game.state === "quit") {
+					if (game.state === "end") {
+						this.endGame(game);
+						this.games.delete(game.id);
+					}
+					if (game.state === "quit")
+						this.games.delete(game.id);
+					client.leave(gameId);
 					clearInterval(timer);
+				}
 			}, INTERVAL_SPEED)
-			return game;
 		}
+		console.log("game.state after loop: ", game.state);
+		return game;
 	}
 
 	async setGameInfos(winner: UserEntity, loser: UserEntity) {
@@ -306,7 +311,7 @@ export class GameService {
 
 	async quitGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
-		game.state = 'outOfGame';
+		this.games[game.id].state = "quit";
 		if (game) {
 			let winner: UserEntity;
 			let loser: UserEntity = user;

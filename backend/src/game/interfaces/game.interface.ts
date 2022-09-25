@@ -1,6 +1,6 @@
 import UserEntity from "src/user/models/user.entity";
 
-export type Game_State = "readyPlay" | "ongoing" | "end" | "outOfGame"
+export type Game_State = "readyPlay" | "ongoing" | "end" | "quit"
 export type Game_Type = "local" | "online"
 
 export class Coordinate {
