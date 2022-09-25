@@ -45,7 +45,6 @@ export class SchoolStrategy extends PassportStrategy(Strategy, '42') {
 	 * @param profile ce que le premier call à l'API 42 a return, voir @param profileFields
 	 * @returns renvoie un User qui est ajouté à la requête http de callback par passport
 	 *
-	 * @Todo Verifier que personne n'ai le meme username.
 	 */
 	async validate(accessToken, refreshToken, profile: Profile): Promise<any> {
 		const user = this.userService.findOrCreate(profile);

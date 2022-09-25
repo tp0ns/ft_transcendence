@@ -338,25 +338,13 @@ export class GameService {
 	}
 
 	async quitGame(user: UserEntity) {
-		// let game: Game = this.getMyGame(user.userId);
-		// console.log("quit game: ", game);
-		// if (game)
-		// game.state = "quit";
-		// if (game) {
 		this.games.delete(user.currentMatch);
 		user.currentMatch = null;
-		// let user1: UserEntity = game.player1.user;
-		// let user2: UserEntity = game.player2.user;
-		// user1.currentMatch = null;
-		// user2.currentMatch = null;
 		await this.userRepo.save(user);
-		// await this.userRepo.save(user2);
-		// }
 	}
 
 	leaveLocalGame(user : UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
-		console.log('game : ', game);
 		this.games.delete(game.id);
 		user.localMatch = null;
 		this.userRepo.save(user);
@@ -537,7 +525,6 @@ export class GameService {
 	 * @returns l'invitation pour pouvoir supprimer
 	 * toutes les autres invitations
 	 *
-	 * @todo supprimer le user si pas utile
 	 */
 	acceptInvite(user: UserEntity, invitationId: string) {
 		if (!this.inviteMap.has(invitationId))

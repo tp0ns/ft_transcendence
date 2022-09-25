@@ -612,16 +612,11 @@ export class GeneralGateway
 	@SubscribeMessage('gameLoop')
 	gameLoop(client: Socket, roomId: string) {
 		let game: Game = this.gameService.gameLoop(client, this.server, roomId);
-		// if (game.state === "end" || game.state === "quit") {
-		// 	console.log("hello");
-		// 	client.leave(roomId);
-		// }
 	}
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveGame')
 	async leaveGame(client: Socket, roomId: string) {
-		// console.log(leftRoom)
 		await this.gameService.quitGame(client.data.user);
 		client.leave(roomId);
 	}
