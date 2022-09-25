@@ -85,7 +85,7 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			this.gameService.cleanGame(client.data.user);
+			this.gameService.quitGame(client.data.user);
 			// const winnerId: string = await this.gameService.handleGameDisconnect(
 			// 	client,
 			// );
