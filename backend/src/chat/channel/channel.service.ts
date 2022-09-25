@@ -352,6 +352,7 @@ export class ChannelService {
 			)
 		) {
 			await this.deleteMember(user, channel);
+			await this.deleteUserInProtectedChan(user, channel);
 			if (channel.adminsId.includes(user.userId))
 				this.deleteAdmin(user, channel);
 			if (channel.owner && channel.owner.userId === user.userId)
@@ -608,6 +609,18 @@ export class ChannelService {
 			return admin.userId !== userToDelete.userId;
 		});
 	}
+
+	/**
+	 * @brief Suppression d'un user de la liste des admins du channel
+	 *
+	 * @param userToDelete le user a supprimer
+	 * @param channel le channel concernee
+	 */
+		 async deleteUserInProtectedChan(userToDelete: UserEntity, channel: ChannelEntity) {
+			channel.userInProtectedChan = channel.userInProtectedChan.filter((userInProtectedChan) => {
+				return userInProtectedChan.userId !== userToDelete.userId;
+			});
+		}
 
 	/**
 	 * ------------------------ GETTERS  ------------------------- *

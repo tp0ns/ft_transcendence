@@ -572,8 +572,11 @@ export class GameService {
 			throw new ForbiddenException('You already are in a matchmaking');
 		if (this.matchMakingMap.size > 0) {
 			let matchmake = this.matchMakingMap.entries().next();
-			matchmake.value[1].player2 = user;
-			return matchmake.value[1];
+			if (matchmake.value[1].player2 === null) {
+				matchmake.value[1].player2 = user;
+				return matchmake.value[1];
+				//delete le matchmaking
+			}
 		}
 		this.matchMakingMap.set(user.userId, {
 			id: client.id,
@@ -582,6 +585,10 @@ export class GameService {
 			player2: null,
 		});
 		return null;
+	}
+
+	deleteMatchMaking(userId: string) {
+		this.matchMakingMap.delete(userId);
 	}
 
 	/**

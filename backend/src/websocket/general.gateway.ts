@@ -85,26 +85,11 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
-			if (client.data.user.currentMatch != null)
+			if (client.data.user.currentMatch != null) {
 				this.gameService.quitGame(client.data.user);
-			// const winnerId: string = await this.gameService.handleGameDisconnect(
-			// 	client,
-			// );
-			// if (winnerId != null) {
-			// 	const winner = await this.userService.getUserById(winnerId);
-			// 	winner.victories++;
-			// 	client.data.user.defeats++;
-			// 	await this.gameService.setAchievements(winner);
-			// 	await this.gameService.setAchievements(client.data.user);
-			// 	// await this.gameService.setMatchHistory(winner, client.data.user, client.data.user.currentMatch);
-			// 	this.server
-			// 		.to(client.data.user.currentMatch.roomName)
-			// 		.emit('victoryOf', winner);
-			// 	this.server
-			// 		.to(client.data.user.currentMatch.roomName)
-			// 		.emit('errorEvent', 'Your opponnent has disconnected.');
-			// 	this.server.emit('endGame');
-			// }
+				this.server.to('client.data.user.currentMatch').emit('errorEvent', 'Disconnection of the game');
+
+			}
 			this.server.emit('updateInvitation');
 			this.userService.disconnectClient(client.data.user);
 		}
@@ -510,19 +495,6 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Si un joueur qui a envoye une invitation
-	 * quitte la partie ou si un joueur refuse une invitation
-	 * => annulation de l'invit
-	 * @param client personne concernee par l'annulation
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('deleteInvitation')
-	async deleteInvitation(client: Socket) {
-		//  await this.gameService.deleteInvitation(client.data.user);
-		this.server.emit('updateInvitation');
-	}
-
-	/**
 	 * __  __       _______ _____ _    _   __  __          _  _______ _   _  _____
 	 * |  \/  |   /\|__   __/ ____| |  | | |  \/  |   /\   | |/ /_   _| \ | |/ ____|
 	 * | \  / |  /  \  | | | |    | |__| | | \  / |  /  \  | ' /  | | |  \| | |  __
@@ -539,6 +511,7 @@ export class GeneralGateway
 		if (!matchMaking) return client.emit('waitingMatchmaking');
 		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
 		client.emit('matchAccepted', matchMaking.roomId);
+		this.gameService.deleteMatchMaking(matchMaking.player1.userId);
 		this.initGame(matchMaking);
 	}
 
