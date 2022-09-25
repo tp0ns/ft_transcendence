@@ -95,6 +95,11 @@ export class GeneralGateway
 				this.server.to(client.data.user.currentMatch).emit('clientLeft');
 				await this.gameService.firstPlayerQuit(client.data.user);
 			}
+			else if (client.data.user.localMatch != null)
+			{
+				client.leave(client.data.user.currentMatch);
+				this.gameService.leaveLocalGame(client.data.user);
+			}
 			else {
 				this.gameService.deleteAllUserInvite(client.data.user.userId);
 			}
@@ -576,6 +581,7 @@ export class GeneralGateway
 	localGame(client: Socket) {
 		let game: Game = this.gameService.initLocal(client.data.user);
 		client.join(game.id);
+		// this.gameService.setMatch(client.data.user, game.id);
 		this.server.to(game.id).emit('updatedGame', game);
 	}
 
@@ -628,12 +634,14 @@ export class GeneralGateway
 			return;
 		}
 		if (client.data.user.currentMatch != null) {
-			//besoin de faire leave la room aux 2 joueurs
-			// this.gameService.quitGame(client.data.user);
 			client.leave(client.data.user.currentMatch);
-			//if le client qui c est barre est un joueur alors :
 			this.server.to(client.data.user.currentMatch).emit('clientLeft');
 			await this.gameService.firstPlayerQuit(client.data.user);
+		}
+		else if (client.data.user.localMatch != null)
+		{
+			client.leave(client.data.user.currentMatch);
+			this.gameService.leaveLocalGame(client.data.user);
 		}
 		else {
 			this.gameService.changedTab(client.data.user);

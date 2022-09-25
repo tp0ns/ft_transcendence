@@ -106,6 +106,8 @@ export class GameService {
 			spectatorIds: [],
 		}
 		this.games.set(game.id, game);
+		user.localMatch = game.id;
+		this.userRepo.save(user);
 		return game;
 	}
 
@@ -302,6 +304,11 @@ export class GameService {
 	 * @todo CHANGER LE SCORE A 5
 	 */
 	async endGame(game: Game) {
+		if (game.type === 'local') {
+			let user: UserEntity = game.player1.user;
+			user.localMatch = null;
+			this.userRepo.save(user);
+		}
 		if (game.type != 'local') {
 			let winner: UserEntity;
 			let loser: UserEntity;
@@ -345,6 +352,14 @@ export class GameService {
 		await this.userRepo.save(user);
 		// await this.userRepo.save(user2);
 		// }
+	}
+
+	leaveLocalGame(user : UserEntity) {
+		let game: Game = this.getMyGame(user.userId);
+		console.log('game : ', game);
+		this.games.delete(game.id);
+		user.localMatch = null;
+		this.userRepo.save(user);
 	}
 
 	cleanGame(user: UserEntity) {
@@ -480,6 +495,8 @@ export class GameService {
 			return "You can't invite someone while playing";
 		if (userToInvite.currentMatch != null)
 			return 'This user is already in game.';
+		if (userToInvite.localMatch != null)
+			return 'This user is already in a game';
 		if (this.inviteMap.has(user.userId))
 			return "You can't send more than one invitation.";
 		if (this.inviteMap.has(userToInviteId))

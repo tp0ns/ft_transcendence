@@ -55,6 +55,11 @@ export class UserEntity {
 	})
 	currentMatch: string;
 
+	@Column({
+		nullable: true,
+	})
+	localMatch: string;
+
 	@OneToMany(
 		() => InvitationEntity,
 		(InvitationEntity) => InvitationEntity.creator,
