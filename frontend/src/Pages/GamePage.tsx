@@ -6,8 +6,6 @@ import { Game } from "../components/game/interfaces/game.interfaces";
 import Layout from "../components/Layout/Layout";
 import classes from "./GamePage.module.css"
 
-let pressLock = false;
-
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
 	const autoFocusRef = useRef<HTMLDivElement>(null)
@@ -27,17 +25,17 @@ const GamePage = () => {
 				socket.emit("movePad", { direction: "up", roomId: game.id, type: "online" });
 			if (event.key === "s")
 				socket.emit("movePad", { direction: "down", roomId: game.id, type: "online" });
-			if (event.keyCode === 38)
-				socket.emit("movePad", { direction: "up", roomId: game.id, type: "local" });
-			if (event.keyCode === 40)
-				socket.emit("movePad", { direction: "down", roomId: game.id, type: "local" });
+			if (game.type === 'local') {
+				if (event.keyCode === 38)
+					socket.emit("movePad", { direction: "up", roomId: game.id, type: "local" });
+				if (event.keyCode === 40)
+					socket.emit("movePad", { direction: "down", roomId: game.id, type: "local" });
+			}
 			if (game.state === "readyPlay" && event.key === "Enter") {
 				socket.emit('gameLoop', { roomId: game.id, state: "start" });
 			}
 		}
 	}
-
-
 
 	return (
 		<Layout>

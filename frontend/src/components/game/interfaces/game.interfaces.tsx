@@ -1,5 +1,7 @@
 import UserProp from "../../../interfaces/User.interface";
 
+export type Game_Type = "local" | "online"
+
 export interface Coordinate {
   x: number;
   y: number;
@@ -34,4 +36,5 @@ export interface Game {
   player1: Player;
   player2: Player;
   state: string;
+  type: Game_Type;
 }
