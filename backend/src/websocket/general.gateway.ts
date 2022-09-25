@@ -556,7 +556,6 @@ export class GeneralGateway
 	@SubscribeMessage('spectate')
 	spectate(client: Socket, player: string) {
 		let game: Game = this.gameService.spectate(client.data.user);
-		// console.log("game: ", game);
 		client.join(game.id);
 		client.emit('spectate', player);
 	}
@@ -621,9 +620,9 @@ export class GeneralGateway
 
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveGame')
-	leaveGame(client: Socket, roomId: string) {
+	async leaveGame(client: Socket, roomId: string) {
 		// console.log(leftRoom)
-		this.gameService.quitGame(client.data.user);
+		await this.gameService.quitGame(client.data.user);
 		client.leave(roomId);
 	}
 
@@ -632,11 +631,10 @@ export class GeneralGateway
 	async checkChangedTab(client: Socket) {
 		if (client.data.user.currentMatch != null) {
 			//besoin de faire leave la room aux 2 joueurs
-			// console.log("entered quit game if gateway");
 			// this.gameService.quitGame(client.data.user);
-			console.log("entered change tab gateway");
-			console.log("client.data.user.currentMatch", client.data.user.currentMatch)
 			client.leave(client.data.user.currentMatch);
+			await this.gameService.firstPlayerQuit(client.data.user);
+			//if le client qui c est barre est un joueur alors :
 			this.server.to(client.data.user.currentMatch).emit('clientLeft');
 		}
 		else {

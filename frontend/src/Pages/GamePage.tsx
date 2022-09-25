@@ -20,7 +20,6 @@ const GamePage = () => {
 			setGame(updatedGame)
 		})
 		socket.on('clientLeft', () => {
-			console.log("entered client left front")
 			socket.emit('leaveGame', game?.id)
 			navigate("/");
 		});

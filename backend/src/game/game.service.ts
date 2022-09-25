@@ -59,7 +59,6 @@ export class GameService {
 	}
 
 	getMyGame(userId: string) {
-		console.log("this.games", this.games);
 		for (const value of this.games.values()) {
 			if (value.player1.user.userId === userId || value.player2.user.userId === userId) {
 				return value;
@@ -308,13 +307,18 @@ export class GameService {
 		this.matchMakingMap.delete(user.userId)
 	}
 
+
+	async firstPlayerQuit(user: UserEntity) {
+		user.currentMatch = null;
+		await this.userRepo.save(user);
+	}
+
 	async quitGame(user: UserEntity) {
 		// let game: Game = this.getMyGame(user.userId);
 		// console.log("quit game: ", game);
 		// if (game)
 		// game.state = "quit";
 		// if (game) {
-		console.log("entered quit game: ", user);
 		this.games.delete(user.currentMatch);
 		user.currentMatch = null;
 		// let user1: UserEntity = game.player1.user;
