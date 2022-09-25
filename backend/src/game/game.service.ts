@@ -100,7 +100,7 @@ export class GameService {
 				score: 0,
 			},
 			state: "readyPlay",
-			type: "online"
+			type: "local"
 		}
 		this.games.set(game.id, game);
 		return game;
@@ -155,11 +155,11 @@ export class GameService {
 	}
 
 	checkWinner(game: Game) {
-		if ((game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) && game.state === 'ongoing' ) {
+		if ((game.player1.score >= MAX_SCORE || game.player2.score >= MAX_SCORE) && game.state === 'ongoing') {
 			game.state = "end";
 			let gameToSend: Game = Object.assign({}, game);
 			this.games.delete(game.id);
-			this.endGame(gameToSend);
+			// this.endGame(gameToSend);
 		}
 
 	}
