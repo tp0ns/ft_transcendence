@@ -254,16 +254,16 @@ export class GameService {
 				game.state = this.checkWinner(game);
 				this.moveBall(game.grid.ball);
 				server.to(gameId).emit('updatedGame', game);
-				if (game.state === "end" || game.state === "readyPlay") {
+				if (game.state === "end" || game.state === "readyPlay" || game.state === "quit") {
 					if (game.state === "end") {
 						this.endGame(game);
 						this.games.delete(game.id);
 						client.leave(gameId);
 					}
-					// if (game.state === "quit") {
-					// 	this.games.delete(game.id);
-					// 	client.leave(gameId);
-					// }
+					if (game.state === "quit") {
+						this.games.delete(game.id);
+						client.leave(gameId);
+					}
 					clearInterval(timer);
 				}
 			}, INTERVAL_SPEED)
@@ -314,7 +314,8 @@ export class GameService {
 
 	async quitGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
-		this.games[game.id].state = "quit";
+		if (game)
+			game.state = "quit";
 		if (game) {
 			let winner: UserEntity;
 			let loser: UserEntity = user;
