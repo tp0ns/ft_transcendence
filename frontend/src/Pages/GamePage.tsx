@@ -66,7 +66,7 @@ const GamePage = () => {
 				ref={autoFocusRef}
 				onKeyDown={handleKeyDown}
 			>
-				{game && game.state != "end" ? (
+				{game && game.state !== "end" ? (
 					<React.Fragment>
 						<GameCanvas className={classes.gameCanvas} game={game} />
 						<div className={classes.badges}>
@@ -100,9 +100,18 @@ const GamePage = () => {
 							</div>
 						</div>
 					</React.Fragment>
-				) : (
-					<p>There is a winner</p>
-				)}
+				) : game?.state === "end" ? (
+				<div className={classes.win}>
+					<div className={classes.username}>
+						{game.player1.score > game.player2.score ? game.player1.user.username : game.player2.user.username} is the winner !
+					</div>
+					<div onClick={() => {navigate("/")}} className={classes.home}>Back Home</div>
+				</div>
+				) : 
+				<div className={classes.wait}>
+					<div className={classes.loading}></div>
+					<div onClick={() => {navigate("/")}} className={classes.home}>Back Home</div>
+				</div>}
 			</div>
 		</Layout>
 	);

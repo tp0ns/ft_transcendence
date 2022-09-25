@@ -70,3 +70,62 @@
 		width: 55%;
 	}
 }
+
+.home {
+	aspect-ratio: calc(137 / 20);
+	cursor: pointer;
+	font-size: 2vw;
+	width: 16vw;
+	text-align: center;
+	border: 1px solid #3a3636;
+	border-radius: 20px;
+	background-color: #3a3636;
+	color: #fdd05d;
+	padding-block: 10px;
+	padding-inline: 5px;
+}
+
+.win {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 20px;
+	width: 100%;
+	padding-block: 20px;
+}
+
+.wait {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 30px;
+	top:50%;
+	width: 100%;
+	padding-block: 20px;
+}
+
+.loading::before {
+	animation: 1.5s linear infinite spinner;
+	animation-play-state: inherit;
+	border: solid 5px #3a3636;
+	border-bottom-color: #fdd05d;
+	border-radius: 50%;
+	content: "";
+	position: absolute;
+	height: 40px;
+	transform: translate3d(-50%, -50%, 0);
+	width: 40px;
+	will-change: transform;
+}
+
+@keyframes spinner {
+	0% {
+		transform: translate3d(-50%, -50%, 0) rotate(0deg);
+	}
+	100% {
+		transform: translate3d(-50%, -50%, 0) rotate(360deg);
+	}
+}
