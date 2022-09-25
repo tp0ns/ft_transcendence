@@ -86,11 +86,14 @@ export class GeneralGateway
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
 			if (client.data.user.currentMatch != null) {
-				this.gameService.quitGame(client.data.user);
-				this.server.to('client.data.user.currentMatch').emit('errorEvent', 'Disconnection of the game');
-
+				client.leave(client.data.user.currentMatch);
+				this.server.to(client.data.user.currentMatch).emit('clientLeft');
+				await this.gameService.firstPlayerQuit(client.data.user);
 			}
-			this.server.emit('updateInvitation');
+			else {
+				this.gameService.deleteAllUserInvite(client.data.user.userId);
+				this.server.emit('updateInvitation');
+			}
 			this.userService.disconnectClient(client.data.user);
 		}
 		this.server.emit('updatedRelations');
@@ -508,9 +511,14 @@ export class GeneralGateway
 	@SubscribeMessage('matchmaking')
 	matchmaking(client: Socket) {
 		const matchMaking = this.gameService.matchmaking(client);
-		if (!matchMaking) return client.emit('waitingMatchmaking');
+		if (!matchMaking){
+			this.gameService.deleteReceivedInvite(client.data.user.userId);
+			this.server.emit("updateInvitation");
+			return client.emit('waitingMatchmaking')
+		};
 		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
 		client.emit('matchAccepted', matchMaking.roomId);
+
 		this.gameService.deleteMatchMaking(matchMaking.player1.userId);
 		this.initGame(matchMaking);
 	}
