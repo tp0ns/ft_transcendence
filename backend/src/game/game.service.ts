@@ -593,7 +593,6 @@ export class GameService {
 			if (matchmake.value[1].player2 === null) {
 				matchmake.value[1].player2 = user;
 				return matchmake.value[1];
-				//delete le matchmaking
 			}
 		}
 		this.matchMakingMap.set(user.userId, {
