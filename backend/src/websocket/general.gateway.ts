@@ -85,6 +85,11 @@ export class GeneralGateway
 	async handleDisconnect(client: Socket) {
 		this.logger.log(`Client disconnected: ${client.id}`);
 		if (client.data.user) {
+			if (this.gameService.isSpectator(client.data.user.userId)) {
+				client.leave(client.data.user.currentMatch);
+				this.userService.disconnectClient(client.data.user);
+				return;
+			}
 			if (client.data.user.currentMatch != null) {
 				client.leave(client.data.user.currentMatch);
 				this.server.to(client.data.user.currentMatch).emit('clientLeft');
@@ -518,7 +523,7 @@ export class GeneralGateway
 	@SubscribeMessage('matchmaking')
 	matchmaking(client: Socket) {
 		const matchMaking = this.gameService.matchmaking(client);
-		if (!matchMaking){
+		if (!matchMaking) {
 			this.gameService.deleteReceivedInvite(client.data.user.userId);
 			this.server.emit("updateInvitation");
 			return client.emit('waitingMatchmaking')
