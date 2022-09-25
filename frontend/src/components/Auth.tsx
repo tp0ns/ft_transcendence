@@ -11,7 +11,7 @@ const Auth: React.FC<{ children: JSX.Element }> = (props) => {
 
 	useEffect(() => {
 		if (location.pathname != "/game" && location.pathname != "/waiting") {
-			console.log("changedTab");
+			socket.emit("notPlaying");
 			socket.emit("changedTab");
 		}
 	}, [location]);
