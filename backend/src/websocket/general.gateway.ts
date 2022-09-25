@@ -620,11 +620,24 @@ export class GeneralGateway
 	}
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('leaveGame')
+	leaveGame(client: Socket, roomId: string) {
+		// console.log(leftRoom)
+		this.gameService.quitGame(client.data.user);
+		client.leave(roomId);
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('changedTab')
 	async checkChangedTab(client: Socket) {
 		if (client.data.user.currentMatch != null) {
-			//besoin de faire leave la room aux 2 joueurs 
-			this.gameService.quitGame(client.data.user);
+			//besoin de faire leave la room aux 2 joueurs
+			// console.log("entered quit game if gateway");
+			// this.gameService.quitGame(client.data.user);
+			console.log("entered change tab gateway");
+			console.log("client.data.user.currentMatch", client.data.user.currentMatch)
+			client.leave(client.data.user.currentMatch);
+			this.server.to(client.data.user.currentMatch).emit('clientLeft');
 		}
 		else {
 			this.gameService.changedTab(client.data.user);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { socket } from "../App";
 import GameCanvas from "../components/game/GameCanvas";
 import { Game } from "../components/game/interfaces/game.interfaces";
@@ -9,6 +10,7 @@ import classes from "./GamePage.module.css"
 const GamePage = () => {
 	const [game, setGame] = useState<Game>();
 	const autoFocusRef = useRef<HTMLDivElement>(null)
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (autoFocusRef.current)
@@ -17,6 +19,11 @@ const GamePage = () => {
 		socket.on('updatedGame', (updatedGame) => {
 			setGame(updatedGame)
 		})
+		socket.on('clientLeft', () => {
+			console.log("entered client left front")
+			socket.emit('leaveGame', game?.id)
+			navigate("/");
+		});
 	}, [])
 
 	const handleKeyDown = (event: any) => {
