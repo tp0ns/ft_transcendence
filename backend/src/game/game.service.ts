@@ -110,7 +110,7 @@ export class GameService {
 		let game: Game = this.games.get(gameId);
 		let padToMove: Pad = game.grid.pad2;
 
-		if (game.player2.user.userId === user.userId)
+		if (game.player1.user.userId === user.userId)
 			padToMove = game.grid.pad1;
 		if (type === "local")
 			padToMove = game.grid.pad2;
