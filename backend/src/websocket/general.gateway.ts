@@ -495,19 +495,6 @@ export class GeneralGateway
 	}
 
 	/**
-	 * @brief Si un joueur qui a envoye une invitation
-	 * quitte la partie ou si un joueur refuse une invitation
-	 * => annulation de l'invit
-	 * @param client personne concernee par l'annulation
-	 */
-	@UseGuards(WsGuard)
-	@SubscribeMessage('deleteInvitation')
-	async deleteInvitation(client: Socket) {
-		//  await this.gameService.deleteInvitation(client.data.user);
-		this.server.emit('updateInvitation');
-	}
-
-	/**
 	 * __  __       _______ _____ _    _   __  __          _  _______ _   _  _____
 	 * |  \/  |   /\|__   __/ ____| |  | | |  \/  |   /\   | |/ /_   _| \ | |/ ____|
 	 * | \  / |  /  \  | | | |    | |__| | | \  / |  /  \  | ' /  | | |  \| | |  __
@@ -542,7 +529,6 @@ export class GeneralGateway
 	@SubscribeMessage('spectate')
 	spectate(client: Socket, player: string) {
 		let game: Game = this.gameService.spectate(client.data.user);
-		// console.log("game: ", game);
 		client.join(game.id);
 		client.emit('spectate', player);
 	}
@@ -606,11 +592,23 @@ export class GeneralGateway
 	}
 
 	@UseGuards(WsGuard)
+	@SubscribeMessage('leaveGame')
+	async leaveGame(client: Socket, roomId: string) {
+		// console.log(leftRoom)
+		await this.gameService.quitGame(client.data.user);
+		client.leave(roomId);
+	}
+
+	@UseGuards(WsGuard)
 	@SubscribeMessage('changedTab')
 	async checkChangedTab(client: Socket) {
 		if (client.data.user.currentMatch != null) {
-			//besoin de faire leave la room aux 2 joueurs 
-			this.gameService.quitGame(client.data.user);
+			//besoin de faire leave la room aux 2 joueurs
+			// this.gameService.quitGame(client.data.user);
+			client.leave(client.data.user.currentMatch);
+			//if le client qui c est barre est un joueur alors :
+			this.server.to(client.data.user.currentMatch).emit('clientLeft');
+			await this.gameService.firstPlayerQuit(client.data.user);
 		}
 		else {
 			this.gameService.changedTab(client.data.user);

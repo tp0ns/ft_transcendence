@@ -110,7 +110,7 @@ export class GameService {
 		let game: Game = this.games.get(gameId);
 		let padToMove: Pad = game.grid.pad2;
 
-		if (game.player2.user.userId === user.userId)
+		if (game.player1.user.userId === user.userId)
 			padToMove = game.grid.pad1;
 		if (type === "local")
 			padToMove = game.grid.pad2;
@@ -254,14 +254,9 @@ export class GameService {
 				game.state = this.checkWinner(game);
 				this.moveBall(game.grid.ball);
 				server.to(gameId).emit('updatedGame', game);
-				if (game.state === "end" || game.state === "readyPlay" || game.state === "quit") {
+				if (game.state === "end" || game.state === "readyPlay") {
 					if (game.state === "end") {
 						this.endGame(game);
-						this.games.delete(game.id);
-						client.leave(gameId);
-					}
-					if (game.state === "quit") {
-						// console.log("entered quit")
 						this.games.delete(game.id);
 						client.leave(gameId);
 					}
@@ -312,32 +307,27 @@ export class GameService {
 		this.matchMakingMap.delete(user.userId)
 	}
 
+
+	async firstPlayerQuit(user: UserEntity) {
+		user.currentMatch = null;
+		await this.userRepo.save(user);
+	}
+
 	async quitGame(user: UserEntity) {
-		let game: Game = this.getMyGame(user.userId);
+		// let game: Game = this.getMyGame(user.userId);
 		// console.log("quit game: ", game);
-		if (game)
-			game.state = "quit";
-		if (game) {
-			let user1: UserEntity = game.player1.user;
-			let user2: UserEntity = game.player2.user;
-			user1.currentMatch = null;
-			user2.currentMatch = null;
-			this.userRepo.save(user1);
-			this.userRepo.save(user2);
-			// if (game.player2.user.userId === user.userId) {
-			// 	winner = game.player1.user;
-			// 	game.player1.score = 5;
-			// 	game.player2.score = 0;
-			// 	await this.setMatchHistory(game.player1, game.player2);
-			// }
-			// else {
-			// 	winner = game.player2.user;
-			// 	game.player2.score = 5;
-			// 	game.player1.score = 0;
-			// 	await this.setMatchHistory(game.player2, game.player1);
-			// }
-			// this.setGameInfos(winner, loser);
-		}
+		// if (game)
+		// game.state = "quit";
+		// if (game) {
+		this.games.delete(user.currentMatch);
+		user.currentMatch = null;
+		// let user1: UserEntity = game.player1.user;
+		// let user2: UserEntity = game.player2.user;
+		// user1.currentMatch = null;
+		// user2.currentMatch = null;
+		await this.userRepo.save(user);
+		// await this.userRepo.save(user2);
+		// }
 	}
 
 	cleanGame(user: UserEntity) {
@@ -348,10 +338,10 @@ export class GameService {
 	}
 
 	/**
- * ------------------ SPECTATE  ------------------ *
- *
- * -  spectate(user)
- */
+	* ------------------ SPECTATE  ------------------ *
+	*
+	* -  spectate(user)
+	*/
 
 	spectate(user: UserEntity) {
 		if (user.currentMatch != null)
