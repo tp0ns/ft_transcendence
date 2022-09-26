@@ -8,7 +8,7 @@ import {
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { QueryFailedError } from 'typeorm';
-@Catch(WsException, QueryFailedError, ForbiddenException)
+@Catch(WsException, QueryFailedError, ForbiddenException, BadRequestException)
 export class globalExceptionFilter extends BaseWsExceptionFilter {
 	public catch(
 		exception: WsException | QueryFailedError,
@@ -26,9 +26,9 @@ export class globalExceptionFilter extends BaseWsExceptionFilter {
 		}else if (exception instanceof WsException) {
 			error = exception.message;
 		} 
-		// else if (exception instanceof HttpException) {
-		// 	error = exception.getResponse();
-		// } 
+		else if (exception instanceof HttpException) {
+			error = exception.getResponse();
+		} 
 		else if (exception instanceof QueryFailedError) {
 			error = exception.message;
 		}
