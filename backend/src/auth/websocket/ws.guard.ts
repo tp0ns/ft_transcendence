@@ -31,8 +31,6 @@ export class WsGuard implements CanActivate {
 			if (user) return await true;
 			return await false;
 		} catch (err) {
-			console.log('Error occured in ws guard : ');
-			console.log(err.message);
 			throw new WsException(err.message);
 		}
 	}
