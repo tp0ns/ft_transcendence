@@ -1,7 +1,6 @@
 import { MaxLength } from 'class-validator';
 import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { Match } from 'src/game/interfaces/match.interface';
-import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { MatchHistoryEntity } from 'src/game/matchHistory/matchHistory.entity';
 import {
 	Column,
@@ -59,18 +58,6 @@ export class UserEntity {
 		nullable: true,
 	})
 	localMatch: string;
-
-	@OneToMany(
-		() => InvitationEntity,
-		(InvitationEntity) => InvitationEntity.creator,
-	)
-	sentInvitations: InvitationEntity[];
-
-	@OneToMany(
-		() => InvitationEntity,
-		(InvitationEntity) => InvitationEntity.receiver,
-	)
-	receivedInvitations: InvitationEntity[];
 
 	@OneToMany(() => RelationEntity, (RelationEntity) => RelationEntity.creator)
 	sentRelations: RelationEntity[];

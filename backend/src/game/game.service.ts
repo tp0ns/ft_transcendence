@@ -12,7 +12,6 @@ import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { GridFSBucket, Repository } from 'typeorm';
 import { Ball, Coordinate, Game, Game_State, Grid, Pad, Player } from './interfaces/game.interface';
-import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
@@ -23,9 +22,6 @@ import { Match } from 'src/game/interfaces/match.interface';
 import { arrayBuffer } from 'stream/consumers';
 
 
-let match: Match;
-
-// let games = new Map<string, Game>();
 let PAD_SPEED = 20;
 export let BALL_SPEED = 5;
 let INTERVAL_SPEED = 15;
@@ -38,8 +34,6 @@ export class GameService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private userRepo: Repository<UserEntity>,
-		@InjectRepository(InvitationEntity)
-		private invitationRepository: Repository<InvitationEntity>,
 		@InjectRepository(AchievementsEntity)
 		private AchievementsRepository: Repository<AchievementsEntity>,
 		@InjectRepository(MatchHistoryEntity)

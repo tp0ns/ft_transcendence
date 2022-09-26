@@ -24,7 +24,6 @@ import { MessagesEntity } from 'src/chat/messages/messages.entity';
 import { MessageService } from 'src/chat/messages/messages.service';
 import { AchievementsEntity } from 'src/game/achievements/achievements.entity';
 import { invitationInterface } from 'src/game/invitations/invitation.interface';
-import InvitationEntity from 'src/game/invitations/invitations.entity';
 import { globalExceptionFilter } from 'src/globalException.filter';
 import RelationEntity from 'src/relations/models/relations.entity';
 import { RelationsService } from 'src/relations/relations.service';

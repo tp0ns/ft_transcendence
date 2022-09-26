@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import { io } from "socket.io-client";
 import Auth from "./components/Auth";
 import ChatPage from "./Pages/ChatPage/ChatPage";
-import Debug from "./Pages/Debug";
 import GamePage from "./Pages/GamePage";
 import LoginPage from "./Pages/Login/LoginPage/LoginPage";
 import SocialPage from "./Pages/SocialPage/SocialPage";
@@ -85,7 +84,6 @@ function App() {
 					</Auth>
 				}
 			/>
-			<Route path="debug" element={<Debug />} />
 		</Routes>
 	);
 }
