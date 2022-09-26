@@ -4,11 +4,15 @@ services:
     image: traefik:latest
     container_name: traefik
     command:
-      - "--log.level=ERROR"
+      # uncomment following commands for debugging !
+      # - "--log.level=ERROR"
+      # - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:8080"
     ports:
+      # Change this to a value above 100 for correction
+      # - 80:80
       - 8080:8080
     volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock:ro
@@ -18,11 +22,10 @@ services:
   pong-frontend:
     build:
       context: ./frontend
-      target: production
+      target: dev
     container_name: frontend
-    restart: on-failure:4
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./frontend/:/frontend/:cached
     networks:
       - front_back
     labels:
@@ -35,13 +38,12 @@ services:
   pong-backend:
     build:
       context: ./backend
-      target: production
+      target: dev
     container_name: backend
-    restart: on-failure:4
+    volumes:
+      - ./backend/:/backend/:cached
     env_file:
       - .env
-    environment:
-      - NODE_ENV=production
     networks:
       - back_db
       - front_back
@@ -55,13 +57,26 @@ services:
   pong-db:
     image: postgres:alpine
     container_name: db
-    restart: always
     env_file:
       - .env
     networks:
       - back_db
     volumes:
-      - /var/lib/postgresql/
+      - ${PRIVATE_PATH_DB}:/var/lib/postgresql/:cached
+
+  pong-dev:
+    image: dpage/pgadmin4
+    profiles:
+      - dev
+    container_name: dev
+    volumes:
+      - ${PRIVATE_PATH_DEV}:/var/lib/pgadmin:cached
+    ports:
+      - "5050:80"
+    env_file:
+      - .env
+    networks:
+      - back_db
 
 networks:
   front_back:

@@ -1,0 +1,28 @@
+{
+	http_port 3001
+	auto_https off
+	log {
+		output stdout
+		level error
+		format console
+	}
+}
+
+http:// {
+	log {
+		output stdout
+		level error
+		format console
+	}
+
+	route {
+		header Cache-Control max-age=3600
+		header /public/* Cache-Control max-age=31536000
+	}
+
+	encode * gzip zstd
+
+	root * /site
+	try_files {path} /index.html
+	file_server
+}
