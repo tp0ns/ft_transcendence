@@ -78,6 +78,8 @@ export class GameService {
 			type: 'online',
 			spectatorIds: [],
 		}
+		this.userService.playingClient(invitation.player1);
+		this.userService.playingClient(invitation.player2);
 		this.games.set(invitation.roomId, game);
 		return game;
 	}
@@ -107,6 +109,8 @@ export class GameService {
 
 	movePad(user: UserEntity, direction: string, gameId: string, type: string) {
 		let game: Game = this.games.get(gameId);
+		if (!game || !game.player1 || !game.player2)
+			return game;
 		if (user.userId !== game.player1.user.userId && user.userId !== game.player2.user.userId)
 			return game;
 
@@ -332,17 +336,19 @@ export class GameService {
 
 
 	async firstPlayerQuit(user: UserEntity) {
+		this.userService.notPlayingClient(user);
 		user.currentMatch = null;
 		await this.userRepo.save(user);
 	}
 
 	async quitGame(user: UserEntity) {
+		this.userService.notPlayingClient(user);
 		this.games.delete(user.currentMatch);
 		user.currentMatch = null;
 		await this.userRepo.save(user);
 	}
 
-	leaveLocalGame(user : UserEntity) {
+	leaveLocalGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
 		this.games.delete(game.id);
 		user.localMatch = null;

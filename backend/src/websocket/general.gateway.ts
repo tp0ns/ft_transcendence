@@ -94,8 +94,7 @@ export class GeneralGateway
 				this.server.to(client.data.user.currentMatch).emit('clientLeft');
 				await this.gameService.firstPlayerQuit(client.data.user);
 			}
-			else if (client.data.user.localMatch != null)
-			{
+			else if (client.data.user.localMatch != null) {
 				client.leave(client.data.user.currentMatch);
 				this.gameService.leaveLocalGame(client.data.user);
 			}
@@ -616,6 +615,7 @@ export class GeneralGateway
 	@UseGuards(WsGuard)
 	@SubscribeMessage('leaveGame')
 	async leaveGame(client: Socket, roomId: string) {
+		this.userService.notPlayingClient(client.data.user);
 		await this.gameService.quitGame(client.data.user);
 		client.leave(roomId);
 	}
@@ -632,8 +632,7 @@ export class GeneralGateway
 			this.server.to(client.data.user.currentMatch).emit('clientLeft');
 			await this.gameService.firstPlayerQuit(client.data.user);
 		}
-		else if (client.data.user.localMatch != null)
-		{
+		else if (client.data.user.localMatch != null) {
 			client.leave(client.data.user.currentMatch);
 			this.gameService.leaveLocalGame(client.data.user);
 		}
