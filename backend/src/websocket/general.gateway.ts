@@ -529,7 +529,7 @@ export class GeneralGateway
 		const matchMaking = this.gameService.matchmaking(client);
 		if (!matchMaking) {
 			this.gameService.deleteReceivedInvite(client.data.user.userId);
-			this.server.emit("updateInvitation");
+			client.emit('updateInvitation');
 			return client.emit('waitingMatchmaking')
 		};
 		this.server.to(matchMaking.id).emit('matchAccepted', matchMaking.roomId);
