@@ -107,6 +107,8 @@ export class GameService {
 
 	movePad(user: UserEntity, direction: string, gameId: string, type: string) {
 		let game: Game = this.games.get(gameId);
+		if (!game || !game.player1 || !game.player2)
+			return game;
 		if (user.userId !== game.player1.user.userId && user.userId !== game.player2.user.userId)
 			return game;
 
