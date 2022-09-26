@@ -143,10 +143,11 @@ export class GameService {
 		return wall;
 	}
 
-	resetGrid(grid: Grid) {
-		grid.ball.direction.x = -BALL_SPEED;
-		if (grid.ball.pos.x <= 0)
+	resetGrid(grid: Grid, direction: string) {
+		if (direction === "right")
 			grid.ball.direction.x = BALL_SPEED;
+		if (direction === "left")
+			grid.ball.direction.x = -BALL_SPEED;
 		grid.ball.direction.y = BALL_SPEED / 4;
 		grid.ball.pos.x = grid.size.x / 2;
 		grid.ball.pos.y = grid.size.y / 2;
@@ -239,8 +240,12 @@ export class GameService {
 		this.isTopWallCollision(game.grid.ball, topWall)
 		this.isBottomWallCollision(game.grid.ball, bottomWall)
 		if (!padCollision) {
-			if (this.isLeftWallCollision(game.grid.ball, leftWall, game) || this.isRightWallCollision(game.grid.ball, rightWall, game)) {
-				this.resetGrid(game.grid);
+			if (this.isLeftWallCollision(game.grid.ball, leftWall, game)) {
+				this.resetGrid(game.grid, "right");
+				game.state = "readyPlay";
+			}
+			if (this.isRightWallCollision(game.grid.ball, rightWall, game)) {
+				this.resetGrid(game.grid, "left");
 				game.state = "readyPlay";
 			}
 		}

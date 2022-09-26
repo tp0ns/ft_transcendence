@@ -60,20 +60,6 @@ const GamePage = () => {
 					roomId: game.id,
 					type: "online",
 				});
-			// if (game.type === "local") {
-			// 	if (event.keyCode === 38)
-			// socket.emit("movePad", {
-			// 	direction: "up",
-			// 	roomId: game.id,
-			// 	type: "local",
-			// });
-			// 	if (event.keyCode === 40)
-			// socket.emit("movePad", {
-			// 	direction: "down",
-			// 	roomId: game.id,
-			// 	type: "local",
-			// });
-			// }
 			if (game.state === "readyPlay" && event.key === "Enter")
 				socket.emit('gameLoop', game.id);
 		}
