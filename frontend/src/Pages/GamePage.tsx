@@ -13,10 +13,12 @@ const GamePage = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		socket.emit('playing');
 		if (autoFocusRef.current)
 			autoFocusRef.current.focus()
 		socket.emit('getMyGame');
 		socket.on('updatedGame', (updatedGame) => {
+			socket.emit('playing');
 			console.log("updatedGame", updatedGame);
 			setGame(updatedGame)
 		})
