@@ -26,8 +26,7 @@ const GamePage = () => {
 	}, [])
 
 	const handleMouseWheel = (event: any) => {
-		console.log(event.nativeEvent.wheelDelta);
-		if (game) {
+		if (game && game.state != "end") {
 			if (game.type === "local") {
 				if (event.nativeEvent.wheelDelta > 0)
 					socket.emit("movePad", {
@@ -47,7 +46,7 @@ const GamePage = () => {
 	}
 
 	const handleKeyDown = (event: any) => {
-		if (game) {
+		if (game && game.state !== "end") {
 			if (event.key === "w")
 				socket.emit("movePad", {
 					direction: "up",
