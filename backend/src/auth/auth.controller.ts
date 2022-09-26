@@ -97,16 +97,14 @@ export class AuthController {
 	// @UseGuards(JwtAuthGuard)
 	@Get('login/:id')
 	async dummyLogin(@Param('id') id: string, @Res() res) {
-		// console.log(id);
 		const dummy_user = await this.userService.getUserById(id);
-		// console.log(dummy_user);
 		return await this.authService.login(dummy_user, res);
 	}
 
 	/**
 	 * Supprime le contenu du cookie pour qu'il ne contienne plus de JWT.
 	 * L'utilisateur n'est donc plus identifié.
-	 * @todo La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
+	 * La logique, Unauthorized => Page de connexion, voir "authentication extending guards"
 	 */
 	@UseGuards(JwtAuthGuard)
 	@Get('logout')

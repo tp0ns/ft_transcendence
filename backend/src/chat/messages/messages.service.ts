@@ -29,7 +29,6 @@ export class MessageService {
 	 * @param msg
 	 * @returns
 	 *
-	 * @todo peut etre faire un orderBy
 	 */
 	async addNewMessage(
 		sender: UserEntity,

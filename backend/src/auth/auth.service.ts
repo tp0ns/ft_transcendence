@@ -19,7 +19,6 @@ export class AuthService {
 	 *	- on a choisit de le store sous forme de cookie pour garder la logique dans le back
 	 * On utilise res pour generer le nouveau cookie et nous rediriger a la page d'acceuil (fin de l'Auth)
 	 *
-	 * @todo Il faut ajouter twofaAuthenticated: boolean au payload pour la 2FA
 	 */
 	async login(user: UserEntity, res: Response) {
 		const payload = {

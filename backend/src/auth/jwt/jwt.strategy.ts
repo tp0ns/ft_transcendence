@@ -39,8 +39,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	 * @param payload
 	 * @returns a UserEntity.
 	 *
-	 * @todo C'est ici qu'on va integrer le 2FA, notament grace au payload avec un booleen twofaAuthenticated.
-	 * @coucou Elias <3
 	 */
 	async validate(req: Request, payload: any) {
 		const user = await this.userService.getUserById(payload.sub);

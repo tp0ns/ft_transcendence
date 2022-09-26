@@ -47,7 +47,6 @@ const SettingsUser: React.FC<{
 			}),
 		});
 		if (!response.ok) {
-			console.log(response);
 			return ctx_error?.changeError("Username is invalid");
 		}
 		props.onUserchange(await response.json());

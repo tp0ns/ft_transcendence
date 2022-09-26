@@ -25,6 +25,27 @@ const GamePage = () => {
 		});
 	}, [])
 
+	const handleMouseWheel = (event: any) => {
+		console.log(event.nativeEvent.wheelDelta);
+		if (game) {
+			if (game.type === "local") {
+				if (event.nativeEvent.wheelDelta > 0)
+					socket.emit("movePad", {
+						direction: "up",
+						roomId: game.id,
+						type: "local",
+					});
+				else {
+					socket.emit("movePad", {
+						direction: "down",
+						roomId: game.id,
+						type: "local",
+					});
+				}
+			}
+		}
+	}
+
 	const handleKeyDown = (event: any) => {
 		if (game) {
 			if (event.key === "w")
@@ -39,20 +60,6 @@ const GamePage = () => {
 					roomId: game.id,
 					type: "online",
 				});
-			if (game.type === "local") {
-				if (event.keyCode === 38)
-					socket.emit("movePad", {
-						direction: "up",
-						roomId: game.id,
-						type: "local",
-					});
-				if (event.keyCode === 40)
-					socket.emit("movePad", {
-						direction: "down",
-						roomId: game.id,
-						type: "local",
-					});
-			}
 			if (game.state === "readyPlay" && event.key === "Enter")
 				socket.emit('gameLoop', game.id);
 		}
@@ -65,8 +72,9 @@ const GamePage = () => {
 				className={classes.autoFocus}
 				ref={autoFocusRef}
 				onKeyDown={handleKeyDown}
+				onWheel={handleMouseWheel}
 			>
-				{game && game.state != "end" ? (
+				{game && game.state !== "end" ? (
 					<React.Fragment>
 						<GameCanvas className={classes.gameCanvas} game={game} />
 						<div className={classes.badges}>
@@ -100,9 +108,18 @@ const GamePage = () => {
 							</div>
 						</div>
 					</React.Fragment>
-				) : (
-					<p>There is a winner</p>
-				)}
+				) : game?.state === "end" ? (
+				<div className={classes.win}>
+					<div className={classes.username}>
+						{game.player1.score > game.player2.score ? game.player1.user.username : game.player2.user.username} is the winner !
+					</div>
+					<div onClick={() => {navigate("/")}} className={classes.home}>Back Home</div>
+				</div>
+				) : 
+				<div className={classes.wait}>
+					<div className={classes.loading}></div>
+					<div onClick={() => {navigate("/")}} className={classes.home}>Back Home</div>
+				</div>}
 			</div>
 		</Layout>
 	);

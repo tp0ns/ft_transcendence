@@ -12,7 +12,6 @@ import { UserEntity } from 'src/user/models/user.entity';
 import { UserService } from 'src/user/user.service';
 import { GridFSBucket, Repository } from 'typeorm';
 import { Ball, Coordinate, Game, Game_State, Grid, Pad, Player } from './interfaces/game.interface';
-import InvitationEntity from './invitations/invitations.entity';
 import { AchievementsEntity } from './achievements/achievements.entity';
 import { MatchHistoryEntity } from './matchHistory/matchHistory.entity';
 import { invitationInterface } from './invitations/invitation.interface';
@@ -23,9 +22,6 @@ import { Match } from 'src/game/interfaces/match.interface';
 import { arrayBuffer } from 'stream/consumers';
 
 
-let match: Match;
-
-// let games = new Map<string, Game>();
 let PAD_SPEED = 20;
 export let BALL_SPEED = 5;
 let INTERVAL_SPEED = 15;
@@ -38,8 +34,6 @@ export class GameService {
 	constructor(
 		@InjectRepository(UserEntity)
 		private userRepo: Repository<UserEntity>,
-		@InjectRepository(InvitationEntity)
-		private invitationRepository: Repository<InvitationEntity>,
 		@InjectRepository(AchievementsEntity)
 		private AchievementsRepository: Repository<AchievementsEntity>,
 		@InjectRepository(MatchHistoryEntity)
@@ -106,6 +100,8 @@ export class GameService {
 			spectatorIds: [],
 		}
 		this.games.set(game.id, game);
+		user.localMatch = game.id;
+		this.userRepo.save(user);
 		return game;
 	}
 
@@ -147,10 +143,11 @@ export class GameService {
 		return wall;
 	}
 
-	resetGrid(grid: Grid) {
-		grid.ball.direction.x = -BALL_SPEED;
-		if (grid.ball.pos.x <= 0)
+	resetGrid(grid: Grid, direction: string) {
+		if (direction === "right")
 			grid.ball.direction.x = BALL_SPEED;
+		if (direction === "left")
+			grid.ball.direction.x = -BALL_SPEED;
 		grid.ball.direction.y = BALL_SPEED / 4;
 		grid.ball.pos.x = grid.size.x / 2;
 		grid.ball.pos.y = grid.size.y / 2;
@@ -243,8 +240,12 @@ export class GameService {
 		this.isTopWallCollision(game.grid.ball, topWall)
 		this.isBottomWallCollision(game.grid.ball, bottomWall)
 		if (!padCollision) {
-			if (this.isLeftWallCollision(game.grid.ball, leftWall, game) || this.isRightWallCollision(game.grid.ball, rightWall, game)) {
-				this.resetGrid(game.grid);
+			if (this.isLeftWallCollision(game.grid.ball, leftWall, game)) {
+				this.resetGrid(game.grid, "right");
+				game.state = "readyPlay";
+			}
+			if (this.isRightWallCollision(game.grid.ball, rightWall, game)) {
+				this.resetGrid(game.grid, "left");
 				game.state = "readyPlay";
 			}
 		}
@@ -302,6 +303,11 @@ export class GameService {
 	 * @todo CHANGER LE SCORE A 5
 	 */
 	async endGame(game: Game) {
+		if (game.type === 'local') {
+			let user: UserEntity = game.player1.user;
+			user.localMatch = null;
+			this.userRepo.save(user);
+		}
 		if (game.type != 'local') {
 			let winner: UserEntity;
 			let loser: UserEntity;
@@ -331,20 +337,16 @@ export class GameService {
 	}
 
 	async quitGame(user: UserEntity) {
-		// let game: Game = this.getMyGame(user.userId);
-		// console.log("quit game: ", game);
-		// if (game)
-		// game.state = "quit";
-		// if (game) {
 		this.games.delete(user.currentMatch);
 		user.currentMatch = null;
-		// let user1: UserEntity = game.player1.user;
-		// let user2: UserEntity = game.player2.user;
-		// user1.currentMatch = null;
-		// user2.currentMatch = null;
 		await this.userRepo.save(user);
-		// await this.userRepo.save(user2);
-		// }
+	}
+
+	leaveLocalGame(user : UserEntity) {
+		let game: Game = this.getMyGame(user.userId);
+		this.games.delete(game.id);
+		user.localMatch = null;
+		this.userRepo.save(user);
 	}
 
 	cleanGame(user: UserEntity) {
@@ -480,6 +482,8 @@ export class GameService {
 			return "You can't invite someone while playing";
 		if (userToInvite.currentMatch != null)
 			return 'This user is already in game.';
+		if (userToInvite.localMatch != null)
+			return 'This user is already in a game';
 		if (this.inviteMap.has(user.userId))
 			return "You can't send more than one invitation.";
 		if (this.inviteMap.has(userToInviteId))
@@ -520,7 +524,6 @@ export class GameService {
 	 * @returns l'invitation pour pouvoir supprimer
 	 * toutes les autres invitations
 	 *
-	 * @todo supprimer le user si pas utile
 	 */
 	acceptInvite(user: UserEntity, invitationId: string) {
 		if (!this.inviteMap.has(invitationId))
