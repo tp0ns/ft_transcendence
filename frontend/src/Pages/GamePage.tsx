@@ -17,6 +17,7 @@ const GamePage = () => {
 			autoFocusRef.current.focus()
 		socket.emit('getMyGame');
 		socket.on('updatedGame', (updatedGame) => {
+			console.log("updatedGame", updatedGame);
 			setGame(updatedGame)
 		})
 		socket.on('clientLeft', () => {
@@ -108,17 +109,17 @@ const GamePage = () => {
 						</div>
 					</React.Fragment>
 				) : game?.state === "end" ? (
-				<div className={classes.win}>
-					<div className={classes.username}>
-						{game.player1.score > game.player2.score ? game.player1.user.username : game.player2.user.username} is the winner !
+					<div className={classes.win}>
+						<div className={classes.username}>
+							{game.player1.score > game.player2.score ? game.player1.user.username : game.player2.user.username} is the winner !
+						</div>
+						<div onClick={() => { navigate("/") }} className={classes.home}>Back Home</div>
 					</div>
-					<div onClick={() => {navigate("/")}} className={classes.home}>Back Home</div>
-				</div>
-				) : 
-				<div className={classes.wait}>
-					<div className={classes.loading}></div>
-					<div onClick={() => {navigate("/")}} className={classes.home}>Back Home</div>
-				</div>}
+				) :
+					<div className={classes.wait}>
+						<div className={classes.loading}></div>
+						<div onClick={() => { navigate("/") }} className={classes.home}>Back Home</div>
+					</div>}
 			</div>
 		</Layout>
 	);

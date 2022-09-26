@@ -78,6 +78,8 @@ export class GameService {
 			type: 'online',
 			spectatorIds: [],
 		}
+		this.userService.playingClient(invitation.player1);
+		this.userService.playingClient(invitation.player2);
 		this.games.set(invitation.roomId, game);
 		return game;
 	}
@@ -334,17 +336,19 @@ export class GameService {
 
 
 	async firstPlayerQuit(user: UserEntity) {
+		this.userService.notPlayingClient(user);
 		user.currentMatch = null;
 		await this.userRepo.save(user);
 	}
 
 	async quitGame(user: UserEntity) {
+		this.userService.notPlayingClient(user);
 		this.games.delete(user.currentMatch);
 		user.currentMatch = null;
 		await this.userRepo.save(user);
 	}
 
-	leaveLocalGame(user : UserEntity) {
+	leaveLocalGame(user: UserEntity) {
 		let game: Game = this.getMyGame(user.userId);
 		this.games.delete(game.id);
 		user.localMatch = null;
